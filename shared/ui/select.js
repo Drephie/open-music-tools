@@ -15,6 +15,11 @@
  * Keyboard: arrows, Home/End, Enter/Space, Escape, Tab. Disabled options are
  * skipped. Importing this module adds one document click listener that closes
  * open lists. Styles: shared/ui/select.css.
+ *
+ * A list opens below its trigger, or above it (class "select-up") when there
+ * is more room there, and is shortened to fit the screen, so it never needs the
+ * page scrolled. Highlighting an option scrolls only the list. A list inside a
+ * scrolling container is cut off by it: give such a container overflow: visible.
  */
 export function closeAllSelect(except) {
   document.querySelectorAll('.custom-select').forEach(cs => {
@@ -56,9 +61,22 @@ export function buildCustomSelect(container) {
     trigger.textContent = opt ? opt.textContent : '';
   };
   const isOpen = () => !list.classList.contains('select-hide');
+  // Below the trigger, or above when there is more room there; never taller than the room.
+  const placeList = () => {
+    list.classList.remove('select-up');
+    list.style.maxHeight = '';
+    const r = trigger.getBoundingClientRect();
+    const below = window.innerHeight - r.bottom - 8, above = r.top - 8;
+    const need = Math.min(list.scrollHeight, parseFloat(getComputedStyle(list).maxHeight) || Infinity);
+    const up = need > below && above > below;
+    list.classList.toggle('select-up', up);
+    const room = up ? above : below;
+    if (need > room) list.style.maxHeight = Math.max(96, Math.floor(room)) + 'px';
+  };
   const open = () => {
     closeAllSelect(container);
     list.classList.remove('select-hide');
+    placeList();
     trigger.classList.add('select-arrow-active');
     trigger.setAttribute('aria-expanded', 'true');
     highlight = Math.max(0, sel.selectedIndex);
@@ -73,7 +91,11 @@ export function buildCustomSelect(container) {
   const updateHighlight = () => {
     optionEls.forEach((o, i) => o.classList.toggle('option-highlight', i === highlight));
     const o = optionEls[highlight];
-    if (o) { trigger.setAttribute('aria-activedescendant', o.id); o.scrollIntoView({ block: 'nearest' }); }
+    if (!o) return;
+    trigger.setAttribute('aria-activedescendant', o.id);
+    // Scroll the list only (scrollIntoView would also scroll the page or a window).
+    if (o.offsetTop < list.scrollTop) list.scrollTop = o.offsetTop;
+    else if (o.offsetTop + o.offsetHeight > list.scrollTop + list.clientHeight) list.scrollTop = o.offsetTop + o.offsetHeight - list.clientHeight;
   };
   // Match by value (via selectedIndex), never by innerHTML.
   const commit = (i) => {

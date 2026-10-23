@@ -16,6 +16,8 @@
 /* Must out-specify `.compact-grid .select-items { display: grid }` (0,2,0)
    or the Musical Key list can never collapse. */
 .custom-select .select-items.select-hide { display: none; }
+/* Opens upward when there is more room above (set by select.js). */
+.select-items.select-up { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 4px; }
 .select-items::-webkit-scrollbar { width: 6px; }
 .select-items::-webkit-scrollbar-thumb { background: var(--color-right); border-radius: 3px; }
 
