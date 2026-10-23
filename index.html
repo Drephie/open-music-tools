@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Open Music Tools</title>
+  <meta name="description" content="Free, open-source music tools to learn, practise and make your own music: piano, ear trainer, metronome and more. Everything runs in your browser; nothing is uploaded.">
+  <meta name="theme-color" content="#0f1419">
+  <link rel="icon" type="image/svg+xml" href="hub/favicon.svg">
+  <!-- Google Fonts CSS is UA-dependent, so SRI cannot be applied to it. -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared/ui/themes.css">
+  <link rel="stylesheet" href="shared/ui/select.css">
+  <link rel="stylesheet" href="shared/ui/page.css">
+  <link rel="stylesheet" href="hub/hub.css">
+</head>
+<body data-theme="liquid">
+  <div id="theme-frame" aria-hidden="true"></div>
+  <div class="page">
+    <header class="hub-top">
+      <div class="hub-hero">
+        <svg class="hub-logo" viewBox="0 0 100 100" aria-hidden="true">
+          <defs><clipPath id="hub-logo-inside"><circle cx="50" cy="50" r="41.5"/></clipPath></defs>
+          <circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="6"/>
+          <g clip-path="url(#hub-logo-inside)" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round">
+            <path d="M15 8Q50 52 85 8"/>
+            <path d="M25 60V100M50 30V100M75 60V100"/>
+            <rect x="19.5" y="0" width="11" height="63" rx="3.5" fill="currentColor" stroke="none"/>
+            <rect x="69.5" y="0" width="11" height="63" rx="3.5" fill="currentColor" stroke="none"/>
+          </g>
+        </svg>
+        <h1 class="hub-name" data-i18n="title">Open Music Tools</h1>
+        <p class="hub-tagline" data-i18n="tagline">Free music tools to learn, practise and make your own music.</p>
+        <p class="hub-privacy" data-i18n="privacy">Everything runs on your device: nothing is uploaded, no ads, no trackers.</p>
+      </div>
+      <div class="header-actions">
+        <button id="about-btn" class="icon-btn" data-i18n-aria="about" aria-label="About">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
+        </button>
+        <button id="settings-btn" class="icon-btn" data-i18n-aria="settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="hub-main">
+      <!-- A finished tool is a link (<a class="tool-card">); a planned one is a greyed
+           <div class="tool-card soon">. When a tool is finished, move its card up here. -->
+      <section aria-labelledby="tools-heading">
+        <h2 id="tools-heading" class="visually-hidden" data-i18n="toolsHeading">Tools</h2>
+        <ul class="tool-grid">
+          <li><a class="tool-card" href="piano/">
+            <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M9 13v6M15 13v6"/><rect x="7.5" y="5" width="3" height="8" class="fill"/><rect x="13.5" y="5" width="3" height="8" class="fill"/></svg>
+            <span class="tool-name" data-i18n="piano">Piano</span>
+            <span class="tool-desc" data-i18n="pianoDesc">Play, and see the name of the chord</span>
+          </a></li>
+          <li><a class="tool-card" href="ear-trainer/">
+            <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 3.5-3.5 4.5-3.5 8a2.5 2.5 0 0 1-5 0"/><path d="M9.5 10.5a2.5 2.5 0 0 1 5 0c0 1.8-2.5 2.2-2.5 4"/></svg>
+            <span class="tool-name" data-i18n="ear">Ear Trainer</span>
+            <span class="tool-desc" data-i18n="earDesc">Lessons and a game to train your ear</span>
+          </a></li>
+          <li><a class="tool-card" href="metronome/">
+            <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l4 18H5z"/><path d="M6 17h12"/><path d="M12 16l5-10"/></svg>
+            <span class="tool-name" data-i18n="met">Metronome</span>
+            <span class="tool-desc" data-i18n="metDesc">A steady click to practise with, and tap tempo</span>
+          </a></li>
+          <li><a class="tool-card" href="choordination/">
+            <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8.5" cy="12" r="5.5"/><circle cx="15.5" cy="12" r="5.5"/><path d="M12 9.5l2.5 2.5-2.5 2.5-2.5-2.5z" class="fill"/></svg>
+            <span class="tool-name" data-i18n="cho">Choordination</span>
+            <span class="tool-desc" data-i18n="choDesc">Play chords with your hands, using your camera. Nothing leaves your device.</span>
+          </a></li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="soon-heading">
+        <h2 id="soon-heading" class="hub-section-title" data-i18n="soon">Coming soon</h2>
+        <ul class="tool-grid">
+          <li><div class="tool-card soon">
+            <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17a8 8 0 0 1 16 0"/><path d="M12 17l3.5-6"/></svg>
+            <span class="tool-name" data-i18n="tuner">Tuner</span>
+            <span class="tool-desc" data-i18n="tunerDesc">Tune your voice or instrument: see if a note is too high or too low</span>
+          </div></li>
+          <li><div class="tool-card soon">
+            <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2 0 2-5 4.5-5s2 4 4.5 4 2-7 4.5-7S19 13 21 13"/><path d="M3 20h18"/></svg>
+            <span class="tool-name" data-i18n="pitchDet">Pitch Detector</span>
+            <span class="tool-desc" data-i18n="pitchDetDesc">See the note you sing, live, and how your pitch moves</span>
+          </div></li>
+          <li><div class="tool-card soon">
+            <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>
+            <span class="tool-name" data-i18n="pitchTrain">Pitch Training</span>
+            <span class="tool-desc" data-i18n="pitchTrainDesc">Singing exercises that show how in tune you are</span>
+          </div></li>
+          <li><div class="tool-card soon">
+            <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-5 3 10 2-5h7"/></svg>
+            <span class="tool-name" data-i18n="bpm">BPM Finder</span>
+            <span class="tool-desc" data-i18n="bpmDesc">Find the speed (BPM) of a song you own</span>
+          </div></li>
+          <li><div class="tool-card soon">
+            <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="M15 15l5.5 5.5M7.5 8h5M7.5 12h5"/></svg>
+            <span class="tool-name" data-i18n="chordFind">Chord Finder</span>
+            <span class="tool-desc" data-i18n="chordFindDesc">Find the key and the chords of a song you own</span>
+          </div></li>
+          <li><div class="tool-card soon">
+            <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v4h-4"/><path d="M10 9l5 3-5 3z"/></svg>
+            <span class="tool-name" data-i18n="player">Practice Player</span>
+            <span class="tool-desc" data-i18n="playerDesc">Slow a song down without changing its pitch, and loop a part</span>
+          </div></li>
+          <li><div class="tool-card soon">
+            <svg class="tool-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h.01M15 9h.01M9 15h.01M15 15h.01M12 12h.01" class="dots"/></svg>
+            <span class="tool-name" data-i18n="jam">Jam Machine</span>
+            <span class="tool-desc" data-i18n="jamDesc">Chord progressions in many styles to play and sing over</span>
+          </div></li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="tool-footer">
+      <a class="support-link" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+      <span class="designer-credit"><span data-i18n="designedBy">Designed by</span> <a href="https://instagram.com/drephie" target="_blank" rel="noopener noreferrer">@drephie</a></span>
+    </footer>
+  </div>
+
+  <div id="settings-modal" class="centered-modal has-dropdowns" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="settings-title" data-i18n="settings">Settings</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <div class="control-group">
+      <label for="theme-select" data-i18n="theme">Aesthetic Theme</label>
+      <div class="custom-select"><select id="theme-select"></select></div>
+    </div>
+    <div class="control-group">
+      <label for="lang-select" data-i18n="lang">Language</label>
+      <div class="custom-select"><select id="lang-select"></select></div>
+    </div>
+    <p class="about-small" data-i18n="lookNote">The theme and language are used by every tool.</p>
+  </div>
+
+  <div id="about-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="about-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="about-title" data-i18n="aboutTitle">About Open Music Tools</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <p class="about-text" data-i18n="aboutBody"></p>
+    <a class="btn patreon-btn" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+  </div>
+
+  <script type="module" src="hub/hub.js"></script>
+</body>
+</html>

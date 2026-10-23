@@ -1,0 +1,89 @@
+/* hub/hub.css: the home page (spec: specs/hub.md). Loads after shared/ui/page.css.
+ * Theme variables only. Every tool is a square card of the same size; hub.js
+ * shrinks the names until every word fits (--name-size) and makes all cards as
+ * tall as the tallest one when a description needs more than a square (--card-h).
+ */
+.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.hub-top { position: relative; }
+.hub-top > .header-actions { position: absolute; top: 0; right: 0; }
+.hub-hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 4px 0 6px; }
+.hub-logo { width: 132px; height: auto; color: var(--color-left); }
+body[data-theme="liquid"] .hub-logo, body:not([data-theme]) .hub-logo { color: var(--color-right); }
+.hub-name { margin: 10px 0 0; font-size: 30px; font-weight: 900; text-transform: uppercase; letter-spacing: 3px; line-height: 1.15; color: var(--color-left); }
+.hub-tagline { margin: 10px 0 0; max-width: 36em; font-size: 16px; line-height: 1.45; }
+.hub-privacy { margin: 6px 0 0; max-width: 40em; font-size: 13px; line-height: 1.45; opacity: 0.75; }
+
+.hub-main { display: flex; flex-direction: column; gap: 18px; }
+.hub-section-title { margin: 0 0 10px; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; opacity: 0.75; }
+.tool-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.tool-grid > li { display: flex; }
+
+.tool-card {
+  /* min-width 0: otherwise min-height would widen the square past its column. */
+  box-sizing: border-box; flex: 1; aspect-ratio: 1; min-width: 0; min-height: var(--card-h, auto);
+  display: flex; flex-direction: column; gap: 8px; padding: 18px;
+  background: var(--color-panel); border: 1px solid var(--border-panel); border-radius: 16px;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  color: var(--color-text); text-decoration: none;
+  -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none;
+  transition: border-color 0.15s, transform 0.12s, background 0.15s;
+}
+.tool-icon { width: 36px; height: 36px; flex: none; fill: none; stroke: var(--color-right); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tool-icon .fill { fill: var(--color-right); stroke: none; }
+.tool-icon .dots { stroke-width: 3; }
+.tool-name { font-size: var(--name-size, 18px); font-weight: 900; text-transform: uppercase; letter-spacing: 1px; line-height: 1.15; color: var(--color-left); overflow-wrap: normal; hyphens: none; }
+.tool-desc { font-size: 14px; line-height: 1.45; }
+
+a.tool-card:active { transform: scale(0.97); }
+@media (hover: hover) {
+  a.tool-card:hover { border-color: var(--color-right); background: color-mix(in srgb, var(--color-right) 14%, var(--color-panel)); transform: translateY(-2px); }
+}
+a.tool-card:focus-visible { outline: 3px solid var(--color-right); outline-offset: 3px; }
+
+/* Planned tools: greyed out, not links. */
+.tool-card.soon { background: transparent; border-style: dashed; color: var(--color-text-inactive); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.tool-card.soon .tool-name { color: var(--color-text-inactive); }
+.tool-card.soon .tool-icon { stroke: var(--color-text-inactive); }
+
+/* Theme shapes */
+body[data-theme="pink"] .tool-card { border-radius: 26px; border-width: 3px; }
+body[data-theme="pink"] .tool-card.soon { border-width: 2px; }
+body[data-theme="bw"] .tool-card { border-radius: 0; }
+body[data-theme="y2k"] .hub-name { text-shadow: 0 0 14px var(--color-left); }
+body[data-theme="retro"] .hub-name { text-shadow: 0 0 var(--shadow-blur) var(--color-left); }
+body[data-theme="y2k"] .hub-logo { filter: drop-shadow(0 0 8px var(--color-left)); }
+body[data-theme="retro"] .hub-logo { filter: drop-shadow(0 0 var(--shadow-blur) var(--color-left)); }
+body[data-theme="retro"] .hub-tagline { font-size: 21px; }
+body[data-theme="retro"] .hub-privacy { font-size: 17px; }
+body[data-theme="retro"] .hub-section-title { font-size: 19px; }
+body[data-theme="retro"] .tool-name { font-size: var(--name-size, 24px); }
+body[data-theme="retro"] .tool-desc { font-size: 19px; line-height: 1.2; }
+
+@media (max-width: 860px) {
+  .tool-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Phones: two cards per row; the page scrolls. */
+@media (max-width: 600px) {
+  .hub-hero { padding: 2px 0 2px; }
+  .hub-logo { width: 96px; }
+  .hub-name { margin-top: 8px; font-size: 20px; letter-spacing: 2px; }
+  .hub-tagline { margin-top: 6px; font-size: 14px; line-height: 1.4; }
+  .hub-privacy { margin-top: 4px; font-size: 12px; line-height: 1.4; }
+  .hub-main { gap: 12px; }
+  .hub-section-title { margin-bottom: 8px; font-size: 12px; }
+  .tool-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .tool-card { gap: 5px; padding: 12px; border-radius: 14px; }
+  .tool-icon { width: 28px; height: 28px; }
+  .tool-name { font-size: var(--name-size, 15px); }
+  .tool-desc { font-size: 12px; line-height: 1.4; }
+  body[data-theme="pink"] .tool-card { border-radius: 22px; }
+  body[data-theme="retro"] .hub-tagline { font-size: 18px; line-height: 1.15; }
+  body[data-theme="retro"] .hub-privacy { font-size: 15px; line-height: 1.15; }
+  body[data-theme="retro"] .hub-section-title { font-size: 16px; }
+  body[data-theme="retro"] .tool-name { font-size: var(--name-size, 20px); }
+  body[data-theme="retro"] .tool-desc { font-size: 15px; line-height: 1.1; }
+  /* The page scrolls here, so the footer may wrap instead of shrinking. */
+  .tool-footer { padding-top: 4px; }
+}
