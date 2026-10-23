@@ -8,12 +8,18 @@
  *   --color-text-inactive, --bg-overlay, --color-panel, --border-panel,
  *   --shadow-blur, --credit-shadow, --crt-scanline, --bg-select,
  *   --color-select-text, --color-select-hover,
- *   --frame-top / --frame-bottom / --frame-sides / --frame-radius (theme frame insets).
+ *   --frame-top / --frame-bottom / --frame-sides / --frame-radius (theme frame insets),
+ *   --bg-page (solid page color for tools with no camera behind them),
+ *   --color-warn-start / --color-warn-end (a warning that grows, e.g. volume
+ *   above 100%: yellow to red; tools mix between them).
  * Theme-specific decoration (frames, button shapes) stays in each tool.
  * Load it before the tool's own styles, plus the fonts it names:
  *   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
  */
 :root {
+  --bg-page: #0f1419;
+  --color-warn-start: #ffd60a;
+  --color-warn-end: #ff3b30;
   --bg-overlay: rgba(15, 20, 25, 0.65);
   --font-main: 'Orbitron', sans-serif;
   --color-left: #ffffff;
@@ -38,6 +44,7 @@
 }
 
 body[data-theme="y2k"] {
+  --bg-page: #0a0a16;
   --bg-overlay: rgba(10, 10, 22, 0.85);
   --color-left: #00ffff;
   --color-right: #ff69b4;
@@ -55,6 +62,9 @@ body[data-theme="y2k"] {
 /* Soft Pink — "barbie ultra pop lollipop": bubbly rounded font, hot pink +
    candy purple accents, pill-shaped everything. */
 body[data-theme="pink"] {
+  --bg-page: #ffe3f3;
+  --color-warn-start: #e0a100;
+  --color-warn-end: #e0002b;
   --bg-overlay: rgba(255, 219, 240, 0.92);
   --font-main: 'Baloo 2', 'Quicksand', sans-serif;
   --color-left: #ff2d9c;
@@ -78,6 +88,7 @@ body[data-theme="pink"] {
 }
 
 body[data-theme="bw"] {
+  --bg-page: #000000;
   --bg-overlay: rgba(0, 0, 0, 0.9);
   --font-main: 'Courier Prime', monospace;
   --color-left: #ffffff;
@@ -100,6 +111,9 @@ body[data-theme="bw"] {
 }
 
 body[data-theme="retro"] {
+  --bg-page: #020a02;
+  --color-warn-start: #ffb000;
+  --color-warn-end: #ff3b30;
   --bg-overlay: rgba(0, 15, 0, 0.9);
   --font-main: 'VT323', monospace;
   --color-left: #00ff00;
