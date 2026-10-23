@@ -113,8 +113,8 @@ let pedal = false;           // Space held: released keys keep ringing (Hold mod
 
 // Ring: the note fades out gradually by itself from the moment it is struck,
 // like a piano note dying away, and its key's light fades with it. Low notes
-// fade more slowly: about 4 s at C2, 2.4 s at C4, 1.5 s at C6.
-const ringSeconds = (m) => 0.6 + 1.4 * Math.sqrt(440 / midiToFreq(m));
+// fade more slowly: about 6 s at C2, 3.5 s at C4, 2.2 s at C6 (Drephie's choice).
+const ringSeconds = (m) => 0.9 + 2 * Math.sqrt(440 / midiToFreq(m));
 // How long each sound keeps its attack before the fade (the Pad swells in slowly).
 const RING_HOLD = { piano: 0, epiano: 0.05, esynth: 0.05, pad: 0.45, organ: 0.06, harp: 0.02 };
 

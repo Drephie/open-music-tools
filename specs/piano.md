@@ -15,7 +15,7 @@ A piano in the browser for anyone: play notes and chords, hear a real grand pian
 - **Up to 7 notes at once, or more:** every finger plays its own key, and sliding a finger plays each key it crosses. iPhones track at most 5 fingers at once (iPads more); Ring and Drone let you go past that.
 - **Three ways a key sounds** (Diapason's Short, Hold and Latch, renamed). Changing it stops every sound.
   - **Hold** (default): sounds while you hold the key.
-  - **Ring:** the note fades away gradually by itself from the moment you strike it, like a piano note dying out, and the key's light fades with it. Low notes fade more slowly: about 4 s at C2, 2.4 s at C4, 1.5 s at C6 *(after the re-check: Diapason's 3–8 s at full level, then off, was too long and not gradual, with nothing to see)*.
+  - **Ring:** the note fades away gradually by itself from the moment you strike it, like a piano note dying out, and the key's light fades with it. Low notes fade more slowly: about 6 s at C2, 3.5 s at C4, 2.2 s at C6 *(after the re-check: Diapason's 3–8 s at full level, then off, was too long and not gradual, with nothing to see; then Drephie asked for a bit longer than 2.4 s at C4)*.
   - **Drone:** tap a key to start it, tap again to stop. Drone keys get a dot. Grand Piano and Harp fade by themselves; Pad and Organ hold.
 - **Six sounds**, in a dropdown: Grand Piano (the sampled Salamander), Electric Piano, Synth, Pad, Organ, Harp.
 - **Chord name** (top left, as in Diapason), for every note that is sounding:
@@ -72,4 +72,4 @@ Nothing is recorded or uploaded, and there is no microphone. The piano samples (
 
 **Drephie, by ear and hand on the iPhone:** each of the six sounds low, middle and high; the delay between touching a key and hearing it; 5 fingers at once and sliding; Hold, Ring and Drone; the names of a few chords you know; upright phone shown sideways, then turned both ways; key size; the Spanish and Italian wording.
 
-**Drephie's iPhone test (2026-10-23):** everything works (sound, delay, fingers, modes, chord names, size, wording); changes asked: smoother scrolling, key size and turn-around into Settings, a better-balanced bar. **Re-check:** those three perfect; Ring was too long and not gradual, with no visual feedback, so it now fades gradually with the key's light.
+**Drephie's iPhone test (2026-10-23):** everything works (sound, delay, fingers, modes, chord names, size, wording); changes asked: smoother scrolling, key size and turn-around into Settings, a better-balanced bar. **Re-check:** those three perfect; Ring was too long and not gradual, with no visual feedback, so it now fades gradually with the key's light; Drephie then picked a bit longer (3.5 s at middle C).
