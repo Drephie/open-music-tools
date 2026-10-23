@@ -1,8 +1,7 @@
 /* piano/strings.js: the Piano's own strings in en, es, it.
  * Merged over HUB_STRINGS (shared/ui/strings.js), which has the themes,
  * footer, Patreon window buttons and common controls. {patreon} and
- * {instagram} are interpolated.
- * iv0..iv12: interval names by semitones (iv0 and iv12 are the octave).
+ * {instagram} are interpolated. The interval names (iv0..iv12) are hub strings.
  * q_<id>: plain words for each chord shape in shared/theory.js CHORD_FORMS,
  * shown as "{root} {words}" ("C major seventh").
  */
@@ -26,8 +25,6 @@ export const PIANO_STRINGS = {
     loading: "Loading the piano sound…", loadFailed: "The piano sound didn't load. Check your connection, then touch a key to try again.",
     volume: "Volume",
     also: "Also", noName: "No chord name for these notes", inBass: "{note} in the bass",
-    iv0: "octave", iv1: "minor 2nd", iv2: "major 2nd", iv3: "minor 3rd", iv4: "major 3rd", iv5: "perfect 4th", iv6: "tritone",
-    iv7: "perfect 5th", iv8: "minor 6th", iv9: "major 6th", iv10: "minor 7th", iv11: "major 7th", iv12: "octave",
     q_maj: "major", q_min: "minor", q_7: "dominant seventh", q_maj7: "major seventh", q_m7: "minor seventh",
     q_dim: "diminished", q_aug: "augmented", q_sus4: "suspended fourth", q_sus2: "suspended second",
     q_6: "sixth", q_m6: "minor sixth", q_m7b5: "half-diminished", q_dim7: "diminished seventh",
@@ -59,8 +56,6 @@ export const PIANO_STRINGS = {
     loading: "Cargando el sonido del piano…", loadFailed: "El sonido del piano no se cargó. Revisa tu conexión y toca una tecla para volver a intentarlo.",
     volume: "Volumen",
     also: "También", noName: "Estas notas no tienen nombre de acorde", inBass: "{note} en el bajo",
-    iv0: "octava", iv1: "segunda menor", iv2: "segunda mayor", iv3: "tercera menor", iv4: "tercera mayor", iv5: "cuarta justa", iv6: "tritono",
-    iv7: "quinta justa", iv8: "sexta menor", iv9: "sexta mayor", iv10: "séptima menor", iv11: "séptima mayor", iv12: "octava",
     q_maj: "mayor", q_min: "menor", q_7: "séptima de dominante", q_maj7: "séptima mayor", q_m7: "menor séptima",
     q_dim: "disminuido", q_aug: "aumentado", q_sus4: "con cuarta suspendida", q_sus2: "con segunda suspendida",
     q_6: "sexta", q_m6: "menor sexta", q_m7b5: "semidisminuido", q_dim7: "séptima disminuida",
@@ -92,8 +87,6 @@ export const PIANO_STRINGS = {
     loading: "Caricamento del suono del pianoforte…", loadFailed: "Il suono del pianoforte non si è caricato. Controlla la connessione, poi tocca un tasto per riprovare.",
     volume: "Volume",
     also: "Anche", noName: "Queste note non hanno un nome di accordo", inBass: "{note} al basso",
-    iv0: "ottava", iv1: "seconda minore", iv2: "seconda maggiore", iv3: "terza minore", iv4: "terza maggiore", iv5: "quarta giusta", iv6: "tritono",
-    iv7: "quinta giusta", iv8: "sesta minore", iv9: "sesta maggiore", iv10: "settima minore", iv11: "settima maggiore", iv12: "ottava",
     q_maj: "maggiore", q_min: "minore", q_7: "settima di dominante", q_maj7: "settima maggiore", q_m7: "minore settima",
     q_dim: "diminuito", q_aug: "aumentato", q_sus4: "con quarta sospesa", q_sus2: "con seconda sospesa",
     q_6: "sesta", q_m6: "minore sesta", q_m7b5: "semidiminuito", q_dim7: "settima diminuita",

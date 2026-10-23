@@ -17,12 +17,20 @@
  *   --key-white / --key-white-text, --key-black / --key-black-text,
  *   --key-edge (between white keys), --key-black-edge (a black key's
  *   outline, for themes whose page is black): piano keys (the Piano).
+ *   --color-good / --color-good-text, --color-bad / --color-bad-text (a right
+ *   and a wrong answer: fill and the text on it), --color-star (earned stars
+ *   and the like; unearned ones use --color-text-inactive): the Ear Trainer.
  * Theme-specific decoration (frames, button shapes) stays in each tool.
  * Load it before the tool's own styles, plus the fonts it names:
  *   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
  */
 :root {
   --bg-page: #0f1419;
+  --color-good: #30d158;
+  --color-good-text: #04210d;
+  --color-bad: #ff453a;
+  --color-bad-text: #ffffff;
+  --color-star: #ffd60a;
   --key-white: #f3f5f8;
   --key-white-text: #4b5866;
   --key-black: #151b22;
@@ -58,6 +66,11 @@
 
 body[data-theme="y2k"] {
   --bg-page: #0a0a16;
+  --color-good: #39ff14;
+  --color-good-text: #001a00;
+  --color-bad: #ff3366;
+  --color-bad-text: #ffffff;
+  --color-star: #ffe600;
   --key-white: #eef4ff;
   --key-white-text: #2b3a66;
   --key-black: #12122e;
@@ -82,6 +95,11 @@ body[data-theme="y2k"] {
    candy purple accents, pill-shaped everything. */
 body[data-theme="pink"] {
   --bg-page: #ffe3f3;
+  --color-good: #12a150;
+  --color-good-text: #ffffff;
+  --color-bad: #e0002b;
+  --color-bad-text: #ffffff;
+  --color-star: #ffb300;
   --key-white: #ffffff;
   --key-white-text: #c2187a;
   --key-black: #83104f;
@@ -114,6 +132,11 @@ body[data-theme="pink"] {
 
 body[data-theme="bw"] {
   --bg-page: #000000;
+  --color-good: #ffffff;
+  --color-good-text: #000000;
+  --color-bad: #666666;
+  --color-bad-text: #ffffff;
+  --color-star: #ffffff;
   --key-white: #ffffff;
   --key-white-text: #000000;
   --key-black: #000000;
@@ -143,6 +166,11 @@ body[data-theme="bw"] {
 
 body[data-theme="retro"] {
   --bg-page: #020a02;
+  --color-good: #00ff00;
+  --color-good-text: #021002;
+  --color-bad: #ffb000;
+  --color-bad-text: #1a0f00;
+  --color-star: #b3ff66;
   --key-white: #a6ffa6;
   --key-white-text: #053205;
   --key-black: #031503;
