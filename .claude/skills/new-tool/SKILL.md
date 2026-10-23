@@ -46,6 +46,7 @@ Every visible string and every `aria-label` goes through i18n, in English, Spani
 ## 5. Sound (tools that play)
 
 - `await Tone.start()` first thing in the tap or click handler. Set `navigator.audioSession.type = 'playback'` at load (iPhone silent switch); keep the screen awake while playing (`navigator.wakeLock`, https only).
+- Things that sound on `pointerdown` (piano keys, pads): for a finger, browsers count the lift, not the touch, as the tap that allows sound, so also call `startAudio()` on `pointerup`/`touchend` (see `piano/piano.js`). Play live notes at `Tone.immediate()`, not `Tone.now()` (which adds the look-ahead).
 - Light the screen in time with `Tone.Draw.schedule(fn, time)`.
 - Claude can't hear: test timing by calling loop callbacks at known times on a Transport started far in the future, and levels by rendering with `Tone.Offline` and measuring peaks and energy. Noise sounds start at a random point: take the worst of many renders. Nothing may peak above 1.0 at the loudest setting. Note: `Tone.Transport` stays bound to the original context, so `Tone.Offline` can render sounds but not the Transport.
 
@@ -58,7 +59,9 @@ Add every new file to `APP_SHELL` in `/sw.js` and bump `CACHE_NAME` whenever a c
 - Start the `hub` server from `.claude/launch.json` (`hub-8001` when port 8000 is taken by another session). The pane caches files: `fetch(url, { cache: 'reload' })` each changed file, then reload.
 - All 5 themes, all 3 languages, phone sizes (`resize_window` 375 × 667 and 390 × 664) and desktop, keyboard only, every window and dropdown, settings remembered after reload. Wait for theme transitions (about 0.5 s) before judging colors.
 - `tests/theory.html` and `tests/transport.html` pass. If a shared file changed, Choordination still loads and its dropdowns work.
-- The built-in browser slows its audio clock while its pane is hidden and reports a mouse and no touch, so phone-only and timing behaviour need the methods above, or Drephie's phone.
+- The built-in browser slows its audio clock while its pane is hidden and reports a mouse and no touch, so phone-only and timing behaviour need the methods above, or Drephie's phone. With `resize_window` below 768 px wide it emulates touch (`pointer: coarse`).
+- Taking a screenshot blurs the page: a tool that lets go of held notes on `blur` (the Piano) shows them released. Read held state with JavaScript instead, or use a state that survives (the Piano's Drone).
+- A tool drawn turned sideways on upright phones (the Piano's `#stage`): measure in the stage's own frame (`DOMMatrix` inverse for pointers, `setSelectRoom` for dropdowns), size with px or container units (`cqw`/`cqh`) rather than vw/vh, and map the safe areas with the turn.
 - Don't overwrite Drephie's saved settings or the Patreon window's last-shown time (`open-music-tools.supportPrompt`) without putting them back.
 
 ## 8. Drephie's test
