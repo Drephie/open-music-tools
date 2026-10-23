@@ -820,7 +820,6 @@
       leftHand: "Left Hand", rightHand: "Right Hand",
       tutRoot: "Selects the Root Note.", tutMod: "Selects the Chord Modifier.",
       tutTrigger: "<strong>Trigger:</strong> Pinch <em>both</em> thumbs and index fingers to play.",
-      tutYolo: "<strong>YOLO Sign 🤙:</strong> Sign this with your Modifier hand — your thumb picks one modifier and your pinky picks another, and the chord blends both!",
       tutSustain: "<strong>Sustain:</strong> Raise your eyebrows (or hold Space) to let chords ring — your mouth stays free for singing.",
       tutTip: "Tip: Only have one hand available? Try the Accessibility options in the Settings Menu!",
       tutAccTitle: "Accessible Mode (Head Tilt)",
@@ -899,7 +898,6 @@
       leftHand: "Mano Izquierda", rightHand: "Mano Derecha",
       tutRoot: "Selecciona la nota fundamental.", tutMod: "Selecciona el modificador del acorde.",
       tutTrigger: "<strong>Disparo:</strong> Pellizca con <em>ambas</em> manos (pulgar e índice) para tocar.",
-      tutYolo: "<strong>Seña YOLO 🤙:</strong> Haz esta seña con la mano de modificadores: el pulgar elige un modificador y el meñique otro, ¡y el acorde combina ambos!",
       tutSustain: "<strong>Sustain:</strong> Levanta las cejas (o mantén pulsada la barra espaciadora) para que los acordes sigan sonando: tu boca queda libre para cantar.",
       tutTip: "Consejo: ¿Solo tienes una mano disponible? ¡Prueba las opciones de Accesibilidad en el menú de Ajustes!",
       tutAccTitle: "Modo Accesible (Inclinación de Cabeza)",
@@ -978,7 +976,6 @@
       leftHand: "Mano Sinistra", rightHand: "Mano Destra",
       tutRoot: "Seleziona la nota fondamentale.", tutMod: "Seleziona il modificatore dell'accordo.",
       tutTrigger: "<strong>Attivazione:</strong> Fai il gesto della pinza con <em>entrambe</em> le mani (pollice e indice) per suonare.",
-      tutYolo: "<strong>Segno YOLO 🤙:</strong> Fai questo segno con la mano dei modificatori: il pollice sceglie un modificatore e il mignolo l'altro, e l'accordo li combina!",
       tutSustain: "<strong>Sustain:</strong> Alza le sopracciglia (o tieni premuta la barra spaziatrice) per far durare gli accordi: la bocca resta libera per cantare.",
       tutTip: "Suggerimento: Hai una sola mano disponibile? Prova le opzioni di Accessibilità nel menu Impostazioni!",
       tutAccTitle: "Modalità Accessibile (Inclinazione della Testa)",
@@ -1137,7 +1134,6 @@
         <li><strong>${rootHand}:</strong> ${t('tutRoot')}</li>
         <li><strong>${modHand}:</strong> ${t('tutMod')}</li>
         <li>${t('tutTrigger')}</li>
-        <li>${t('tutYolo')}</li>
         <li>${t('tutSustain')}</li>
       </ul>
       <p class="tutorial-tip"><em>${t('tutTip')}</em></p>`;
@@ -1243,14 +1239,12 @@
     updateModifiersList();
   }
 
-  // What the current gesture/keypress means musically. modPair (optional) =
-  // [idxA, idxB]: the two modifiers chosen by the YOLO sign's thumb and pinky;
-  // otherwise a single modifier is used (plus the next one when dualMod).
-  function getChordInfo(dualMod, modPair) {
+  // What the current gesture/keypress/tap means musically.
+  function getChordInfo() {
     return theoryChordInfo({
       key: isChromatic ? { chromatic: true } : { chromatic: false, rootIdx: currentKeyRootIdx, scaleType: currentScaleType },
       degree: Math.max(0, Math.min(leftChordNames.length - 1, activeNoteIdx)),
-      modifiers: pickModifiers(currentModifiers, activeTypeIdx, dualMod, modPair),
+      modifiers: pickModifiers(currentModifiers, activeTypeIdx),
       octave: parseInt(octaveSelector.value, 10),
       solfege: notationSelector.value === 'solfeggio',
     });
@@ -1962,17 +1956,6 @@
     return now;
   }
 
-  // YOLO 🤙: thumb + pinky extended, index/middle/ring curled. Detected by
-  // comparing each fingertip's distance from the wrist against its own middle
-  // joint — robust to hand size, distance and rotation, unlike fixed thresholds.
-  function isYoloSign(lm) {
-    if (!lm) return false;
-    const d = (a, b) => Math.hypot(lm[a].x - lm[b].x, lm[a].y - lm[b].y);
-    const curled = (tip, pip) => d(tip, 0) < d(pip, 0) * 1.05;
-    const extended = (tip, pip) => d(tip, 0) > d(pip, 0) * 1.15;
-    return extended(4, 2) && extended(20, 18) && curled(8, 6) && curled(12, 10) && curled(16, 14);
-  }
-
   // Precision aspect-crop matching (mirrored view)
   function mapLandmarkToCanvas(lm, w, h) {
     const vw = video.videoWidth || 1280, vh = video.videoHeight || 720;
@@ -2007,7 +1990,7 @@
       if (raw === 'Left') userHand = 'Right';
       else if (raw === 'Right') userHand = 'Left';
       else userHand = (1 - lm[0].x) < 0.5 ? 'Left' : 'Right';
-      visionState.hands.push({ lm, userHand, pinched: computePinch(lm, userHand), yolo: isYoloSign(lm) });
+      visionState.hands.push({ lm, userHand, pinched: computePinch(lm, userHand) });
     }
     if (visionState.hands.length > 0) lastActivityTime = Date.now();
 
@@ -2080,21 +2063,6 @@
     return { index: Math.max(0, Math.min(itemsLen - 1, Math.floor(mappedY * rows) * 2 + c)), inDeadzone: false };
   }
 
-  // For the YOLO sign: map the thumb tip (4) and pinky tip (20) each to a
-  // modifier segment in the given zone. Falls back to the current selection if
-  // a fingertip is in the wheel deadzone.
-  function yoloModifierPair(z, W, H) {
-    const len = Math.max(1, currentModifiers.length);
-    const idxAt = (lmIdx) => {
-      const p = mapLandmarkToCanvas(z.hand.lm[lmIdx], W, H);
-      const mappedY = Math.max(0, Math.min(0.999, (p.y - (z.y - z.r)) / (z.r * 2)));
-      const info = getSelectionInfo(z.shape, p.x, p.y, mappedY, z.x, z.y, z.r, len);
-      if (info.inDeadzone || info.index < 0) return activeTypeIdx;
-      return Math.max(0, Math.min(len - 1, info.index));
-    };
-    return [idxAt(4), idxAt(20)];
-  }
-
   // Zone routing follows hand IDENTITY (handedness), not screen half, so crossed
   // hands and two hands on the same side still map correctly. In head-tilt modes
   // the active hand drives the root zone on its own side.
@@ -2155,8 +2123,8 @@
     if (activeTypeIdx >= currentModifiers.length) activeTypeIdx = 0;
 
     const zones = {
-      left: { x: W * 0.25 + uiOffsets.lx / 100 * W, y: H * 0.5 + uiOffsets.ly / 100 * H, r: H * 0.25 * (uiOffsets.ls / 100), shape: leftShape.value, hand: null, pinch: false, yolo: false },
-      right: { x: W * 0.75 + uiOffsets.rx / 100 * W, y: H * 0.5 + uiOffsets.ry / 100 * H, r: H * 0.25 * (uiOffsets.rs / 100), shape: rightShape.value, hand: null, pinch: false, yolo: false }
+      left: { x: W * 0.25 + uiOffsets.lx / 100 * W, y: H * 0.5 + uiOffsets.ly / 100 * H, r: H * 0.25 * (uiOffsets.ls / 100), shape: leftShape.value, hand: null, pinch: false },
+      right: { x: W * 0.75 + uiOffsets.rx / 100 * W, y: H * 0.5 + uiOffsets.ry / 100 * H, r: H * 0.25 * (uiOffsets.rs / 100), shape: rightShape.value, hand: null, pinch: false }
     };
 
     if (active) {
@@ -2169,7 +2137,7 @@
         if (mode === 'right' && hand.userHand !== 'Right') continue;
         const zoneName = (mode === 'none') ? (hand.userHand === 'Left' ? 'left' : 'right') : (mode === 'left' ? 'left' : 'right');
         const z = zones[zoneName];
-        z.hand = hand; z.pinch = hand.pinched; z.yolo = hand.yolo;
+        z.hand = hand; z.pinch = hand.pinched;
 
         const tip = mapLandmarkToCanvas(hand.lm[8], W, H);
         if (!withinZone(z, tip)) continue; // outside bounds: hold last selection
@@ -2209,31 +2177,19 @@
       sustainBrow = false;
     }
 
-    // Trigger gate. In two-handed mode the modifier hand can either pinch or
-    // hold the YOLO sign 🤙 — you physically can't pinch while signing, so the
-    // sign itself counts as that hand's half of the trigger.
+    // Trigger gate. In two-handed mode both hands pinch.
     let isTriggering = false;
-    let applyDualMod = false;
-    let yoloPair = null;
     if (mode === 'keyboard') {
       isTriggering = kbdTrigger || mouseTrigger;
     } else if (active) {
-      if (mode === 'none') {
-        const typeZone = layout.left === 'type' ? zones.left : zones.right;
-        const noteZone = layout.left === 'type' ? zones.right : zones.left;
-        applyDualMod = typeZone.yolo;
-        // YOLO 🤙: thumb picks one modifier, pinky the other; the chord blends
-        // whichever two segments those fingertips point at (not just adjacent).
-        if (typeZone.yolo && typeZone.hand) yoloPair = yoloModifierPair(typeZone, W, H);
-        isTriggering = !!(zones.left.hand && zones.right.hand && noteZone.pinch && (typeZone.pinch || typeZone.yolo));
-      }
+      if (mode === 'none') isTriggering = !!(zones.left.hand && zones.right.hand && zones.left.pinch && zones.right.pinch);
       else if (mode === 'left') isTriggering = !!(zones.left.hand && zones.left.pinch);
       else if (mode === 'right') isTriggering = !!(zones.right.hand && zones.right.pinch);
     }
 
     if (uiEditMode) isTriggering = false; // no notes while laying out widgets
     if (audioReady && engineStarted && !uiEditMode) {
-      const info = getChordInfo(applyDualMod, yoloPair);
+      const info = getChordInfo();
       if (isTriggering && (!wasTriggering || !arraysEqual(currentlyPlayingKeys, info.freqs))) playChord(info);
       if (!isTriggering && !sustainActive() && (currentlyPlayingKeys.length > 0 || liveNotes.length > 0)) releaseAudio();
     }
@@ -2262,14 +2218,10 @@
     const typeLabels = currentModifiers.map(modShortLabel);
     const leftItems = layout.left === 'type' ? typeLabels : leftChordNames;
     const rightItems = layout.right === 'type' ? typeLabels : leftChordNames;
-    const lPinchRender = zones.left.hand ? (zones.left.pinch || zones.left.yolo) : isTriggering;
-    const rPinchRender = zones.right.hand ? (zones.right.pinch || zones.right.yolo) : isTriggering;
-    // Which segments to light up: the YOLO pair on the modifier zone, else the
-    // single active segment (or the adjacent pair for keyboard-less dual mode).
-    const typeIndices = yoloPair ? yoloPair.slice()
-      : (applyDualMod ? [activeTypeIdx, (activeTypeIdx + 1) % Math.max(1, currentModifiers.length)] : [activeTypeIdx]);
-    const leftIndices = layout.left === 'type' ? typeIndices : [activeNoteIdx];
-    const rightIndices = layout.right === 'type' ? typeIndices : [activeNoteIdx];
+    const lPinchRender = zones.left.hand ? zones.left.pinch : isTriggering;
+    const rPinchRender = zones.right.hand ? zones.right.pinch : isTriggering;
+    const leftIndices = [layout.left === 'type' ? activeTypeIdx : activeNoteIdx];
+    const rightIndices = [layout.right === 'type' ? activeTypeIdx : activeNoteIdx];
 
     drawZone(zones.left, leftItems, leftIndices, lPinchRender, th.colorLeft);
     drawZone(zones.right, rightItems, rightIndices, rPinchRender, th.colorRight);
@@ -2466,7 +2418,7 @@
 
   function kbdPlayNow() {
     if (!engineStarted || uiEditMode) return;
-    playChord(getChordInfo(false));
+    playChord(getChordInfo());
     wasTriggering = true;
   }
   function kbdMaybeRelease() {
@@ -2637,7 +2589,7 @@
         heldRootPointers.set(e.pointerId, idx);
         activeNoteIdx = idx;
         b.classList.add('held');
-        if (audioReady) playChord(getChordInfo(false));
+        if (audioReady) playChord(getChordInfo());
         lastActivityTime = Date.now();
       });
       const up = (e) => {
@@ -2658,7 +2610,7 @@
         e.preventDefault();
         activeTypeIdx = idx;
         [...touchMods.children].forEach((c, i) => c.classList.toggle('selected', i === idx));
-        if (heldRootPointers.size > 0 && audioReady) playChord(getChordInfo(false));
+        if (heldRootPointers.size > 0 && audioReady) playChord(getChordInfo());
         lastActivityTime = Date.now();
       });
       touchMods.appendChild(b);

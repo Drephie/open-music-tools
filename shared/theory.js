@@ -23,8 +23,8 @@
  *   modifierSuffix(mod, third, fifth, seventh)     'm', 'maj7', 'sus4', ...
  *     'Triad', '7th' and 'Add9' follow the degree's own third/fifth/seventh.
  *   pickModifiers(list, typeIdx, dualMod, modPair) -> [mod1, mod2 | null]
- *     modPair = [i, j] picks two (the YOLO sign); dualMod adds the next one.
- *     Indices are clamped to the list.
+ *     modPair = [i, j] picks two to blend; dualMod adds the next one. Both
+ *     are optional. Indices are clamped to the list.
  *   getChordInfo({ key, degree, modifiers, octave = 0, solfege = false })
  *     -> { freqs, midiNotes, name, noteNames }
  *     degree is 0..6 in a key, 0..11 in chromatic (clamped). Degree 0 of C
