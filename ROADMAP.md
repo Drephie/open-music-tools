@@ -47,7 +47,7 @@ Each module starts with a header comment describing its API: read that, not the 
 
 0. **Setup (done):** hub repo, Choordination copied in, install paths fixed, Salamander credit, CLAUDE.md, this file.
 1. **Engines (done 2026-10-23):** split Choordination into `shared/` (theory, sound, transport, ui) with one service worker. Choordination behaves exactly as before. Theory tests are in `tests/theory.html`. **Next: the Choordination changes.**
-2. **Tools on existing engines:** Metronome (done 2026-10-23; Spanish and Italian wording still to be checked by Drephie), Digital Piano, Ear Trainer, hub landing page, then the first public launch.
+2. **Tools on existing engines:** Metronome (done 2026-10-23; Drephie approved it, including the Spanish and Italian wording), Digital Piano, Ear Trainer, hub landing page, then the first public launch.
 3. **Pitch:** pitch engine, then Tuner, Pitch Detector and Pitch Training.
 4. **Analysis:** an Essentia.js trial on the test songs, then BPM Finder, Practice Player and Chord Finder.
 5. **Jam Machine.**
@@ -85,5 +85,5 @@ Silent bars practice (the click drops out for a bar), a speed trainer that slowl
 ## Custom skills to create along the way
 
 - `tool-spec` (done, `.claude/skills/tool-spec/`): the one-page spec Drephie approves before any code; specs live in `specs/`.
-- `new-tool`: next, now that the Metronome works (folder layout, page parts, strings, `APP_SHELL`, tests, checks).
+- `new-tool` (done, `.claude/skills/new-tool/`): building a tool after its spec is approved, with the Metronome as the example (files, shared page parts, strings, phone fit, sound tests, `APP_SHELL`, browser checks, Drephie's phone test).
 - `release-check`: before the first launch
