@@ -7,7 +7,7 @@ import { LANGUAGES, mergeStrings, createI18n } from '../shared/ui/i18n.js';
 import { HUB_STRINGS } from '../shared/ui/strings.js';
 import { setupCustomSelects } from '../shared/ui/select.js';
 import { createModalManager } from '../shared/ui/modal.js';
-import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, browserLanguage, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt } from '../shared/ui/page.js';
+import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
 import { METRONOME_STRINGS } from './strings.js';
 
@@ -33,11 +33,11 @@ function readSettings() {
     subdivision: int(s.subdivision, 1, 4, 1),
     sound: CLICK_SOUNDS.includes(s.sound) ? s.sound : 'click',
     volume: int(s.volume, 0, 200, 100),
-    theme: THEMES.some(([v]) => v === s.theme) ? s.theme : 'liquid',
-    lang: LANGUAGES.includes(s.lang) ? s.lang : browserLanguage(),
   };
 }
 const settings = readSettings();
+// Theme and language are one choice for the whole hub; what this tool saved before is passed on.
+Object.assign(settings, loadLook(loadSettings(SETTINGS_KEY)));
 const save = () => saveSettings(SETTINGS_KEY, settings);
 
 const i18n = createI18n({
@@ -294,8 +294,13 @@ $('about-btn').addEventListener('click', (e) => modals.open(aboutModal, e.curren
 
 themeSelect.innerHTML = THEMES.map(([value, key]) => `<option value="${value}" data-i18n="${key}"></option>`).join('');
 langSelect.innerHTML = LANGUAGES.map((l) => `<option value="${l}">${LANGUAGE_NAMES[l]}</option>`).join('');
-themeSelect.addEventListener('change', () => { settings.theme = themeSelect.value; applyTheme(settings.theme); fitBpmInput(); save(); });
-langSelect.addEventListener('change', () => { settings.lang = langSelect.value; applyLanguage(); save(); });
+themeSelect.addEventListener('change', () => { settings.theme = themeSelect.value; applyTheme(settings.theme); fitBpmInput(); save(); saveLook({ theme: settings.theme }); });
+langSelect.addEventListener('change', () => { settings.lang = langSelect.value; applyLanguage(); save(); saveLook({ lang: settings.lang }); });
+// Chosen on the home page or in another tool, in another tab or before coming Back here.
+watchLook((look) => {
+  if (look.theme !== settings.theme) { settings.theme = themeSelect.value = look.theme; applyTheme(look.theme); fitBpmInput(); setupCustomSelects(); }
+  if (look.lang !== settings.lang) { settings.lang = langSelect.value = look.lang; applyLanguage(); }
+});
 
 function applyLanguage() {
   i18n.apply();

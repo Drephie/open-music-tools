@@ -10,7 +10,7 @@ import { LANGUAGES, mergeStrings, createI18n } from '../shared/ui/i18n.js';
 import { HUB_STRINGS } from '../shared/ui/strings.js';
 import { setupCustomSelects, setSelectRoom } from '../shared/ui/select.js';
 import { createModalManager } from '../shared/ui/modal.js';
-import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, browserLanguage, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt } from '../shared/ui/page.js';
+import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
 import { PIANO_STRINGS } from './strings.js';
 
@@ -43,11 +43,11 @@ function readSettings() {
     firstWhite: int(s.firstWhite, 0, 51, -1),   // the leftmost white key on screen; -1: around middle C
     volume: int(s.volume, 0, 100, 100),
     flip: s.flip === true,
-    theme: THEMES.some(([v]) => v === s.theme) ? s.theme : 'liquid',
-    lang: LANGUAGES.includes(s.lang) ? s.lang : browserLanguage(),
   };
 }
 const settings = readSettings();
+// Theme and language are one choice for the whole hub; what this tool saved before is passed on.
+Object.assign(settings, loadLook(loadSettings(SETTINGS_KEY)));
 const save = () => saveSettings(SETTINGS_KEY, settings);
 // Do Re Mi in Spanish and Italian, C D E in English, until the Do/C switch is used.
 const solfege = () => (settings.solfege === null ? settings.lang !== 'en' : settings.solfege);
@@ -615,8 +615,13 @@ document.querySelectorAll('.about-btn').forEach((b) => b.addEventListener('click
 themeSelect.innerHTML = THEMES.map(([value, key]) => `<option value="${value}" data-i18n="${key}"></option>`).join('');
 langSelect.innerHTML = LANGUAGES.map((l) => `<option value="${l}">${LANGUAGE_NAMES[l]}</option>`).join('');
 soundSelect.innerHTML = INSTRUMENTS.map((id) => `<option value="${id}" data-i18n="${SOUND_KEYS[id]}"></option>`).join('');
-themeSelect.addEventListener('change', () => { settings.theme = themeSelect.value; applyTheme(settings.theme); save(); setTimeout(fitBig, 500); });
-langSelect.addEventListener('change', () => { settings.lang = langSelect.value; applyLanguage(); save(); });
+themeSelect.addEventListener('change', () => { settings.theme = themeSelect.value; applyTheme(settings.theme); save(); saveLook({ theme: settings.theme }); setTimeout(fitBig, 500); });
+langSelect.addEventListener('change', () => { settings.lang = langSelect.value; applyLanguage(); save(); saveLook({ lang: settings.lang }); });
+// Chosen on the home page or in another tool, in another tab or before coming Back here.
+watchLook((look) => {
+  if (look.theme !== settings.theme) { settings.theme = themeSelect.value = look.theme; applyTheme(look.theme); setupCustomSelects(); setTimeout(fitBig, 500); }
+  if (look.lang !== settings.lang) { settings.lang = langSelect.value = look.lang; applyLanguage(); }
+});
 
 function applyLanguage() {
   i18n.apply();
