@@ -675,7 +675,7 @@
 <script type="module">
   import { HandLandmarker, FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs";
   // (SRI cannot be applied to ES-module imports without an import map; the file is
-  //  cached by sw.js after first load.)
+  //  cached by the hub's service worker, ../sw.js, after first load.)
   import { parseKey, keyRootName, keyChordNames, pickModifiers, getChordInfo as theoryChordInfo } from '../shared/theory.js';
   import { startAudio, createRack } from '../shared/sound.js';
   import { clampBpm, createClicks, startMetronome, countIn, currentBeat, createTapTempo } from '../shared/transport.js';
@@ -683,6 +683,7 @@
   import { HUB_STRINGS } from '../shared/ui/strings.js';
   import { setupCustomSelects } from '../shared/ui/select.js';
   import { createModalManager } from '../shared/ui/modal.js';
+  import { registerHubWorker } from '../shared/offline.js';
 
   // --- roundRect polyfill (older Safari) ---
   if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
@@ -2808,10 +2809,8 @@
   sizeCanvas();
   showBootStep(1);
 
-  // --- SERVICE WORKER (asset cache for instant repeat visits) ---
-  if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname))) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => { /* offline cache unavailable */ }));
-  }
+  // --- SERVICE WORKER (the hub's one worker caches assets for instant repeat visits) ---
+  registerHubWorker('../');
 </script>
 </body>
 </html>
