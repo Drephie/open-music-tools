@@ -8,8 +8,11 @@
  *     clicks.play(sound, time, level = 'normal')
  *       level 'strong' (higher/louder, for accents), 'normal', or 'soft' (for
  *       in-between clicks). Unknown sounds play 'click'.
- *     clicks.setVolume(gain)   1 = the normal level (-8 dB), 2 = twice the
- *                              signal (+6 dB, still below clipping), 0 = silent
+ *     clicks.setVolume(gain)   0..2 (the Metronome's 0..200%). 1 = the loudest
+ *       clean level (strong clicks peak near 0.8). Below 1 the level follows
+ *       hearing (gain², so 0.5 sounds about half as loud); 0 = silent. Above 1
+ *       the clicks are pushed up to +12 dB into a soft limiter: fuller and
+ *       louder, a little rougher, and never past 0.95, so nothing clips.
  *     clicks.dispose()
  *   startMetronome(clicks, { enabled, sound, beatsPerBar, accents, subdivision, onBeat })
  *     A Tone.Loop on Tone.Transport from 0, 12 steps per quarter-note beat so
@@ -50,10 +53,25 @@ export const clampBpm = (v) => Math.max(40, Math.min(240, isNaN(v) ? 100 : v));
 
 export const CLICK_SOUNDS = ['click', 'beep', 'wood', 'hat'];
 
-const BASE_DB = -8;
+const BASE_DB = -2;     // the clean maximum (was -8 dB before 2026-10-23: too quiet on phones)
+const BOOST_DB = 12;   // how far 200% pushes into the limiter
+const XMAX = 4;        // the largest signal the limiter is built for (10^(12/20))
+const KNEE = 0.7, CEILING = 0.95;
+// Straight up to KNEE, then a smooth bend that never reaches CEILING.
+const softLimit = (x) => {
+  const a = Math.abs(x);
+  return a <= KNEE ? x : Math.sign(x) * (KNEE + (CEILING - KNEE) * Math.tanh((a - KNEE) / (CEILING - KNEE)));
+};
 
 export function createClicks() {
-  const metVol = new Tone.Volume(BASE_DB).toDestination();
+  // synths -> metVol (clean maximum) -> fader (0..1) -> driveIn (boost, scaled into
+  // the shaper's -1..1 input) -> soft limiter -> speakers
+  const shaper = new Tone.WaveShaper((u) => softLimit(u * XMAX), 8193).toDestination();
+  // No oversampling: its smoothing filter overshoots on noise clicks (peaks up to 1.24).
+  shaper.oversample = 'none';
+  const driveIn = new Tone.Gain(1 / XMAX).connect(shaper);
+  const fader = new Tone.Gain(1).connect(driveIn);
+  const metVol = new Tone.Volume(BASE_DB).connect(fader);
   const hatFilter = new Tone.Filter(8000, 'highpass').connect(metVol);
   const metSynths = {
     click: new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.03, sustain: 0 } }).connect(metVol),
@@ -67,17 +85,18 @@ export function createClicks() {
       switch (sound) {
         case 'beep': metSynths.beep.triggerAttackRelease(strong ? 'E6' : 'A5', 0.05, time, soft ? 0.55 : 1); break;
         case 'wood': metSynths.wood.triggerAttackRelease(strong ? 'A4' : 'E4', 0.05, time, soft ? 0.55 : 1); break;
-        // The hi-hat's filtered noise peaks higher, so it sits lower to stay clean at 200%.
+        // The hi-hat's filtered noise peaks higher, so it sits lower to stay clean at 100%.
         case 'hat': metSynths.hat.triggerAttackRelease(0.03, time, strong ? 0.6 : soft ? 0.2 : 0.35); break;
         default: metSynths.click.triggerAttackRelease(0.02, time, strong ? 1 : soft ? 0.3 : 0.55);
       }
     },
     setVolume(gain) {
-      metVol.mute = !(gain > 0);
-      if (gain > 0) metVol.volume.value = BASE_DB + 20 * Math.log10(gain);
+      const g = Math.max(0, Math.min(2, Number(gain) || 0));
+      fader.gain.value = g >= 1 ? 1 : g * g;
+      driveIn.gain.value = (g > 1 ? Math.pow(10, ((g - 1) * BOOST_DB) / 20) : 1) / XMAX;
     },
     dispose() {
-      [...Object.values(metSynths), hatFilter, metVol].forEach(n => {
+      [...Object.values(metSynths), hatFilter, metVol, fader, driveIn, shaper].forEach(n => {
         try { if (n) n.dispose(); } catch { /* already disposed */ }
       });
     },

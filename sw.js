@@ -10,7 +10,7 @@
  * Bump CACHE_NAME whenever a cached file changes. Add each new tool's files
  * to APP_SHELL.
  */
-const CACHE_NAME = 'open-music-tools-v6';
+const CACHE_NAME = 'open-music-tools-v7';
 const APP_SHELL = [
   'shared/theory.js',
   'shared/sound.js',

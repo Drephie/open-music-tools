@@ -195,28 +195,45 @@
       report('tap tempo: very fast taps are capped at 240', 1, capped === 240 ? 0 : 1, [`got ${capped}`]);
     }
 
-    // Real sounds, rendered offline: volume, no clipping at 200%, level order.
-    const peak = async (sound, level, gain) => {
+    // Real sounds, rendered offline: volume curve, no clipping at 200%, level order.
+    // peak(): the highest sample; energy(): mean power over the click's first 100 ms, in dB.
+    const render = async (sound, level, gain) => {
       const buf = await Tone.Offline(() => {
         const c = T.createClicks();
         c.setVolume(gain);
         c.play(sound, 0.05, level);
       }, 0.3);
-      const data = buf.getChannelData(0);
-      let p = 0;
-      for (let i = 0; i < data.length; i++) p = Math.max(p, Math.abs(data[i]));
-      return p;
+      return buf.getChannelData(0);
+    };
+    const peakOf = (data) => { let p = 0; for (let i = 0; i < data.length; i++) p = Math.max(p, Math.abs(data[i])); return p; };
+    const peak = async (sound, level, gain) => peakOf(await render(sound, level, gain));
+    const energy = async (sound, level, gain) => {
+      const d = await render(sound, level, gain), sr = Tone.getContext().sampleRate;
+      const from = Math.floor(0.05 * sr), to = from + Math.floor(0.1 * sr);
+      let e = 0;
+      for (let i = from; i < to; i++) e += d[i] * d[i];
+      return 10 * Math.log10(e / (to - from) + 1e-12);
     };
     {
       const ex = [];
       let bad = 0, n = 0;
       for (const sound of ['beep', 'wood']) {   // deterministic sounds: exact ratios
-        const p1 = await peak(sound, 'normal', 1), p2 = await peak(sound, 'normal', 2), ph = await peak(sound, 'normal', 0.5), p0 = await peak(sound, 'normal', 0);
-        for (const [name, ok] of [[`${sound} 200% = 2 × 100%`, Math.abs(p2 / p1 - 2) < 0.01], [`${sound} 50% = ½ × 100%`, Math.abs(ph / p1 - 0.5) < 0.01], [`${sound} 0% is silent`, p0 === 0]]) {
-          n++; if (!ok) { bad++; ex.push(`${name}: peaks 100% ${p1}, 200% ${p2}, 50% ${ph}, 0% ${p0}`); }
+        const p1 = await peak(sound, 'normal', 1), ph = await peak(sound, 'normal', 0.5), p0 = await peak(sound, 'normal', 0);
+        for (const [name, ok] of [[`${sound} 100% is the clean maximum (peak 0.7–0.85)`, p1 > 0.7 && p1 < 0.85], [`${sound} 50% = ¼ of the signal (−12 dB)`, Math.abs(ph / p1 - 0.25) < 0.005], [`${sound} 0% is silent`, p0 === 0]]) {
+          n++; if (!ok) { bad++; ex.push(`${name}: peaks 100% ${p1}, 50% ${ph}, 0% ${p0}`); }
         }
       }
-      report('setVolume: 200% doubles the signal, 50% halves it, 0% is silent', n, bad, ex);
+      report('setVolume up to 100%: 100% is the clean maximum, 50% sounds about half as loud, 0% is silent', n, bad, ex);
+    }
+    {
+      const ex = [];
+      let bad = 0, n = 0;
+      for (const sound of T.CLICK_SOUNDS) {
+        const [e1, e15, e2] = [await energy(sound, 'strong', 1), await energy(sound, 'strong', 1.5), await energy(sound, 'strong', 2)];
+        n++;
+        if (!(e15 - e1 > 4 && e2 - e1 > 7 && e2 > e15)) { bad++; ex.push(`${sound}: 150% ${(e15 - e1).toFixed(1)} dB, 200% ${(e2 - e1).toFixed(1)} dB over 100%`); }
+      }
+      report('setVolume above 100%: 150% at least 4 dB and 200% at least 7 dB louder than 100%', n, bad, ex);
     }
     {
       const ex = [];
