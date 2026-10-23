@@ -19,7 +19,8 @@ Free, open-source music tools that build musical literacy and help people make t
 - `choordination/`: the hand-tracking chord instrument. `index.html` (about 2,800 lines, roughly 40k tokens) with its own `manifest.json`. Its `sw.js` is a retired worker that only removes itself from old installs.
 - `sw.js` at the root: the one service worker for the whole hub.
 - `tests/`: browser test pages (`theory.html`) and their fixtures.
-- One folder per new tool (see ROADMAP.md).
+- One folder per new tool (see ROADMAP.md), e.g. `metronome/`. New tools build their page on `shared/ui/page.css` and `page.js`.
+- `specs/`: the one-page spec of each new tool, approved by Drephie before any code (the `tool-spec` skill).
 - `~/CLAUDE/choordination/` is the original folder, kept as an archive. Never edit it. Vochoorder (parked) only lives there.
 
 ## Tech
@@ -28,7 +29,7 @@ Free, open-source music tools that build musical literacy and help people make t
 - Libraries come from CDNs with pinned versions: Tone.js 14.8.49 (cdnjs, with SRI) and MediaPipe tasks-vision 0.10.3 (jsDelivr).
 - Run locally from the repo root with `python3 -m http.server 8000`, then open http://localhost:8000/choordination/. ES modules, camera, microphone and service workers don't work from `file://`.
 - When you change a file the service worker caches, bump `CACHE_NAME` in `/sw.js`; list each new tool's files in its `APP_SHELL`.
-- Tests run in the browser: open http://localhost:8000/tests/theory.html. The same check runs from the terminal with macOS's built-in JavaScriptCore: `/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc -m tests/tools/run-theory-test.js`.
+- Tests run in the browser: open http://localhost:8000/tests/theory.html and http://localhost:8000/tests/transport.html (metronome timing, levels and volume). The same check runs from the terminal with macOS's built-in JavaScriptCore: `/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc -m tests/tools/run-theory-test.js`.
 
 ## Conventions
 
