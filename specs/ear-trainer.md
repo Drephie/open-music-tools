@@ -1,6 +1,6 @@
 # Ear Trainer: spec
 
-**Status:** approved by Drephie, 2026-10-23. Built the same day; waiting for Drephie's phone test.
+**Status:** approved by Drephie, 2026-10-23. Built the same day; Drephie's phone test on 2026-10-24: all good.
 Items marked *(Claude's pick)* weren't asked: say if you want them changed. *(At build time)* marks details settled while building.
 
 ## What it is for
@@ -73,3 +73,5 @@ Nothing is recorded or uploaded; there is no microphone. Piano sound: Salamander
 **Claude:** 5 themes, 3 languages, phones 375 × 667 and 390 × 664, desktop; keyboard only; every window, tab and screen; lesson unlocking, stars, lives and best score; settings and progress after a reload; the question test page, `tests/theory.html` and `tests/transport.html`; the Piano still loads.
 
 **Drephie, by ear on the phone:** the piano in questions (length of the notes, the gap between them); whether the I–IV–V–I chords make the key clear; whether lesson 1 of each tab is easy enough and the order fair; how fast the streak game gets harder; Compare; the chord words; the Spanish and Italian wording.
+
+**Drephie's phone test (2026-10-24):** all good: the sounds, the questions, the game and the wording, as built. No changes asked.

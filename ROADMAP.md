@@ -1,6 +1,6 @@
 # Roadmap
 
-**Status (2026-10-23):** Phase 0 and the Phase 1 engine split are done: `shared/` holds theory, sound, transport and ui, and Choordination runs on them. After Drephie's hand test, Choordination lost the YOLO sign and the loop station, and gained smooth chords (Chord Style setting), a "Record my voice" switch and a headphones tip. Phase 2 has started: the **Metronome** is done (`metronome/`, spec in `specs/metronome.md`); Drephie tested it on a phone: it works with the silent switch on, fits the screen, and the volume curve sounds right. The **Piano** is done (`piano/`, spec in `specs/piano.md`), built from Drephie's Diapason prototype; Drephie tested it on an iPhone. The **Ear Trainer** is built (`ear-trainer/`, spec in `specs/ear-trainer.md`): intervals, chords and scale degrees, with lessons that unlock one by one, a streak game with 3 lives and free practice; waiting for Drephie's phone test. Next: Drephie listens to the Choordination changes, then the next Phase 2 tool (or the remaining Choordination changes below).
+**Status (2026-10-23):** Phase 0 and the Phase 1 engine split are done: `shared/` holds theory, sound, transport and ui, and Choordination runs on them. After Drephie's hand test, Choordination lost the YOLO sign and the loop station, and gained smooth chords (Chord Style setting), a "Record my voice" switch and a headphones tip. Phase 2 has started: the **Metronome** is done (`metronome/`, spec in `specs/metronome.md`); Drephie tested it on a phone: it works with the silent switch on, fits the screen, and the volume curve sounds right. The **Piano** is done (`piano/`, spec in `specs/piano.md`), built from Drephie's Diapason prototype; Drephie tested it on an iPhone. The **Ear Trainer** is done (`ear-trainer/`, spec in `specs/ear-trainer.md`): intervals, chords and scale degrees, with lessons that unlock one by one, a streak game with 3 lives and free practice; Drephie tested it on a phone (2026-10-24): all good (sounds, questions, game and wording). Next: Drephie listens to the Choordination changes, then the next Phase 2 tool (or the remaining Choordination changes below).
 
 ## Tools in scope
 
@@ -12,7 +12,7 @@
 | **Tuner** | Chromatic tuner | pitch |
 | **Pitch Detector** | One voice: the live note plus a pitch-over-time graph for lessons | pitch |
 | **Pitch Training** | Singing exercises (scales and more) scored live; teachers make exercises and share them by link | pitch, theory, transport |
-| **Ear Trainer** | Intervals, chord qualities, scale degrees (built 2026-10-23 as `ear-trainer/`; spec `specs/ear-trainer.md`): lessons, a streak game, free practice | theory, sound |
+| **Ear Trainer** | Intervals, chord qualities, scale degrees (done 2026-10-24 as `ear-trainer/`; spec `specs/ear-trainer.md`): lessons, a streak game, free practice | theory, sound |
 | **BPM Finder** | Tempo of an audio file you own, plus tap tempo; always shows half- and double-time alternatives | analysis |
 | **Chord Finder** | Key, chords and key changes of an audio file you own, using existing open-source analysis; built to be easy to correct | analysis, theory |
 | **Practice Player** | Slow a song down without changing pitch and loop sections; transposing comes later | analysis (beat grid) |
@@ -47,7 +47,7 @@ Each module starts with a header comment describing its API: read that, not the 
 
 0. **Setup (done):** hub repo, Choordination copied in, install paths fixed, Salamander credit, CLAUDE.md, this file.
 1. **Engines (done 2026-10-23):** split Choordination into `shared/` (theory, sound, transport, ui) with one service worker. Choordination behaves exactly as before. Theory tests are in `tests/theory.html`. **Next: the Choordination changes.**
-2. **Tools on existing engines:** Metronome (done 2026-10-23; Drephie approved it, including the Spanish and Italian wording), Piano (done 2026-10-23), Ear Trainer (built 2026-10-23), hub landing page, then the first public launch.
+2. **Tools on existing engines:** Metronome (done 2026-10-23; Drephie approved it, including the Spanish and Italian wording), Piano (done 2026-10-23), Ear Trainer (done 2026-10-24; Drephie's phone test: all good), hub landing page, then the first public launch.
 3. **Pitch:** pitch engine, then Tuner, Pitch Detector and Pitch Training.
 4. **Analysis:** an Essentia.js trial on the test songs, then BPM Finder, Practice Player and Chord Finder.
 5. **Jam Machine.**
