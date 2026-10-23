@@ -61,7 +61,7 @@ Removed after Drephie's hand test (2026-10-23): the YOLO sign (didn't work) and 
 
 - Done: smooth chords (Chord Style, on by default): the root in the bass and the chord above in the closest inversion to the previous one; the note list shows the notes above the bass. `voiceChord` in `shared/theory.js`.
 - Done: voice in keyboard and touch recordings ("Record my voice" switch, on by default).
-- Check with Drephie: "7th (Auto)" gives every major-quality degree a major 7th, so V in a major key plays Amaj7 (A C# E G#) in D major instead of the A7 the key contains. Choordination always did this.
+- Done: "7th (Auto)" follows the key (V in major and VII in minor are dominant 7ths; before, every major chord got a maj7).
 - m7♭5 as its own modifier; 11ths and 13ths; slash chords and bass notes
 - Web MIDI output to control a DAW
 - Drephie's own list

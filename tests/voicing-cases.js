@@ -3,7 +3,8 @@
  * tests/tools/run-theory-test.js.
  *
  * checkVoicing(theory) -> rows { section, checked, failed, examples }
- *   - known answers: progressions worked out by hand
+ *   - known answers: "7th (Auto)" in a major and a minor key, and
+ *     smooth-chord progressions worked out by hand
  *   - invariants over every key, octave, modifier and pair of degrees
  */
 import { MODES, rootsOf } from './theory-cases.js';
@@ -36,6 +37,17 @@ export function checkVoicing(theory) {
   const info = (mode, degree, mod, octave, solfege = false) => theory.getChordInfo({
     key: theory.parseKey(mode), degree, modifiers: [mod], octave, solfege,
   });
+
+  // "7th (Auto)" uses the key's own seventh on each degree.
+  const sevenths = row('known: 7th (Auto) follows the key');
+  for (const [mode, want] of [
+    ['0_maj', 'Cmaj7 Dm7 Em7 Fmaj7 G7 Am7 Bm7♭5'],
+    ['9_min', 'Am7 Bm7♭5 Cmaj7 Dm7 Em7 Fmaj7 G7'],
+  ]) {
+    const got = Array.from({ length: 7 }, (_, d) => info(mode, d, '7th', 0).name).join(' ');
+    sevenths.checked++;
+    if (got !== want) fail(sevenths, `${mode}: expected ${want}, got ${got}`);
+  }
 
   const known = row('voicing: known progressions');
   for (const [mode, octave, chords, expected, names] of KNOWN) {

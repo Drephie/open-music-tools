@@ -21,7 +21,8 @@
  *   CHORD_MODIFIERS  the 16 modifier ids, in menu order
  *   modifierIntervals(mod, third, fifth, seventh)  semitones above the root
  *   modifierSuffix(mod, third, fifth, seventh)     'm', 'maj7', 'sus4', ...
- *     'Triad', '7th' and 'Add9' follow the degree's own third/fifth/seventh.
+ *     'Triad', '7th' and 'Add9' use the key's own third/fifth/seventh on that
+ *     degree (so '7th' on V in major, or VII in minor, is a dominant 7th).
  *   pickModifiers(list, typeIdx, dualMod, modPair) -> [mod1, mod2 | null]
  *     modPair = [i, j] picks two to blend; dualMod adds the next one. Both
  *     are optional. Indices are clamped to the list.
@@ -203,7 +204,9 @@ export function getChordInfo({ key, degree = 0, modifiers = [], octave = 0, solf
     const dq = DIATONIC_QUALITIES[key.scaleType][noteIdx];
     baseThird = (dq === 'Minor' || dq === 'Dim') ? 3 : 4;
     baseFifth = (dq === 'Dim') ? 6 : 7;
-    baseSeventh = (dq === 'Major') ? 11 : 10;
+    // The key's own seventh, seven scale steps up: maj7 on I and IV, a
+    // dominant 7th on V (VII in minor), m7 or m7♭5 on the others.
+    baseSeventh = scaleSteps[(noteIdx + 6) % 7] + (noteIdx + 6 >= 7 ? 12 : 0) - scaleSteps[noteIdx];
   }
   rootMidi += octave * 12;
 
