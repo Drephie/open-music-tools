@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Ear Trainer</title>
+  <meta name="description" content="A free, open-source ear trainer: intervals, chords and scale degrees, with lessons and a streak game. Runs in your browser; nothing is uploaded.">
+  <meta name="theme-color" content="#0f1419">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" integrity="sha384-c6Uo4N9c3SOEigMVzP6IshUG1wQ5uMp3xeoQFiHWAQ86joWdgyajkvopySyKy/Z6" crossorigin="anonymous"></script>
+  <!-- Google Fonts CSS is UA-dependent, so SRI cannot be applied to it. -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/ui/themes.css">
+  <link rel="stylesheet" href="../shared/ui/select.css">
+  <link rel="stylesheet" href="../shared/ui/page.css">
+  <link rel="stylesheet" href="ear-trainer.css">
+</head>
+<body data-theme="liquid">
+  <svg class="icons" aria-hidden="true">
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.6l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.5l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z" fill="currentColor"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.5s-7.6-4.5-9.4-9.3C1.3 7.8 3.4 4.4 6.9 4.4c2.1 0 3.6 1.1 5.1 2.9 1.5-1.8 3-2.9 5.1-2.9 3.5 0 5.6 3.4 4.3 6.8-1.8 4.8-9.4 9.3-9.4 9.3z" fill="currentColor"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 2.2c.7 3.6 5.6 6 5.6 11.4a5.6 5.6 0 0 1-11.2 0c0-2.6 1.3-4.6 2.8-5.9 0 1.9.9 3.2 2.3 3.8-.6-3.3-.4-6.3.5-9.3z" fill="currentColor"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="currentColor"/><path d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5" fill="none" stroke="currentColor" stroke-width="2.2"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2.6" fill="currentColor"/><circle cx="15" cy="17" r="2.6" fill="currentColor"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cross" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
+  </svg>
+  <div id="theme-frame" aria-hidden="true"></div>
+  <div class="page">
+    <header class="tool-header">
+      <h1 class="tool-title" data-i18n="title">Ear Trainer</h1>
+      <div class="header-actions">
+        <button id="about-btn" class="icon-btn" data-i18n-aria="about" aria-label="About">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
+        </button>
+        <button id="settings-btn" class="icon-btn" data-i18n-aria="settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="ear">
+      <!-- Lessons screen: the three tabs, the lesson path, the game and free practice -->
+      <section id="home" class="screen home">
+        <div class="tabs" role="tablist" data-i18n-aria="tabsAria" aria-label="Exercises">
+          <button role="tab" class="tab" data-ex="intervals" id="tab-intervals" aria-controls="home-panel" data-i18n="tabIntervals">Intervals</button>
+          <button role="tab" class="tab" data-ex="chords" id="tab-chords" aria-controls="home-panel" data-i18n="tabChords">Chords</button>
+          <button role="tab" class="tab" data-ex="degrees" id="tab-degrees" aria-controls="home-panel" data-i18n="tabDegrees">Scale degrees</button>
+        </div>
+        <div id="home-panel" class="panel home-panel" role="tabpanel">
+          <h2 id="lessons-head" class="small-head" data-i18n="lessons">Lessons</h2>
+          <div id="path" class="path" role="group" aria-labelledby="lessons-head"></div>
+          <div class="lesson-info">
+            <p class="lesson-name" aria-live="polite"><span id="lesson-num" class="lesson-num"></span> <span id="lesson-title"></span></p>
+            <button id="start-btn" class="btn btn-primary start-btn" data-i18n="start">Start</button>
+          </div>
+        </div>
+        <div class="cards">
+          <button id="game-btn" class="card-btn">
+            <svg class="card-icon flame" aria-hidden="true"><use href="#i-flame"/></svg>
+            <span class="card-text"><span class="card-title" data-i18n="game">Streak game</span><span id="best-label" class="card-sub"></span></span>
+          </button>
+          <button id="practice-btn" class="card-btn">
+            <svg class="card-icon" aria-hidden="true"><use href="#i-sliders"/></svg>
+            <span class="card-text"><span class="card-title" data-i18n="practice">Free practice</span><span class="card-sub" data-i18n="practiceSub">Pick your answers</span></span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Question screen: lessons, the game and free practice -->
+      <section id="quiz" class="screen quiz" hidden>
+        <div class="quiz-top">
+          <button id="back-btn" class="icon-btn back-btn" data-i18n-aria="backAria" aria-label="Back to the lessons">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cross"/></svg>
+          </button>
+          <div id="progress" class="progress" role="img">
+            <div class="bar"><div id="bar-fill" class="bar-fill"></div></div>
+            <span id="bar-text" class="bar-text" aria-hidden="true"></span>
+          </div>
+          <div id="lives" class="lives" role="img" hidden></div>
+          <div id="score" class="score" role="img" hidden>
+            <svg class="flame" aria-hidden="true"><use href="#i-flame"/></svg><span id="score-num" aria-hidden="true">0</span>
+          </div>
+          <div id="tally" class="tally" hidden></div>
+        </div>
+        <div class="panel quiz-panel">
+          <p id="prompt" class="prompt"></p>
+          <button id="hear-btn" class="btn hear-btn">
+            <svg aria-hidden="true"><use href="#i-play"/></svg><span data-i18n="hear">Hear again</span>
+          </button>
+          <p id="loading" class="loading" hidden></p>
+          <div id="answers" class="answers" role="group" aria-labelledby="prompt"></div>
+          <div id="feedback" class="feedback" aria-live="polite">
+            <p id="fb-main" class="fb-main"></p>
+            <p id="fb-detail" class="fb-detail"></p>
+            <p id="fb-notes" class="fb-notes"></p>
+          </div>
+          <div class="quiz-actions">
+            <button id="compare-btn" class="btn" data-i18n="compare">Compare</button>
+            <button id="next-btn" class="btn btn-primary" data-i18n="next">Next</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- End of a lesson or a game -->
+      <section id="done" class="screen done" hidden>
+        <div class="panel done-panel">
+          <div id="done-stars" class="done-stars" role="img"></div>
+          <div id="done-score" class="done-score" hidden><svg class="flame" aria-hidden="true"><use href="#i-flame"/></svg><span id="done-score-num"></span></div>
+          <h2 id="done-title" class="done-title"></h2>
+          <p id="done-text" class="done-text"></p>
+          <div class="done-actions">
+            <button id="done-main" class="btn btn-primary"></button>
+            <button id="done-again" class="btn"></button>
+            <button id="done-back" class="btn" data-i18n="back">Back</button>
+          </div>
+        </div>
+      </section>
+      <div id="burst" class="burst" aria-hidden="true"></div>
+    </main>
+
+    <footer class="tool-footer">
+      <a class="support-link" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+      <span class="designer-credit"><span data-i18n="designedBy">Designed by</span> <a href="https://instagram.com/drephie" target="_blank" rel="noopener noreferrer">@drephie</a></span>
+    </footer>
+  </div>
+
+  <div id="settings-modal" class="centered-modal has-dropdowns" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="settings-title" data-i18n="settings">Settings</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <div class="control-group">
+      <label for="theme-select" data-i18n="theme">Aesthetic Theme</label>
+      <div class="custom-select"><select id="theme-select"></select></div>
+    </div>
+    <div class="control-group">
+      <label for="lang-select" data-i18n="lang">Language</label>
+      <div class="custom-select"><select id="lang-select"></select></div>
+    </div>
+    <div class="control-group">
+      <span id="names-label" class="group-label" data-i18n="names">Note names</span>
+      <div id="names-seg" class="seg" role="group" aria-labelledby="names-label">
+        <button type="button" data-names="solfege" data-i18n="namesSolfege">Do Re Mi</button>
+        <button type="button" data-names="letters" data-i18n="namesLetters">C D E</button>
+      </div>
+    </div>
+    <div class="control-group reset-group">
+      <button id="reset-btn" class="btn" data-i18n="reset">Start the lessons over</button>
+      <div id="reset-ask" class="reset-ask" hidden>
+        <p data-i18n="resetAsk">Your stars and best scores go back to zero.</p>
+        <div class="reset-actions">
+          <button id="reset-yes" class="btn btn-primary" data-i18n="resetYes">Yes, start over</button>
+          <button id="reset-no" class="btn" data-i18n="resetNo">Cancel</button>
+        </div>
+      </div>
+      <p id="reset-done" class="reset-done" role="status" hidden data-i18n="resetDone">Everything starts over.</p>
+    </div>
+  </div>
+
+  <div id="practice-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="practice-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="practice-title"></h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <div class="control-group">
+      <span id="pick-label" class="group-label" data-i18n="pickAnswers">Answers to practise</span>
+      <div id="pick" class="chips" role="group" aria-labelledby="pick-label"></div>
+      <p id="pick-hint" class="pick-hint" data-i18n="pickTwo">Pick at least 2</p>
+    </div>
+    <div id="play-group" class="control-group">
+      <span id="play-label" class="group-label"></span>
+      <div id="play-seg" class="seg" role="group" aria-labelledby="play-label"></div>
+    </div>
+    <button id="practice-start" class="btn btn-primary" data-i18n="start">Start</button>
+  </div>
+
+  <div id="about-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="about-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="about-title" data-i18n="aboutTitle">About the Ear Trainer</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <p class="about-text" data-i18n="aboutBody"></p>
+    <p class="about-small" data-i18n="aboutCredits"></p>
+    <a class="btn patreon-btn" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+    <p class="about-small computer-only" data-i18n="aboutKeys"></p>
+  </div>
+
+  <div id="support-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="support-title" aria-describedby="support-body" style="display:none">
+    <div class="centered-modal support-card">
+      <button class="close-btn support-close" data-i18n-aria="closeAria" aria-label="Close" hidden>×</button>
+      <h2 id="support-title" data-i18n="supportTitle">Support the Ear Trainer</h2>
+      <p id="support-body" data-i18n="supportBody"></p>
+      <a class="btn patreon-btn" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+      <button class="btn support-continue" disabled></button>
+    </div>
+  </div>
+
+  <script type="module" src="ear-trainer.js"></script>
+</body>
+</html>

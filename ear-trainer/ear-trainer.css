@@ -1,0 +1,234 @@
+/* ear-trainer/ear-trainer.css: the Ear Trainer's layout. Page parts (header,
+ * panels, buttons, windows, footer) come from shared/ui/page.css.
+ * Three screens in <main>: #home (tabs, lesson path, cards), #quiz (a
+ * question) and #done (end of a lesson or a game); body[data-screen] says
+ * which one shows. Right and wrong use --color-good / --color-bad, stars
+ * --color-star (shared/ui/themes.css).
+ */
+
+.icons { position: absolute; width: 0; height: 0; overflow: hidden; }
+body { -webkit-user-select: none; user-select: none; }
+.ear { position: relative; width: 100%; max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; justify-content: center; }
+.screen { display: flex; flex-direction: column; gap: 12px; }
+.screen[hidden] { display: none; }
+.flame { color: color-mix(in srgb, var(--color-warn-end) 40%, var(--color-warn-start)); }
+.star { color: var(--color-text-inactive); }
+.star.on { color: var(--color-star); }
+:is(.tab, .step, .answer, .chip, .card-btn, .seg button):focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
+
+/* --- Tabs --- */
+.tabs { display: flex; border: 1px solid var(--border-panel); border-radius: 14px; overflow: hidden; background: var(--color-panel); }
+.tab {
+  flex: 1 1 0; min-width: 0; min-height: 44px; padding: 6px 6px; border: 0; background: transparent; cursor: pointer;
+  font: 700 13px/1.15 var(--font-main); letter-spacing: 0.5px; text-transform: uppercase; color: var(--color-btn-text);
+  touch-action: manipulation; transition: background 0.15s, color 0.15s;
+}
+.tab + .tab { border-left: 1px solid var(--border-panel); }
+.tab[aria-selected="true"] { background: var(--color-left); color: var(--color-text-pinched); }
+
+/* --- Lesson path: numbered circles, 4 per row --- */
+.home-panel { display: flex; flex-direction: column; gap: 10px; }
+.small-head { margin: 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.path { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px 6px; justify-items: center; }
+.step {
+  display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 2px; border: 0; background: none;
+  font-family: var(--font-main); color: var(--color-text); cursor: pointer; touch-action: manipulation;
+}
+.step-circle {
+  box-sizing: border-box; width: clamp(40px, 6.2dvh, 54px); height: clamp(40px, 6.2dvh, 54px); border-radius: 50%;
+  display: grid; place-items: center; font-size: 17px; font-weight: 900; line-height: 1;
+  border: 2px solid var(--border-panel); background: var(--color-panel); color: var(--color-btn-text);
+  transition: transform 0.15s, background 0.15s;
+}
+.step.done .step-circle { background: var(--color-left); border-color: var(--color-left); color: var(--color-text-pinched); }
+.step.next .step-circle { border-color: var(--color-right); color: var(--color-right); animation: glow 1.8s ease-in-out infinite; }
+.step.locked .step-circle { border-style: dashed; color: var(--color-text-inactive); }
+.step.locked .step-circle svg { width: 16px; height: 16px; }
+.step[aria-pressed="true"] .step-circle { outline: 3px solid var(--color-right); outline-offset: 2px; transform: scale(1.06); }
+.step-stars { display: flex; height: 12px; }
+.step-stars .star { width: 12px; height: 12px; }
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50% { box-shadow: 0 0 16px 2px color-mix(in srgb, var(--color-right) 65%, transparent); }
+}
+
+.lesson-info { display: flex; flex-direction: column; gap: 8px; }
+.lesson-name { margin: 0; min-height: 2.6em; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0 0.4em; text-align: center; font-size: 15px; line-height: 1.3; }
+.lesson-num { color: var(--color-right); font-weight: 900; }
+.start-btn { min-height: 52px; font-size: 18px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-icon { width: 18px; height: 18px; }
+
+/* --- The game and free practice --- */
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.card-btn {
+  display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 64px; padding: 10px 12px; text-align: left;
+  border-radius: 16px; border: 1px solid var(--border-panel); background: var(--color-panel); color: var(--color-btn-text);
+  font-family: var(--font-main); cursor: pointer; touch-action: manipulation; transition: background 0.15s, color 0.15s, transform 0.08s;
+}
+.card-btn:active { transform: scale(0.97); }
+.card-icon { flex: none; width: 30px; height: 30px; }
+.card-icon:not(.flame) { color: var(--color-right); }
+.card-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.card-title { font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.15; }
+.card-sub { font-size: 12px; font-weight: 700; line-height: 1.2; color: color-mix(in srgb, var(--color-btn-text) 75%, transparent); }
+
+/* --- Question screen --- */
+.quiz-top { display: flex; align-items: center; gap: 12px; min-height: 44px; }
+.back-btn svg { width: 20px; height: 20px; }
+.progress, .lives, .tally { flex: 1; }
+.progress { display: flex; align-items: center; gap: 10px; }
+.progress[hidden], .lives[hidden], .score[hidden], .tally[hidden] { display: none; }
+.bar { flex: 1; height: 14px; box-sizing: border-box; border-radius: 7px; border: 1px solid var(--border-panel); background: var(--color-panel); overflow: hidden; }
+.bar-fill { height: 100%; width: 0; border-radius: inherit; background: var(--color-good); transition: width 0.35s cubic-bezier(0.3, 1.4, 0.6, 1); }
+.bar-text { min-width: 4.5ch; text-align: right; font-size: 14px; font-weight: 900; }
+.lives { display: flex; gap: 4px; }
+.heart { width: 26px; height: 26px; color: var(--color-bad); transition: color 0.3s, opacity 0.3s; }
+.heart.lost { color: var(--color-text-inactive); opacity: 0.5; }
+.score { display: flex; align-items: center; gap: 4px; font-size: 22px; font-weight: 900; }
+.score .flame { width: 26px; height: 26px; }
+.tally { text-align: right; font-size: 14px; font-weight: 700; }
+
+.quiz-panel { display: flex; flex-direction: column; gap: 12px; }
+.prompt { margin: 0; text-align: center; font-size: 18px; font-weight: 700; line-height: 1.25; }
+.hear-btn { min-height: clamp(56px, 9dvh, 76px); font-size: 18px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.hear-btn svg { width: 22px; height: 22px; flex: none; }
+.hear-btn.playing { border-color: var(--color-right); box-shadow: 0 0 0 2px var(--color-right), 0 0 22px color-mix(in srgb, var(--color-right) 50%, transparent); }
+.loading { margin: -4px 0 0; text-align: center; font-size: 13px; font-weight: 700; }
+.loading[hidden] { display: none; }
+
+.answers { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 8px; }
+.answer {
+  position: relative; min-width: 0; min-height: 48px; padding: 6px 8px; border-radius: 12px;
+  border: 1px solid var(--border-panel); background: var(--color-panel); color: var(--color-btn-text);
+  font: 700 15px/1.15 var(--font-main); cursor: pointer; touch-action: manipulation; overflow-wrap: anywhere;
+  transition: background 0.15s, color 0.15s, opacity 0.2s, box-shadow 0.15s;
+}
+.answers[data-ex="degrees"] .answer { min-height: 54px; padding: 4px; font-size: 22px; font-weight: 900; }
+.answer:active:not(.after) { transform: scale(0.96); }
+.answer.after { cursor: default; }
+.answer.after:not(.good):not(.bad) { opacity: 0.45; }
+.answer.good { background: var(--color-good); border-color: var(--color-good); color: var(--color-good-text); }
+.answer.bad { background: var(--color-bad); border-color: var(--color-bad); color: var(--color-bad-text); }
+body[data-theme="bw"] .answer.bad .answer-name { text-decoration: line-through; }
+.answer.sounding { box-shadow: 0 0 0 3px var(--color-right), 0 0 16px var(--color-right); }
+.answer.fresh::after {
+  content: ''; position: absolute; top: -5px; right: -5px; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--color-star); box-shadow: 0 0 8px var(--color-star);
+}
+.answer-mark svg { width: 15px; height: 15px; margin-right: 4px; vertical-align: -2px; }
+.answers[data-ex="degrees"] .answer-mark svg { width: 13px; height: 13px; margin-right: 2px; vertical-align: 2px; }
+.answer-key { position: absolute; top: 3px; left: 6px; font-size: 10px; opacity: 0.6; }
+.answers[data-ex="degrees"] .answer-key { font-size: 9px; }
+
+.feedback { min-height: 76px; display: flex; flex-direction: column; justify-content: center; gap: 3px; text-align: center; }
+.feedback p { margin: 0; line-height: 1.3; }
+.fb-main { min-height: 1.3em; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 18px; font-weight: 900; }
+.fb-main.good { color: var(--color-good); }
+.fb-main.bad { color: var(--color-bad); }
+.fb-icon { width: 20px; height: 20px; flex: none; }
+.fb-main:not(.good):not(.bad) .fb-icon { color: var(--color-star); }
+.fb-detail { font-size: 14px; }
+.fb-detail strong { color: var(--color-right); }
+.fb-notes { min-height: 1.3em; font-size: 13px; letter-spacing: 1px; color: color-mix(in srgb, var(--color-text) 75%, transparent); }
+.quiz-actions { display: flex; gap: 10px; }
+.quiz-actions .btn { flex: 1; }
+/* Hidden buttons keep their room, so nothing jumps when they appear. */
+.quiz-actions .btn[hidden] { display: block; visibility: hidden; }
+
+/* --- End of a lesson or a game --- */
+.done-panel { display: flex; flex-direction: column; align-items: center; gap: 12px; padding-top: 26px; padding-bottom: 22px; text-align: center; }
+.done-stars { display: flex; align-items: flex-end; gap: 8px; }
+.done-stars[hidden], .done-score[hidden] { display: none; }
+.done-stars .star { width: 54px; height: 54px; animation: star-in 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) backwards; }
+.done-stars .star:nth-child(2) { width: 66px; height: 66px; margin-bottom: 8px; animation-delay: 0.15s; }
+.done-stars .star:nth-child(3) { animation-delay: 0.3s; }
+@keyframes star-in { from { transform: scale(0) rotate(-40deg); opacity: 0; } }
+.done-score { display: flex; align-items: center; gap: 6px; font-size: 64px; font-weight: 900; line-height: 1; }
+.done-score .flame { width: 56px; height: 56px; }
+.done-title { margin: 0; font-size: 22px; color: var(--color-left); text-transform: uppercase; letter-spacing: 1px; }
+.done-text { margin: 0; font-size: 15px; line-height: 1.5; }
+.done-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 360px; }
+.done-actions .btn[hidden] { display: none; }
+
+/* Sparkles when a lesson ends or a best is beaten (ear-trainer.js burst()). */
+.burst { position: absolute; left: 50%; top: 28%; width: 0; height: 0; pointer-events: none; z-index: 20; }
+.burst span { position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; border-radius: 50%; background: var(--c); animation: spark 1.1s ease-out forwards; }
+@keyframes spark { from { transform: translate(0, 0) scale(1); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(0.3); opacity: 0; } }
+
+.pop { animation: pop 0.3s ease-out; }
+@keyframes pop { 40% { transform: scale(1.08); } }
+.shake { animation: shake 0.35s ease-in-out; }
+@keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+/* --- Windows: segmented choices, the practice chips, starting over --- */
+.group-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.seg { display: flex; border: 1px solid var(--border-panel); border-radius: 12px; overflow: hidden; }
+.seg button {
+  flex: 1 1 0; min-width: 0; min-height: 42px; padding: 0 8px; border: 0; background: var(--color-panel); color: var(--color-btn-text); cursor: pointer;
+  font: 700 13px/1.1 var(--font-main); letter-spacing: 0.5px; text-transform: uppercase; touch-action: manipulation; transition: background 0.15s, color 0.15s;
+}
+.seg button + button { border-left: 1px solid var(--border-panel); }
+.seg button[aria-pressed="true"] { background: var(--color-left); color: var(--color-text-pinched); }
+#practice-modal .seg button { padding: 0 4px; font-size: 12px; letter-spacing: 0; }
+.chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.chips[data-ex="degrees"] { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.chip {
+  min-width: 0; min-height: 40px; padding: 4px 6px; border-radius: 10px; border: 1px solid var(--border-panel);
+  background: var(--color-panel); color: var(--color-btn-text); font: 700 13px/1.15 var(--font-main); cursor: pointer;
+  touch-action: manipulation; overflow-wrap: anywhere; transition: background 0.15s, color 0.15s;
+}
+.chips[data-ex="degrees"] .chip { font-size: 18px; font-weight: 900; padding: 4px 0; }
+.chip[aria-pressed="true"] { background: var(--color-left); border-color: var(--color-left); color: var(--color-text-pinched); }
+.pick-hint { margin: 0; font-size: 12px; opacity: 0.75; }
+.pick-hint.warn { color: var(--color-bad); font-weight: 700; opacity: 1; }
+#practice-start { min-height: 52px; font-size: 18px; }
+.reset-group { padding-top: 4px; border-top: 1px solid color-mix(in srgb, var(--border-panel) 50%, transparent); }
+.reset-group > .btn { font-size: 14px; }
+.reset-ask { display: flex; flex-direction: column; gap: 8px; }
+.reset-ask[hidden], .reset-done[hidden] { display: none; }
+.reset-ask p, .reset-done { margin: 0; font-size: 14px; line-height: 1.4; }
+.reset-actions { display: flex; gap: 8px; }
+.reset-actions .btn { flex: 1; min-height: 44px; padding: 8px; font-size: 13px; }
+
+@media (hover: hover) and (pointer: fine) {
+  :is(.tab, .card-btn, .chip, .seg button):hover:not([aria-selected="true"]):not([aria-pressed="true"]) { background: var(--border-panel); color: var(--color-text-pinched); }
+  .answer:not(.after):hover { background: var(--border-panel); color: var(--color-text-pinched); }
+  .step:not(.locked):hover .step-circle { transform: scale(1.06); }
+}
+@media (min-width: 700px) {
+  .answers { grid-template-columns: repeat(var(--cols-wide, 3), minmax(0, 1fr)); }
+  .chips[data-ex="chords"], .chips[data-ex="intervals"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* Retro CRT's VT323 is small for its size: a little bigger. */
+body[data-theme="retro"] :is(.tab, .seg button, .chip) { font-size: 17px; }
+body[data-theme="retro"] .answer { font-size: 19px; }
+body[data-theme="retro"] :is(.lesson-name, .fb-detail, .done-text) { font-size: 18px; }
+body[data-theme="retro"] .card-title { font-size: 18px; }
+body[data-theme="retro"] .card-sub { font-size: 16px; }
+body[data-theme="pink"] :is(.tabs, .seg) { border-radius: 999px; }
+body[data-theme="pink"] :is(.answer, .chip, .card-btn) { border-radius: 18px; }
+body[data-theme="bw"] :is(.tabs, .seg, .answer, .chip, .card-btn, .bar) { border-radius: 0; }
+
+/* Phones: everything on one screen; line heights pinned (Baloo 2 has tall ones). */
+@media (max-width: 600px) {
+  .ear { justify-content: flex-start; }
+  .screen { gap: 10px; }
+  .home-panel, .quiz-panel { gap: 8px; }
+  .tab { font-size: 12px; letter-spacing: 0; line-height: 1.1; }
+  .prompt { font-size: 17px; line-height: 1.2; }
+  .hear-btn { min-height: clamp(50px, 8dvh, 68px); }
+  .answer { min-height: 46px; font-size: 14px; line-height: 1.1; }
+  .feedback { min-height: 68px; }
+  .fb-main { font-size: 17px; }
+  .fb-detail { font-size: 13px; line-height: 1.25; }
+  .card-btn { min-height: 58px; padding: 8px 10px; gap: 8px; }
+  .card-icon { width: 26px; height: 26px; }
+  .card-title { font-size: 13px; line-height: 1.1; }
+  .card-sub { font-size: 11px; line-height: 1.15; }
+  .lesson-name { font-size: 14px; line-height: 1.25; }
+  .start-btn { min-height: 48px; }
+  body[data-theme="retro"] .tab { font-size: 15px; }
+  body[data-theme="retro"] .answer { font-size: 17px; }
+  body[data-theme="retro"] :is(.lesson-name, .fb-detail) { font-size: 16px; }
+}

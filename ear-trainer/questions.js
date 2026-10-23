@@ -190,10 +190,9 @@ export function compareEvents(q, yours) {
     mine = chordEvents(CHORD_IV[yours].map((i) => q.root + i), q.play);
     right = q.events;
   } else {
-    // Home chord, then the note; your step played where it is nearest the right one.
+    // Home chord, then the note; your step in the question's range, nearest the right one.
     const target = q.notes[0];
-    const places = degreePlaces(q.root, yours, 'wide').concat(degreePlaces(q.root, yours, q.range));
-    const place = places.reduce((best, m) => (Math.abs(m - target) < Math.abs(best - target) ? m : best));
+    const place = degreePlaces(q.root, yours, q.range).reduce((best, m) => (Math.abs(m - target) < Math.abs(best - target) ? m : best));
     const withHome = (m) => [{ at: 0, notes: homeChord(q.root), dur: 0.8 }, { at: 1.0, notes: [m], dur: 1.3 }];
     mine = withHome(place);
     right = withHome(target);

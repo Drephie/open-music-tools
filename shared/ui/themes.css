@@ -134,8 +134,8 @@ body[data-theme="bw"] {
   --bg-page: #000000;
   --color-good: #ffffff;
   --color-good-text: #000000;
-  --color-bad: #666666;
-  --color-bad-text: #ffffff;
+  --color-bad: #9a9a9a;
+  --color-bad-text: #000000;
   --color-star: #ffffff;
   --key-white: #ffffff;
   --key-white-text: #000000;

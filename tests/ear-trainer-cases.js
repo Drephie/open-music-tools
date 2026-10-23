@@ -129,10 +129,10 @@ export function checkQuestions(q, theory) {
   rows.push(rep);
 
   // --- Compare ---
-  const cmp = section('compare: your answer on the same start, then the right one');
+  const cmp = section('compare: your answer on the same start (and range), then the right one');
   for (const ex of q.EXERCISES) {
-    const opts = { answers: q.ANSWERS[ex], play: ex === 'intervals' ? 'mixed' : ex === 'chords' ? 'mixed' : null, range: 'wide' };
     for (let k = 0; k < 300; k++) {
+      const opts = { answers: q.ANSWERS[ex], play: ex === 'intervals' ? 'mixed' : ex === 'chords' ? 'mixed' : null, range: ['octave', 'top', 'wide'][k % 3] };
       const qn = q.makeQuestion(ex, opts, { random });
       const yours = q.ANSWERS[ex][Math.floor(random() * q.ANSWERS[ex].length)];
       const ev = q.compareEvents(qn, yours);
@@ -149,8 +149,11 @@ export function checkQuestions(q, theory) {
         const named = theory.nameNotes(notes);
         ok = ok && named.kind === 'chord' && named.form.id === yours && notes[0] === qn.root;
       } else {
-        const myNote = mine[1].notes[0], rightNote = right[1].notes[0];
-        ok = ok && pc(myNote - qn.root) === MAJOR[yours - 1] && rightNote === qn.notes[0]
+        const myNote = mine[1].notes[0], rightNote = right[1].notes[0], T = qn.root;
+        // Your note stays in the question's range (lesson 1 never plays below home).
+        const inRange = qn.range === 'top' ? (yours === 1 ? myNote === T + 12 : myNote > T && myNote < T + 12)
+          : qn.range === 'wide' ? myNote >= T - 7 && myNote <= T + 12 : myNote >= T && myNote < T + 12;
+        ok = ok && pc(myNote - T) === MAJOR[yours - 1] && inRange && rightNote === qn.notes[0]
           && JSON.stringify(mine[0].notes) === JSON.stringify([qn.root - 12, qn.root, qn.root + 4, qn.root + 7]);
       }
       cmp.check(ok, () => `${ex}: question ${qn.answer} ${qn.play || qn.range} ${qn.notes}, yours ${yours}: ${JSON.stringify(ev)}`);
