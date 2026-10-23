@@ -1,6 +1,6 @@
 # Roadmap
 
-**Status (2026-10-23):** Phase 0 and the Phase 1 engine split are done: `shared/` holds theory, sound, transport and ui, and Choordination runs on them. After Drephie's hand test, Choordination lost the YOLO sign and the loop station, and gained smooth chords (Chord Style setting), a "Record my voice" switch and a headphones tip. Phase 2 has started: the **Metronome** is built (`metronome/`, spec in `specs/metronome.md`) and waits for Drephie's listening check. Next: Drephie listens to the Metronome and the Choordination changes, then the next Phase 2 tool (or the remaining Choordination changes below).
+**Status (2026-10-23):** Phase 0 and the Phase 1 engine split are done: `shared/` holds theory, sound, transport and ui, and Choordination runs on them. After Drephie's hand test, Choordination lost the YOLO sign and the loop station, and gained smooth chords (Chord Style setting), a "Record my voice" switch and a headphones tip. Phase 2 has started: the **Metronome** is done (`metronome/`, spec in `specs/metronome.md`); Drephie tested it on a phone: it works with the silent switch on, fits the screen, and the volume curve sounds right. Next: Drephie listens to the Choordination changes, then the next Phase 2 tool (or the remaining Choordination changes below).
 
 ## Tools in scope
 
@@ -8,7 +8,7 @@
 |---|---|---|
 | **Choordination** | Hand-tracking chord instrument (exists; changes pending) | theory, sound, transport |
 | **Digital Piano** | Touch-first piano with good sound that names the chord you play; MIDI keyboard input | theory, sound |
-| **Metronome** | Metronome and tap tempo (built 2026-10-23; spec `specs/metronome.md`) | transport |
+| **Metronome** | Metronome and tap tempo (done 2026-10-23; spec `specs/metronome.md`) | transport |
 | **Tuner** | Chromatic tuner | pitch |
 | **Pitch Detector** | One voice: the live note plus a pitch-over-time graph for lessons | pitch |
 | **Pitch Training** | Singing exercises (scales and more) scored live; teachers make exercises and share them by link | pitch, theory, transport |
@@ -47,7 +47,7 @@ Each module starts with a header comment describing its API: read that, not the 
 
 0. **Setup (done):** hub repo, Choordination copied in, install paths fixed, Salamander credit, CLAUDE.md, this file.
 1. **Engines (done 2026-10-23):** split Choordination into `shared/` (theory, sound, transport, ui) with one service worker. Choordination behaves exactly as before. Theory tests are in `tests/theory.html`. **Next: the Choordination changes.**
-2. **Tools on existing engines:** Metronome (built 2026-10-23, waiting for Drephie's listening check), Digital Piano, Ear Trainer, hub landing page, then the first public launch.
+2. **Tools on existing engines:** Metronome (done 2026-10-23; Spanish and Italian wording still to be checked by Drephie), Digital Piano, Ear Trainer, hub landing page, then the first public launch.
 3. **Pitch:** pitch engine, then Tuner, Pitch Detector and Pitch Training.
 4. **Analysis:** an Essentia.js trial on the test songs, then BPM Finder, Practice Player and Chord Finder.
 5. **Jam Machine.**
