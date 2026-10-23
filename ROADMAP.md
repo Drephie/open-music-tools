@@ -1,6 +1,6 @@
 # Roadmap
 
-**Status (2026-10-23):** Phase 0 and the Phase 1 engine split are done: `shared/` holds theory, sound, transport and ui, and Choordination runs on them unchanged. Next: the Choordination changes Drephie picks (list below), then Phase 2.
+**Status (2026-10-23):** Phase 0 and the Phase 1 engine split are done: `shared/` holds theory, sound, transport and ui, and Choordination runs on them. After Drephie's hand test, Choordination lost the YOLO sign and the loop station and gained a headphones tip for recording. Next: the Choordination changes Drephie picks (list below), then Phase 2.
 
 ## Tools in scope
 
@@ -36,9 +36,9 @@ Each module starts with a header comment describing its API: read that, not the 
 
 - `theory.js` (done): note spelling, keys, chords, chord naming. Pure functions; tested by `tests/theory.html`.
 - `sound.js` (done): the instrument rack (Salamander piano, e-piano, synth, pad, organ, harp), effects chain, master volume, 20 ms look-ahead.
-- `transport.js` (done): metronome clicks and loop, count-in, tap tempo, BPM clamp. Choordination's event looper stays in Choordination.
+- `transport.js` (done): metronome clicks and loop, count-in, tap tempo, BPM clamp. Built for the Metronome tool; Choordination no longer uses it.
 - `ui/` (done): `themes.css` (the five themes' variables), `i18n.js` (`t`, interpolation, `data-i18n`), `strings.js` (hub-wide strings), `select.js`/`select.css` (custom dropdowns), `modal.js` (dialogs).
-- `offline.js` (done): registers the hub's one service worker, `/sw.js` at the root.
+- `offline.js` (done): registers the hub's one service worker, `/sw.js` at the root. Offline and install are designed at the end for the whole suite (Phase 6); until then this worker stays as it is. It fetches our own files from the network first, so it never serves stale code during development.
 - Still to build when the first new tool needs them: a shared header, About window and support links. In Choordination they are markup tied to its stage, so they did not extract cleanly.
 - `pitch.js`: new; microphone to note, running in an AudioWorklet
 - `analysis.js`: new; wraps Essentia.js for key, BPM, beats and chords
@@ -51,15 +51,19 @@ Each module starts with a header comment describing its API: read that, not the 
 3. **Pitch:** pitch engine, then Tuner, Pitch Detector and Pitch Training.
 4. **Analysis:** an Essentia.js trial on the test songs, then BPM Finder, Practice Player and Chord Finder.
 5. **Jam Machine.**
+6. **Offline and install for the whole suite** (last): what works offline, one install or one per tool, update flow. Drephie tests install and offline in real Chrome then.
 
 After Phase 1, phases 2 to 5 don't depend on each other.
 
 ## Choordination change candidates (Drephie picks)
 
+Removed after Drephie's hand test (2026-10-23): the YOLO sign (didn't work) and the loop station (too complicated, not useful). Don't bring them back without asking.
+
 - Smooth voice leading (closest inversion) instead of always playing root position
 - m7♭5 as its own modifier; 11ths and 13ths; slash chords and bass notes
 - Web MIDI output to control a DAW
 - Fix (existed before Phase 1): on a phone held upright, the welcome screen's footer links overlap and the CHOORDINATION watermark is cut off
+- Voice in recordings in keyboard and touch modes: today the microphone is only requested together with the camera, so those modes record the instruments only
 - Drephie's own list
 
 ## Open decisions
