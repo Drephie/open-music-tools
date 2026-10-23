@@ -97,6 +97,11 @@ function ensureAudio() {
     loadRack();
   }
 }
+// Browsers allow sound only after a tap, and for a finger they count the
+// lift, not the touch: keys play on touch-down, so the first lift (anywhere)
+// unlocks the sound too. A note struck before that sounds when it unlocks.
+const unlockAudio = () => { if (Tone.context.state !== 'running') startAudio(); };
+['pointerup', 'touchend', 'click', 'keydown'].forEach((ev) => window.addEventListener(ev, unlockAudio, true));
 
 // What is sounding: midi -> { inst, drone, timer }. Keys held down count per
 // source (each finger, mouse and computer key), so two fingers on one key
