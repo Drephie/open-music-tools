@@ -48,8 +48,33 @@
  *   closeVoicings(pcs, lo, hi), voicingDistance(a, b)  the building blocks
  *     (9ths fold into the octave: a first Cadd9 is voiced E3 G3 C4 D4)
  *
+ * Naming what is played (the Piano)
+ *   nameNotes(midiNotes, solfege) -> null for no notes, else
+ *     { kind, notes, ... }  notes: [{ midi, name, acc, octave }] low to high,
+ *     duplicates removed, spelled for what was found (octave as in C4 = MIDI 60,
+ *     counted on the letter: MIDI 60 spelled B# is B#3).
+ *     kind 'note'      one note, sharp spelling; enharmonic: its flat name
+ *                      for a black key ('Db'), else null
+ *     kind 'interval'  two pitch classes (or one in several octaves);
+ *                      interval: semitones 1..11 from the lowest note up
+ *                      (12 = octaves). The upper note is spelled as the
+ *                      interval reads (C-Ab is a minor 6th).
+ *     kind 'chord'     form: the CHORD_FORMS entry; root ('C'); bass: the
+ *                      lowest note when it isn't the root (C/E), else null;
+ *                      name ('Cmaj7', 'C/E', 'La m7' in solfege); alts: up to
+ *                      4 other names for the same notes ('Am7/C' for C6)
+ *     kind 'none'      no chord shape fits (or more than 7 pitch classes)
+ *     Spelling: of the root's possible letters, the one that gives the fewest
+ *     sharps and flats wins; ties go to the key signature (major, or minor
+ *     for shapes with a minor third): C#m, Ebm, Db, F#, Bb7, Db7 (Cb).
+ *     A root position chord wins over a slash chord, then the earlier shape.
+ *   CHORD_FORMS  [{ id, intervals, suffix, letters }] about 40 shapes, in
+ *                preference order (Diapason's list, Drephie's prototype)
+ *   INTERVAL_SHORT  ['P8', 'm2', 'M2', ... 'M7', 'P8'] by semitones 0..12
+ *
  * Tests: tests/theory.html checks getChordInfo against a snapshot of the
- * original Choordination code, and voiceChord against known answers.
+ * original Choordination code, voiceChord against known answers, and
+ * nameNotes against known chords (tests/naming-cases.js).
  */
 
 // --- NOTE SPELLING (key-signature aware) ---
@@ -300,4 +325,114 @@ export function voiceChord(info, { prevUpper = null, tonicMidi = MIDI_BASE } = {
     bass,
     upper: best,
   };
+}
+
+// --- NAMING WHAT IS PLAYED (the Piano) ---
+
+// Chord shapes in order of preference: Diapason's list (Drephie's piano
+// prototype) plus a few. `letters` spells an interval on another letter than
+// the stacked-thirds default (ivLetterOffset): the ♯9 of 7♯9 is a 2nd.
+const form = (id, intervals, suffix, letters = {}) => ({ id, intervals, suffix, letters });
+export const CHORD_FORMS = [
+  form('maj', [0, 4, 7], ''), form('min', [0, 3, 7], 'm'),
+  form('7', [0, 4, 7, 10], '7'), form('maj7', [0, 4, 7, 11], 'maj7'), form('m7', [0, 3, 7, 10], 'm7'),
+  form('dim', [0, 3, 6], 'dim'), form('aug', [0, 4, 8], 'aug'),
+  form('sus4', [0, 5, 7], 'sus4'), form('sus2', [0, 2, 7], 'sus2'),
+  form('6', [0, 4, 7, 9], '6'), form('m6', [0, 3, 7, 9], 'm6'),
+  form('m7b5', [0, 3, 6, 10], 'm7♭5'), form('dim7', [0, 3, 6, 9], 'dim7'),
+  form('mMaj7', [0, 3, 7, 11], 'm(maj7)'), form('7sus4', [0, 5, 7, 10], '7sus4'),
+  form('7#5', [0, 4, 8, 10], '7♯5'), form('7b5', [0, 4, 6, 10], '7♭5'), form('maj7#5', [0, 4, 8, 11], 'maj7♯5'),
+  form('add9', [0, 2, 4, 7], 'add9'), form('madd9', [0, 2, 3, 7], 'm(add9)'),
+  form('maj9', [0, 2, 4, 7, 11], 'maj9'), form('9', [0, 2, 4, 7, 10], '9'), form('m9', [0, 2, 3, 7, 10], 'm9'),
+  form('6/9', [0, 2, 4, 7, 9], '6/9'), form('m6/9', [0, 2, 3, 7, 9], 'm6/9'), form('9sus4', [0, 2, 5, 7, 10], '9sus4'),
+  form('7b9', [0, 1, 4, 7, 10], '7♭9'), form('7#9', [0, 3, 4, 7, 10], '7♯9', { 3: 1 }),
+  form('7#11', [0, 4, 6, 7, 10], '7♯11', { 6: 3 }), form('7b13', [0, 4, 7, 8, 10], '7♭13', { 8: 5 }),
+  form('m11', [0, 2, 3, 5, 7, 10], 'm11'), form('m11no9', [0, 3, 5, 7, 10], 'm11'),
+  form('11', [0, 2, 4, 5, 7, 10], '11'), form('13', [0, 2, 4, 7, 9, 10], '13'), form('maj13', [0, 2, 4, 7, 9, 11], 'maj13'),
+  form('m7b9', [0, 1, 3, 7, 10], 'm7♭9'), form('sus2sus4', [0, 2, 5, 7], 'sus2sus4'),
+  form('7no5', [0, 4, 10], '7(no5)'), form('m7no5', [0, 3, 10], 'm7(no5)'), form('maj7no5', [0, 4, 11], 'maj7(no5)'),
+  form('7no3', [0, 7, 10], '7(no3)'),
+];
+const FORM_BY_SET = new Map(CHORD_FORMS.map((f, rank) => [f.intervals.join(','), { form: f, rank }]));
+
+// Interval names read the upper note as the 2nd, 3rd... letter above the bass
+// (a minor 6th is C-A♭, where a chord's ♯5 would be C-G♯).
+const INTERVAL_LETTER = [0, 1, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6];
+export const INTERVAL_SHORT = ['P8', 'm2', 'M2', 'm3', 'M3', 'P4', 'TT', 'P5', 'm6', 'M6', 'm7', 'M7', 'P8'];
+const IS_BLACK = [0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0];
+
+// A MIDI note spelled on a letter; octave as in C4 = MIDI 60, counted on the
+// letter (MIDI 60 spelled B# is B#3).
+function spellMidi(midi, letterIdx, solfege) {
+  const li = ((letterIdx % 7) + 7) % 7;
+  let acc = pc(pc(midi) - LETTER_PC[li]);
+  if (acc > 6) acc -= 12;
+  return { midi, name: spellOnLetter(li, pc(midi), solfege), acc, octave: Math.floor((midi - acc) / 12) - 1 };
+}
+
+// Spells notes around a root: tries each letter the root can be written on
+// (one for a white key, two for a black key) and keeps the spelling with the
+// fewest sharps and flats; a tie goes to the key-signature spelling (major,
+// or minor when the shape has a minor third and no major one).
+function spellAround(rootPc, midis, letterOf, minorish, solfege) {
+  const letters = [];
+  for (let li = 0; li < 7; li++) {
+    let d = pc(rootPc - LETTER_PC[li]);
+    if (d > 6) d -= 12;
+    if (d === 0 || (IS_BLACK[rootPc] && Math.abs(d) === 1)) letters.push(li);
+  }
+  const sharpRoot = keyUsesSharps(rootPc, minorish ? 'min' : 'maj');
+  let best = null;
+  for (const li of letters) {
+    const notes = midis.map(m => spellMidi(m, li + letterOf(pc(m - rootPc)), solfege));
+    const score = [...new Map(notes.map(n => [pc(n.midi), Math.abs(n.acc)])).values()].reduce((s, a) => s + a, 0);
+    const rootAcc = spellMidi(rootPc, li, false).acc;
+    const tieWin = rootAcc === 0 || (rootAcc > 0) === sharpRoot;
+    if (!best || score < best.score || (score === best.score && tieWin)) best = { score, notes, rootLetter: li };
+  }
+  return best;
+}
+
+export function nameNotes(midiNotes, solfege = false) {
+  const midis = [...new Set(midiNotes)].sort((a, b) => a - b);
+  if (!midis.length) return null;
+  const bassPc = pc(midis[0]);
+  const pcs = [...new Set(midis.map(pc))];
+  const sharpNames = () => midis.map(m => spellMidi(m, pcLetterIdx(pc(m)) - (IS_BLACK[pc(m)] ? 1 : 0), solfege));
+
+  if (pcs.length === 1) {
+    const notes = sharpNames();
+    if (midis.length > 1) return { kind: 'interval', interval: 12, notes };
+    const flat = IS_BLACK[bassPc] ? spellOnLetter(pcLetterIdx(bassPc), bassPc, solfege) : null;
+    return { kind: 'note', notes, enharmonic: flat };
+  }
+  if (pcs.length === 2) {
+    const iv = pc(pcs.find(p => p !== bassPc) - bassPc);
+    const { notes } = spellAround(bassPc, midis, (i) => INTERVAL_LETTER[i], false, solfege);
+    return { kind: 'interval', interval: iv, notes };
+  }
+
+  const hits = [];
+  for (const root of pcs) {
+    const hit = FORM_BY_SET.get(pcs.map(p => pc(p - root)).sort((a, b) => a - b).join(','));
+    if (hit) hits.push({ root, ...hit, slash: root !== bassPc });
+  }
+  if (!hits.length) return { kind: 'none', notes: sharpNames() };
+  hits.sort((a, b) => (a.slash ? 200 : 0) + a.rank - ((b.slash ? 200 : 0) + b.rank));
+
+  const spell = (h) => {
+    const minorish = h.form.intervals.includes(3) && !h.form.intervals.includes(4);
+    const { notes, rootLetter } = spellAround(h.root, midis, (i) => h.form.letters[i] ?? ivLetterOffset(i), minorish, solfege);
+    const root = spellOnLetter(rootLetter, h.root, solfege);
+    const bass = h.slash ? notes[0].name : null;
+    const name = root + (solfege && h.form.suffix ? ' ' : '') + h.form.suffix + (bass ? '/' + bass : '');
+    return { root, bass, name, notes };
+  };
+  const top = spell(hits[0]);
+  const alts = [];
+  for (const h of hits.slice(1)) {
+    const n = spell(h).name;
+    if (n !== top.name && !alts.includes(n) && alts.length < 4) alts.push(n);
+  }
+  return { kind: 'chord', form: hits[0].form, root: top.root, bass: top.bass, name: top.name, alts, notes: top.notes };
 }

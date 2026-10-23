@@ -8,6 +8,7 @@
 import * as theory from '../../shared/theory.js';
 import { buildSnapshot, compareSnapshots } from '../theory-cases.js';
 import { checkVoicing } from '../voicing-cases.js';
+import { checkNaming } from '../naming-cases.js';
 
 const expected = JSON.parse(readFile('tests/fixtures/theory-snapshot.json'));
 const api = {
@@ -32,7 +33,7 @@ for (const row of compareSnapshots(expected, buildSnapshot(api))) {
   row.examples.forEach(e => print('      ' + e));
   if (row.failed) failed++;
 }
-for (const row of checkVoicing(theory)) {
+for (const row of [...checkVoicing(theory), ...checkNaming(theory)]) {
   print(`${row.failed ? 'FAIL' : 'pass'}  ${row.section}: ${row.checked} checked, ${row.failed} failed`);
   row.examples.forEach(e => print('      ' + e));
   if (row.failed) failed++;

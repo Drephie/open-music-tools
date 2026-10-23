@@ -30,6 +30,7 @@
   import * as theory from '../shared/theory.js';
   import { buildSnapshot, compareSnapshots } from './theory-cases.js';
   import { checkVoicing } from './voicing-cases.js';
+  import { checkNaming } from './naming-cases.js';
 
   const rows = document.getElementById('rows');
   const results = [];
@@ -87,7 +88,7 @@
 
     const actual = buildSnapshot(api);
     for (const row of compareSnapshots(expected, actual)) report(`snapshot: ${row.section}`, row.checked, row.failed, row.examples);
-    for (const row of checkVoicing(theory)) report(row.section, row.checked, row.failed, row.examples);
+    for (const row of [...checkVoicing(theory), ...checkNaming(theory)]) report(row.section, row.checked, row.failed, row.examples);
 
     if (toneFreq) {
       const ex = [];
