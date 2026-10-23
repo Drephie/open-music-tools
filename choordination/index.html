@@ -807,6 +807,7 @@
   import { HandLandmarker, FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs";
   // (SRI cannot be applied to ES-module imports without an import map; the file is
   //  cached by sw.js after first load.)
+  import { parseKey, keyRootName, keyChordNames, pickModifiers, getChordInfo as theoryChordInfo } from '../shared/theory.js';
 
   // --- roundRect polyfill (older Safari) ---
   if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
@@ -1359,41 +1360,7 @@
     }
   });
 
-  // --- NOTE SPELLING (key-signature aware) ---
-  // Real-world key names follow the circle of fifths: sharp keys are spelled
-  // with sharps (D, A, E, B, F#; E/B/F#/C#/G# minor) and flat keys with flats
-  // (F, Bb, Eb, Ab, Db; C/D/F/G/Bb/Eb minor). Chord roots use proper letter
-  // stacking so every degree gets a distinct letter (e.g. D major → D E F# G
-  // A B C#, not Gb/Db), and chord tones are spelled from that root.
-  const SHARP_LETTERS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  const FLAT_LETTERS  = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-  const SHARP_SOLFEGE = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
-  const FLAT_SOLFEGE  = ['Do', 'Reb', 'Re', 'Mib', 'Mi', 'Fa', 'Solb', 'Sol', 'Lab', 'La', 'Sib', 'Si'];
-  // Kept for chromatic mode (no key context → conventional flats).
-  const chromaticNotes = FLAT_LETTERS, chromaticSolfeggio = FLAT_SOLFEGE;
-  const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-  const LETTER_PC = [0, 2, 4, 5, 7, 9, 11];
-  const SOLFEGE_OF = { C: 'Do', D: 'Re', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Si' };
-  // Whether each key (by chromatic root 0=C..11=B) is spelled with sharps.
-  const KEY_SHARP = {
-    maj: [false, false, true, false, true, false, true, true, false, true, false, true],
-    min: [false, true, false, false, true, false, true, false, true, true, false, true],
-  };
-  const keyUsesSharps = (rootIdx, type) => KEY_SHARP[type][rootIdx];
-  const keyRootName = (rootIdx, type, solfege) =>
-    (keyUsesSharps(rootIdx, type) ? (solfege ? SHARP_SOLFEGE : SHARP_LETTERS) : (solfege ? FLAT_SOLFEGE : FLAT_LETTERS))[rootIdx];
-
-  function accSym(acc) { return acc === 0 ? '' : acc > 0 ? '#'.repeat(acc) : 'b'.repeat(-acc); }
-  // Spell a pitch class onto a specific letter (index 0..6), choosing the
-  // accidental that turns that letter into the target pitch.
-  function spellOnLetter(letterIdx, targetPc, solfege) {
-    letterIdx = ((letterIdx % 7) + 7) % 7;
-    let acc = (((targetPc - LETTER_PC[letterIdx]) % 12) + 12) % 12;
-    if (acc > 6) acc -= 12;
-    return (solfege ? SOLFEGE_OF[LETTERS[letterIdx]] : LETTERS[letterIdx]) + accSym(acc);
-  }
-  const tonicLetterIdx = (rootIdx, type) => LETTERS.indexOf(keyRootName(rootIdx, type, false)[0]);
-
+  // --- KEY MENU (note spelling and chord theory live in shared/theory.js) ---
   function buildKeyOptions() {
     const prev = modeSelector.value || '0_maj';
     const solfege = notationSelector.value === 'solfeggio';
@@ -1514,14 +1481,6 @@
   }
 
   // --- MUSIC THEORY / STATE ---
-  const midiBase = 48; // C3
-  const majorScaleSteps = [0, 2, 4, 5, 7, 9, 11];
-  const minorScaleSteps = [0, 2, 3, 5, 7, 8, 10];
-  const diatonicQualities = {
-    maj: ['Major', 'Minor', 'Minor', 'Major', 'Major', 'Minor', 'Dim'],
-    min: ['Minor', 'Dim', 'Major', 'Minor', 'Minor', 'Major', 'Major']
-  };
-
   let leftChordNames = [];
   let currentKeyRootIdx = 0;
   let isChromatic = false;
@@ -1564,137 +1523,28 @@
 
   function updateKeyContext() {
     const solfege = notationSelector.value === 'solfeggio';
-    const val = modeSelector.value;
-    if (val === 'chromatic') {
-      isChromatic = true;
-      leftChordNames = (solfege ? chromaticSolfeggio : chromaticNotes).slice();
-    } else {
-      isChromatic = false;
-      const parts = val.split('_');
-      currentKeyRootIdx = parseInt(parts[0], 10);
-      currentScaleType = parts[1];
-      const scaleSteps = currentScaleType === 'maj' ? majorScaleSteps : minorScaleSteps;
-      const qualities = diatonicQualities[currentScaleType];
-      const tonicLet = tonicLetterIdx(currentKeyRootIdx, currentScaleType);
-      leftChordNames = scaleSteps.map((step, idx) => {
-        // Each degree walks one letter further, so every chord root is spelled
-        // with a distinct letter and the correct accidental for this key.
-        const rootNote = spellOnLetter(tonicLet + idx, (currentKeyRootIdx + step) % 12, solfege);
-        const quality = qualities[idx];
-        if (quality === 'Minor') return rootNote + 'm';
-        if (quality === 'Dim') return rootNote + 'dim';
-        return rootNote;
-      });
+    const key = parseKey(modeSelector.value);
+    isChromatic = key.chromatic;
+    if (!key.chromatic) {
+      currentKeyRootIdx = key.rootIdx;
+      currentScaleType = key.scaleType;
     }
+    leftChordNames = keyChordNames(key, solfege);
     if (activeNoteIdx >= leftChordNames.length) activeNoteIdx = 0;
     updateModifiersList();
   }
 
-  function modifierIntervals(mod, baseThird, baseFifth, baseSeventh) {
-    switch (mod) {
-      case 'Triad': return [0, baseThird, baseFifth];
-      case 'Maj': return [0, 4, 7];
-      case 'Min': return [0, 3, 7];
-      case 'Dim': return [0, 3, 6];
-      case 'Aug': return [0, 4, 8];
-      case '7th': return [0, baseThird, baseFifth, baseSeventh];
-      case 'Maj7': return [0, 4, 7, 11];
-      case 'Min7': return [0, 3, 7, 10];
-      case 'Dom7': return [0, 4, 7, 10];
-      case 'Dim7': return [0, 3, 6, 9];
-      case 'Sus2': return [0, 2, 7];
-      case 'Sus4': return [0, 5, 7];
-      case '6': return [0, 4, 7, 9];
-      case 'Add9': return [0, baseThird, baseFifth, 14];
-      case 'Maj9': return [0, 4, 7, 11, 14];
-      case 'Min9': return [0, 3, 7, 10, 14];
-      default: return [0, baseThird, baseFifth];
-    }
-  }
-  function modifierSuffix(mod, baseThird, baseFifth, baseSeventh) {
-    switch (mod) {
-      case 'Triad': if (baseThird === 3 && baseFifth === 6) return 'dim'; return baseThird === 3 ? 'm' : '';
-      case 'Maj': return '';
-      case 'Min': return 'm';
-      case 'Dim': return 'dim';
-      case 'Aug': return 'aug';
-      case '7th':
-        if (baseThird === 4 && baseSeventh === 11) return 'maj7';
-        if (baseThird === 3 && baseFifth === 6) return 'm7♭5';
-        return baseThird === 3 ? 'm7' : '7';
-      case 'Maj7': return 'maj7';
-      case 'Min7': return 'm7';
-      case 'Dom7': return '7';
-      case 'Dim7': return 'dim7';
-      case 'Sus2': return 'sus2';
-      case 'Sus4': return 'sus4';
-      case '6': return '6';
-      case 'Add9': return baseThird === 3 ? 'm(add9)' : 'add9';
-      case 'Maj9': return 'maj9';
-      case 'Min9': return 'm9';
-      default: return '';
-    }
-  }
-
-  // Chord-tone letter offsets: how many scale letters a semitone interval is
-  // above the root (stacked-thirds spelling). e.g. a major 3rd (4) is the 3rd
-  // letter → offset 2, a 5th (7) → offset 4. 9ths fold to a 2nd letter.
-  const IV_LETTER = [0, 1, 1, 2, 2, 3, 4, 4, 4, 5, 6, 6];
-  const ivLetterOffset = (iv) => IV_LETTER[((iv % 12) + 12) % 12];
-  const pc = (n) => ((n % 12) + 12) % 12;
-  const pcLetterIdx = (p) => LETTERS.indexOf(FLAT_LETTERS[p][0]);
-
-  // One source of truth for what a gesture/keypress means musically:
-  // frequencies for Tone, note numbers, and correctly-spelled names.
-  // modPair (optional) = [idxA, idxB]: the two modifiers chosen by the YOLO
-  // sign's thumb and pinky; otherwise a single modifier is used.
+  // What the current gesture/keypress means musically. modPair (optional) =
+  // [idxA, idxB]: the two modifiers chosen by the YOLO sign's thumb and pinky;
+  // otherwise a single modifier is used (plus the next one when dualMod).
   function getChordInfo(dualMod, modPair) {
-    const solfege = notationSelector.value === 'solfeggio';
-    const scaleSteps = currentScaleType === 'maj' ? majorScaleSteps : minorScaleSteps;
-    const qualities = diatonicQualities[currentScaleType];
-    let baseThird = 4, baseFifth = 7, baseSeventh = 10;
-    const noteIdx = Math.max(0, Math.min(leftChordNames.length - 1, activeNoteIdx));
-    let rootMidi, rootLetterIdx;
-    if (isChromatic) {
-      rootMidi = midiBase + noteIdx;
-      rootLetterIdx = pcLetterIdx(pc(rootMidi));
-    } else {
-      rootMidi = midiBase + currentKeyRootIdx + scaleSteps[noteIdx];
-      rootLetterIdx = (tonicLetterIdx(currentKeyRootIdx, currentScaleType) + noteIdx) % 7;
-      const dq = qualities[noteIdx];
-      baseThird = (dq === 'Minor' || dq === 'Dim') ? 3 : 4;
-      baseFifth = (dq === 'Dim') ? 6 : 7;
-      baseSeventh = (dq === 'Major') ? 11 : 10;
-    }
-    rootMidi += parseInt(octaveSelector.value, 10) * 12;
-
-    const clampMod = i => Math.max(0, Math.min(currentModifiers.length - 1, i));
-    let modifier1, modifier2 = null;
-    if (modPair) {
-      modifier1 = currentModifiers[clampMod(modPair[0])];
-      modifier2 = currentModifiers[clampMod(modPair[1])];
-    } else {
-      modifier1 = currentModifiers[clampMod(activeTypeIdx)];
-      if (dualMod) modifier2 = currentModifiers[(clampMod(activeTypeIdx) + 1) % currentModifiers.length];
-    }
-
-    const intervals = new Set();
-    [modifier1, modifier2].forEach(mod => {
-      if (!mod) return;
-      modifierIntervals(mod, baseThird, baseFifth, baseSeventh).forEach(v => intervals.add(v));
+    return theoryChordInfo({
+      key: isChromatic ? { chromatic: true } : { chromatic: false, rootIdx: currentKeyRootIdx, scaleType: currentScaleType },
+      degree: Math.max(0, Math.min(leftChordNames.length - 1, activeNoteIdx)),
+      modifiers: pickModifiers(currentModifiers, activeTypeIdx, dualMod, modPair),
+      octave: parseInt(octaveSelector.value, 10),
+      solfege: notationSelector.value === 'solfeggio',
     });
-    const sorted = [...intervals].sort((a, b) => a - b);
-    const midiNotes = sorted.map(iv => rootMidi + iv);
-    const freqs = midiNotes.map(n => Tone.Frequency(n, 'midi').toFrequency());
-    const noteNames = sorted.map(iv => spellOnLetter(rootLetterIdx + ivLetterOffset(iv), pc(rootMidi + iv), solfege));
-
-    const rootName = spellOnLetter(rootLetterIdx, pc(rootMidi), solfege);
-    const sep = solfege ? ' ' : '';
-    let suffix = modifierSuffix(modifier1, baseThird, baseFifth, baseSeventh);
-    if (modifier2 && modifier2 !== modifier1) {
-      suffix = (suffix || 'maj') + '+' + (modifierSuffix(modifier2, baseThird, baseFifth, baseSeventh) || 'maj');
-    }
-    return { freqs, midiNotes, name: rootName + sep + suffix, noteNames };
   }
 
   // --- AUDIO ENGINE ---
