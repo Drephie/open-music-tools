@@ -31,7 +31,7 @@ body { -webkit-user-select: none; user-select: none; }
 .small-head { margin: 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
 .path { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px 6px; justify-items: center; }
 .step {
-  display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 2px; border: 0; background: none;
+  position: relative; display: flex; flex-direction: column; align-items: center; padding: 2px 2px 7px; border: 0; background: none;
   font-family: var(--font-main); color: var(--color-text); cursor: pointer; touch-action: manipulation;
 }
 .step-circle {
@@ -45,8 +45,9 @@ body { -webkit-user-select: none; user-select: none; }
 .step.locked .step-circle { border-style: dashed; color: var(--color-text-inactive); }
 .step.locked .step-circle svg { width: 16px; height: 16px; }
 .step[aria-pressed="true"] .step-circle { outline: 3px solid var(--color-right); outline-offset: 2px; transform: scale(1.06); }
-.step-stars { display: flex; height: 12px; }
-.step-stars .star { width: 12px; height: 12px; }
+/* Stars sit on the circle's lower edge, like a badge. */
+.step-stars { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); display: flex; filter: drop-shadow(0 0 1.5px var(--bg-page)) drop-shadow(0 0 1px var(--bg-page)); }
+.step-stars .star { width: 13px; height: 13px; }
 @keyframes glow {
   0%, 100% { box-shadow: 0 0 0 0 transparent; }
   50% { box-shadow: 0 0 16px 2px color-mix(in srgb, var(--color-right) 65%, transparent); }
@@ -100,7 +101,7 @@ body { -webkit-user-select: none; user-select: none; }
 .answer {
   position: relative; min-width: 0; min-height: 48px; padding: 6px 8px; border-radius: 12px;
   border: 1px solid var(--border-panel); background: var(--color-panel); color: var(--color-btn-text);
-  font: 700 15px/1.15 var(--font-main); cursor: pointer; touch-action: manipulation; overflow-wrap: anywhere;
+  font: 700 15px/1.15 var(--font-main); cursor: pointer; touch-action: manipulation; overflow-wrap: anywhere; hyphens: auto;
   transition: background 0.15s, color 0.15s, opacity 0.2s, box-shadow 0.15s;
 }
 .answers[data-ex="degrees"] .answer { min-height: 54px; padding: 4px; font-size: 22px; font-weight: 900; }
@@ -169,13 +170,14 @@ body[data-theme="bw"] .answer.bad .answer-name { text-decoration: line-through; 
 }
 .seg button + button { border-left: 1px solid var(--border-panel); }
 .seg button[aria-pressed="true"] { background: var(--color-left); color: var(--color-text-pinched); }
-#practice-modal .seg button { padding: 0 4px; font-size: 12px; letter-spacing: 0; }
+#practice-modal .seg button { padding: 0 4px; font-size: 13px; letter-spacing: 0; text-transform: none; }
+body[data-theme="retro"] #practice-modal .seg button { font-size: 17px; }
 .chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .chips[data-ex="degrees"] { grid-template-columns: repeat(7, minmax(0, 1fr)); }
 .chip {
   min-width: 0; min-height: 40px; padding: 4px 6px; border-radius: 10px; border: 1px solid var(--border-panel);
   background: var(--color-panel); color: var(--color-btn-text); font: 700 13px/1.15 var(--font-main); cursor: pointer;
-  touch-action: manipulation; overflow-wrap: anywhere; transition: background 0.15s, color 0.15s;
+  touch-action: manipulation; overflow-wrap: anywhere; hyphens: auto; transition: background 0.15s, color 0.15s;
 }
 .chips[data-ex="degrees"] .chip { font-size: 18px; font-weight: 900; padding: 4px 0; }
 .chip[aria-pressed="true"] { background: var(--color-left); border-color: var(--color-left); color: var(--color-text-pinched); }
@@ -207,18 +209,25 @@ body[data-theme="retro"] :is(.lesson-name, .fb-detail, .done-text) { font-size: 
 body[data-theme="retro"] .card-title { font-size: 18px; }
 body[data-theme="retro"] .card-sub { font-size: 16px; }
 body[data-theme="pink"] :is(.tabs, .seg) { border-radius: 999px; }
+/* Soft Pink's button text is white for its pink buttons: on white panels it is pink. */
+body[data-theme="pink"] :is(.tab:not([aria-selected="true"]), .seg button:not([aria-pressed="true"]), .chip:not([aria-pressed="true"]),
+  .card-btn, .answer:not(.good):not(.bad), .step:not(.done):not(.locked):not(.next) .step-circle) { color: var(--color-left); }
+body[data-theme="pink"] .card-sub { color: var(--color-text); }
 body[data-theme="pink"] :is(.answer, .chip, .card-btn) { border-radius: 18px; }
 body[data-theme="bw"] :is(.tabs, .seg, .answer, .chip, .card-btn, .bar) { border-radius: 0; }
+body[data-theme="bw"] :is(.flame, .heart:not(.lost)) { color: var(--color-text); }
 
 /* Phones: everything on one screen; line heights pinned (Baloo 2 has tall ones). */
 @media (max-width: 600px) {
-  .ear { justify-content: flex-start; }
+  /* A question has the whole screen, as in the spec's mock-up: × and the progress on top. */
+  body[data-screen="quiz"] .tool-header { display: none; }
   .screen { gap: 10px; }
   .home-panel, .quiz-panel { gap: 8px; }
   .tab { font-size: 12px; letter-spacing: 0; line-height: 1.1; }
   .prompt { font-size: 17px; line-height: 1.2; }
   .hear-btn { min-height: clamp(50px, 8dvh, 68px); }
   .answer { min-height: 46px; font-size: 14px; line-height: 1.1; }
+  .answers[data-ex="chords"] .answer { padding: 4px 5px; font-size: 13px; }
   .feedback { min-height: 68px; }
   .fb-main { font-size: 17px; }
   .fb-detail { font-size: 13px; line-height: 1.25; }
@@ -230,5 +239,8 @@ body[data-theme="bw"] :is(.tabs, .seg, .answer, .chip, .card-btn, .bar) { border
   .start-btn { min-height: 48px; }
   body[data-theme="retro"] .tab { font-size: 15px; }
   body[data-theme="retro"] .answer { font-size: 17px; }
-  body[data-theme="retro"] :is(.lesson-name, .fb-detail) { font-size: 16px; }
+  body[data-theme="retro"] .answers[data-ex="chords"] .answer { font-size: 15px; }
+  body[data-theme="retro"] :is(.lesson-name, .fb-detail) { font-size: 15px; }
+  body[data-theme="retro"] .card-title { font-size: 16px; }
+  body[data-theme="retro"] .card-sub { font-size: 14px; }
 }
