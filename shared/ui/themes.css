@@ -13,13 +13,22 @@
  *   --color-warn-start / --color-warn-end (a warning that grows, e.g. volume
  *   above 100%: yellow to red; tools mix between them),
  *   --color-patreon / --color-patreon-text (the Patreon button: the one
- *   brand color, the same in every theme).
+ *   brand color, the same in every theme),
+ *   --key-white / --key-white-text, --key-black / --key-black-text,
+ *   --key-edge (between white keys), --key-black-edge (a black key's
+ *   outline, for themes whose page is black): piano keys (the Piano).
  * Theme-specific decoration (frames, button shapes) stays in each tool.
  * Load it before the tool's own styles, plus the fonts it names:
  *   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
  */
 :root {
   --bg-page: #0f1419;
+  --key-white: #f3f5f8;
+  --key-white-text: #4b5866;
+  --key-black: #151b22;
+  --key-black-text: #a9b6c3;
+  --key-edge: rgba(15, 20, 25, 0.35);
+  --key-black-edge: rgba(255, 255, 255, 0.14);
   --color-warn-start: #ffd60a;
   --color-warn-end: #ff3b30;
   --color-patreon: #ff424d;
@@ -49,6 +58,12 @@
 
 body[data-theme="y2k"] {
   --bg-page: #0a0a16;
+  --key-white: #eef4ff;
+  --key-white-text: #2b3a66;
+  --key-black: #12122e;
+  --key-black-text: #7fefff;
+  --key-edge: rgba(0, 120, 160, 0.45);
+  --key-black-edge: rgba(0, 255, 255, 0.55);
   --bg-overlay: rgba(10, 10, 22, 0.85);
   --color-left: #00ffff;
   --color-right: #ff69b4;
@@ -67,6 +82,12 @@ body[data-theme="y2k"] {
    candy purple accents, pill-shaped everything. */
 body[data-theme="pink"] {
   --bg-page: #ffe3f3;
+  --key-white: #ffffff;
+  --key-white-text: #c2187a;
+  --key-black: #83104f;
+  --key-black-text: #ffd1ea;
+  --key-edge: #ff9ad5;
+  --key-black-edge: rgba(255, 255, 255, 0.35);
   --color-warn-start: #e0a100;
   --color-warn-end: #e0002b;
   --bg-overlay: rgba(255, 219, 240, 0.92);
@@ -93,6 +114,12 @@ body[data-theme="pink"] {
 
 body[data-theme="bw"] {
   --bg-page: #000000;
+  --key-white: #ffffff;
+  --key-white-text: #000000;
+  --key-black: #000000;
+  --key-black-text: #ffffff;
+  --key-edge: #000000;
+  --key-black-edge: #ffffff;
   --bg-overlay: rgba(0, 0, 0, 0.9);
   --font-main: 'Courier Prime', monospace;
   --color-left: #ffffff;
@@ -116,6 +143,12 @@ body[data-theme="bw"] {
 
 body[data-theme="retro"] {
   --bg-page: #020a02;
+  --key-white: #a6ffa6;
+  --key-white-text: #053205;
+  --key-black: #031503;
+  --key-black-text: #33ff33;
+  --key-edge: #063806;
+  --key-black-edge: #00aa00;
   --color-warn-start: #ffb000;
   --color-warn-end: #ff3b30;
   --bg-overlay: rgba(0, 15, 0, 0.9);

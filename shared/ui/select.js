@@ -20,7 +20,18 @@
  * is more room there, and is shortened to fit the screen, so it never needs the
  * page scrolled. Highlighting an option scrolls only the list. A list inside a
  * scrolling container is cut off by it: give such a container overflow: visible.
+ *
+ *   setSelectRoom(fn)  replaces how that room is measured: fn(trigger) ->
+ *                      { above, below } in px. For a page drawn turned by a
+ *                      CSS transform (the Piano on an upright phone), where
+ *                      the screen's top is not the page's top.
  */
+let measureRoom = (trigger) => {
+  const r = trigger.getBoundingClientRect();
+  return { above: r.top, below: window.innerHeight - r.bottom };
+};
+export function setSelectRoom(fn) { measureRoom = fn; }
+
 export function closeAllSelect(except) {
   document.querySelectorAll('.custom-select').forEach(cs => {
     if (cs === except) return;
@@ -65,13 +76,13 @@ export function buildCustomSelect(container) {
   const placeList = () => {
     list.classList.remove('select-up');
     list.style.maxHeight = '';
-    const r = trigger.getBoundingClientRect();
-    const below = window.innerHeight - r.bottom - 8, above = r.top - 8;
+    const room = measureRoom(trigger);
+    const below = room.below - 8, above = room.above - 8;
     const need = Math.min(list.scrollHeight, parseFloat(getComputedStyle(list).maxHeight) || Infinity);
     const up = need > below && above > below;
     list.classList.toggle('select-up', up);
-    const room = up ? above : below;
-    if (need > room) list.style.maxHeight = Math.max(96, Math.floor(room)) + 'px';
+    const space = up ? above : below;
+    if (need > space) list.style.maxHeight = Math.max(96, Math.floor(space)) + 'px';
   };
   const open = () => {
     closeAllSelect(container);
