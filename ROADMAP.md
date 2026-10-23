@@ -1,6 +1,6 @@
 # Roadmap
 
-**Status (2026-10-23):** Phase 0 (setup) is done. Next is Phase 1.
+**Status (2026-10-23):** Phase 0 and the Phase 1 engine split are done: `shared/` holds theory, sound, transport and ui, and Choordination runs on them unchanged. Next: the Choordination changes Drephie picks (list below), then Phase 2.
 
 ## Tools in scope
 
@@ -30,19 +30,23 @@
 - **Interactive circle of fifths**: dropped as not beginner-friendly.
 - **Building a chord recognizer from scratch**: no. Use existing open-source analysis.
 
-## Shared engines (planned, in `shared/`)
+## Shared engines (`shared/`)
 
-- `theory.js`: note spelling, chords, keys, chord naming (extracted from Choordination)
-- `sound.js`: the instrument rack (extracted from Choordination)
-- `transport.js`: metronome and timing (extracted from Choordination's looper)
-- `ui/`: themes, i18n, header, About and support links (extracted from Choordination)
+Each module starts with a header comment describing its API: read that, not the implementation.
+
+- `theory.js` (done): note spelling, keys, chords, chord naming. Pure functions; tested by `tests/theory.html`.
+- `sound.js` (done): the instrument rack (Salamander piano, e-piano, synth, pad, organ, harp), effects chain, master volume, 20 ms look-ahead.
+- `transport.js` (done): metronome clicks and loop, count-in, tap tempo, BPM clamp. Choordination's event looper stays in Choordination.
+- `ui/` (done): `themes.css` (the five themes' variables), `i18n.js` (`t`, interpolation, `data-i18n`), `strings.js` (hub-wide strings), `select.js`/`select.css` (custom dropdowns), `modal.js` (dialogs).
+- `offline.js` (done): registers the hub's one service worker, `/sw.js` at the root.
+- Still to build when the first new tool needs them: a shared header, About window and support links. In Choordination they are markup tied to its stage, so they did not extract cleanly.
 - `pitch.js`: new; microphone to note, running in an AudioWorklet
 - `analysis.js`: new; wraps Essentia.js for key, BPM, beats and chords
 
 ## Phases
 
 0. **Setup (done):** hub repo, Choordination copied in, install paths fixed, Salamander credit, CLAUDE.md, this file.
-1. **Engines:** split Choordination into `shared/` (theory, sound, transport, ui) with one service worker. Choordination must behave exactly as before. Theory tests go in a browser test page. Then the Choordination changes.
+1. **Engines (done 2026-10-23):** split Choordination into `shared/` (theory, sound, transport, ui) with one service worker. Choordination behaves exactly as before. Theory tests are in `tests/theory.html`. **Next: the Choordination changes.**
 2. **Tools on existing engines:** Metronome, Digital Piano, Ear Trainer, hub landing page, then the first public launch.
 3. **Pitch:** pitch engine, then Tuner, Pitch Detector and Pitch Training.
 4. **Analysis:** an Essentia.js trial on the test songs, then BPM Finder, Practice Player and Chord Finder.
@@ -55,6 +59,7 @@ After Phase 1, phases 2 to 5 don't depend on each other.
 - Smooth voice leading (closest inversion) instead of always playing root position
 - m7♭5 as its own modifier; 11ths and 13ths; slash chords and bass notes
 - Web MIDI output to control a DAW
+- Fix (existed before Phase 1): on a phone held upright, the welcome screen's footer links overlap and the CHOORDINATION watermark is cut off
 - Drephie's own list
 
 ## Open decisions
@@ -64,6 +69,7 @@ After Phase 1, phases 2 to 5 don't depend on each other.
 - Hub name (`open-music-tools` is a placeholder) and domain.
 - Funding: Patreon, versus "minimal ads", versus Choordination's promise of "No ads, no trackers, ever".
 - `REPO_URL` in `choordination/index.html` still points at a placeholder.
+- A hub-wide privacy line for future tools (e.g. "Everything runs on your device"). Choordination's privacy text mentions its camera, so it stayed in Choordination; the wording for the hub is Drephie's.
 - Test songs for Phase 4: 5 to 10 songs Drephie owns with known chords and BPM, including one with a difficult key change.
 
 ## Custom skills to create along the way
