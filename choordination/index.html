@@ -809,6 +809,7 @@
   //  cached by sw.js after first load.)
   import { parseKey, keyRootName, keyChordNames, pickModifiers, getChordInfo as theoryChordInfo } from '../shared/theory.js';
   import { startAudio, createRack } from '../shared/sound.js';
+  import { clampBpm, createClicks, startMetronome, countIn, currentBeat, createTapTempo } from '../shared/transport.js';
 
   // --- roundRect polyfill (older Safari) ---
   if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
@@ -1819,56 +1820,31 @@
     layers: [], events: null, pending: null,
     loopTicks: 0, commitId: null,
   };
-  let metSynths = null, metVol = null, hatFilter = null, metLoop = null;
+  let clicks = null, metLoop = null; // metronome sounds and loop: shared/transport.js
   let loopUiTimer = null;
-  const tapTimes = [];
+  const tapTempo = createTapTempo();
 
   function disposeLooperNodes() {
     try { if (metLoop) metLoop.dispose(); } catch { /* already disposed */ }
     looper.layers.forEach(l => { try { l.part.dispose(); } catch { /* already disposed */ } });
     looper.layers = [];
-    [...(metSynths ? Object.values(metSynths) : []), hatFilter, metVol].forEach(n => {
-      try { if (n) n.dispose(); } catch { /* already disposed */ }
-    });
-    metSynths = null; metVol = null; hatFilter = null; metLoop = null;
+    if (clicks) clicks.dispose();
+    clicks = null; metLoop = null;
     looper.state = 'idle'; looper.events = null; looper.pending = null; looper.commitId = null;
   }
 
   function initLooper() {
-    metVol = new Tone.Volume(-8).toDestination();
-    hatFilter = new Tone.Filter(8000, 'highpass').connect(metVol);
-    metSynths = {
-      click: new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.03, sustain: 0 } }).connect(metVol),
-      beep: new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.001, decay: 0.07, sustain: 0, release: 0.02 } }).connect(metVol),
-      wood: new Tone.MembraneSynth({ pitchDecay: 0.008, octaves: 2, envelope: { attack: 0.001, decay: 0.06, sustain: 0 } }).connect(metVol),
-      hat: new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.05, sustain: 0 } }).connect(hatFilter),
-    };
+    clicks = createClicks();
     Tone.Transport.bpm.value = clampBpm(parseInt(loopBpmInput.value, 10));
     Tone.Transport.loop = true;
     Tone.Transport.loopStart = 0;
     setLoopLen();
-    metLoop = new Tone.Loop(metTick, '4n').start(0);
+    metLoop = startMetronome(clicks, { enabled: () => looper.metOn, sound: () => looper.metSound });
   }
 
-  const clampBpm = (v) => Math.max(40, Math.min(240, isNaN(v) ? 100 : v));
   function setLoopLen() {
     looper.loopTicks = looper.bars * 4 * Tone.Transport.PPQ;
     Tone.Transport.loopEnd = looper.bars + 'm';
-  }
-
-  function playMet(time, accent) {
-    if (!metSynths) return;
-    switch (looper.metSound) {
-      case 'beep': metSynths.beep.triggerAttackRelease(accent ? 'E6' : 'A5', 0.05, time); break;
-      case 'wood': metSynths.wood.triggerAttackRelease(accent ? 'A4' : 'E4', 0.05, time); break;
-      case 'hat': metSynths.hat.triggerAttackRelease(0.03, time, accent ? 0.9 : 0.5); break;
-      default: metSynths.click.triggerAttackRelease(0.02, time, accent ? 1 : 0.55);
-    }
-  }
-  function metTick(time) {
-    if (!looper.metOn) return;
-    const beat = Math.floor(Tone.Transport.getTicksAtTime(time) / Tone.Transport.PPQ) % 4;
-    playMet(time, beat === 0);
   }
 
   // Capture hooks, called from playChord()/releaseAudio()
@@ -1923,14 +1899,8 @@
     setLoopLen();
     looper.events = [];
     looper.pending = null;
-    const beatSec = 60 / Tone.Transport.bpm.value;
     const t0 = Tone.now() + 0.12;
-    if (looper.countIn) {
-      for (let k = 0; k < 4; k++) playMet(t0 + k * beatSec, k === 0);
-      Tone.Transport.start(t0 + 4 * beatSec);
-    } else {
-      Tone.Transport.start(t0);
-    }
+    Tone.Transport.start(looper.countIn ? countIn(clicks, looper.metSound, t0) : t0);
     looper.commitId = Tone.Transport.scheduleOnce(() => {
       commitLayer();
       looper.commitId = null;
@@ -1978,17 +1948,10 @@
   }
 
   function loopTap() {
-    const now = performance.now();
-    if (tapTimes.length && now - tapTimes[tapTimes.length - 1] > 2500) tapTimes.length = 0;
-    tapTimes.push(now);
-    if (tapTimes.length > 5) tapTimes.shift();
-    if (tapTimes.length >= 2) {
-      const gaps = [];
-      for (let i = 1; i < tapTimes.length; i++) gaps.push(tapTimes[i] - tapTimes[i - 1]);
-      const bpm = clampBpm(Math.round(60000 / (gaps.reduce((a, b) => a + b, 0) / gaps.length)));
-      loopBpmInput.value = bpm;
-      if (audioReady) Tone.Transport.bpm.value = bpm;
-    }
+    const bpm = tapTempo.tap(performance.now());
+    if (bpm === null) return;
+    loopBpmInput.value = bpm;
+    if (audioReady) Tone.Transport.bpm.value = bpm;
   }
 
   function toggleLoopBar() {
@@ -2016,7 +1979,7 @@
     const busy = looper.layers.length > 0 || looper.state !== 'idle';
     loopBarsSelect.disabled = busy;
     const dots = loopBeatsEl.children;
-    const beat = running ? Math.floor(Tone.Transport.ticks / Tone.Transport.PPQ) % 4 : -1;
+    const beat = running ? currentBeat() : -1;
     for (let i = 0; i < dots.length; i++) dots[i].classList.toggle('on', i === beat);
   }
 
