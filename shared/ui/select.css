@@ -1,0 +1,24 @@
+/* shared/ui/select.css: looks for the custom selects built by shared/ui/select.js.
+ * Uses the theme variables from themes.css. Add class "compact-grid" next to
+ * "custom-select" to lay a long list out as a 3-column grid.
+ */
+.custom-select { position: relative; font-family: var(--font-main); font-size: 14px; font-weight: 700; user-select: none; }
+.custom-select select { display: none; }
+.select-selected { background-color: var(--bg-select); color: var(--color-select-text); padding: 8px 12px; border: 1px solid var(--border-panel); border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+.select-selected:after { content: '▼'; font-size: 10px; color: var(--color-right); margin-left: 8px; }
+.select-selected.select-arrow-active:after { content: '▲'; }
+.select-selected:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
+.select-items { position: absolute; background-color: var(--bg-select); border: 1px solid var(--border-panel); top: 100%; left: 0; right: 0; z-index: 99; border-radius: 6px; margin-top: 4px; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+.select-items div { color: var(--color-select-text); padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.select-items div:hover, .same-as-selected { background-color: var(--color-select-hover); color: var(--color-left); }
+.option-highlight { outline: 2px solid var(--color-right); outline-offset: -2px; }
+.option-disabled { opacity: 0.45; cursor: not-allowed; }
+/* Must out-specify `.compact-grid .select-items { display: grid }` (0,2,0)
+   or the Musical Key list can never collapse. */
+.custom-select .select-items.select-hide { display: none; }
+.select-items::-webkit-scrollbar { width: 6px; }
+.select-items::-webkit-scrollbar-thumb { background: var(--color-right); border-radius: 3px; }
+
+/* Compact Grid specifically for Musical Key dropdown */
+.compact-grid .select-items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 5px; }
+.compact-grid .select-items div { padding: 8px 2px; text-align: center; font-size: 12px; border-bottom: none; border-radius: 4px; }

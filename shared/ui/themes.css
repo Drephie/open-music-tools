@@ -1,0 +1,124 @@
+/* shared/ui/themes.css: the five hub themes as CSS variables.
+ *
+ * <body data-theme="liquid|y2k|pink|bw|retro">; no attribute (or "liquid")
+ * is Liquid Glass, the :root default. Tools use colors and fonts ONLY through
+ * these variables, so every theme works everywhere:
+ *   --font-main, --color-text, --color-left / --color-right (the two accents),
+ *   --color-text-pinched (text on an accent), --color-btn-text,
+ *   --color-text-inactive, --bg-overlay, --color-panel, --border-panel,
+ *   --shadow-blur, --credit-shadow, --crt-scanline, --bg-select,
+ *   --color-select-text, --color-select-hover,
+ *   --frame-top / --frame-bottom / --frame-sides / --frame-radius (theme frame insets).
+ * Theme-specific decoration (frames, button shapes) stays in each tool.
+ * Load it before the tool's own styles, plus the fonts it names:
+ *   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+ */
+:root {
+  --bg-overlay: rgba(15, 20, 25, 0.65);
+  --font-main: 'Orbitron', sans-serif;
+  --color-left: #ffffff;
+  --color-right: #8ad4ff;
+  --color-text: #ffffff;
+  --color-text-pinched: #0f172a;
+  --color-btn-text: #ffffff;
+  --color-text-inactive: rgba(255, 255, 255, 0.4);
+  --color-panel: rgba(255, 255, 255, 0.1);
+  --border-panel: rgba(255, 255, 255, 0.25);
+  --shadow-blur: 12px;
+  --crt-scanline: transparent;
+  --credit-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.85);
+  --bg-select: rgba(20, 25, 30, 0.95);
+  --color-select-text: #ffffff;
+  --color-select-hover: rgba(255, 255, 255, 0.1);
+
+  --frame-top: 0px;
+  --frame-bottom: 0px;
+  --frame-sides: 0px;
+  --frame-radius: 0px;
+}
+
+body[data-theme="y2k"] {
+  --bg-overlay: rgba(10, 10, 22, 0.85);
+  --color-left: #00ffff;
+  --color-right: #ff69b4;
+  --color-text-pinched: #000000;
+  --color-btn-text: #ffffff;
+  --color-text-inactive: #888888;
+  --color-panel: rgba(255, 255, 255, 0.05);
+  --border-panel: rgba(0, 255, 255, 0.3);
+  --shadow-blur: 20px;
+  --bg-select: rgba(10, 10, 22, 0.95);
+  --color-select-hover: rgba(0, 255, 255, 0.2);
+  --frame-radius: 14px;
+}
+
+/* Soft Pink — "barbie ultra pop lollipop": bubbly rounded font, hot pink +
+   candy purple accents, pill-shaped everything. */
+body[data-theme="pink"] {
+  --bg-overlay: rgba(255, 219, 240, 0.92);
+  --font-main: 'Baloo 2', 'Quicksand', sans-serif;
+  --color-left: #ff2d9c;
+  --color-right: #b743ff;
+  --color-text: #83104f;
+  --color-text-pinched: #ffffff;
+  --color-btn-text: #ffffff;
+  --color-text-inactive: #eba3cc;
+  --color-panel: rgba(255, 255, 255, 0.93);
+  --border-panel: #ff9ad5;
+  --shadow-blur: 18px;
+  --credit-shadow: 0 1px 2px rgba(255,255,255,0.55);
+  --bg-select: #fff0fa;
+  --color-select-text: #d61f84;
+  --color-select-hover: rgba(255, 105, 180, 0.25);
+
+  --frame-top: 18px;
+  --frame-bottom: 18px;
+  --frame-sides: 18px;
+  --frame-radius: 26px;
+}
+
+body[data-theme="bw"] {
+  --bg-overlay: rgba(0, 0, 0, 0.9);
+  --font-main: 'Courier Prime', monospace;
+  --color-left: #ffffff;
+  --color-right: #dddddd;
+  --color-text: #ffffff;
+  --color-text-pinched: #000000;
+  --color-btn-text: #ffffff;
+  --color-text-inactive: #666666;
+  --color-panel: rgba(0, 0, 0, 0.9);
+  --border-panel: #ffffff;
+  --shadow-blur: 0px;
+  --credit-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  --bg-select: rgba(0, 0, 0, 0.95);
+  --color-select-hover: rgba(255, 255, 255, 0.2);
+
+  --frame-top: 60px;
+  --frame-bottom: 60px;
+  --frame-sides: 0px;
+  --frame-radius: 0px;
+}
+
+body[data-theme="retro"] {
+  --bg-overlay: rgba(0, 15, 0, 0.9);
+  --font-main: 'VT323', monospace;
+  --color-left: #00ff00;
+  --color-right: #33cc33;
+  --color-text: #00ff00;
+  --color-text-pinched: #0a110a;
+  --color-btn-text: #00ff00;
+  --color-text-inactive: #006600;
+  --color-panel: rgba(0, 20, 0, 0.9);
+  --border-panel: #00ff00;
+  --shadow-blur: 10px;
+  --crt-scanline: repeating-linear-gradient(0deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px);
+  --credit-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  --bg-select: rgba(10, 17, 10, 0.95);
+  --color-select-text: #00ff00;
+  --color-select-hover: rgba(0, 255, 0, 0.2);
+
+  --frame-top: 24px;
+  --frame-bottom: 24px;
+  --frame-sides: 24px;
+  --frame-radius: 16px;
+}

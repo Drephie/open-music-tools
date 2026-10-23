@@ -19,118 +19,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 
+  <link rel="stylesheet" href="../shared/ui/themes.css">
+  <link rel="stylesheet" href="../shared/ui/select.css">
   <style>
-    /* --- THEME VARIABLES --- */
-    :root {
-      --bg-overlay: rgba(15, 20, 25, 0.65);
-      --font-main: 'Orbitron', sans-serif;
-      --color-left: #ffffff;
-      --color-right: #8ad4ff;
-      --color-text: #ffffff;
-      --color-text-pinched: #0f172a;
-      --color-btn-text: #ffffff;
-      --color-text-inactive: rgba(255, 255, 255, 0.4);
-      --color-panel: rgba(255, 255, 255, 0.1);
-      --border-panel: rgba(255, 255, 255, 0.25);
-      --shadow-blur: 12px;
-      --crt-scanline: transparent;
-      --credit-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.85);
-      --bg-select: rgba(20, 25, 30, 0.95);
-      --color-select-text: #ffffff;
-      --color-select-hover: rgba(255, 255, 255, 0.1);
-
-      --frame-top: 0px;
-      --frame-bottom: 0px;
-      --frame-sides: 0px;
-      --frame-radius: 0px;
-    }
-
-    body[data-theme="y2k"] {
-      --bg-overlay: rgba(10, 10, 22, 0.85);
-      --color-left: #00ffff;
-      --color-right: #ff69b4;
-      --color-text-pinched: #000000;
-      --color-btn-text: #ffffff;
-      --color-text-inactive: #888888;
-      --color-panel: rgba(255, 255, 255, 0.05);
-      --border-panel: rgba(0, 255, 255, 0.3);
-      --shadow-blur: 20px;
-      --bg-select: rgba(10, 10, 22, 0.95);
-      --color-select-hover: rgba(0, 255, 255, 0.2);
-      --frame-radius: 14px;
-    }
-
-    /* Soft Pink — "barbie ultra pop lollipop": bubbly rounded font, hot pink +
-       candy purple accents, pill-shaped everything. */
-    body[data-theme="pink"] {
-      --bg-overlay: rgba(255, 219, 240, 0.92);
-      --font-main: 'Baloo 2', 'Quicksand', sans-serif;
-      --color-left: #ff2d9c;
-      --color-right: #b743ff;
-      --color-text: #83104f;
-      --color-text-pinched: #ffffff;
-      --color-btn-text: #ffffff;
-      --color-text-inactive: #eba3cc;
-      --color-panel: rgba(255, 255, 255, 0.93);
-      --border-panel: #ff9ad5;
-      --shadow-blur: 18px;
-      --credit-shadow: 0 1px 2px rgba(255,255,255,0.55);
-      --bg-select: #fff0fa;
-      --color-select-text: #d61f84;
-      --color-select-hover: rgba(255, 105, 180, 0.25);
-
-      --frame-top: 18px;
-      --frame-bottom: 18px;
-      --frame-sides: 18px;
-      --frame-radius: 26px;
-    }
-
-    body[data-theme="bw"] {
-      --bg-overlay: rgba(0, 0, 0, 0.9);
-      --font-main: 'Courier Prime', monospace;
-      --color-left: #ffffff;
-      --color-right: #dddddd;
-      --color-text: #ffffff;
-      --color-text-pinched: #000000;
-      --color-btn-text: #ffffff;
-      --color-text-inactive: #666666;
-      --color-panel: rgba(0, 0, 0, 0.9);
-      --border-panel: #ffffff;
-      --shadow-blur: 0px;
-      --credit-shadow: 0 2px 4px rgba(0,0,0,0.8);
-      --bg-select: rgba(0, 0, 0, 0.95);
-      --color-select-hover: rgba(255, 255, 255, 0.2);
-
-      --frame-top: 60px;
-      --frame-bottom: 60px;
-      --frame-sides: 0px;
-      --frame-radius: 0px;
-    }
-
-    body[data-theme="retro"] {
-      --bg-overlay: rgba(0, 15, 0, 0.9);
-      --font-main: 'VT323', monospace;
-      --color-left: #00ff00;
-      --color-right: #33cc33;
-      --color-text: #00ff00;
-      --color-text-pinched: #0a110a;
-      --color-btn-text: #00ff00;
-      --color-text-inactive: #006600;
-      --color-panel: rgba(0, 20, 0, 0.9);
-      --border-panel: #00ff00;
-      --shadow-blur: 10px;
-      --crt-scanline: repeating-linear-gradient(0deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px);
-      --credit-shadow: 0 2px 4px rgba(0,0,0,0.8);
-      --bg-select: rgba(10, 17, 10, 0.95);
-      --color-select-text: #00ff00;
-      --color-select-hover: rgba(0, 255, 0, 0.2);
-
-      --frame-top: 24px;
-      --frame-bottom: 24px;
-      --frame-sides: 24px;
-      --frame-radius: 16px;
-    }
-
     body[data-theme="retro"] .centered-modal { font-size: 1.15rem; }
     body[data-theme="retro"] label { font-size: 1.1rem; }
     body[data-theme="retro"] .settings-action-btn { font-size: 1.1rem; }
@@ -250,28 +141,6 @@
     .control-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 5px; position: relative; }
     .menu-divider { border: none; border-top: 1px solid var(--border-panel); opacity: 0.6; margin: 14px 0 12px; }
     label { font-size: 12px; font-weight: 700; color: var(--color-text); text-transform: uppercase; }
-
-    /* CUSTOM SELECT DROPDOWNS (accessible combobox pattern) */
-    .custom-select { position: relative; font-family: var(--font-main); font-size: 14px; font-weight: 700; user-select: none; }
-    .custom-select select { display: none; }
-    .select-selected { background-color: var(--bg-select); color: var(--color-select-text); padding: 8px 12px; border: 1px solid var(--border-panel); border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
-    .select-selected:after { content: '▼'; font-size: 10px; color: var(--color-right); margin-left: 8px; }
-    .select-selected.select-arrow-active:after { content: '▲'; }
-    .select-selected:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
-    .select-items { position: absolute; background-color: var(--bg-select); border: 1px solid var(--border-panel); top: 100%; left: 0; right: 0; z-index: 99; border-radius: 6px; margin-top: 4px; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-    .select-items div { color: var(--color-select-text); padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .select-items div:hover, .same-as-selected { background-color: var(--color-select-hover); color: var(--color-left); }
-    .option-highlight { outline: 2px solid var(--color-right); outline-offset: -2px; }
-    .option-disabled { opacity: 0.45; cursor: not-allowed; }
-    /* Must out-specify `.compact-grid .select-items { display: grid }` (0,2,0)
-       or the Musical Key list can never collapse. */
-    .custom-select .select-items.select-hide { display: none; }
-    .select-items::-webkit-scrollbar { width: 6px; }
-    .select-items::-webkit-scrollbar-thumb { background: var(--color-right); border-radius: 3px; }
-
-    /* Compact Grid specifically for Musical Key dropdown */
-    .compact-grid .select-items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 5px; }
-    .compact-grid .select-items div { padding: 8px 2px; text-align: center; font-size: 12px; border-bottom: none; border-radius: 4px; }
 
     input[type=range] { width: 100%; cursor: pointer; opacity: 0.8; } input[type=range]:hover { opacity: 1; }
     input[type=range]:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
@@ -810,6 +679,10 @@
   import { parseKey, keyRootName, keyChordNames, pickModifiers, getChordInfo as theoryChordInfo } from '../shared/theory.js';
   import { startAudio, createRack } from '../shared/sound.js';
   import { clampBpm, createClicks, startMetronome, countIn, currentBeat, createTapTempo } from '../shared/transport.js';
+  import { createI18n, mergeStrings } from '../shared/ui/i18n.js';
+  import { HUB_STRINGS } from '../shared/ui/strings.js';
+  import { setupCustomSelects } from '../shared/ui/select.js';
+  import { createModalManager } from '../shared/ui/modal.js';
 
   // --- roundRect polyfill (older Safari) ---
   if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
@@ -907,22 +780,23 @@
 
   const allModals = [controlsPanel, modifiersModal, uiLayoutModal, tutorialModal, logoInfoModal, patreonNag, recChoiceModal];
 
-  // --- I18N DICTIONARY (all user-facing strings; {repo}/{patreon} are interpolated) ---
-  const i18n = {
+  // --- I18N: Choordination's own strings ({repo}/{patreon} are interpolated);
+  // hub-wide ones (themes, instruments, footer...) are in shared/ui/strings.js ---
+  const STRINGS = {
     en: {
       menu: "Menu", settingsTitle: "Studio Settings",
-      lang: "Language", not: "Notation", vol: "Master Volume", oct: "Octave Shift",
+      not: "Notation", oct: "Octave Shift",
       key: "Musical Key", mods: "Chord Modifiers...", modsTitle: "Chord Modifiers",
-      inst: "Instrument Rack", theme: "Aesthetic Theme", acc: "Accessibility",
+      acc: "Accessibility",
       leftShape: "Left Shape", rightShape: "Right Shape", handLayout: "Hand Layout",
       uiPos: "UI Positioning & Size...", uiPosTitle: "UI Positioning",
       uiEditBtn: "✋ Drag & resize on screen", uiFineTune: "Or fine-tune precisely:",
       uiEditHint: "Drag a widget to move it — drag the ⤢ handle to resize (always kept to scale). Esc or Done to finish.", uiEditDone: "Done",
       reset: "Reset Placements", back: "← Back to Menu", lh: "LEFT UI", rh: "RIGHT UI",
-      closeAria: "Close", helpAria: "How to play", recordAria: "Record audio", recStopAria: "Stop recording",
+      helpAria: "How to play", recordAria: "Record audio", recStopAria: "Stop recording",
       aboutAria: "About Choordination", touchSettingsAria: "Settings",
       loopAria: "Loop station", loopBpmAria: "Tempo (BPM)", loopBars: "Bars",
-      metClick: "Click", metBeep: "Beep", metWood: "Wood", metHat: "Hi-hat",
+
       loopMetAria: "Metronome", loopMetSoundAria: "Metronome sound", loopCountInAria: "1-bar count-in",
       loopRecAria: "Record / overdub loop", loopPlayAria: "Play or stop loops",
       loopUndoAria: "Undo last layer", loopClearAria: "Clear all layers",
@@ -932,14 +806,14 @@
       ariaRX: "Right UI horizontal position", ariaRY: "Right UI vertical position", ariaRS: "Right UI size",
       octMellow: "Mellow (-1)", octNormal: "Normal (0)", octBright: "Bright (+1)",
       chromatic: "Chromatic", major: "Major", minor: "Minor",
-      instPiano: "Grand Piano", instEpiano: "Classic Electric Piano", instEsynth: "Electric Synth", instPad: "Smooth Analog Pad",
-      instOrgan: "Warm Organ", instHarp: "Dream Harp",
+
+
       shapeWheel: "Donut", shapeSlider: "Pill", shapeGrid: "Grid",
       handRight: "Right-Handed", handLeft: "Left-Handed",
       accNone: "Two-Handed Mode", accLeft: "Left Hand + Head Tilt", accRight: "Right Hand + Head Tilt",
       accKeyboard: "Keyboard Only (camera optional)", accTouch: "Touch Pads (no camera)", accHandsfree: "Hands-Free Mode (Coming Soon)",
       browSustain: "Eyebrow Sustain", onLabel: "On", offLabel: "Off",
-      themeLiquid: "Liquid Glass", themeY2k: "Y2K Cyber", themePink: "Soft Pink", themeBw: "Monochrome", themeRetro: "Retro CRT",
+
       bootWelcome: "Welcome to Choordination", boot1Title: "About this project",
       boot1Open: '<strong>Open source.</strong> Choordination is free and open source — every line of code is public in the <a href="{repo}" target="_blank" rel="noopener noreferrer">repository</a>.',
       boot1Privacy: '<strong>100% private.</strong> Your camera and microphone are processed entirely on this device, inside your browser. Nothing is ever uploaded or stored — the mic is only mixed into recordings you choose to make.',
@@ -974,13 +848,13 @@
       errModelsBody: "The hand & face tracking models could not be downloaded. Check your internet connection and try again.",
       errCameraTitle: "Camera access needed",
       errCameraBody: "Choordination couldn't access your camera. Click the camera icon in your browser's address bar (or check your system settings), allow access for this site, then press Retry. Remember: all video stays on your device.",
-      retry: "Retry", useKeyboard: "Continue with keyboard mode", useTouch: "Continue with touch pads",
+      useKeyboard: "Continue with keyboard mode", useTouch: "Continue with touch pads",
       calibrating: "Calibrating… keep a neutral face",
       sustainOn: "SUSTAIN ON", playingLabel: "Playing",
       nagTitle: "Support Choordination",
       nagBody: "Love creating with Choordination? Help keep the studio alive, ad-free, and full of new features!",
       nagPatreon: "Support on Patreon", nagContinue: "Continue playing", nagSkip: "Skip in {s}s…",
-      supportLink: "Support on Patreon", designedBy: "Designed by",
+
       aboutTitle: "About Choordination",
       aboutBody: 'Choordination is an open source website designed and curated by Drephie, a singer and vocal coach. The idea behind the project is to make music tools available to everyone — every line of code is public in the <a href="{repo}" target="_blank" rel="noopener noreferrer">repository</a>.<br><br>It is <strong>100% private</strong>: all video is processed on your device, in your browser, and is never uploaded or stored. It is <strong>completely ad-free</strong> and user-supported.<br><br>To follow updates and other projects, or to <u><b>get rid of the watermark</b></u>, check out the <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>!',
       aboutCredits: 'Piano sound: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> by Alexander Holm, licensed under <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
@@ -995,18 +869,18 @@
     },
     es: {
       menu: "Menú", settingsTitle: "Ajustes del Estudio",
-      lang: "Idioma", not: "Notación", vol: "Volumen", oct: "Octava",
+      not: "Notación", oct: "Octava",
       key: "Tonalidad", mods: "Modificadores de Acordes...", modsTitle: "Modificadores de Acordes",
-      inst: "Instrumento", theme: "Tema Estético", acc: "Accesibilidad",
+      acc: "Accesibilidad",
       leftShape: "Forma Izq.", rightShape: "Forma Der.", handLayout: "Mano Dominante",
       uiPos: "Posición y Tamaño UI...", uiPosTitle: "Posición de la UI",
       uiEditBtn: "✋ Arrastrar y redimensionar en pantalla", uiFineTune: "O ajusta con precisión:",
       uiEditHint: "Arrastra un elemento para moverlo — arrastra el tirador ⤢ para redimensionar (siempre a escala). Esc o Listo para terminar.", uiEditDone: "Listo",
       reset: "Restablecer", back: "← Volver al Menú", lh: "UI IZQ.", rh: "UI DER.",
-      closeAria: "Cerrar", helpAria: "Cómo tocar", recordAria: "Grabar audio", recStopAria: "Detener la grabación",
+      helpAria: "Cómo tocar", recordAria: "Grabar audio", recStopAria: "Detener la grabación",
       aboutAria: "Acerca de Choordination", touchSettingsAria: "Ajustes",
       loopAria: "Estación de loops", loopBpmAria: "Tempo (BPM)", loopBars: "Compases",
-      metClick: "Clic", metBeep: "Bip", metWood: "Madera", metHat: "Hi-hat",
+
       loopMetAria: "Metrónomo", loopMetSoundAria: "Sonido del metrónomo", loopCountInAria: "Claqueta de 1 compás",
       loopRecAria: "Grabar / superponer loop", loopPlayAria: "Reproducir o detener los loops",
       loopUndoAria: "Deshacer la última capa", loopClearAria: "Borrar todas las capas",
@@ -1016,14 +890,14 @@
       ariaRX: "Posición horizontal de la UI derecha", ariaRY: "Posición vertical de la UI derecha", ariaRS: "Tamaño de la UI derecha",
       octMellow: "Grave (-1)", octNormal: "Normal (0)", octBright: "Brillante (+1)",
       chromatic: "Cromática", major: "Mayor", minor: "Menor",
-      instPiano: "Piano de Cola", instEpiano: "Piano Eléctrico Clásico", instEsynth: "Sinte Eléctrico", instPad: "Pad Analógico Suave",
-      instOrgan: "Órgano Cálido", instHarp: "Arpa de Ensueño",
+
+
       shapeWheel: "Dónut", shapeSlider: "Píldora", shapeGrid: "Cuadrícula",
       handRight: "Diestro", handLeft: "Zurdo",
       accNone: "Modo a Dos Manos", accLeft: "Mano Izquierda + Inclinación de Cabeza", accRight: "Mano Derecha + Inclinación de Cabeza",
       accKeyboard: "Solo Teclado (cámara opcional)", accTouch: "Pads Táctiles (sin cámara)", accHandsfree: "Manos Libres (Próximamente)",
       browSustain: "Sustain con Cejas", onLabel: "Activado", offLabel: "Desactivado",
-      themeLiquid: "Cristal Líquido", themeY2k: "Cyber Y2K", themePink: "Rosa Suave", themeBw: "Monocromo", themeRetro: "CRT Retro",
+
       bootWelcome: "Bienvenido a Choordination", boot1Title: "Sobre este proyecto",
       boot1Open: '<strong>Código abierto.</strong> Choordination es gratuito y de código abierto: cada línea de código es pública en el <a href="{repo}" target="_blank" rel="noopener noreferrer">repositorio</a>.',
       boot1Privacy: '<strong>100% privado.</strong> La cámara y el micrófono se procesan por completo en este dispositivo, dentro de tu navegador. Nada se sube ni se almacena: el micrófono solo se mezcla en las grabaciones que tú decidas hacer.',
@@ -1058,13 +932,13 @@
       errModelsBody: "No se pudieron descargar los modelos de seguimiento de manos y rostro. Comprueba tu conexión a internet y vuelve a intentarlo.",
       errCameraTitle: "Se necesita acceso a la cámara",
       errCameraBody: "Choordination no pudo acceder a tu cámara. Haz clic en el icono de la cámara en la barra de direcciones del navegador (o revisa los ajustes del sistema), permite el acceso para este sitio y pulsa Reintentar. Recuerda: todo el vídeo se queda en tu dispositivo.",
-      retry: "Reintentar", useKeyboard: "Continuar en modo teclado", useTouch: "Continuar con pads táctiles",
+      useKeyboard: "Continuar en modo teclado", useTouch: "Continuar con pads táctiles",
       calibrating: "Calibrando… mantén el rostro neutro",
       sustainOn: "SUSTAIN ACTIVO", playingLabel: "Sonando",
       nagTitle: "Apoya a Choordination",
       nagBody: "¿Te encanta crear con Choordination? ¡Ayuda a mantener el estudio vivo, sin anuncios y lleno de novedades!",
       nagPatreon: "Apóyanos en Patreon", nagContinue: "Seguir tocando", nagSkip: "Saltar en {s} s…",
-      supportLink: "Apóyanos en Patreon", designedBy: "Diseñado por",
+
       aboutTitle: "Acerca de Choordination",
       aboutBody: 'Choordination es un sitio web de código abierto diseñado y cuidado por Drephie, cantante y coach vocal. La idea del proyecto es poner herramientas musicales al alcance de todo el mundo: cada línea de código es pública en el <a href="{repo}" target="_blank" rel="noopener noreferrer">repositorio</a>.<br><br>Es <strong>100% privado</strong>: todo el vídeo se procesa en tu dispositivo, dentro de tu navegador, y nunca se sube ni se almacena. Además es <strong>totalmente libre de anuncios</strong> y se financia gracias a la comunidad.<br><br>Para seguir las novedades y otros proyectos, o para <u><b>quitar la marca de agua</b></u>, ¡pásate por el <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>!',
       aboutCredits: 'Sonido de piano: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> de Alexander Holm, con licencia <a href="https://creativecommons.org/licenses/by/3.0/deed.es" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
@@ -1079,18 +953,18 @@
     },
     it: {
       menu: "Menu", settingsTitle: "Impostazioni Studio",
-      lang: "Lingua", not: "Notazione", vol: "Volume", oct: "Ottava",
+      not: "Notazione", oct: "Ottava",
       key: "Tonalità", mods: "Modificatori di Accordi...", modsTitle: "Modificatori di Accordi",
-      inst: "Strumento", theme: "Tema Estetico", acc: "Accessibilità",
+      acc: "Accessibilità",
       leftShape: "Forma Sinistra", rightShape: "Forma Destra", handLayout: "Mano Dominante",
       uiPos: "Posizionamento UI...", uiPosTitle: "Posizionamento UI",
       uiEditBtn: "✋ Trascina e ridimensiona sullo schermo", uiFineTune: "Oppure regola con precisione:",
       uiEditHint: "Trascina un elemento per spostarlo — trascina la maniglia ⤢ per ridimensionare (sempre in scala). Esc o Fatto per terminare.", uiEditDone: "Fatto",
       reset: "Ripristina", back: "← Torna al Menu", lh: "UI SINISTRA", rh: "UI DESTRA",
-      closeAria: "Chiudi", helpAria: "Come si suona", recordAria: "Registra audio", recStopAria: "Interrompi la registrazione",
+      helpAria: "Come si suona", recordAria: "Registra audio", recStopAria: "Interrompi la registrazione",
       aboutAria: "Informazioni su Choordination", touchSettingsAria: "Impostazioni",
       loopAria: "Stazione loop", loopBpmAria: "Tempo (BPM)", loopBars: "Battute",
-      metClick: "Clic", metBeep: "Bip", metWood: "Legno", metHat: "Hi-hat",
+
       loopMetAria: "Metronomo", loopMetSoundAria: "Suono del metronomo", loopCountInAria: "Pre-conteggio di 1 battuta",
       loopRecAria: "Registra / sovraincidi loop", loopPlayAria: "Avvia o ferma i loop",
       loopUndoAria: "Annulla l'ultimo livello", loopClearAria: "Cancella tutti i livelli",
@@ -1100,14 +974,14 @@
       ariaRX: "Posizione orizzontale della UI destra", ariaRY: "Posizione verticale della UI destra", ariaRS: "Dimensione della UI destra",
       octMellow: "Scuro (-1)", octNormal: "Normale (0)", octBright: "Brillante (+1)",
       chromatic: "Cromatica", major: "Maggiore", minor: "Minore",
-      instPiano: "Pianoforte a Coda", instEpiano: "Piano Elettrico Classico", instEsynth: "Synth Elettrico", instPad: "Pad Analogico Morbido",
-      instOrgan: "Organo Caldo", instHarp: "Arpa da Sogno",
+
+
       shapeWheel: "Ciambella", shapeSlider: "Pillola", shapeGrid: "Griglia",
       handRight: "Destrimano", handLeft: "Mancino",
       accNone: "Modalità a Due Mani", accLeft: "Mano Sinistra + Inclinazione della Testa", accRight: "Mano Destra + Inclinazione della Testa",
       accKeyboard: "Solo Tastiera (fotocamera opzionale)", accTouch: "Pad Touch (senza fotocamera)", accHandsfree: "Senza Mani (Prossimamente)",
       browSustain: "Sustain con Sopracciglia", onLabel: "Attivo", offLabel: "Disattivato",
-      themeLiquid: "Vetro Liquido", themeY2k: "Cyber Y2K", themePink: "Rosa Tenue", themeBw: "Monocromatico", themeRetro: "CRT Retrò",
+
       bootWelcome: "Benvenuto in Choordination", boot1Title: "Su questo progetto",
       boot1Open: '<strong>Open source.</strong> Choordination è gratuito e open source: ogni riga di codice è pubblica nel <a href="{repo}" target="_blank" rel="noopener noreferrer">repository</a>.',
       boot1Privacy: '<strong>100% privato.</strong> Fotocamera e microfono vengono elaborati interamente su questo dispositivo, nel tuo browser. Nulla viene caricato o salvato: il microfono viene mixato solo nelle registrazioni che scegli di fare.',
@@ -1142,13 +1016,13 @@
       errModelsBody: "Non è stato possibile scaricare i modelli di tracciamento di mani e volto. Controlla la connessione a internet e riprova.",
       errCameraTitle: "Serve l'accesso alla fotocamera",
       errCameraBody: "Choordination non è riuscito ad accedere alla fotocamera. Fai clic sull'icona della fotocamera nella barra degli indirizzi (o controlla le impostazioni di sistema), consenti l'accesso per questo sito e premi Riprova. Ricorda: tutto il video resta sul tuo dispositivo.",
-      retry: "Riprova", useKeyboard: "Continua in modalità tastiera", useTouch: "Continua con i pad touch",
+      useKeyboard: "Continua in modalità tastiera", useTouch: "Continua con i pad touch",
       calibrating: "Calibrazione… mantieni il viso neutro",
       sustainOn: "SUSTAIN ATTIVO", playingLabel: "In riproduzione",
       nagTitle: "Sostieni Choordination",
       nagBody: "Ti piace creare con Choordination? Aiutaci a mantenere lo studio vivo, senza pubblicità e pieno di novità!",
       nagPatreon: "Sostienici su Patreon", nagContinue: "Continua a suonare", nagSkip: "Salta tra {s} s…",
-      supportLink: "Sostienici su Patreon", designedBy: "Progettato da",
+
       aboutTitle: "Informazioni su Choordination",
       aboutBody: 'Choordination è un sito web open source progettato e curato da Drephie, cantante e vocal coach. L\'idea alla base del progetto è rendere gli strumenti musicali accessibili a tutti: ogni riga di codice è pubblica nel <a href="{repo}" target="_blank" rel="noopener noreferrer">repository</a>.<br><br>È <strong>100% privato</strong>: tutto il video viene elaborato sul tuo dispositivo, nel tuo browser, e non viene mai caricato né salvato. È inoltre <strong>completamente senza pubblicità</strong> e sostenuto dagli utenti.<br><br>Per seguire aggiornamenti e altri progetti, o per <u><b>rimuovere la filigrana</b></u>, dai un\'occhiata al <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>!',
       aboutCredits: 'Suono di pianoforte: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> di Alexander Holm, con licenza <a href="https://creativecommons.org/licenses/by/3.0/deed.it" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
@@ -1163,11 +1037,11 @@
     }
   };
 
-  function t(key) {
-    const lang = languageSelector.value;
-    return (i18n[lang] && i18n[lang][key]) ?? i18n.en[key] ?? key;
-  }
-  function interp(str) { return String(str).replaceAll('{repo}', REPO_URL).replaceAll('{patreon}', PATREON_URL); }
+  const { t, interp, apply: applyI18n } = createI18n({
+    strings: mergeStrings(HUB_STRINGS, STRINGS),
+    getLang: () => languageSelector.value,
+    vars: { repo: REPO_URL, patreon: PATREON_URL },
+  });
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
   // --- SETTINGS PERSISTENCE ---
@@ -1203,164 +1077,18 @@
     document.body.setAttribute('data-theme', 'liquid');
   }
 
-  // --- ACCESSIBLE CUSTOM SELECTS (combobox + listbox pattern) ---
-  function closeAllSelect(except) {
-    document.querySelectorAll('.custom-select').forEach(cs => {
-      if (cs === except) return;
-      const list = cs.querySelector('.select-items');
-      const trig = cs.querySelector('.select-selected');
-      if (list) list.classList.add('select-hide');
-      if (trig) { trig.classList.remove('select-arrow-active'); trig.setAttribute('aria-expanded', 'false'); trig.removeAttribute('aria-activedescendant'); }
-    });
-  }
-  document.addEventListener('click', () => closeAllSelect(null));
+  // --- CUSTOM SELECTS: shared/ui/select.js ---
 
-  function buildCustomSelect(container) {
-    const sel = container.querySelector('select');
-    if (!sel) return;
-    container.querySelectorAll('.select-selected, .select-items').forEach(n => n.remove());
-
-    const labelEl = container.closest('.control-group')?.querySelector('label');
-    const listId = 'listbox-' + sel.id;
-    const trigger = document.createElement('div');
-    trigger.className = 'select-selected';
-    trigger.tabIndex = 0;
-    trigger.setAttribute('role', 'combobox');
-    trigger.setAttribute('aria-haspopup', 'listbox');
-    trigger.setAttribute('aria-expanded', 'false');
-    trigger.setAttribute('aria-controls', listId);
-    if (labelEl) trigger.setAttribute('aria-label', labelEl.textContent);
-
-    const list = document.createElement('div');
-    list.className = 'select-items select-hide';
-    list.id = listId;
-    list.setAttribute('role', 'listbox');
-
-    const optionEls = [];
-    let highlight = Math.max(0, sel.selectedIndex);
-
-    const syncTriggerText = () => {
-      const opt = sel.options[Math.max(0, sel.selectedIndex)];
-      trigger.textContent = opt ? opt.textContent : '';
-    };
-    const isOpen = () => !list.classList.contains('select-hide');
-    const open = () => {
-      closeAllSelect(container);
-      list.classList.remove('select-hide');
-      trigger.classList.add('select-arrow-active');
-      trigger.setAttribute('aria-expanded', 'true');
-      highlight = Math.max(0, sel.selectedIndex);
-      updateHighlight();
-    };
-    const close = () => {
-      list.classList.add('select-hide');
-      trigger.classList.remove('select-arrow-active');
-      trigger.setAttribute('aria-expanded', 'false');
-      trigger.removeAttribute('aria-activedescendant');
-    };
-    const updateHighlight = () => {
-      optionEls.forEach((o, i) => o.classList.toggle('option-highlight', i === highlight));
-      const o = optionEls[highlight];
-      if (o) { trigger.setAttribute('aria-activedescendant', o.id); o.scrollIntoView({ block: 'nearest' }); }
-    };
-    // Match by value (via selectedIndex), never by innerHTML.
-    const commit = (i) => {
-      if (!sel.options[i] || sel.options[i].disabled) return;
-      if (sel.selectedIndex !== i) {
-        sel.selectedIndex = i;
-        optionEls.forEach((o, j) => { o.classList.toggle('same-as-selected', j === i); o.setAttribute('aria-selected', String(j === i)); });
-        syncTriggerText();
-        sel.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-    };
-    const move = (delta) => {
-      let i = highlight;
-      for (let guard = 0; guard < sel.options.length; guard++) {
-        i = (i + delta + sel.options.length) % sel.options.length;
-        if (!sel.options[i].disabled) { highlight = i; break; }
-      }
-      updateHighlight();
-    };
-
-    [...sel.options].forEach((opt, i) => {
-      const o = document.createElement('div');
-      o.id = listId + '-opt-' + i;
-      o.setAttribute('role', 'option');
-      o.dataset.value = opt.value;
-      o.textContent = opt.textContent;
-      o.setAttribute('aria-selected', String(i === sel.selectedIndex));
-      if (i === sel.selectedIndex) o.classList.add('same-as-selected');
-      if (opt.disabled) { o.setAttribute('aria-disabled', 'true'); o.classList.add('option-disabled'); }
-      o.addEventListener('click', (e) => { e.stopPropagation(); if (opt.disabled) return; commit(i); close(); trigger.focus(); });
-      list.appendChild(o);
-      optionEls.push(o);
-    });
-    syncTriggerText();
-
-    trigger.addEventListener('click', (e) => { e.stopPropagation(); isOpen() ? close() : open(); });
-    trigger.addEventListener('keydown', (e) => {
-      switch (e.key) {
-        case 'ArrowDown': e.preventDefault(); isOpen() ? move(1) : open(); break;
-        case 'ArrowUp': e.preventDefault(); isOpen() ? move(-1) : open(); break;
-        case 'Enter': case ' ': e.preventDefault(); if (isOpen()) { commit(highlight); close(); } else open(); break;
-        case 'Home': if (isOpen()) { e.preventDefault(); highlight = -1; move(1); } break;
-        case 'End': if (isOpen()) { e.preventDefault(); highlight = 0; move(-1); } break;
-        case 'Escape': if (isOpen()) { e.preventDefault(); e.stopPropagation(); close(); } break;
-        case 'Tab': if (isOpen()) close(); break;
-      }
-    });
-
-    container.appendChild(trigger);
-    container.appendChild(list);
-  }
-  function setupCustomSelects() {
-    document.querySelectorAll('.custom-select').forEach(buildCustomSelect);
-  }
-
-  // --- MODAL MANAGER (dialog semantics, focus trap, Escape, focus return) ---
-  let openModalEl = null;
-  let modalOpener = null;
-
-  const focusablesIn = (el) => [...el.querySelectorAll('button, [href], input, select, [tabindex]:not([tabindex="-1"])')]
-    .filter(n => !n.disabled && n.offsetParent !== null);
-
-  function openModal(modal, opener) {
-    hideAllModals(false);
-    modal.style.display = 'flex';
-    openModalEl = modal;
-    modalOpener = opener || null;
-    const f = focusablesIn(modal);
-    (f.find(n => !n.classList.contains('close-btn')) || f[0] || modal).focus();
-  }
-  function hideAllModals(returnFocus = true) {
-    const nagWasOpen = patreonNag.style.display === 'flex';
-    allModals.forEach(m => m.style.display = 'none');
-    if (nagWasOpen) nagDismissed();
-    if (returnFocus && modalOpener && document.contains(modalOpener)) modalOpener.focus();
-    openModalEl = null;
-    modalOpener = null;
-  }
-  function currentDialog() {
-    if (openModalEl) return openModalEl;
-    if (bootModal.style.display !== 'none') return bootModal;
-    return null;
-  }
-  document.addEventListener('keydown', (e) => {
-    const modal = currentDialog();
-    if (!modal) return;
-    if (e.key === 'Escape') {
-      if (modal === patreonNag) { e.preventDefault(); dismissNag(); }
-      else if (modal !== bootModal) { e.preventDefault(); hideAllModals(); }
-      return;
-    }
-    if (e.key === 'Tab') {
-      const f = focusablesIn(modal);
-      if (f.length === 0) { e.preventDefault(); return; }
-      const first = f[0], last = f[f.length - 1];
-      if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
-    }
+  // --- MODALS (dialog semantics, focus trap, Escape, focus return: shared/ui/modal.js) ---
+  const modals = createModalManager({
+    modals: allModals,
+    fallback: () => (bootModal.style.display !== 'none' ? bootModal : null),
+    onHidden: (wasOpen) => { if (wasOpen.includes(patreonNag)) nagDismissed(); },
+    escapeAction: (modal) => (modal === patreonNag ? dismissNag : modal === bootModal ? 'ignore' : 'hide'),
   });
+  const openModal = modals.open;
+  const hideAllModals = modals.hideAll;
+  const currentDialog = modals.current;
 
   // --- KEY MENU (note spelling and chord theory live in shared/theory.js) ---
   function buildKeyOptions() {
@@ -1380,14 +1108,7 @@
 
   // --- LANGUAGE ---
   function updateLanguage() {
-    const lang = languageSelector.value;
-    document.documentElement.lang = lang;
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      el.innerHTML = interp(t(el.getAttribute('data-i18n')));
-    });
-    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
-      el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
-    });
+    applyI18n();
     buildKeyOptions();
     buildModifierCheckboxes();
     setupCustomSelects();
@@ -2022,7 +1743,7 @@
     if (!engineStarted || nagEligibleAt === null) return;
     if (patreonNag.style.display === 'flex') return;
     if (Date.now() < nagEligibleAt) return;
-    if (openModalEl || currentDialog()) return;
+    if (currentDialog()) return;
     if (isRecording) return;
     if (audioReady && Tone.Transport.state === 'started') { lastActivityTime = Date.now(); return; } // loops sounding
     if (currentlyPlayingKeys.length > 0) { lastActivityTime = Date.now(); return; }
