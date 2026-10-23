@@ -33,8 +33,22 @@
  *   midiToFreq(n)  equal temperament, A4 = 440 Hz (same numbers as Tone.js)
  *   MIDI_BASE, MAJOR_SCALE_STEPS, MINOR_SCALE_STEPS, DIATONIC_QUALITIES
  *
- * Tests: tests/theory.html checks all of this against a snapshot of the
- * original Choordination code.
+ * Smooth chords (root in the bass, the chord above moves as little as possible)
+ *   voiceChord(info, { prevUpper, tonicMidi }) -> { ...info, bass, upper }
+ *     info comes from getChordInfo. bass = the root an octave below root
+ *     position; upper = the close-position inversion nearest to prevUpper
+ *     (the previous chord's `upper`; null starts from root position), with
+ *     its lowest note in [tonicMidi - 5, tonicMidi + 7] and above the bass.
+ *     midiNotes/freqs are bass first, then upper low to high; noteNames are
+ *     the upper notes only, low to high (the bass root is implied by the
+ *     name, which is unchanged). Keep `upper` and pass it to the next call.
+ *     Example, C major: C (C2 | C3 E3 G3) -> F (F2 | C3 F3 A3) -> G (G2 | B2 D3 G3).
+ *   keyTonicMidi(key, octave)  the tonicMidi anchor for a key and octave
+ *   closeVoicings(pcs, lo, hi), voicingDistance(a, b)  the building blocks
+ *     (9ths fold into the octave: a first Cadd9 is voiced E3 G3 C4 D4)
+ *
+ * Tests: tests/theory.html checks getChordInfo against a snapshot of the
+ * original Choordination code, and voiceChord against known answers.
  */
 
 // --- NOTE SPELLING (key-signature aware) ---
@@ -210,4 +224,77 @@ export function getChordInfo({ key, degree = 0, modifiers = [], octave = 0, solf
     suffix = (suffix || 'maj') + '+' + (modifierSuffix(modifier2, baseThird, baseFifth, baseSeventh) || 'maj');
   }
   return { freqs, midiNotes, name: rootName + sep + suffix, noteNames };
+}
+
+// --- SMOOTH CHORDS (root in the bass, the chord above moves as little as possible) ---
+
+// MIDI note of the key's tonic in root position at this octave (C3 in
+// chromatic mode): the anchor that keeps smooth chords from drifting.
+export const keyTonicMidi = (key, octave = 0) => MIDI_BASE + (key.chromatic ? 0 : key.rootIdx) + octave * 12;
+
+// How far apart two voicings are: every note's distance to the nearest note
+// of the other voicing, both ways (works for chords of different sizes).
+export function voicingDistance(a, b) {
+  const near = (n, set) => Math.min(...set.map(m => Math.abs(n - m)));
+  return a.reduce((s, n) => s + near(n, b), 0) + b.reduce((s, n) => s + near(n, a), 0);
+}
+
+// Every close-position voicing (all notes within one octave, each inversion)
+// of the given pitch classes, listed in ascending order from the root, whose
+// lowest note lies in [lo, hi].
+export function closeVoicings(pcs, lo, hi) {
+  const out = [];
+  for (let r = 0; r < pcs.length; r++) {
+    const order = [...pcs.slice(r), ...pcs.slice(0, r)];
+    for (let bottom = lo; bottom <= hi; bottom++) {
+      if (pc(bottom) !== order[0]) continue;
+      const v = [bottom];
+      for (const p of order.slice(1)) {
+        let n = v[v.length - 1] + 1;
+        while (pc(n) !== p) n++;
+        v.push(n);
+      }
+      out.push(v);
+    }
+  }
+  return out;
+}
+
+// Turns a root-position chord from getChordInfo into a smooth one: the root
+// an octave down in the bass, and above it the close-position voicing nearest
+// to prevUpper (the upper notes of the chord played before; null for the
+// first chord, which then stays as close to root position as it can).
+export function voiceChord(info, { prevUpper = null, tonicMidi = MIDI_BASE } = {}) {
+  const bass = info.midiNotes[0] - 12;
+  const nameOf = {};
+  info.midiNotes.forEach((m, i) => { nameOf[pc(m)] = info.noteNames[i]; });
+  // Chord tones by pitch above the root, so a 9th folds down to a 2nd and
+  // every inversion is close position.
+  const rootPc = pc(info.midiNotes[0]);
+  const pcs = [...new Set(info.midiNotes.map(pc))].sort((a, b) => pc(a - rootPc) - pc(b - rootPc));
+  const ref = prevUpper && prevUpper.length ? prevUpper : info.midiNotes;
+  const mean = (v) => v.reduce((s, n) => s + n, 0) / v.length;
+  let lo = tonicMidi - 5, hi = tonicMidi + 7;
+  let candidates = [];
+  // The window always holds every inversion; only the "above the bass" rule
+  // can empty it, and then the next octave up is used.
+  for (let tries = 0; candidates.length === 0 && tries < 4; tries++, lo += 12, hi += 12) {
+    candidates = closeVoicings(pcs, lo, hi).filter(v => v[0] > bass);
+  }
+  let best = null, bestKey = null;
+  for (const v of candidates) {
+    const key = [voicingDistance(v, ref), Math.abs(mean(v) - mean(ref)), v[0]];
+    if (!best || key[0] < bestKey[0] || (key[0] === bestKey[0] && (key[1] < bestKey[1] || (key[1] === bestKey[1] && key[2] < bestKey[2])))) {
+      best = v; bestKey = key;
+    }
+  }
+  const midiNotes = [bass, ...best];
+  return {
+    ...info,
+    midiNotes,
+    freqs: midiNotes.map(midiToFreq),
+    noteNames: best.map(m => nameOf[pc(m)]),
+    bass,
+    upper: best,
+  };
 }

@@ -338,6 +338,16 @@
       </div>
     </div>
 
+    <div class="control-group">
+      <label data-i18n="chordStyle">Chord Style</label>
+      <div class="custom-select">
+        <select id="chord-style">
+          <option value="smooth" selected data-i18n="styleSmooth">Smooth (root in the bass)</option>
+          <option value="stacked" data-i18n="styleStacked">Stacked (root position)</option>
+        </select>
+      </div>
+    </div>
+
     <button id="open-modifiers-btn" class="settings-action-btn mob-hide" data-i18n="mods">Chord Modifiers...</button>
 
     <hr class="menu-divider">
@@ -611,7 +621,7 @@
   import { HandLandmarker, FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs";
   // (SRI cannot be applied to ES-module imports without an import map; the file is
   //  cached by the hub's service worker, ../sw.js, after first load.)
-  import { parseKey, keyRootName, keyChordNames, pickModifiers, getChordInfo as theoryChordInfo } from '../shared/theory.js';
+  import { parseKey, keyRootName, keyChordNames, pickModifiers, getChordInfo as theoryChordInfo, voiceChord, keyTonicMidi } from '../shared/theory.js';
   import { startAudio, createRack } from '../shared/sound.js';
   import { createI18n, mergeStrings } from '../shared/ui/i18n.js';
   import { HUB_STRINGS } from '../shared/ui/strings.js';
@@ -681,6 +691,7 @@
   const notationSelector = $("notation-selector");
   const volumeSelector = $("volume-selector");
   const octaveSelector = $("octave-selector");
+  const chordStyleSelector = $("chord-style");
 
   const bootTitle = $("boot-title");
   const bootStep1 = $("boot-step-1");
@@ -716,6 +727,7 @@
       menu: "Menu", settingsTitle: "Studio Settings",
       not: "Notation", oct: "Octave Shift",
       key: "Musical Key", mods: "Chord Modifiers...", modsTitle: "Chord Modifiers",
+      chordStyle: "Chord Style", styleSmooth: "Smooth (root in the bass)", styleStacked: "Stacked (root position)",
       acc: "Accessibility",
       leftShape: "Left Shape", rightShape: "Right Shape", handLayout: "Hand Layout",
       uiPos: "UI Positioning & Size...", uiPosTitle: "UI Positioning",
@@ -791,6 +803,7 @@
       menu: "Menú", settingsTitle: "Ajustes del Estudio",
       not: "Notación", oct: "Octava",
       key: "Tonalidad", mods: "Modificadores de Acordes...", modsTitle: "Modificadores de Acordes",
+      chordStyle: "Estilo de Acordes", styleSmooth: "Suave (fundamental en el bajo)", styleStacked: "Apilado (posición fundamental)",
       acc: "Accesibilidad",
       leftShape: "Forma Izq.", rightShape: "Forma Der.", handLayout: "Mano Dominante",
       uiPos: "Posición y Tamaño UI...", uiPosTitle: "Posición de la UI",
@@ -866,6 +879,7 @@
       menu: "Menu", settingsTitle: "Impostazioni Studio",
       not: "Notazione", oct: "Ottava",
       key: "Tonalità", mods: "Modificatori di Accordi...", modsTitle: "Modificatori di Accordi",
+      chordStyle: "Stile degli Accordi", styleSmooth: "Fluido (fondamentale al basso)", styleStacked: "Impilato (posizione fondamentale)",
       acc: "Accessibilità",
       leftShape: "Forma Sinistra", rightShape: "Forma Destra", handLayout: "Mano Dominante",
       uiPos: "Posizionamento UI...", uiPosTitle: "Posizionamento UI",
@@ -1154,19 +1168,29 @@
       currentScaleType = key.scaleType;
     }
     leftChordNames = keyChordNames(key, solfege);
+    lastUpper = null; // a new key starts its smooth chords afresh
     if (activeNoteIdx >= leftChordNames.length) activeNoteIdx = 0;
     updateModifiersList();
   }
 
+  // Smooth chords (Chord Style setting): the root in the bass, and the notes
+  // above moved as little as possible from the last chord played (lastUpper,
+  // set in playChord, so a held chord never re-voices itself).
+  let lastUpper = null;
+  const smoothChords = () => chordStyleSelector.value === 'smooth';
+
   // What the current gesture/keypress/tap means musically.
   function getChordInfo() {
-    return theoryChordInfo({
-      key: isChromatic ? { chromatic: true } : { chromatic: false, rootIdx: currentKeyRootIdx, scaleType: currentScaleType },
+    const key = isChromatic ? { chromatic: true } : { chromatic: false, rootIdx: currentKeyRootIdx, scaleType: currentScaleType };
+    const octave = parseInt(octaveSelector.value, 10);
+    const info = theoryChordInfo({
+      key,
       degree: Math.max(0, Math.min(leftChordNames.length - 1, activeNoteIdx)),
       modifiers: pickModifiers(currentModifiers, activeTypeIdx),
-      octave: parseInt(octaveSelector.value, 10),
+      octave,
       solfege: notationSelector.value === 'solfeggio',
     });
+    return smoothChords() ? voiceChord(info, { prevUpper: lastUpper, tonicMidi: keyTonicMidi(key, octave) }) : info;
   }
 
   // --- AUDIO ENGINE (the instrument rack lives in shared/sound.js) ---
@@ -1228,6 +1252,7 @@
     const now = Tone.now();
     if (!sustainActive()) releaseLiveVoices(now);
     instruments[currentInstrument].triggerAttack(info.freqs, now + 0.01);
+    if (info.upper) lastUpper = info.upper;
     liveNotes = liveNotes.concat(info.freqs);
     currentlyPlayingKeys = info.freqs;
     setChordDisplay(info);
@@ -2402,7 +2427,8 @@
     saveSettings();
   });
   volumeSelector.addEventListener('change', () => { applyVolume(); saveSettings(); });
-  octaveSelector.addEventListener('change', () => { releaseAudio(); saveSettings(); });
+  octaveSelector.addEventListener('change', () => { lastUpper = null; releaseAudio(); saveSettings(); });
+  chordStyleSelector.addEventListener('change', () => { lastUpper = null; releaseAudio(); });
   handednessMode.addEventListener('change', () => { updateTutorialText(); saveSettings(); });
   languageSelector.addEventListener('change', () => { updateLanguage(); saveSettings(); });
   accMode.addEventListener('change', () => {
