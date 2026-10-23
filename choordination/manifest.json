@@ -2,7 +2,7 @@
   "name": "Choordination Studio",
   "short_name": "Choordination",
   "description": "Turn hand gestures into chords, right in your browser. Free, open source, 100% on-device.",
-  "start_url": "./choordination.html",
+  "start_url": "./",
   "display": "standalone",
   "orientation": "landscape",
   "background_color": "#0f1419",

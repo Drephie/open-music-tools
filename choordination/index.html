@@ -309,6 +309,8 @@
     #boot-step-1, #boot-step-2 { display: flex; flex-direction: column; gap: 15px; }
     .about-text { font-size: 15px; line-height: 1.6; padding: 10px; margin: 0; }
     .about-text a { color: var(--color-right); font-weight: bold; }
+    .about-credits { font-size: 12px; line-height: 1.5; padding: 0 10px 10px; margin: 0; opacity: 0.75; }
+    .about-credits a { color: var(--color-right); }
 
     button.start-btn { padding: 15px 40px; font-size: 20px; font-weight: 900; cursor: pointer; background: transparent; border: 1px solid var(--border-panel); border-radius: 50px; color: var(--color-text); text-transform: uppercase; letter-spacing: 3px; transition: all 0.3s ease; font-family: var(--font-main); backdrop-filter: blur(5px); }
     button.start-btn:hover { transform: scale(1.05); background: rgba(255,255,255,0.2); border-color: #ffffff; }
@@ -697,6 +699,9 @@
     <p id="about-body" class="about-text" data-i18n="aboutBody">
        <!-- Injected via i18n -->
     </p>
+    <p class="about-credits" data-i18n="aboutCredits">
+       <!-- Injected via i18n -->
+    </p>
   </div>
 
   <!-- Patreon Nag Modal (idle-only, instantly dismissible) -->
@@ -975,6 +980,7 @@
       supportLink: "Support on Patreon", designedBy: "Designed by",
       aboutTitle: "About Choordination",
       aboutBody: 'Choordination is an open source website designed and curated by Drephie, a singer and vocal coach. The idea behind the project is to make music tools available to everyone — every line of code is public in the <a href="{repo}" target="_blank" rel="noopener noreferrer">repository</a>.<br><br>It is <strong>100% private</strong>: all video is processed on your device, in your browser, and is never uploaded or stored. It is <strong>completely ad-free</strong> and user-supported.<br><br>To follow updates and other projects, or to <u><b>get rid of the watermark</b></u>, check out the <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>!',
+      aboutCredits: 'Piano sound: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> by Alexander Holm, licensed under <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
       rotateTitle: "Rotate your device", rotateBody: "Choordination plays in landscape. Turn your device sideways to continue.",
       sustainLatch: "SUSTAIN",
       modTriadShort: "Triad", mod7Short: "7th",
@@ -1058,6 +1064,7 @@
       supportLink: "Apóyanos en Patreon", designedBy: "Diseñado por",
       aboutTitle: "Acerca de Choordination",
       aboutBody: 'Choordination es un sitio web de código abierto diseñado y cuidado por Drephie, cantante y coach vocal. La idea del proyecto es poner herramientas musicales al alcance de todo el mundo: cada línea de código es pública en el <a href="{repo}" target="_blank" rel="noopener noreferrer">repositorio</a>.<br><br>Es <strong>100% privado</strong>: todo el vídeo se procesa en tu dispositivo, dentro de tu navegador, y nunca se sube ni se almacena. Además es <strong>totalmente libre de anuncios</strong> y se financia gracias a la comunidad.<br><br>Para seguir las novedades y otros proyectos, o para <u><b>quitar la marca de agua</b></u>, ¡pásate por el <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>!',
+      aboutCredits: 'Sonido de piano: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> de Alexander Holm, con licencia <a href="https://creativecommons.org/licenses/by/3.0/deed.es" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
       rotateTitle: "Gira tu dispositivo", rotateBody: "Choordination se toca en horizontal. Gira tu dispositivo para continuar.",
       sustainLatch: "SUSTAIN",
       modTriadShort: "Tríada", mod7Short: "7ª",
@@ -1141,6 +1148,7 @@
       supportLink: "Sostienici su Patreon", designedBy: "Progettato da",
       aboutTitle: "Informazioni su Choordination",
       aboutBody: 'Choordination è un sito web open source progettato e curato da Drephie, cantante e vocal coach. L\'idea alla base del progetto è rendere gli strumenti musicali accessibili a tutti: ogni riga di codice è pubblica nel <a href="{repo}" target="_blank" rel="noopener noreferrer">repository</a>.<br><br>È <strong>100% privato</strong>: tutto il video viene elaborato sul tuo dispositivo, nel tuo browser, e non viene mai caricato né salvato. È inoltre <strong>completamente senza pubblicità</strong> e sostenuto dagli utenti.<br><br>Per seguire aggiornamenti e altri progetti, o per <u><b>rimuovere la filigrana</b></u>, dai un\'occhiata al <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>!',
+      aboutCredits: 'Suono di pianoforte: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> di Alexander Holm, con licenza <a href="https://creativecommons.org/licenses/by/3.0/deed.it" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
       rotateTitle: "Ruota il dispositivo", rotateBody: "Choordination si suona in orizzontale. Ruota il dispositivo per continuare.",
       sustainLatch: "SUSTAIN",
       modTriadShort: "Triade", mod7Short: "7ª",

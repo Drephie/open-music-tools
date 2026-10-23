@@ -3,8 +3,8 @@
  * models, Tone.js, Google Fonts, Salamander piano samples) so repeat visits
  * load instantly and work offline once primed.
  */
-const CACHE_NAME = 'choordination-v1';
-const APP_SHELL = ['./', './choordination.html', './manifest.json', './favicon.svg'];
+const CACHE_NAME = 'choordination-v2';
+const APP_SHELL = ['./', './index.html', './manifest.json', './favicon.svg'];
 const RUNTIME_HOSTS = [
   'cdnjs.cloudflare.com',   // Tone.js
   'cdn.jsdelivr.net',       // MediaPipe tasks-vision bundle + WASM
