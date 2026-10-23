@@ -9,6 +9,19 @@
  *   saveSettings(key, data)     saves it; silently does nothing when storage is
  *                               unavailable (private mode, blocked storage)
  *   applyTheme(theme)           sets <body data-theme>
+ *
+ * The theme and language are one choice for the whole hub (the home page and
+ * every tool), saved in localStorage under LOOK_KEY:
+ *   loadLook(saved)   { theme, lang } for this page. A value the hub has not
+ *                     saved yet comes from `saved` (the tool's own settings
+ *                     from before the hub shared them: { theme, lang }), and
+ *                     is then passed on to the hub; else 'liquid' and
+ *                     browserLanguage().
+ *   saveLook(changes) saves { theme } and/or { lang } for every tool
+ *   watchLook(apply)  calls apply({ theme, lang }) when another tab changes
+ *                     them, and when the browser's Back or Forward button
+ *                     brings this page back from its memory (it may show an
+ *                     older choice). apply must do nothing if nothing changed.
  *   closeOnBackdrop(modals)     a click outside the open window closes it
  *                               (modals: a shared/ui/modal.js manager)
  *   createSupportPrompt({ dialog, modals, t, isBusy, storageKey, idleMs, everyMs, waitSeconds })
@@ -52,6 +65,29 @@ export function saveSettings(key, data) {
 
 export function applyTheme(theme) {
   document.body.setAttribute('data-theme', theme);
+}
+
+export const LOOK_KEY = 'open-music-tools.look.v1';
+const validTheme = (v) => THEMES.some(([value]) => value === v);
+const validLang = (v) => Object.keys(LANGUAGE_NAMES).includes(v);
+
+export function loadLook(saved = {}) {
+  const hub = loadSettings(LOOK_KEY);
+  const passOn = {};
+  if (!validTheme(hub.theme) && validTheme(saved.theme)) passOn.theme = saved.theme;
+  if (!validLang(hub.lang) && validLang(saved.lang)) passOn.lang = saved.lang;
+  if (Object.keys(passOn).length) saveLook(passOn);
+  return {
+    theme: validTheme(hub.theme) ? hub.theme : passOn.theme || 'liquid',
+    lang: validLang(hub.lang) ? hub.lang : passOn.lang || browserLanguage(),
+  };
+}
+export function saveLook(changes) {
+  saveSettings(LOOK_KEY, { ...loadSettings(LOOK_KEY), ...changes });
+}
+export function watchLook(apply) {
+  window.addEventListener('storage', (e) => { if (e.key === LOOK_KEY || e.key === null) apply(loadLook()); });
+  window.addEventListener('pageshow', (e) => { if (e.persisted) apply(loadLook()); });
 }
 
 export function createSupportPrompt({

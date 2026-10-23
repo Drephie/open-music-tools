@@ -15,7 +15,7 @@ export const HUB_STRINGS = {
     supportLink: "Support on Patreon", designedBy: "Designed by",
     // Common controls
     lang: "Language", vol: "Master Volume", closeAria: "Close", retry: "Retry",
-    settings: "Settings", about: "About",
+    settings: "Settings", about: "About", home: "Home: all the tools",
     // Patreon window (shared/ui/page.js createSupportPrompt)
     supportContinue: "Continue", supportWait: "Continue in {s} s…",
     // Themes (shared/ui/themes.css)
@@ -33,7 +33,7 @@ export const HUB_STRINGS = {
     supportLink: "Apóyanos en Patreon", designedBy: "Diseñado por",
     // Common controls
     lang: "Idioma", vol: "Volumen", closeAria: "Cerrar", retry: "Reintentar",
-    settings: "Ajustes", about: "Información",
+    settings: "Ajustes", about: "Información", home: "Inicio: todas las herramientas",
     // Patreon window (shared/ui/page.js createSupportPrompt)
     supportContinue: "Continuar", supportWait: "Continuar en {s} s…",
     // Themes (shared/ui/themes.css)
@@ -51,7 +51,7 @@ export const HUB_STRINGS = {
     supportLink: "Sostienici su Patreon", designedBy: "Progettato da",
     // Common controls
     lang: "Lingua", vol: "Volume", closeAria: "Chiudi", retry: "Riprova",
-    settings: "Impostazioni", about: "Informazioni",
+    settings: "Impostazioni", about: "Informazioni", home: "Home: tutti gli strumenti",
     // Patreon window (shared/ui/page.js createSupportPrompt)
     supportContinue: "Continua", supportWait: "Continua tra {s} s…",
     // Themes (shared/ui/themes.css)
