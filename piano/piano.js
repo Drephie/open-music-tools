@@ -250,14 +250,18 @@ function letterKeys() {
   }
 }
 
-// Key sizes and scrolling: whole white keys, never half a key at the edge.
-let W = 54, visible = 12, firstWhite = 0, fitted = false;
+// Key sizes and scrolling. The keys fill the width exactly; scrolling follows
+// the finger smoothly and settles on a whole key, so no half key is left at
+// the edge. pos: white keys scrolled past the left edge.
+let W = 54, visible = 12, pos = 0, fitted = false;
+const keysOut = $('keys-out');
 function fitKeys() {
   const avail = keysWrap.clientWidth;
   if (!avail) return;
-  const center = firstWhite + visible / 2;
+  const center = pos + visible / 2;
   visible = Math.max(5, Math.round(avail / KEY_WIDTHS[settings.keySize]));
   W = avail / visible;
+  keysOut.textContent = visible;
   const BW = W * 0.62;
   for (const [m, el] of keyEls) {
     const x = whiteIndex.get(m) * W;
@@ -268,20 +272,27 @@ function fitKeys() {
   kb.style.setProperty('--kw', `${W}px`);
   if (settings.firstWhite < 0) {
     // First visit: start on middle C (C4 to the G above C5 on a phone), centred on wider screens.
-    setFirstWhite(whiteIndex.get(60) - Math.max(0, Math.floor((visible - 12) / 2)), false);
+    scrollKeys(whiteIndex.get(60) - Math.max(0, Math.floor((visible - 12) / 2)), { remember: false });
   } else if (fitted) {
-    setFirstWhite(Math.round(center - visible / 2));   // keep the middle of the view where it was
+    scrollKeys(center - visible / 2);   // keep the middle of the view where it was
   } else {
-    setFirstWhite(settings.firstWhite, false);
+    scrollKeys(settings.firstWhite, { remember: false });
   }
   fitted = true;
   placeTicks();
 }
-function setFirstWhite(i, remember = true) {
-  firstWhite = Math.max(0, Math.min(Math.round(i), whites - visible));
-  kb.style.transform = `translateX(${-firstWhite * W}px)`;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const EASE = '0.28s cubic-bezier(0.2, 0.7, 0.2, 1)';
+// glide: animate there (taps on the bar, octave steps, settling after a drag).
+// settle: end on a whole key and remember it; while dragging it stays false.
+function scrollKeys(p, { glide = false, settle = true, remember = settle } = {}) {
+  pos = Math.max(0, Math.min(settle ? Math.round(p) : p, whites - visible));
+  const anim = glide && !reduceMotion.matches;
+  kb.style.transition = anim ? `transform ${EASE}` : 'none';
+  thumb.style.transition = anim ? `left ${EASE}` : 'none';
+  kb.style.transform = `translateX(${-pos * W}px)`;
   drawThumb();
-  if (remember && settings.firstWhite !== firstWhite) { settings.firstWhite = firstWhite; save(); }
+  if (remember && settings.firstWhite !== pos) { settings.firstWhite = pos; save(); }
 }
 function setKeySize(i) {
   settings.keySize = Math.max(0, Math.min(KEY_WIDTHS.length - 1, i));
@@ -306,46 +317,52 @@ function labelTicks() {
   for (const tk of ticks) tk.el.textContent = (solfege() ? 'Do' : 'C') + tk.o;
 }
 function drawThumb() {
-  thumb.style.left = `${firstWhite / whites * 100}%`;
+  thumb.style.left = `${pos / whites * 100}%`;
   thumb.style.width = `${visible / whites * 100}%`;
-  const mid = firstWhite + visible / 2;
+  const mid = pos + visible / 2;
   let here = ticks[0];
   for (const tk of ticks) {
     const x = whiteIndex.get(tk.midi);
-    tk.el.classList.toggle('here', x >= firstWhite && x < firstWhite + visible);
+    tk.el.classList.toggle('here', x >= pos - 0.5 && x < pos + visible - 0.5);
     if (Math.abs(x + 3.5 - mid) < Math.abs(whiteIndex.get(here.midi) + 3.5 - mid)) here = tk;
   }
   track.setAttribute('aria-valuenow', here.o);
   track.setAttribute('aria-valuetext', (solfege() ? 'Do' : 'C') + here.o);
 }
+// Touching the bar glides there; dragging follows the finger; letting go settles.
 let scrubbing = null;
-function scrubTo(e) {
+function scrubTarget(e) {
   const p = toLocal(e.clientX, e.clientY), r = localRect(track);
   const frac = Math.max(0, Math.min(1, (p.x - r.left) / (r.right - r.left)));
-  setFirstWhite(frac * whites - visible / 2);
+  return frac * whites - visible / 2;
 }
 track.addEventListener('pointerdown', (e) => {
   if (e.button !== 0) return;
   e.preventDefault();
   scrubbing = e.pointerId;
   try { track.setPointerCapture(e.pointerId); } catch { /* pointer already gone */ }
-  scrubTo(e);
+  scrollKeys(scrubTarget(e), { glide: true });
 });
-track.addEventListener('pointermove', (e) => { if (scrubbing === e.pointerId) scrubTo(e); });
-['pointerup', 'pointercancel', 'lostpointercapture'].forEach((ev) => track.addEventListener(ev, () => { scrubbing = null; }));
+track.addEventListener('pointermove', (e) => { if (scrubbing === e.pointerId) scrollKeys(scrubTarget(e), { settle: false }); });
+['pointerup', 'pointercancel', 'lostpointercapture'].forEach((ev) => track.addEventListener(ev, (e) => {
+  if (scrubbing !== e.pointerId) return;
+  scrubbing = null;
+  scrollKeys(pos, { glide: true });
+}));
 track.addEventListener('keydown', (e) => {
   const step = { ArrowLeft: -7, ArrowRight: 7, PageUp: -7, PageDown: 7, Home: -99, End: 99 }[e.key];
   if (step === undefined) return;
   e.preventDefault();
-  setFirstWhite(firstWhite + step);
+  scrollKeys(pos + step, { glide: true });
 });
 // Mouse wheel or trackpad: sideways (or up and down) moves along the keyboard.
-let wheelRest = 0;
+let wheelTimer = null;
 function onWheel(e) {
   e.preventDefault();
-  wheelRest += Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-  const steps = Math.trunc(wheelRest / 40);
-  if (steps) { wheelRest -= steps * 40; setFirstWhite(firstWhite + steps); }
+  const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  scrollKeys(pos + d / W, { settle: false });
+  clearTimeout(wheelTimer);
+  wheelTimer = setTimeout(() => scrollKeys(pos, { glide: true }), 160);
 }
 keysWrap.addEventListener('wheel', onWheel, { passive: false });
 track.addEventListener('wheel', onWheel, { passive: false });
@@ -605,7 +622,7 @@ document.addEventListener('keydown', (e) => {
     letterKeys();
     // Keep the computer keys' octave on screen.
     const lo = whiteIndex.get(kbdBase), hi = whiteIndex.get(kbdBase + 12);
-    if (lo < firstWhite || hi >= firstWhite + visible) setFirstWhite(lo - Math.max(0, Math.floor((visible - 8) / 2)));
+    if (lo < pos || hi >= pos + visible) scrollKeys(lo - Math.max(0, Math.floor((visible - 8) / 2)), { glide: true });
   }
 });
 document.addEventListener('keyup', (e) => {

@@ -49,15 +49,7 @@
                 <label for="sound-select" class="visually-hidden" data-i18n="sound">Sound</label>
                 <div class="custom-select"><select id="sound-select"></select></div>
               </div>
-              <div class="stepper keys-stepper" role="group" aria-labelledby="keys-label">
-                <button id="keys-fewer" class="round-btn small" data-i18n-aria="keysFewer" aria-label="Fewer, bigger keys">−</button>
-                <span id="keys-label" class="stepper-label" data-i18n="keys">Keys</span>
-                <button id="keys-more" class="round-btn small" data-i18n-aria="keysMore" aria-label="More, smaller keys">+</button>
-              </div>
               <div class="bar-icons">
-                <button id="flip-btn" class="icon-btn" data-i18n-aria="flip" aria-label="Turn the piano around">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5.3"/><path d="M18 3v4h-4"/><path d="M20 12a8 8 0 0 1-14 5.3"/><path d="M6 21v-4h4"/></svg>
-                </button>
                 <button class="icon-btn about-btn" data-i18n-aria="about" aria-label="About">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
                 </button>
@@ -103,20 +95,32 @@
         <h2 id="settings-title" data-i18n="settings">Settings</h2>
         <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
       </div>
-      <div class="control-group">
+      <div class="setting-row control-group">
         <label for="theme-select" data-i18n="theme">Aesthetic Theme</label>
         <div class="custom-select"><select id="theme-select"></select></div>
       </div>
-      <div class="control-group">
+      <div class="setting-row control-group">
         <label for="lang-select" data-i18n="lang">Language</label>
         <div class="custom-select"><select id="lang-select"></select></div>
       </div>
-      <div class="control-group">
-        <div class="volume-head">
-          <label for="volume-slider" data-i18n="volume">Volume</label>
-          <output id="volume-out" for="volume-slider">100%</output>
+      <div class="setting-row">
+        <span id="keys-label" class="setting-label" data-i18n="keys">Keys on screen</span>
+        <div class="stepper" role="group" aria-labelledby="keys-label">
+          <button id="keys-fewer" class="round-btn small" data-i18n-aria="keysFewer" aria-label="Fewer, bigger keys">−</button>
+          <output id="keys-out" aria-live="polite">12</output>
+          <button id="keys-more" class="round-btn small" data-i18n-aria="keysMore" aria-label="More, smaller keys">+</button>
         </div>
+      </div>
+      <div class="setting-row volume-row">
+        <label for="volume-slider" data-i18n="volume">Volume</label>
         <input id="volume-slider" class="range" type="range" min="0" max="100" step="1" value="100">
+        <output id="volume-out" for="volume-slider">100%</output>
+      </div>
+      <div class="setting-row flip-row">
+        <span id="flip-label" class="setting-label" data-i18n="flip">Turn the piano around</span>
+        <button id="flip-btn" class="icon-btn" aria-labelledby="flip-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5.3"/><path d="M18 3v4h-4"/><path d="M20 12a8 8 0 0 1-14 5.3"/><path d="M6 21v-4h4"/></svg>
+        </button>
       </div>
     </div>
 
