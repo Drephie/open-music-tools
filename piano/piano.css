@@ -92,8 +92,16 @@ body.phone, body.compact { --fx: min(var(--frame-sides), 8px); --fy-top: min(var
   font-size: clamp(7px, calc(var(--kw) * 0.17), 12px);
 }
 .key.middle-c { box-shadow: inset -1px 0 0 var(--key-edge), inset 0 10px 10px -10px rgba(0, 0, 0, 0.45), inset 0 -5px 0 -1px var(--color-right); }
-.key.white.on { background: color-mix(in srgb, var(--color-right) 50%, var(--key-white)); }
-.key.black.on { background: color-mix(in srgb, var(--color-right) 70%, var(--key-black)); color: var(--color-text-pinched); }
+/* --lit: a sounding key. Ring notes show it as a light that fades with the sound
+   (--ring, the fade's length, set in piano.js). */
+.key.white { --lit: color-mix(in srgb, var(--color-right) 50%, var(--key-white)); }
+.key.black { --lit: color-mix(in srgb, var(--color-right) 70%, var(--key-black)); }
+.key.on { background: var(--lit); }
+.key.black.on { color: var(--color-text-pinched); }
+.key > span { position: relative; z-index: 1; }
+.key::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--lit); opacity: 0; pointer-events: none; }
+.key.ring::after { animation: ring-fade var(--ring, 2s) cubic-bezier(0.2, 0.6, 0.4, 1) forwards; }
+@keyframes ring-fade { from { opacity: 1; } to { opacity: 0; } }
 .key.white.drone { background: color-mix(in srgb, var(--color-right) 25%, var(--key-white)); }
 .key.black.drone { background: color-mix(in srgb, var(--color-right) 40%, var(--key-black)); }
 .key.drone::before {
@@ -190,9 +198,10 @@ body[data-theme="retro"].compact :is(.chord-notes, .chord-also, .seg button, .to
 body[data-theme="retro"] .scrub-link { font-size: 13px; }
 /* Monochrome and Retro: the accent is close to the key colour, so pressed and
    drone keys darken (or lighten) instead. */
-body:is([data-theme="bw"], [data-theme="retro"]) .key.white.on { background: color-mix(in srgb, var(--key-black) 38%, var(--key-white)); }
+body:is([data-theme="bw"], [data-theme="retro"]) .key.white { --lit: color-mix(in srgb, var(--key-black) 38%, var(--key-white)); }
 body:is([data-theme="bw"], [data-theme="retro"]) .key.white.drone { background: color-mix(in srgb, var(--key-black) 16%, var(--key-white)); }
-body:is([data-theme="bw"], [data-theme="retro"]) .key.black.on { background: color-mix(in srgb, var(--key-white) 50%, var(--key-black)); color: var(--key-white-text); }
+body:is([data-theme="bw"], [data-theme="retro"]) .key.black { --lit: color-mix(in srgb, var(--key-white) 50%, var(--key-black)); }
+body:is([data-theme="bw"], [data-theme="retro"]) .key.black.on { color: var(--key-white-text); }
 body:is([data-theme="bw"], [data-theme="retro"]) .key.black.drone { background: color-mix(in srgb, var(--key-white) 25%, var(--key-black)); }
 body:is([data-theme="bw"], [data-theme="retro"]) .key.white.drone::before { background: var(--key-black); box-shadow: none; }
 body:is([data-theme="bw"], [data-theme="retro"]) .key.black.drone::before { background: var(--key-white); box-shadow: none; }

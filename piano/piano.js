@@ -111,29 +111,58 @@ const sources = new Map();   // source id -> midi
 const holds = new Map();     // midi -> number of sources holding it
 let pedal = false;           // Space held: released keys keep ringing (Hold mode)
 
-// Ring: how long a note rings out after it is struck, as in Diapason (longer
-// for low notes: about 8 s at C2, 4.5 s at C4, under 3 s at C6).
-const ringSeconds = (m) => 1.1 + 2.6 * Math.pow(440 / midiToFreq(m), 0.55);
+// Ring: the note fades out gradually by itself from the moment it is struck,
+// like a piano note dying away, and its key's light fades with it. Low notes
+// fade more slowly: about 4 s at C2, 2.4 s at C4, 1.5 s at C6.
+const ringSeconds = (m) => 0.6 + 1.4 * Math.sqrt(440 / midiToFreq(m));
+// How long each sound keeps its attack before the fade (the Pad swells in slowly).
+const RING_HOLD = { piano: 0, epiano: 0.05, esynth: 0.05, pad: 0.45, organ: 0.06, harp: 0.02 };
 
 function startNote(m, { ring = false, drone = false } = {}) {
   stopNote(m);
   const inst = rack ? rack.instruments[settings.instrument] : null;
-  if (inst) inst.triggerAttack(midiToFreq(m), Tone.immediate());
-  const v = { inst, drone, timer: null };
+  const f = midiToFreq(m);
+  const hold = ring ? RING_HOLD[settings.instrument] ?? 0.05 : 0, fade = ring ? ringSeconds(m) : 0;
+  const sampler = inst instanceof Tone.Sampler;
+  if (inst) {
+    // The Sampler fixes a note's fade when the note starts.
+    const release = sampler ? inst.release : 0;
+    if (sampler && ring) inst.release = fade;
+    inst.triggerAttack(f, Tone.immediate());
+    if (sampler && ring) inst.release = release;
+  }
+  const v = { inst, drone, ring, timers: [] };
   if (ring) {
-    v.timer = setTimeout(() => {
+    v.timers.push(setTimeout(() => {
+      if (sounding.get(m) !== v || !inst) return;
+      if (sampler) { inst.triggerRelease(f, Tone.immediate()); return; }
+      // A synth's fade is its release: lengthen it for this one note only.
+      const release = inst.get().envelope.release;
+      inst.set({ envelope: { release: fade } });
+      inst.triggerRelease(f, Tone.immediate());
+      inst.set({ envelope: { release } });
+    }, hold * 1000));
+    v.timers.push(setTimeout(() => {
       if (sounding.get(m) !== v) return;
-      stopNote(m);
+      sounding.delete(m);   // faded out
       paintKeys();
       scheduleRender();
-    }, ringSeconds(m) * 1000);
+    }, (hold + fade) * 1000));
   }
   sounding.set(m, v);
+  // The key's light fades with the sound (restarted when the key is struck again).
+  const el = keyEls.get(m);
+  el.classList.remove('ring');
+  if (ring) {
+    el.style.setProperty('--ring', `${hold + fade}s`);
+    void el.offsetWidth;
+    el.classList.add('ring');
+  }
 }
 function stopNote(m) {
   const v = sounding.get(m);
   if (!v) return;
-  clearTimeout(v.timer);
+  v.timers.forEach(clearTimeout);
   sounding.delete(m);
   if (v.inst) v.inst.triggerRelease(midiToFreq(m), Tone.immediate());
 }
@@ -236,7 +265,8 @@ function paintKeys() {
   for (const [m, el] of keyEls) {
     const v = sounding.get(m);
     el.classList.toggle('drone', !!(v && v.drone));
-    el.classList.toggle('on', (!!v && !v.drone) || (holds.has(m) && settings.mode !== 'drone'));
+    el.classList.toggle('ring', !!(v && v.ring));
+    el.classList.toggle('on', (!!v && !v.drone && !v.ring) || (holds.has(m) && settings.mode === 'hold'));
   }
   labelKeys();
 }
