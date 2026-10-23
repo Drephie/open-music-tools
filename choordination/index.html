@@ -194,6 +194,8 @@
 
     .modifier-list { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border: 1px solid var(--border-panel); }
     .modifier-list label { font-size: 12px; text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .rec-voice { font-size: 13px; text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .rec-voice input { cursor: pointer; transform: scale(1.2); accent-color: var(--color-left); }
     .modifier-list input { cursor: pointer; transform: scale(1.2); }
 
     /* --- TOUCH-PADS MODE (accessibility: "Touch Pads (no camera)") --- */
@@ -602,6 +604,7 @@
        <button class="close-btn modal-close" data-i18n-aria="closeAria" aria-label="Close">×</button>
     </div>
     <p class="modal-note" data-i18n="recChoiceBody">What would you like to capture?</p>
+    <label class="rec-voice"><input type="checkbox" id="rec-voice" checked> <span data-i18n="recVoice">🎤 Record my voice</span></label>
     <p class="modal-note" data-i18n="recHeadphones">🎧 Recording your voice? Wear headphones. With the sound on speakers, the microphone picks up the instruments and your voice ends up very quiet in the recording.</p>
     <button id="rec-audio-btn" class="settings-action-btn" data-i18n="recAudio">🎙 Audio only</button>
     <button id="rec-screen-btn" class="settings-action-btn" data-i18n="recScreen">🖥 Screen + audio</button>
@@ -717,6 +720,7 @@
   const touchSettingsBtn = $("touch-settings-btn");
 
   const recChoiceModal = $("rec-choice-modal");
+  const recVoiceToggle = $("rec-voice");
 
   const allModals = [controlsPanel, modifiersModal, uiLayoutModal, tutorialModal, logoInfoModal, patreonNag, recChoiceModal];
 
@@ -738,6 +742,7 @@
       aboutAria: "About Choordination", touchSettingsAria: "Settings",
       recChoiceTitle: "Record", recChoiceBody: "What would you like to capture?",
       recHeadphones: "🎧 Recording your voice? Wear headphones. With the sound on speakers, the microphone picks up the instruments and your voice ends up very quiet in the recording.",
+      recVoice: "🎤 Record my voice",
       recAudio: "🎙 Audio only", recScreen: "🖥 Screen + audio",
       ariaLX: "Left UI horizontal position", ariaLY: "Left UI vertical position", ariaLS: "Left UI size",
       ariaRX: "Right UI horizontal position", ariaRY: "Right UI vertical position", ariaRS: "Right UI size",
@@ -814,6 +819,7 @@
       aboutAria: "Acerca de Choordination", touchSettingsAria: "Ajustes",
       recChoiceTitle: "Grabar", recChoiceBody: "¿Qué quieres capturar?",
       recHeadphones: "🎧 ¿Vas a grabar tu voz? Usa auriculares. Con el sonido por los altavoces, el micrófono capta los instrumentos y tu voz queda muy baja en la grabación.",
+      recVoice: "🎤 Grabar mi voz",
       recAudio: "🎙 Solo audio", recScreen: "🖥 Pantalla + audio",
       ariaLX: "Posición horizontal de la UI izquierda", ariaLY: "Posición vertical de la UI izquierda", ariaLS: "Tamaño de la UI izquierda",
       ariaRX: "Posición horizontal de la UI derecha", ariaRY: "Posición vertical de la UI derecha", ariaRS: "Tamaño de la UI derecha",
@@ -890,6 +896,7 @@
       aboutAria: "Informazioni su Choordination", touchSettingsAria: "Impostazioni",
       recChoiceTitle: "Registra", recChoiceBody: "Cosa vuoi registrare?",
       recHeadphones: "🎧 Registri la tua voce? Usa le cuffie. Con il suono dalle casse, il microfono capta gli strumenti e la tua voce risulta molto bassa nella registrazione.",
+      recVoice: "🎤 Registra la mia voce",
       recAudio: "🎙 Solo audio", recScreen: "🖥 Schermo + audio",
       ariaLX: "Posizione orizzontale della UI sinistra", ariaLY: "Posizione verticale della UI sinistra", ariaLS: "Dimensione della UI sinistra",
       ariaRX: "Posizione orizzontale della UI destra", ariaRY: "Posizione verticale della UI destra", ariaRS: "Dimensione della UI destra",
@@ -1351,14 +1358,18 @@
     updateRecordButtons();
   }
   // The REC button first asks what to capture: just the audio, or the screen too.
+  let recStarting = false; // true while the browser asks for the microphone
   function toggleRecording(opener) {
-    if (!audioReady || !recorder) return;
+    if (!audioReady || !recorder || recStarting) return;
     if (isRecording) { stopRecording(); return; }
     $("rec-screen-btn").style.display = navigator.mediaDevices?.getDisplayMedia ? '' : 'none';
     openModal(recChoiceModal, opener || null);
   }
-  function startAudioRecording() {
+  async function startAudioRecording() {
     hideAllModals();
+    recStarting = true;
+    await connectVoice();
+    recStarting = false;
     recMode = 'audio';
     recorder.start();
     beginRecordingUI();
@@ -1379,6 +1390,10 @@
       // Cap the capture at 30 fps so software encoders don't choke the UI.
       stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: false });
     } catch { return; } // user dismissed the browser's screen picker
+    // Ask for the mic only after the screen picker: the picker needs the click's user activation.
+    recStarting = true;
+    await connectVoice();
+    recStarting = false;
     recMode = 'screen';
     screenStream = stream;
     const mixed = new MediaStream([...stream.getVideoTracks(), ...streamDest.stream.getAudioTracks()]);
@@ -1414,8 +1429,10 @@
     updateRecordButtons();
     if (recMode === 'screen') {
       if (screenRecorder && screenRecorder.state !== 'inactive') screenRecorder.stop(); // onstop finalizes
+      disconnectVoice();
     } else {
       const blob = await recorder.stop();
+      disconnectVoice();
       showFinalizing();
       await nextPaint();
       try {
@@ -1617,28 +1634,57 @@
     cameraReady = true;
     lastVideoTime = -1;
     resetCalibration();
-    hookMicToRecordings();
   }
-  // Route the mic into BOTH recording paths (Tone.Recorder for audio takes and
-  // streamDest for screen recordings) so a singer's voice lands in the file.
-  let micTapSrc = null, micTapGain = null;
-  function hookMicToRecordings() {
-    if (!audioReady || !currentStream || micTapSrc) return;
-    if (currentStream.getAudioTracks().length === 0) return;
+  // --- VOICE IN RECORDINGS ("Record my voice" switch in the recording window) ---
+  // While a recording with the switch on runs, the mic is routed into BOTH
+  // recording paths (Tone.Recorder for audio takes and streamDest for screen
+  // recordings). Camera modes reuse the camera's mic; keyboard and touch modes
+  // ask for the mic when such a recording starts and close it when it ends.
+  // The mic is never monitored, so there is no feedback.
+  let micTapSrc = null, micTapGain = null, micTapStream = null, micOnlyStream = null;
+  function closeMicTap() {
+    try { if (micTapSrc) micTapSrc.disconnect(); if (micTapGain) micTapGain.disconnect(); } catch { /* ignore */ }
+    micTapSrc = null; micTapGain = null; micTapStream = null;
+  }
+  async function connectVoice() {
+    if (!recVoiceToggle.checked) return;
+    let stream = currentStream && currentStream.getAudioTracks().length ? currentStream : null;
+    if (!stream) {
+      try {
+        micOnlyStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+        stream = micOnlyStream;
+      } catch (err) {
+        // No mic or permission refused: record the instruments only.
+        console.warn('Microphone unavailable', err);
+        recVoiceToggle.checked = false;
+        return;
+      }
+    }
     try {
-      const rawCtx = Tone.getContext().rawContext;
-      micTapSrc = rawCtx.createMediaStreamSource(currentStream);
-      micTapGain = rawCtx.createGain();
-      micTapGain.gain.value = 1;
-      micTapSrc.connect(micTapGain);
+      if (micTapStream !== stream) {
+        closeMicTap();
+        const rawCtx = Tone.getContext().rawContext;
+        micTapSrc = rawCtx.createMediaStreamSource(stream);
+        micTapGain = rawCtx.createGain();
+        micTapGain.gain.value = 1;
+        micTapSrc.connect(micTapGain);
+        micTapStream = stream;
+      }
       if (streamDest) micTapGain.connect(streamDest);
       if (recorder) Tone.connect(micTapGain, recorder);
     } catch (err) { console.warn('Mic tap failed', err); }
   }
+  function disconnectVoice() {
+    try { if (micTapGain) micTapGain.disconnect(); } catch { /* ignore */ }
+    if (micOnlyStream) {
+      if (micTapStream === micOnlyStream) closeMicTap();
+      micOnlyStream.getTracks().forEach(tr => tr.stop());
+      micOnlyStream = null;
+    }
+  }
   function stopCamera() {
     if (currentStream) currentStream.getTracks().forEach(tr => tr.stop());
-    try { if (micTapSrc) micTapSrc.disconnect(); if (micTapGain) micTapGain.disconnect(); } catch { /* ignore */ }
-    micTapSrc = null; micTapGain = null;
+    if (micTapStream && micTapStream === currentStream) closeMicTap();
     currentStream = null;
     video.srcObject = null;
     cameraReady = false;
@@ -1661,7 +1707,6 @@
   function finishStartup() {
     uiLayer.style.display = 'none';
     applyTouchClass();
-    hookMicToRecordings(); // audio + camera may finish in either order
     if (!engineStarted) {
       engineStarted = true;
       document.body.classList.add('engine-on');
