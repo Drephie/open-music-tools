@@ -1,6 +1,6 @@
 # Roadmap
 
-**Status (2026-10-23):** Phase 0 and the Phase 1 engine split are done: `shared/` holds theory, sound, transport and ui, and Choordination runs on them. After Drephie's hand test, Choordination lost the YOLO sign and the loop station and gained a headphones tip for recording. Next: the Choordination changes Drephie picks (list below), then Phase 2.
+**Status (2026-10-23):** Phase 0 and the Phase 1 engine split are done: `shared/` holds theory, sound, transport and ui, and Choordination runs on them. After Drephie's hand test, Choordination lost the YOLO sign and the loop station, and gained smooth chords (Chord Style setting), a "Record my voice" switch and a headphones tip. Next: Drephie listens to those, then picks the remaining Choordination changes (list below) or moves to Phase 2.
 
 ## Tools in scope
 
@@ -59,11 +59,11 @@ After Phase 1, phases 2 to 5 don't depend on each other.
 
 Removed after Drephie's hand test (2026-10-23): the YOLO sign (didn't work) and the loop station (too complicated, not useful). Don't bring them back without asking.
 
-- Smooth voice leading (closest inversion) instead of always playing root position
+- Done: smooth chords (Chord Style, on by default): the root in the bass and the chord above in the closest inversion to the previous one; the note list shows the notes above the bass. `voiceChord` in `shared/theory.js`.
+- Done: voice in keyboard and touch recordings ("Record my voice" switch, on by default).
+- Check with Drephie: "7th (Auto)" gives every major-quality degree a major 7th, so V in a major key plays Amaj7 (A C# E G#) in D major instead of the A7 the key contains. Choordination always did this.
 - m7♭5 as its own modifier; 11ths and 13ths; slash chords and bass notes
 - Web MIDI output to control a DAW
-- Fix (existed before Phase 1): on a phone held upright, the welcome screen's footer links overlap and the CHOORDINATION watermark is cut off
-- Voice in recordings in keyboard and touch modes: today the microphone is only requested together with the camera, so those modes record the instruments only
 - Drephie's own list
 
 ## Open decisions
