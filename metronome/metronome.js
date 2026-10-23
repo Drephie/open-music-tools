@@ -7,7 +7,7 @@ import { LANGUAGES, mergeStrings, createI18n } from '../shared/ui/i18n.js';
 import { HUB_STRINGS } from '../shared/ui/strings.js';
 import { setupCustomSelects } from '../shared/ui/select.js';
 import { createModalManager } from '../shared/ui/modal.js';
-import { THEMES, LANGUAGE_NAMES, PATREON_URL, browserLanguage, loadSettings, saveSettings, applyTheme, closeOnBackdrop } from '../shared/ui/page.js';
+import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, browserLanguage, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
 import { METRONOME_STRINGS } from './strings.js';
 
@@ -43,7 +43,7 @@ const save = () => saveSettings(SETTINGS_KEY, settings);
 const i18n = createI18n({
   strings: mergeStrings(HUB_STRINGS, METRONOME_STRINGS),
   getLang: () => settings.lang,
-  vars: { patreon: PATREON_URL },
+  vars: { patreon: PATREON_URL, instagram: DESIGNER_URL },
 });
 const { t } = i18n;
 
@@ -55,7 +55,7 @@ const bpbOut = $('bpb-out');
 const subdivSelect = $('subdiv-select'), soundSelect = $('sound-select');
 const volSlider = $('volume-slider'), volOut = $('volume-out'), volNote = $('volume-note'), volBox = document.querySelector('.volume');
 const themeSelect = $('theme-select'), langSelect = $('lang-select');
-const settingsModal = $('settings-modal'), aboutModal = $('about-modal');
+const settingsModal = $('settings-modal'), aboutModal = $('about-modal'), supportModal = $('support-modal');
 
 // --- SOUND ---
 let clicks = null, loop = null, playing = false;
@@ -146,6 +146,7 @@ function lightBeat(beat) {
 function renderDots() {
   const n = settings.beatsPerBar;
   dotsEl.style.setProperty('--cols', n <= 6 ? n : Math.ceil(n / 2));
+  dotsEl.classList.toggle('two-rows', n > 6);
   while (dotsEl.children.length > n) dotsEl.lastElementChild.remove();
   while (dotsEl.children.length < n) {
     const i = dotsEl.children.length;
@@ -181,7 +182,7 @@ function setBeatsPerBar(n) {
 function setTempo(v) {
   settings.bpm = clampBpm(Math.round(v));
   if (playing) Tone.Transport.bpm.value = settings.bpm;
-  if (document.activeElement !== bpmInput) bpmInput.value = settings.bpm;
+  if (document.activeElement !== bpmInput) { bpmInput.value = settings.bpm; fitBpmInput(); }
   bpmSlider.value = settings.bpm;
   bpmSlider.style.setProperty('--fill', `calc(12px + (100% - 24px) * ${(settings.bpm - 40) / 200})`);
   showTempoName();
@@ -195,14 +196,28 @@ function showTempoName() {
   bpmSlider.setAttribute('aria-valuetext', `${settings.bpm} ${t('bpmUnit')}, ${word}`);
 }
 
+// The number is as wide as its digits, so "BPM" can sit right next to it on phones.
+// Measured in the current font, so it follows theme, screen size and font loading.
+const measure = document.createElement('canvas').getContext('2d');
+function fitBpmInput() {
+  const cs = getComputedStyle(bpmInput);
+  measure.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+  bpmInput.style.width = `${Math.ceil(measure.measureText(bpmInput.value || '00').width) + 6}px`;
+  // A theme's font loads the first time it is used: measure again once it has.
+  if (document.fonts && !document.fonts.check(measure.font)) document.fonts.load(measure.font).then(fitBpmInput, () => {});
+}
+bpmInput.addEventListener('input', fitBpmInput);
+window.addEventListener('resize', fitBpmInput);
+document.fonts?.ready.then(fitBpmInput);
 bpmInput.addEventListener('focus', () => bpmInput.select());
 bpmInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') bpmInput.blur(); });
 bpmInput.addEventListener('change', () => {
   const v = parseInt(bpmInput.value, 10);
   if (isNaN(v)) bpmInput.value = settings.bpm;
   else { setTempo(v); bpmInput.value = settings.bpm; }
+  fitBpmInput();
 });
-bpmInput.addEventListener('blur', () => { bpmInput.value = settings.bpm; });
+bpmInput.addEventListener('blur', () => { bpmInput.value = settings.bpm; fitBpmInput(); });
 bpmSlider.addEventListener('input', () => setTempo(Number(bpmSlider.value)));
 
 // − / + buttons: one step per press, and holding keeps stepping.
@@ -264,16 +279,22 @@ function setVolume(v) {
 }
 volSlider.addEventListener('input', () => setVolume(Number(volSlider.value)));
 
-// --- SETTINGS AND ABOUT WINDOWS ---
-const modals = createModalManager({ modals: [settingsModal, aboutModal] });
+// --- SETTINGS, ABOUT AND PATREON WINDOWS ---
+const modals = createModalManager({
+  modals: [settingsModal, aboutModal, supportModal],
+  escapeAction: (m) => (m === supportModal && support.locked() ? 'ignore' : 'hide'),
+});
 closeOnBackdrop(modals);
-document.querySelectorAll('.centered-modal .close-btn').forEach((b) => b.addEventListener('click', () => modals.hideAll()));
+document.querySelectorAll('.modal-header .close-btn').forEach((b) => b.addEventListener('click', () => modals.hideAll()));
+// After 30 s untouched, coming back opens the Patreon window (at most every 40 min).
+// Playing counts as use, so it never interrupts someone practising.
+const support = createSupportPrompt({ dialog: supportModal, modals, t, isBusy: () => playing });
 $('settings-btn').addEventListener('click', (e) => modals.open(settingsModal, e.currentTarget));
 $('about-btn').addEventListener('click', (e) => modals.open(aboutModal, e.currentTarget));
 
 themeSelect.innerHTML = THEMES.map(([value, key]) => `<option value="${value}" data-i18n="${key}"></option>`).join('');
 langSelect.innerHTML = LANGUAGES.map((l) => `<option value="${l}">${LANGUAGE_NAMES[l]}</option>`).join('');
-themeSelect.addEventListener('change', () => { settings.theme = themeSelect.value; applyTheme(settings.theme); save(); });
+themeSelect.addEventListener('change', () => { settings.theme = themeSelect.value; applyTheme(settings.theme); fitBpmInput(); save(); });
 langSelect.addEventListener('change', () => { settings.lang = langSelect.value; applyLanguage(); save(); });
 
 function applyLanguage() {
