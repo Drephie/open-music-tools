@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Piano</title>
+  <meta name="description" content="A free, open-source piano that names the chords you play. Runs in your browser; nothing is uploaded.">
+  <meta name="theme-color" content="#0f1419">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" integrity="sha384-c6Uo4N9c3SOEigMVzP6IshUG1wQ5uMp3xeoQFiHWAQ86joWdgyajkvopySyKy/Z6" crossorigin="anonymous"></script>
+  <!-- Google Fonts CSS is UA-dependent, so SRI cannot be applied to it. -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/ui/themes.css">
+  <link rel="stylesheet" href="../shared/ui/select.css">
+  <link rel="stylesheet" href="../shared/ui/page.css">
+  <link rel="stylesheet" href="piano.css">
+</head>
+<body data-theme="liquid">
+  <!-- The stage holds everything; on an upright phone it is drawn turned sideways. -->
+  <div id="stage">
+    <div id="theme-frame" aria-hidden="true"></div>
+    <div class="page piano-page">
+      <header class="tool-header">
+        <h1 class="tool-title" data-i18n="title">Piano</h1>
+        <div class="header-actions">
+          <button class="icon-btn about-btn" data-i18n-aria="about" aria-label="About">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
+          </button>
+          <button class="icon-btn settings-btn" data-i18n-aria="settings" aria-label="Settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="piano-main">
+        <section class="pbar">
+          <div id="readout" class="readout" aria-live="polite">
+            <div class="chord-big"><span id="chord-root">C</span><span id="chord-qual" class="chord-qual"></span></div>
+            <div class="chord-lines">
+              <div id="chord-words" class="chord-words"></div>
+              <div id="chord-notes" class="chord-notes"></div>
+              <div id="chord-also" class="chord-also"></div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="ctrl-row">
+              <div class="control-group sound-group">
+                <label for="sound-select" class="visually-hidden" data-i18n="sound">Sound</label>
+                <div class="custom-select"><select id="sound-select"></select></div>
+              </div>
+              <div class="stepper keys-stepper" role="group" aria-labelledby="keys-label">
+                <button id="keys-fewer" class="round-btn small" data-i18n-aria="keysFewer" aria-label="Fewer, bigger keys">−</button>
+                <span id="keys-label" class="stepper-label" data-i18n="keys">Keys</span>
+                <button id="keys-more" class="round-btn small" data-i18n-aria="keysMore" aria-label="More, smaller keys">+</button>
+              </div>
+              <div class="bar-icons">
+                <button id="flip-btn" class="icon-btn" data-i18n-aria="flip" aria-label="Turn the piano around">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5.3"/><path d="M18 3v4h-4"/><path d="M20 12a8 8 0 0 1-14 5.3"/><path d="M6 21v-4h4"/></svg>
+                </button>
+                <button class="icon-btn about-btn" data-i18n-aria="about" aria-label="About">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
+                </button>
+                <button class="icon-btn settings-btn" data-i18n-aria="settings" aria-label="Settings">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="ctrl-row">
+              <div id="mode-seg" class="seg" role="group" data-i18n-aria="modeGroup" aria-label="How a key sounds">
+                <button data-mode="hold" aria-pressed="true" data-i18n="modeHold">Hold</button>
+                <button data-mode="ring" aria-pressed="false" data-i18n="modeRing">Ring</button>
+                <button data-mode="drone" aria-pressed="false" data-i18n="modeDrone">Drone</button>
+              </div>
+              <button id="names-btn" class="toggle" aria-pressed="true" data-i18n="names">Names</button>
+              <button id="solfege-btn" class="toggle" aria-pressed="false" data-i18n-aria="solfegeAria" aria-label="Note names: Do Re Mi or C D E">C</button>
+            </div>
+          </div>
+        </section>
+
+        <div id="keys-wrap" class="keys-wrap" role="group" data-i18n-aria="keysAria" aria-label="Piano keys">
+          <div id="kb" class="kb"></div>
+          <p id="loading" class="loading" hidden data-i18n="loading">Loading the piano sound…</p>
+        </div>
+
+        <div class="scrub-row">
+          <a class="scrub-link support-link" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer">Patreon</a>
+          <div id="track" class="track" role="slider" tabindex="0" data-i18n-aria="scrollAria" aria-label="Move along the keyboard" aria-valuemin="1" aria-valuemax="7" aria-valuenow="4">
+            <div id="thumb" class="thumb"></div>
+          </div>
+          <a class="scrub-link designer-link" href="https://instagram.com/drephie" target="_blank" rel="noopener noreferrer">@drephie</a>
+        </div>
+      </main>
+
+      <footer class="tool-footer">
+        <a class="support-link" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+        <span class="designer-credit"><span data-i18n="designedBy">Designed by</span> <a href="https://instagram.com/drephie" target="_blank" rel="noopener noreferrer">@drephie</a></span>
+      </footer>
+    </div>
+
+    <div id="settings-modal" class="centered-modal has-dropdowns" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1" style="display:none">
+      <div class="modal-header">
+        <h2 id="settings-title" data-i18n="settings">Settings</h2>
+        <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+      </div>
+      <div class="control-group">
+        <label for="theme-select" data-i18n="theme">Aesthetic Theme</label>
+        <div class="custom-select"><select id="theme-select"></select></div>
+      </div>
+      <div class="control-group">
+        <label for="lang-select" data-i18n="lang">Language</label>
+        <div class="custom-select"><select id="lang-select"></select></div>
+      </div>
+      <div class="control-group">
+        <div class="volume-head">
+          <label for="volume-slider" data-i18n="volume">Volume</label>
+          <output id="volume-out" for="volume-slider">100%</output>
+        </div>
+        <input id="volume-slider" class="range" type="range" min="0" max="100" step="1" value="100">
+      </div>
+    </div>
+
+    <div id="about-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="about-title" tabindex="-1" style="display:none">
+      <div class="modal-header">
+        <h2 id="about-title" data-i18n="aboutTitle">About the Piano</h2>
+        <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+      </div>
+      <p class="about-text" data-i18n="aboutBody"></p>
+      <p class="about-small" data-i18n="aboutCredits"></p>
+      <a class="btn patreon-btn" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+      <p class="about-small computer-only" data-i18n="aboutKeys"></p>
+    </div>
+
+    <div id="support-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="support-title" aria-describedby="support-body" style="display:none">
+      <div class="centered-modal support-card">
+        <button class="close-btn support-close" data-i18n-aria="closeAria" aria-label="Close" hidden>×</button>
+        <h2 id="support-title" data-i18n="supportTitle">Support the Piano</h2>
+        <p id="support-body" data-i18n="supportBody"></p>
+        <a class="btn patreon-btn" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+        <button class="btn support-continue" disabled></button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="piano.js"></script>
+</body>
+</html>

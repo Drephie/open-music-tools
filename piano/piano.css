@@ -1,0 +1,193 @@
+/* piano/piano.css: the Piano's layout. Page parts (header, buttons, windows,
+ * footer) come from shared/ui/page.css.
+ * Everything lives in #stage, which piano.js sizes to the window, or turns
+ * sideways on an upright phone (body.turned; body.flipped turns it the other
+ * way round). body.compact: a short stage (a sideways phone): no title or
+ * footer, the About and Settings buttons in the bar, the footer links beside
+ * the scroll bar. Sizes in compact are plain px, since vw/vh would measure
+ * the upright screen when the stage is turned.
+ */
+
+html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+body { min-height: 0; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* The safe areas (notch, home bar) follow the turn: on an upright phone the
+   screen's top edge is the stage's left edge. */
+#stage {
+  position: fixed; top: 0; left: 0; overflow: hidden; container-type: size;
+  --safe-t: env(safe-area-inset-top); --safe-r: env(safe-area-inset-right);
+  --safe-b: env(safe-area-inset-bottom); --safe-l: env(safe-area-inset-left);
+}
+body.turned #stage {
+  transform-origin: 0 0; transform: rotate(90deg) translateY(-100%);
+  --safe-t: env(safe-area-inset-right); --safe-r: env(safe-area-inset-bottom);
+  --safe-b: env(safe-area-inset-left); --safe-l: env(safe-area-inset-top);
+}
+body.turned.flipped #stage {
+  transform: rotate(-90deg) translateX(-100%);
+  --safe-t: env(safe-area-inset-left); --safe-r: env(safe-area-inset-top);
+  --safe-b: env(safe-area-inset-right); --safe-l: env(safe-area-inset-bottom);
+}
+/* Thin theme frames on phones and short windows, so they don't eat the keys. */
+body.phone, body.compact { --fx: min(var(--frame-sides), 8px); --fy-top: min(var(--frame-top), 8px); --fy-bottom: min(var(--frame-bottom), 8px); }
+.centered-modal { width: min(400px, calc(100cqw - 32px)); max-height: calc(100cqh - 24px); }
+
+.piano-page {
+  position: absolute; inset: 0; max-width: none; min-height: 0; gap: 10px;
+  padding: calc(var(--fy-top) + 12px + var(--safe-t)) calc(var(--fx) + 16px + var(--safe-r))
+           calc(var(--fy-bottom) + 12px + var(--safe-b)) calc(var(--fx) + 16px + var(--safe-l));
+}
+.piano-main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+
+/* --- The bar: chord name and controls --- */
+.pbar { position: relative; z-index: 5; display: flex; align-items: center; gap: 12px 20px; }
+.readout { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 16px; opacity: 0.55; transition: opacity 1.5s ease-out; }
+.readout.lit { opacity: 1; transition: none; }
+.chord-big { flex: none; font-size: clamp(56px, 7vw, 96px); font-weight: 900; line-height: 1; white-space: nowrap; color: var(--color-left); }
+.chord-big .acc { font-size: 0.6em; position: relative; top: -0.55em; }
+.chord-qual { font-size: 0.55em; color: var(--color-right); margin-left: 0.06em; }
+.chord-qual .acc { font-size: 0.75em; top: -0.35em; }
+.chord-lines { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.chord-lines > div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+.chord-words { font-size: 17px; font-weight: 700; }
+.chord-notes { font-size: 14px; letter-spacing: 1px; color: color-mix(in srgb, var(--color-text) 80%, transparent); }
+.chord-also { font-size: 13px; color: var(--color-right); }
+
+/* Two rows on the right: sound and key size, then how a key sounds and the names. */
+.controls { flex: none; margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.ctrl-row { display: flex; align-items: center; gap: 8px; }
+.sound-group .custom-select { width: 180px; }
+.stepper { display: flex; align-items: center; gap: 6px; }
+.stepper-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.round-btn.small { width: 40px; height: 40px; font-size: 22px; }
+.round-btn:disabled { opacity: 0.4; cursor: default; }
+.bar-icons { display: none; gap: 6px; }
+#flip-btn { display: none; }
+body.turned #flip-btn { display: inline-flex; }
+
+.seg { display: flex; border: 1px solid var(--border-panel); border-radius: 12px; overflow: hidden; }
+.seg button, .toggle {
+  font-family: var(--font-main); font-weight: 700; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase; line-height: 1.1;
+  min-height: 42px; padding: 0 12px; color: var(--color-btn-text); background: var(--color-panel); border: 0; cursor: pointer;
+  touch-action: manipulation; transition: background 0.15s, color 0.15s;
+}
+.seg button + button { border-left: 1px solid var(--border-panel); }
+.toggle { border: 1px solid var(--border-panel); border-radius: 12px; min-width: 44px; }
+.seg button[aria-pressed="true"], .toggle[aria-pressed="true"] { background: var(--color-left); color: var(--color-text-pinched); }
+:is(.seg button, .toggle, .track):focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
+
+/* --- The keys (positions and --kw, the white key width, set in piano.js) --- */
+.keys-wrap { position: relative; flex: 1 1 auto; min-height: 110px; max-height: 380px; overflow: hidden; touch-action: none; }
+.kb { position: absolute; top: 0; left: 0; height: 100%; will-change: transform; }
+.key {
+  position: absolute; top: 0; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  font-family: var(--font-main); font-weight: 700; line-height: 1; cursor: pointer; overflow: hidden;
+}
+.key.white {
+  height: 100%; padding-bottom: 10px; border-radius: 0 0 7px 7px; background: var(--key-white); color: var(--key-white-text);
+  box-shadow: inset -1px 0 0 var(--key-edge), inset 0 10px 10px -10px rgba(0, 0, 0, 0.45);
+  font-size: clamp(9px, calc(var(--kw) * 0.22), 16px);
+}
+.key.black {
+  height: 60%; z-index: 2; padding-bottom: 7px; border-radius: 0 0 5px 5px; background: var(--key-black); color: var(--key-black-text);
+  box-shadow: 0 0 0 1px var(--key-black-edge), 0 4px 7px rgba(0, 0, 0, 0.55);
+  font-size: clamp(7px, calc(var(--kw) * 0.17), 12px);
+}
+.key.middle-c { box-shadow: inset -1px 0 0 var(--key-edge), inset 0 10px 10px -10px rgba(0, 0, 0, 0.45), inset 0 -5px 0 -1px var(--color-right); }
+.key.white.on { background: color-mix(in srgb, var(--color-right) 50%, var(--key-white)); }
+.key.black.on { background: color-mix(in srgb, var(--color-right) 70%, var(--key-black)); color: var(--color-text-pinched); }
+.key.white.drone { background: color-mix(in srgb, var(--color-right) 25%, var(--key-white)); }
+.key.black.drone { background: color-mix(in srgb, var(--color-right) 40%, var(--key-black)); }
+.key.drone::before {
+  content: ''; position: absolute; top: 10px; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%;
+  background: var(--color-right); box-shadow: 0 0 0 2px var(--key-black-text), 0 0 10px var(--color-right);
+}
+.kname { white-space: nowrap; }
+.kletter { position: absolute; top: 22px; font-size: 11px; opacity: 0.55; }
+.key.black .kletter { top: 20px; font-size: 10px; }
+.loading {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 4; margin: 0; padding: 8px 12px; text-align: center; pointer-events: none;
+  font-size: 13px; font-weight: 700; background: var(--bg-overlay); color: var(--color-text);
+}
+
+/* --- The scroll bar --- */
+.scrub-row { flex: none; display: flex; align-items: center; gap: 10px; height: 40px; }
+.track {
+  position: relative; flex: 1; align-self: stretch; box-sizing: border-box; border: 1px solid var(--border-panel); border-radius: 10px;
+  background: var(--color-panel); touch-action: none; overflow: hidden; cursor: pointer;
+}
+.thumb {
+  position: absolute; top: 3px; bottom: 3px; box-sizing: border-box; border-radius: 7px; pointer-events: none;
+  background: color-mix(in srgb, var(--color-right) 28%, transparent); border: 1px solid var(--color-right);
+}
+.tick { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; transform: translateX(-50%); font-size: 12px; font-weight: 700; color: var(--color-text-inactive); pointer-events: none; }
+.tick.here { color: var(--color-text); }
+.scrub-link { display: none; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; text-decoration: none; white-space: nowrap; line-height: 1.2; }
+.designer-link { color: var(--color-right); }
+
+.volume-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.volume-head > label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+#volume-out { font-size: 16px; font-weight: 900; }
+
+/* Narrow, tall windows: the chord name above the controls. */
+body.narrow .pbar { flex-wrap: wrap; }
+body.narrow .readout { flex-basis: 100%; }
+body.narrow .controls { margin-left: 0; align-items: flex-start; }
+
+/* --- Short stages: sideways phones (and short windows) --- */
+body.compact .tool-header, body.compact .tool-footer { display: none; }
+body.compact .bar-icons { display: flex; }
+body.compact .scrub-link { display: block; }
+body.compact .piano-page {
+  gap: 6px;
+  padding: calc(var(--fy-top) + 6px + var(--safe-t)) calc(var(--fx) + 10px + var(--safe-r))
+           calc(var(--fy-bottom) + 6px + var(--safe-b)) calc(var(--fx) + 10px + var(--safe-l));
+}
+body.compact .piano-main { gap: 6px; justify-content: flex-start; }
+body.compact .pbar { gap: 10px; }
+body.compact .readout { flex: 1 1 auto; gap: 10px; }
+body.compact .chord-big { font-size: 40px; }
+body.compact .chord-lines { gap: 1px; }
+body.compact .chord-lines > div { line-height: 1.25; }
+body.compact .chord-words { font-size: 13px; }
+body.compact .chord-notes { font-size: 11px; letter-spacing: 0.5px; }
+body.compact .chord-also { font-size: 11px; }
+body.compact .controls { gap: 6px; }
+body.compact .ctrl-row { gap: 6px; }
+body.compact .sound-group .custom-select { width: 136px; font-size: 12px; }
+body.compact .sound-group .select-selected { padding: 6px 8px; line-height: 1.2; }
+body.compact .icon-btn { width: 34px; height: 34px; }
+body.compact .icon-btn svg { width: 18px; height: 18px; }
+body.compact .round-btn.small { width: 32px; height: 32px; font-size: 19px; }
+body.compact .stepper { gap: 4px; }
+body.compact .stepper-label { font-size: 10px; letter-spacing: 0.5px; }
+body.compact .seg button, body.compact .toggle { min-height: 34px; padding: 0 9px; font-size: 11px; letter-spacing: 0; }
+body.compact .toggle { min-width: 38px; }
+body.compact .keys-wrap { max-height: none; min-height: 90px; }
+body.compact .scrub-row { height: 30px; gap: 8px; }
+body.compact .tick { font-size: 10px; }
+
+/* Theme shapes and sizes */
+body[data-theme="pink"] :is(.seg, .toggle, .track) { border-radius: 999px; }
+body[data-theme="pink"] .thumb { border-radius: 999px; }
+body[data-theme="pink"] .seg button:not([aria-pressed="true"]), body[data-theme="pink"] .toggle:not([aria-pressed="true"]) { background: var(--color-panel); color: var(--color-left); }
+body[data-theme="bw"] :is(.seg, .toggle, .track, .thumb) { border-radius: 0; }
+body[data-theme="bw"] .key { border-radius: 0; }
+body[data-theme="y2k"] .chord-big, body[data-theme="retro"] .chord-big { text-shadow: 0 0 var(--shadow-blur) var(--color-left); }
+body[data-theme="retro"] :is(.chord-words) { font-size: 22px; }
+body[data-theme="retro"] :is(.chord-notes, .chord-also, .seg button, .toggle, .stepper-label, .tick) { font-size: 17px; }
+body[data-theme="retro"] .key.white { font-size: clamp(12px, calc(var(--kw) * 0.3), 20px); }
+body[data-theme="retro"] .key.black { font-size: clamp(10px, calc(var(--kw) * 0.24), 16px); }
+body[data-theme="retro"].compact :is(.chord-words) { font-size: 17px; }
+body[data-theme="retro"].compact :is(.chord-notes, .chord-also, .seg button, .toggle, .tick) { font-size: 14px; }
+body[data-theme="retro"].compact .stepper-label { font-size: 13px; }
+body[data-theme="retro"] .scrub-link { font-size: 13px; }
+/* Monochrome and Retro: the accent is close to the key colour, so pressed and
+   drone keys darken (or lighten) instead. */
+body:is([data-theme="bw"], [data-theme="retro"]) .key.white.on { background: color-mix(in srgb, var(--key-black) 38%, var(--key-white)); }
+body:is([data-theme="bw"], [data-theme="retro"]) .key.white.drone { background: color-mix(in srgb, var(--key-black) 16%, var(--key-white)); }
+body:is([data-theme="bw"], [data-theme="retro"]) .key.black.on { background: color-mix(in srgb, var(--key-white) 50%, var(--key-black)); color: var(--key-white-text); }
+body:is([data-theme="bw"], [data-theme="retro"]) .key.black.drone { background: color-mix(in srgb, var(--key-white) 25%, var(--key-black)); }
+body:is([data-theme="bw"], [data-theme="retro"]) .key.white.drone::before { background: var(--key-black); box-shadow: none; }
+body:is([data-theme="bw"], [data-theme="retro"]) .key.black.drone::before { background: var(--key-white); box-shadow: none; }
