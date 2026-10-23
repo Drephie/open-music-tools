@@ -119,7 +119,7 @@ body[data-theme="retro"] #theme-frame { border: var(--fy-top) solid rgb(17, 17, 
 
 /* Theme shapes */
 body[data-theme="pink"] :is(.btn, .select-selected) { border-radius: 999px; }
-body[data-theme="pink"] .btn:not(.btn-primary) { background: var(--color-left); border-color: var(--border-panel); color: var(--color-text-pinched); }
+body[data-theme="pink"] :is(.btn:not(.btn-primary), .icon-btn, .round-btn) { background: var(--color-left); border-color: var(--border-panel); color: var(--color-text-pinched); }
 body[data-theme="pink"] .panel, body[data-theme="pink"] .centered-modal { border-radius: 28px; border-width: 3px; }
 body[data-theme="pink"] .select-items { border-radius: 18px; }
 body[data-theme="bw"] :is(.panel, .btn, .centered-modal) { border-radius: 0; }
@@ -127,5 +127,7 @@ body[data-theme="y2k"] :is(.tool-title, .modal-header h2) { text-shadow: 0 0 12p
 body[data-theme="retro"] :is(.tool-title, .modal-header h2) { text-shadow: 0 0 var(--shadow-blur) var(--color-left); }
 body[data-theme="retro"] .setting-row > label, body[data-theme="retro"] .setting-label { font-size: 18px; }
 body[data-theme="retro"] .btn { font-size: 22px; }
+body[data-theme="retro"] .custom-select { font-size: 19px; }
 body[data-theme="retro"] .about-text { font-size: 19px; }
+body[data-theme="retro"] .about-small { font-size: 17px; }
 body[data-theme="retro"] .tool-footer { font-size: 16px; }

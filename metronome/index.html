@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Metronome</title>
+  <meta name="description" content="A free, open-source metronome with tap tempo, accents and in-between clicks. Runs in your browser; nothing is uploaded.">
+  <meta name="theme-color" content="#0f1419">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" integrity="sha384-c6Uo4N9c3SOEigMVzP6IshUG1wQ5uMp3xeoQFiHWAQ86joWdgyajkvopySyKy/Z6" crossorigin="anonymous"></script>
+  <!-- Google Fonts CSS is UA-dependent, so SRI cannot be applied to it. -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/ui/themes.css">
+  <link rel="stylesheet" href="../shared/ui/select.css">
+  <link rel="stylesheet" href="../shared/ui/page.css">
+  <link rel="stylesheet" href="metronome.css">
+</head>
+<body data-theme="liquid">
+  <div id="theme-frame" aria-hidden="true"></div>
+  <div class="page">
+    <header class="tool-header">
+      <h1 class="tool-title" data-i18n="title">Metronome</h1>
+      <div class="header-actions">
+        <button id="about-btn" class="icon-btn" data-i18n-aria="about" aria-label="About">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
+        </button>
+        <button id="settings-btn" class="icon-btn" data-i18n-aria="settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="met">
+      <section class="panel met-main">
+        <div id="beat-dots" class="beat-dots" role="group" data-i18n-aria="dotsGroup" aria-label="Beats in the bar" aria-describedby="dots-hint"></div>
+        <p id="dots-hint" class="hint" data-i18n="dotsHint">Tap a dot: strong, normal or silent</p>
+
+        <div class="tempo">
+          <input id="bpm-input" class="bpm-input" type="number" inputmode="numeric" min="40" max="240" step="1" value="100" data-i18n-aria="bpmAria" aria-label="Tempo in beats per minute">
+          <div class="bpm-unit" data-i18n="bpmUnit" aria-hidden="true">BPM</div>
+          <p id="tempo-name" class="tempo-name"><strong class="tempo-word">Andante</strong>: <span class="tempo-meaning">at a walking pace</span></p>
+        </div>
+
+        <div class="tempo-row">
+          <button id="slower-btn" class="round-btn" data-i18n-aria="slower" aria-label="Slower">−</button>
+          <input id="bpm-slider" class="range" type="range" min="40" max="240" step="1" value="100" data-i18n-aria="tempoSlider" aria-label="Tempo">
+          <button id="faster-btn" class="round-btn" data-i18n-aria="faster" aria-label="Faster">+</button>
+        </div>
+
+        <div class="big-row">
+          <button id="tap-btn" class="btn big-btn" data-i18n-aria="tapAria" aria-label="Tap tempo: tap along with the music"><span data-i18n="tap">Tap</span></button>
+          <button id="start-btn" class="btn btn-primary big-btn" aria-pressed="false">
+            <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></svg>
+            <svg class="stop-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor"/></svg>
+            <span id="start-label" data-i18n="start">Start</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="panel met-settings">
+        <div class="setting-row">
+          <span id="bpb-label" class="setting-label" data-i18n="beatsPerBar">Beats per bar</span>
+          <div class="stepper" role="group" aria-labelledby="bpb-label">
+            <button id="bpb-down" class="round-btn small" data-i18n-aria="fewerBeats" aria-label="Fewer beats">−</button>
+            <output id="bpb-out" aria-live="polite">4</output>
+            <button id="bpb-up" class="round-btn small" data-i18n-aria="moreBeats" aria-label="More beats">+</button>
+          </div>
+        </div>
+        <div class="setting-row stacked control-group">
+          <label for="subdiv-select" data-i18n="subdiv">In-between clicks</label>
+          <div class="custom-select">
+            <select id="subdiv-select">
+              <option value="1" data-i18n="subdiv1">Off</option>
+              <option value="2" data-i18n="subdiv2">2 per beat (1-and)</option>
+              <option value="3" data-i18n="subdiv3">3 per beat (1-trip-let)</option>
+              <option value="4" data-i18n="subdiv4">4 per beat (1-e-and-a)</option>
+            </select>
+          </div>
+        </div>
+        <div class="setting-row stacked control-group">
+          <label for="sound-select" data-i18n="sound">Sound</label>
+          <div class="custom-select">
+            <select id="sound-select">
+              <option value="click" data-i18n="metClick">Click</option>
+              <option value="beep" data-i18n="metBeep">Beep</option>
+              <option value="wood" data-i18n="metWood">Wood</option>
+              <option value="hat" data-i18n="metHat">Hi-hat</option>
+            </select>
+          </div>
+        </div>
+        <div class="volume">
+          <div class="volume-head">
+            <label for="volume-slider" class="setting-label" data-i18n="volume">Volume</label>
+            <output id="volume-out" for="volume-slider">100%</output>
+          </div>
+          <div class="volume-track">
+            <input id="volume-slider" class="range" type="range" min="0" max="200" step="1" value="100">
+            <span class="volume-mark" aria-hidden="true"></span>
+            <span class="volume-mark-label" aria-hidden="true">100%</span>
+          </div>
+          <p id="volume-note" class="volume-note" data-i18n="volLoud" hidden>Extra loud</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="tool-footer">
+      <a class="support-link" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+      <span class="designer-credit"><span data-i18n="designedBy">Designed by</span> <a href="https://instagram.com/drephie" target="_blank" rel="noopener noreferrer">@drephie</a></span>
+    </footer>
+  </div>
+
+  <div id="settings-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="settings-title" data-i18n="settings">Settings</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <div class="control-group">
+      <label for="theme-select" data-i18n="theme">Aesthetic Theme</label>
+      <div class="custom-select"><select id="theme-select"></select></div>
+    </div>
+    <div class="control-group">
+      <label for="lang-select" data-i18n="lang">Language</label>
+      <div class="custom-select"><select id="lang-select"></select></div>
+    </div>
+  </div>
+
+  <div id="about-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="about-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="about-title" data-i18n="aboutTitle">About the Metronome</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <p class="about-text" data-i18n="aboutBody"></p>
+    <p class="about-small" data-i18n="aboutKeys"></p>
+  </div>
+
+  <script type="module" src="metronome.js"></script>
+</body>
+</html>

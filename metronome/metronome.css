@@ -1,0 +1,74 @@
+/* metronome/metronome.css: the Metronome's layout. Page parts (header, panels,
+ * buttons, sliders, windows, footer) come from shared/ui/page.css. */
+
+.met { display: grid; gap: 16px; align-content: center; }
+@media (min-width: 820px) {
+  .met { grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); align-items: start; }
+}
+
+.met-main { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+
+/* Beat dots: one button per beat; two rows above 6 beats (--cols set in JS). */
+.beat-dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; width: 100%; max-width: calc(var(--cols, 4) * 56px - 4px); min-height: 44px; }
+/* Up to 52px, smaller on narrow phones so a row of 6 always fits. */
+.beat-dot { position: relative; flex: 0 0 calc((100% - (var(--cols, 4) - 1) * 4px) / var(--cols, 4)); max-width: 52px; aspect-ratio: 1; padding: 0; background: none; border: none; border-radius: 50%; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.beat-dot::before {
+  content: ''; position: absolute; left: 50%; top: 50%; width: 24px; height: 24px; box-sizing: border-box;
+  transform: translate(-50%, -50%); border-radius: 50%; border: 3px solid var(--color-left); background: transparent;
+  transition: background 0.12s, border-color 0.12s, box-shadow 0.12s, width 0.12s, height 0.12s;
+}
+.beat-dot[data-level="strong"]::before { width: 34px; height: 34px; background: var(--color-left); }
+.beat-dot[data-level="silent"]::before { border: 2px dashed var(--color-text-inactive); }
+.beat-dot.lit::before { background: var(--color-right); border-color: var(--color-right); box-shadow: 0 0 18px var(--color-right); animation: beat-pop 0.16s ease-out; }
+.beat-dot[data-level="silent"].lit::before { background: transparent; border: 2px dashed var(--color-right); box-shadow: 0 0 12px var(--color-right); }
+@keyframes beat-pop { from { transform: translate(-50%, -50%) scale(1.45); } to { transform: translate(-50%, -50%) scale(1); } }
+.beat-dot:focus-visible { outline: 2px solid var(--color-right); outline-offset: -2px; }
+.hint { margin: -6px 0 0; font-size: 12px; color: color-mix(in srgb, var(--color-text) 65%, transparent); }
+
+/* The tempo number is an input you can type into. */
+.tempo { display: flex; flex-direction: column; align-items: center; }
+.bpm-input {
+  width: 3.4ch; padding: 0; margin: 0; border: none; border-bottom: 2px solid transparent; border-radius: 0;
+  background: transparent; color: var(--color-text); font-family: var(--font-main); font-weight: 900;
+  font-size: clamp(76px, 24vw, 128px); line-height: 1; text-align: center;
+  -moz-appearance: textfield; appearance: textfield;
+}
+.bpm-input::-webkit-outer-spin-button, .bpm-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.bpm-input:focus { outline: none; border-bottom-color: var(--color-right); }
+.bpm-unit { font-size: 14px; font-weight: 700; letter-spacing: 3px; color: var(--color-text-inactive); }
+.tempo-name { margin: 8px 0 0; font-size: 15px; min-height: 1.4em; }
+.tempo-word { color: var(--color-right); }
+
+.tempo-row { display: flex; align-items: center; gap: 14px; width: 100%; max-width: 460px; }
+.big-row { display: flex; gap: 12px; width: 100%; max-width: 460px; }
+.big-btn { flex: 1; min-height: 68px; font-size: 20px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.big-btn svg { width: 22px; height: 22px; }
+#start-btn .stop-icon, #start-btn.playing .play-icon { display: none; }
+#start-btn.playing .stop-icon { display: block; }
+#start-btn.playing { box-shadow: 0 0 22px color-mix(in srgb, var(--color-right) 60%, transparent); }
+#tap-btn.tapped { animation: tap-flash 0.18s ease-out; }
+@keyframes tap-flash { from { background: var(--color-right); color: var(--color-text-pinched); } }
+
+.met-settings { padding-top: 6px; padding-bottom: 14px; }
+/* Dropdowns sit under their label, so long option names never wrap. */
+.setting-row.stacked { flex-direction: column; align-items: stretch; gap: 8px; padding: 12px 0; }
+.setting-row.stacked .custom-select { min-width: 0; }
+.stepper { display: flex; align-items: center; gap: 10px; }
+.round-btn.small { width: 40px; height: 40px; font-size: 22px; }
+.stepper output { min-width: 2ch; text-align: center; font-size: 22px; font-weight: 900; }
+
+/* Volume: 0–200%. Above 100% the track, thumb, number and note go from
+   --color-warn-start to --color-warn-end (set in JS). */
+.volume { padding-top: 12px; border-top: 1px solid color-mix(in srgb, var(--border-panel) 50%, transparent); }
+.volume-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+#volume-out { font-size: 18px; font-weight: 900; color: var(--vol-color, var(--color-text)); }
+.volume-track { position: relative; padding-bottom: 18px; }
+.volume-track .range { display: block; position: relative; z-index: 1; }
+.volume-mark { position: absolute; left: 50%; top: -6px; width: 2px; height: 20px; margin-left: -1px; background: var(--color-text-inactive); }
+.volume-mark-label { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); font-size: 11px; color: var(--color-text-inactive); }
+.volume-note { margin: 2px 0 0; font-size: 13px; font-weight: 700; color: var(--vol-color); }
+
+body[data-theme="retro"] .hint, body[data-theme="retro"] .tempo-name { font-size: 20px; }
+body[data-theme="retro"] .bpm-unit, body[data-theme="retro"] .volume-note, body[data-theme="retro"] .volume-mark-label { font-size: 17px; }
+body[data-theme="retro"] .big-btn { font-size: 26px; }
+body[data-theme="pink"] .beat-dot[data-level="strong"]::before { box-shadow: 0 2px 8px color-mix(in srgb, var(--color-left) 50%, transparent); }

@@ -10,7 +10,7 @@
  * Bump CACHE_NAME whenever a cached file changes. Add each new tool's files
  * to APP_SHELL.
  */
-const CACHE_NAME = 'open-music-tools-v4';
+const CACHE_NAME = 'open-music-tools-v5';
 const APP_SHELL = [
   'shared/theory.js',
   'shared/sound.js',
@@ -22,10 +22,18 @@ const APP_SHELL = [
   'shared/ui/modal.js',
   'shared/ui/i18n.js',
   'shared/ui/strings.js',
+  'shared/ui/page.css',
+  'shared/ui/page.js',
   'choordination/',
   'choordination/index.html',
   'choordination/manifest.json',
   'choordination/favicon.svg',
+  'metronome/',
+  'metronome/index.html',
+  'metronome/metronome.css',
+  'metronome/metronome.js',
+  'metronome/strings.js',
+  'metronome/favicon.svg',
 ];
 // Only our own caches are ever deleted: the hub may share its origin with other sites.
 const OWN_CACHE = (k) => k.startsWith('open-music-tools-') || k.startsWith('choordination-');
