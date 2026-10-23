@@ -1,0 +1,3355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Choordination Studio</title>
+  <meta name="description" content="Choordination turns your webcam hand gestures into chords — a free, open-source, on-device browser instrument for singers and music-theory learners.">
+  <meta property="og:title" content="Choordination Studio">
+  <meta property="og:description" content="Turn hand gestures into chords, right in your browser. Free, open source, 100% on-device.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Choordination Studio">
+  <meta name="twitter:description" content="Turn hand gestures into chords, right in your browser. Free, open source, 100% on-device.">
+  <meta name="theme-color" content="#0f1419">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" integrity="sha384-c6Uo4N9c3SOEigMVzP6IshUG1wQ5uMp3xeoQFiHWAQ86joWdgyajkvopySyKy/Z6" crossorigin="anonymous"></script>
+  <!-- Google Fonts CSS is UA-dependent, so SRI cannot be applied to it. -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* --- THEME VARIABLES --- */
+    :root {
+      --bg-overlay: rgba(15, 20, 25, 0.65);
+      --font-main: 'Orbitron', sans-serif;
+      --color-left: #ffffff;
+      --color-right: #8ad4ff;
+      --color-text: #ffffff;
+      --color-text-pinched: #0f172a;
+      --color-btn-text: #ffffff;
+      --color-text-inactive: rgba(255, 255, 255, 0.4);
+      --color-panel: rgba(255, 255, 255, 0.1);
+      --border-panel: rgba(255, 255, 255, 0.25);
+      --shadow-blur: 12px;
+      --crt-scanline: transparent;
+      --credit-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.85);
+      --bg-select: rgba(20, 25, 30, 0.95);
+      --color-select-text: #ffffff;
+      --color-select-hover: rgba(255, 255, 255, 0.1);
+
+      --frame-top: 0px;
+      --frame-bottom: 0px;
+      --frame-sides: 0px;
+      --frame-radius: 0px;
+    }
+
+    body[data-theme="y2k"] {
+      --bg-overlay: rgba(10, 10, 22, 0.85);
+      --color-left: #00ffff;
+      --color-right: #ff69b4;
+      --color-text-pinched: #000000;
+      --color-btn-text: #ffffff;
+      --color-text-inactive: #888888;
+      --color-panel: rgba(255, 255, 255, 0.05);
+      --border-panel: rgba(0, 255, 255, 0.3);
+      --shadow-blur: 20px;
+      --bg-select: rgba(10, 10, 22, 0.95);
+      --color-select-hover: rgba(0, 255, 255, 0.2);
+      --frame-radius: 14px;
+    }
+
+    /* Soft Pink — "barbie ultra pop lollipop": bubbly rounded font, hot pink +
+       candy purple accents, pill-shaped everything. */
+    body[data-theme="pink"] {
+      --bg-overlay: rgba(255, 219, 240, 0.92);
+      --font-main: 'Baloo 2', 'Quicksand', sans-serif;
+      --color-left: #ff2d9c;
+      --color-right: #b743ff;
+      --color-text: #83104f;
+      --color-text-pinched: #ffffff;
+      --color-btn-text: #ffffff;
+      --color-text-inactive: #eba3cc;
+      --color-panel: rgba(255, 255, 255, 0.93);
+      --border-panel: #ff9ad5;
+      --shadow-blur: 18px;
+      --credit-shadow: 0 1px 2px rgba(255,255,255,0.55);
+      --bg-select: #fff0fa;
+      --color-select-text: #d61f84;
+      --color-select-hover: rgba(255, 105, 180, 0.25);
+
+      --frame-top: 18px;
+      --frame-bottom: 18px;
+      --frame-sides: 18px;
+      --frame-radius: 26px;
+    }
+
+    body[data-theme="bw"] {
+      --bg-overlay: rgba(0, 0, 0, 0.9);
+      --font-main: 'Courier Prime', monospace;
+      --color-left: #ffffff;
+      --color-right: #dddddd;
+      --color-text: #ffffff;
+      --color-text-pinched: #000000;
+      --color-btn-text: #ffffff;
+      --color-text-inactive: #666666;
+      --color-panel: rgba(0, 0, 0, 0.9);
+      --border-panel: #ffffff;
+      --shadow-blur: 0px;
+      --credit-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      --bg-select: rgba(0, 0, 0, 0.95);
+      --color-select-hover: rgba(255, 255, 255, 0.2);
+
+      --frame-top: 60px;
+      --frame-bottom: 60px;
+      --frame-sides: 0px;
+      --frame-radius: 0px;
+    }
+
+    body[data-theme="retro"] {
+      --bg-overlay: rgba(0, 15, 0, 0.9);
+      --font-main: 'VT323', monospace;
+      --color-left: #00ff00;
+      --color-right: #33cc33;
+      --color-text: #00ff00;
+      --color-text-pinched: #0a110a;
+      --color-btn-text: #00ff00;
+      --color-text-inactive: #006600;
+      --color-panel: rgba(0, 20, 0, 0.9);
+      --border-panel: #00ff00;
+      --shadow-blur: 10px;
+      --crt-scanline: repeating-linear-gradient(0deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px);
+      --credit-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      --bg-select: rgba(10, 17, 10, 0.95);
+      --color-select-text: #00ff00;
+      --color-select-hover: rgba(0, 255, 0, 0.2);
+
+      --frame-top: 24px;
+      --frame-bottom: 24px;
+      --frame-sides: 24px;
+      --frame-radius: 16px;
+    }
+
+    body[data-theme="retro"] .centered-modal { font-size: 1.15rem; }
+    body[data-theme="retro"] label { font-size: 1.1rem; }
+    body[data-theme="retro"] .settings-action-btn { font-size: 1.1rem; }
+
+    body { margin: 0; overflow: hidden; background: #000; color: var(--color-text); font-family: var(--font-main); transition: all 0.5s ease; }
+    #container { position: relative; width: 100vw; height: 100vh; }
+
+    #media-wrapper {
+      position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 2; overflow: hidden; transition: all 0.5s ease;
+      clip-path: inset(var(--frame-top) var(--frame-sides) var(--frame-bottom) var(--frame-sides) round var(--frame-radius));
+    }
+
+    #theme-frame { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 4; box-sizing: border-box; transition: all 0.5s ease; }
+    body[data-theme="y2k"] #theme-frame { border: 2px solid #00ffff; border-radius: 16px; box-shadow: inset 0 0 45px rgba(0, 255, 255, 0.22); }
+    body[data-theme="pink"] #theme-frame { border: var(--frame-top) solid #ffb3e0; border-radius: 34px; box-shadow: inset 0 0 30px rgba(255, 45, 156, 0.4), 0 0 22px rgba(255, 154, 213, 0.8); }
+    body[data-theme="bw"] #theme-frame { border-top: var(--frame-top) solid #000; border-bottom: var(--frame-bottom) solid #000; }
+    body[data-theme="retro"] #theme-frame { border: var(--frame-top) solid #111; border-radius: 40px; box-shadow: inset 0 0 50px rgba(0, 255, 0, 0.5); }
+
+    #scanlines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--crt-scanline); pointer-events: none; z-index: 5; }
+
+    video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.6; transition: filter 0.5s ease; }
+    body[data-theme="liquid"] video { filter: saturate(1.1) contrast(1.05); }
+    body[data-theme="y2k"] video { filter: saturate(1.5) contrast(1.1); }
+    body[data-theme="pink"] video { filter: saturate(1.45) contrast(1.02) brightness(1.15) hue-rotate(333deg); }
+    body[data-theme="bw"] video { filter: grayscale(1) contrast(1.4); }
+    body[data-theme="retro"] video { filter: sepia(0.8) hue-rotate(80deg) contrast(1.2) brightness(0.9); }
+
+    canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
+
+    /* --- LAYOUT UTILITIES (replaces repeated inline styles) --- */
+    .row { display: flex; gap: 10px; }
+    .row-gap-b { margin-bottom: 10px; }
+    .row-gap-t { margin-top: 10px; }
+    .flex1 { flex: 1; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+    /* --- BRANDING / WATERMARK --- */
+    #choordination-watermark {
+        position: absolute; top: calc(30px + var(--frame-top)); left: calc(30px + var(--frame-sides)); z-index: 5;
+        font-family: var(--font-main); font-size: 28px; font-weight: 900;
+        color: var(--color-text); opacity: 0.6; letter-spacing: 5px;
+        text-shadow: var(--credit-shadow); transition: all 0.3s ease;
+        transform: scale(1.2); transform-origin: top left;
+        pointer-events: auto; cursor: pointer;
+    }
+    #choordination-watermark:hover, #choordination-watermark:focus-visible { opacity: 1; transform: scale(1.25); text-shadow: 0 0 15px var(--color-left); }
+    body[data-theme="retro"] #choordination-watermark { transform: scale(1.4); }
+    body[data-theme="retro"] #choordination-watermark:hover { transform: scale(1.45); }
+    body[data-theme="pink"] #choordination-watermark { color: #d61f84; opacity: 0.9; }
+
+    #patreon-link { position: absolute; bottom: calc(25px + var(--frame-bottom)); left: calc(30px + var(--frame-sides)); z-index: 6; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--color-text); text-shadow: var(--credit-shadow); transition: all 0.5s ease; }
+    #patreon-link a { color: var(--color-left); text-decoration: none; font-weight: 900; transition: color 0.5s ease;} #patreon-link a:hover { text-decoration: underline; }
+
+    #designer-credit { position: absolute; bottom: calc(25px + var(--frame-bottom)); right: calc(30px + var(--frame-sides)); z-index: 6; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--color-text); text-shadow: var(--credit-shadow); transition: all 0.5s ease; }
+    #designer-credit a { color: var(--color-right); text-decoration: none; font-weight: 900; transition: color 0.5s ease;} #designer-credit a:hover { text-decoration: underline; }
+
+    #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-overlay); z-index: 10; backdrop-filter: blur(10px); }
+    .loading-text { text-align: center; line-height: 1.5; margin-bottom: 20px; }
+    .boot-logo { width: 190px; height: 190px; margin: 0 auto 6px; animation: logopulse 2.4s ease-in-out infinite; }
+    @keyframes logopulse { 50% { transform: scale(1.06); opacity: 0.82; } }
+    .brand-title { font-family: 'Quicksand', sans-serif; font-size: 3.5rem; margin: 0; color: #ffffff; }
+    .loading-sub { color: rgba(255,255,255,0.8); margin: 0; }
+    .error-title { color: var(--color-right); margin: 20px 0 0; }
+    .error-body { max-width: 540px; line-height: 1.7; font-size: 15px; margin: 12px auto; }
+    .error-detail { font-size: 12px; opacity: 0.6; max-width: 540px; word-break: break-word; margin: 0 auto 10px; }
+    .error-actions { display: flex; gap: 12px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+    .error-actions .settings-action-btn { width: auto; padding: 12px 22px; }
+
+    #top-right-menu { position: absolute; top: calc(20px + var(--frame-top)); right: calc(20px + var(--frame-sides)); z-index: 6; gap: 10px; align-items: center; transition: all 0.5s ease; display: none; }
+
+    .menu-btn { background: var(--color-panel); border: 1px solid var(--border-panel); color: var(--color-btn-text); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: var(--font-main); font-weight: bold; backdrop-filter: blur(12px); font-size: 14px; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+    .menu-btn:hover { background: var(--border-panel); color: var(--color-text-pinched); }
+    /* Pink theme: solid candy-pink pill buttons with white text. */
+    body[data-theme="pink"] .menu-btn { background: #ff3ea5; border-color: #ff9ad5; color: #ffffff; border-radius: 999px; box-shadow: 0 3px 12px rgba(255, 62, 165, 0.45); }
+    body[data-theme="pink"] .menu-btn:hover { background: #d61f84; color: #ffffff; }
+    body[data-theme="pink"] .centered-modal { border-radius: 28px; border: 3px solid #ffb3e0; }
+    body[data-theme="pink"] .select-selected, body[data-theme="pink"] .settings-action-btn,
+    body[data-theme="pink"] .loop-btn-sm, body[data-theme="pink"] #loop-bpm,
+    body[data-theme="pink"] .loop-native-select, body[data-theme="pink"] button.start-btn { border-radius: 999px; }
+    body[data-theme="pink"] .select-items { border-radius: 18px; }
+    body[data-theme="pink"] .pad, body[data-theme="pink"] #sustain-latch,
+    body[data-theme="pink"] #touch-record-btn, body[data-theme="pink"] #touch-loop-btn,
+    body[data-theme="pink"] #touch-settings-btn { border-radius: 24px; }
+    body[data-theme="pink"] #loop-bar, body[data-theme="pink"] #ui-edit-bar { border-radius: 26px; border: 3px solid #ffb3e0; }
+    body[data-theme="pink"] .tutorial-content li { border-left-color: #ff3ea5; background: rgba(255, 62, 165, 0.07); border-radius: 14px; }
+
+    #record-btn.recording { color: #ff4d4d; border-color: #ff4d4d; animation: recblink 1.2s infinite; }
+    @keyframes recblink { 50% { opacity: 0.55; } }
+
+    .icon-btn { padding: 0; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .circled-question { display: inline-block; border: 2px solid currentColor; border-radius: 50%; width: 20px; height: 20px; line-height: 17px; text-align: center; font-weight: bold; font-size: 14px; box-sizing: border-box; }
+
+    /* --- MODALS & SCROLLING --- */
+    .centered-modal {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20;
+        background: var(--color-panel); backdrop-filter: blur(25px); border: 1px solid var(--border-panel);
+        border-radius: 12px; display: none; flex-direction: column; gap: 12px; padding: 25px;
+        box-shadow: 0 10px 50px rgba(0,0,0,0.8); width: 340px;
+        max-height: 85vh; overflow-y: auto; /* Fixes zoom overflow issue */
+    }
+    body[data-theme="liquid"] .centered-modal { box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+
+    #tutorial-modal, #boot-modal, #patreon-nag, #logo-info-modal { width: 80%; max-width: 600px; gap: 15px; border-radius: 16px; }
+
+    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-panel); padding-bottom: 10px; margin-bottom: 5px; }
+    .modal-header h3, .modal-header h2 { margin: 0; color: var(--color-left); font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+    .close-btn { background: transparent; border: none; color: var(--color-text); font-size: 24px; font-weight: bold; cursor: pointer; transition: 0.2s; padding: 0 5px; }
+    .close-btn:hover { color: var(--color-right); }
+
+    /* Keep the scrollbar inside the modal's rounded corners so the thumb never pokes out the top/bottom. */
+    .centered-modal { scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: var(--color-left) transparent; }
+    .centered-modal::-webkit-scrollbar { width: 12px; }
+    .centered-modal::-webkit-scrollbar-track { background: transparent; margin: 16px 0; }
+    .centered-modal::-webkit-scrollbar-thumb { background: var(--color-left); border-radius: 6px; border: 3px solid transparent; background-clip: padding-box; }
+
+    .control-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 5px; position: relative; }
+    .menu-divider { border: none; border-top: 1px solid var(--border-panel); opacity: 0.6; margin: 14px 0 12px; }
+    label { font-size: 12px; font-weight: 700; color: var(--color-text); text-transform: uppercase; }
+
+    /* CUSTOM SELECT DROPDOWNS (accessible combobox pattern) */
+    .custom-select { position: relative; font-family: var(--font-main); font-size: 14px; font-weight: 700; user-select: none; }
+    .custom-select select { display: none; }
+    .select-selected { background-color: var(--bg-select); color: var(--color-select-text); padding: 8px 12px; border: 1px solid var(--border-panel); border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+    .select-selected:after { content: '▼'; font-size: 10px; color: var(--color-right); margin-left: 8px; }
+    .select-selected.select-arrow-active:after { content: '▲'; }
+    .select-selected:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
+    .select-items { position: absolute; background-color: var(--bg-select); border: 1px solid var(--border-panel); top: 100%; left: 0; right: 0; z-index: 99; border-radius: 6px; margin-top: 4px; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    .select-items div { color: var(--color-select-text); padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .select-items div:hover, .same-as-selected { background-color: var(--color-select-hover); color: var(--color-left); }
+    .option-highlight { outline: 2px solid var(--color-right); outline-offset: -2px; }
+    .option-disabled { opacity: 0.45; cursor: not-allowed; }
+    /* Must out-specify `.compact-grid .select-items { display: grid }` (0,2,0)
+       or the Musical Key list can never collapse. */
+    .custom-select .select-items.select-hide { display: none; }
+    .select-items::-webkit-scrollbar { width: 6px; }
+    .select-items::-webkit-scrollbar-thumb { background: var(--color-right); border-radius: 3px; }
+
+    /* Compact Grid specifically for Musical Key dropdown */
+    .compact-grid .select-items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 5px; }
+    .compact-grid .select-items div { padding: 8px 2px; text-align: center; font-size: 12px; border-bottom: none; border-radius: 4px; }
+
+    input[type=range] { width: 100%; cursor: pointer; opacity: 0.8; } input[type=range]:hover { opacity: 1; }
+    input[type=range]:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
+
+    .highlight-label { color: var(--color-right); }
+
+    .settings-action-btn { width: 100%; padding: 10px; margin-top: 5px; font-family: var(--font-main); font-size: 13px; font-weight: bold; text-transform: uppercase; cursor: pointer; background: transparent; color: var(--color-left); border: 1px solid var(--color-left); border-radius: 6px; transition: 0.2s; text-align: center; display: inline-block; text-decoration: none; box-sizing: border-box; }
+    .settings-action-btn:hover:not(:disabled) { background: var(--color-left); color: var(--color-text-pinched); }
+    .settings-action-btn:disabled { border-color: var(--color-text-inactive); color: var(--color-text-inactive); cursor: not-allowed; }
+    .settings-action-btn:focus-visible, .menu-btn:focus-visible, .close-btn:focus-visible, button.start-btn:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
+
+    .compact-btn { padding: 6px; font-size: 11px; margin-top: 8px; }
+    .spaced-btn { margin-top: 15px; }
+
+    /* UI-layout modal rows */
+    .ui-cols { display: flex; justify-content: space-between; gap: 15px; margin-top: 4px; }
+    .ui-col { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .ui-col-label { font-size: 11px; font-weight: bold; }
+    .ui-col-label.left { color: var(--color-left); }
+    .ui-col-label.right { color: var(--color-right); }
+    .slider-row { display: flex; align-items: center; gap: 5px; }
+    .slider-tag { font-size: 10px; width: 15px; }
+
+    .tutorial-content h2 { margin: 0; color: var(--color-left); text-transform: uppercase; border-bottom: 1px solid var(--border-panel); padding-bottom: 15px; text-align: center; font-size: 22px; letter-spacing: 2px; }
+    .tutorial-content h3 { margin: 15px 0 5px 0; background: linear-gradient(90deg, var(--color-left), transparent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 18px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    /* Modal titles must stay solid — the tutorial-content gradient above otherwise fades them to transparent. */
+    .tutorial-content .modal-header h3 { background: none; -webkit-background-clip: border-box; -webkit-text-fill-color: var(--color-left); margin: 0; padding-bottom: 0; border-bottom: none; }
+    .tutorial-content ul { padding-left: 20px; margin: 5px 0; }
+    .tutorial-content li { font-size: 14px; line-height: 1.5; margin-bottom: 8px; background: rgba(255, 255, 255, 0.04); padding: 10px; border-radius: 6px; border-left: 3px solid var(--color-right); }
+    .tutorial-content a { color: var(--color-right); font-weight: bold; }
+    .tutorial-tip { font-size: 12px; margin-top: 15px; color: var(--color-right); }
+    .modal-note { font-size: 12px; color: var(--color-right); line-height: 1.5; margin: 5px 0 0; }
+    .boot-title { font-family: 'Quicksand', sans-serif; }
+    .boot-cta { width: auto; align-self: flex-end; font-size: 16px; padding: 12px 25px; }
+    #boot-step-1, #boot-step-2 { display: flex; flex-direction: column; gap: 15px; }
+    .about-text { font-size: 15px; line-height: 1.6; padding: 10px; margin: 0; }
+    .about-text a { color: var(--color-right); font-weight: bold; }
+
+    button.start-btn { padding: 15px 40px; font-size: 20px; font-weight: 900; cursor: pointer; background: transparent; border: 1px solid var(--border-panel); border-radius: 50px; color: var(--color-text); text-transform: uppercase; letter-spacing: 3px; transition: all 0.3s ease; font-family: var(--font-main); backdrop-filter: blur(5px); }
+    button.start-btn:hover { transform: scale(1.05); background: rgba(255,255,255,0.2); border-color: #ffffff; }
+
+    /* Patreon Overlay — follows the active theme; only the Patreon button keeps
+       its own warm color so it stays the inviting, actionable element. */
+    #patreon-nag { background: var(--color-panel); backdrop-filter: blur(25px); border: 2px solid var(--color-right); box-shadow: 0 0 50px rgba(0, 0, 0, 0.45); text-align: center; }
+    #patreon-nag h2 { border: none; font-size: 28px; padding-bottom: 5px; color: var(--color-left); text-shadow: 0 0 12px var(--color-left); }
+    #patreon-nag .nag-body { font-size: 16px; margin-top: 0; color: var(--color-text); }
+    #nag-close { position: absolute; top: 10px; right: 14px; z-index: 2; }
+    .patreon-glow-btn { background: #ff424d !important; color: white !important; border: none !important; font-weight: bold !important; padding: 15px !important; margin: 15px 0 !important; box-shadow: 0 4px 20px rgba(255, 66, 77, 0.4) !important; font-size: 16px !important; transition: transform 0.2s !important; text-decoration: none; }
+    .patreon-glow-btn:hover { transform: scale(1.05); box-shadow: 0 4px 30px rgba(255, 66, 77, 0.6) !important; }
+
+    .modifier-list { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border: 1px solid var(--border-panel); }
+    .modifier-list label { font-size: 12px; text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .modifier-list input { cursor: pointer; transform: scale(1.2); }
+
+    /* --- TOUCH-PADS MODE (accessibility: "Touch Pads (no camera)") --- */
+    #touch-ui { position: absolute; inset: 0; z-index: 8; display: none; flex-direction: column; padding-top: calc(8px + var(--frame-top)); box-sizing: border-box; }
+    body.touch-mode.engine-on #touch-ui { display: flex; }
+    #chord-banner { text-align: center; min-height: 58px; padding: 4px 90px 2px; transition: opacity 0.5s ease; }
+    #chord-banner .cb-name { font-family: var(--font-main); font-size: 26px; font-weight: 900; color: var(--color-left); text-shadow: 0 0 14px var(--color-left); letter-spacing: 2px; }
+    #chord-banner .cb-notes { font-family: var(--font-main); font-size: 13px; color: var(--color-text); opacity: 0.75; letter-spacing: 3px; margin-top: 2px; }
+    #chord-banner.idle { opacity: 0; }
+    #touch-pads { flex: 1; display: flex; gap: 12px; padding: 4px 12px; min-height: 0; }
+    .pad-col { flex: 1; display: grid; gap: 8px; grid-template-columns: repeat(2, 1fr); align-content: stretch; min-height: 0; }
+    .pad { min-height: 48px; min-width: 48px; border-radius: 12px; border: 1px solid var(--border-panel); background: var(--color-panel); color: var(--color-text); font-family: var(--font-main); font-weight: 700; font-size: 17px; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; cursor: pointer; }
+    .pad-root.held { background: var(--color-left); color: var(--color-text-pinched); box-shadow: 0 0 var(--shadow-blur) var(--color-left); }
+    .pad-mod.selected { background: var(--color-right); color: var(--color-text-pinched); box-shadow: 0 0 var(--shadow-blur) var(--color-right); }
+    #touch-bottom { display: flex; gap: 10px; padding: 8px 12px calc(10px + env(safe-area-inset-bottom) + var(--frame-bottom)); }
+    #sustain-latch { flex: 1; min-height: 52px; border-radius: 12px; border: 1px solid var(--color-left); background: transparent; color: var(--color-left); font-family: var(--font-main); font-weight: 900; font-size: 16px; letter-spacing: 2px; text-transform: uppercase; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    #sustain-latch.latched { background: var(--color-left); color: var(--color-text-pinched); box-shadow: 0 0 var(--shadow-blur) var(--color-left); }
+    #touch-record-btn, #touch-settings-btn, #touch-loop-btn { min-width: 56px; min-height: 52px; border-radius: 12px; border: 1px solid var(--border-panel); background: var(--color-panel); color: var(--color-text); font-size: 20px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    #touch-record-btn.recording { color: #ff4d4d; border-color: #ff4d4d; animation: recblink 1.2s infinite; }
+
+    #rotate-overlay { position: fixed; inset: 0; z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: var(--bg-overlay); backdrop-filter: blur(12px); text-align: center; font-family: var(--font-main); padding: 30px; box-sizing: border-box; }
+    #rotate-overlay .rotate-emoji { font-size: 56px; }
+    #rotate-overlay h2 { margin: 0; color: var(--color-left); }
+    #rotate-overlay p { margin: 0; max-width: 420px; line-height: 1.6; }
+
+    /* On-canvas widget edit toolbar */
+    #ui-edit-bar { position: absolute; top: calc(20px + var(--frame-top)); left: 50%; transform: translateX(-50%); z-index: 30; display: none; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 12px; width: max-content; max-width: min(92vw, 760px); padding: 10px 16px; background: var(--color-panel); border: 1px solid var(--border-panel); border-radius: 10px; backdrop-filter: blur(12px); box-shadow: 0 8px 30px rgba(0,0,0,0.5); text-align: center; }
+    body.ui-editing #ui-edit-bar { display: flex; }
+    body.ui-editing #top-right-menu, body.ui-editing #choordination-watermark, body.ui-editing #patreon-link, body.ui-editing #designer-credit { opacity: 0.15; pointer-events: none; }
+    body.ui-editing #overlay { cursor: grab; }
+    #ui-edit-hint { flex: 1 1 260px; min-width: 200px; font-size: 13px; font-weight: 700; color: var(--color-text); letter-spacing: 0.5px; line-height: 1.4; }
+    #ui-edit-bar .menu-btn { flex: none; }
+
+    /* Loop station toolbar */
+    /* z-index 15 keeps the loop bar above the stage but BELOW modals (z 20). */
+    #loop-bar { position: absolute; bottom: calc(64px + var(--frame-bottom)); left: 50%; transform: translateX(-50%); z-index: 15; display: none; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; max-width: min(94vw, 920px); padding: 12px 46px 12px 18px; background: var(--color-panel); border: 1px solid var(--border-panel); border-radius: 12px; backdrop-filter: blur(14px); box-shadow: 0 8px 30px rgba(0,0,0,0.5); font-family: var(--font-main); }
+    body.loop-open #loop-bar { display: flex; }
+    .loop-group { display: flex; align-items: center; gap: 6px; }
+    .loop-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--color-text); letter-spacing: 1px; }
+    #loop-bpm { width: 62px; background: var(--bg-select); color: var(--color-select-text); border: 1px solid var(--border-panel); border-radius: 6px; padding: 8px 4px; font-family: var(--font-main); font-weight: 700; font-size: 14px; text-align: center; }
+    .loop-native-select { background: var(--bg-select); color: var(--color-select-text); border: 1px solid var(--border-panel); border-radius: 6px; padding: 8px 6px; font-family: var(--font-main); font-weight: 700; font-size: 13px; cursor: pointer; }
+    .loop-btn-sm { min-width: 44px; min-height: 40px; padding: 6px 10px; background: var(--bg-select); color: var(--color-select-text); border: 1px solid var(--border-panel); border-radius: 8px; font-family: var(--font-main); font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.15s; -webkit-tap-highlight-color: transparent; }
+    .loop-btn-sm:hover { border-color: var(--color-left); }
+    .loop-btn-sm.active { background: var(--color-left); color: var(--color-text-pinched); box-shadow: 0 0 10px var(--color-left); }
+    .loop-btn-sm:disabled, .loop-native-select:disabled { opacity: 0.4; cursor: not-allowed; }
+    #loop-rec.recording { background: #ff424d; border-color: #ff424d; color: #ffffff; animation: recblink 1s infinite; }
+    #loop-rec.overdub { background: var(--color-right); border-color: var(--color-right); color: var(--color-text-pinched); animation: recblink 1.4s infinite; }
+    #loop-beats { display: flex; gap: 6px; align-items: center; }
+    #loop-beats i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--border-panel); background: transparent; transition: background 0.05s; }
+    #loop-beats i.on { background: var(--color-left); box-shadow: 0 0 10px var(--color-left); border-color: var(--color-left); }
+    #loop-beats i:first-child.on { background: var(--color-right); box-shadow: 0 0 10px var(--color-right); border-color: var(--color-right); }
+    #loop-close { position: absolute; top: 4px; right: 10px; }
+    body.touch-mode #loop-bar { bottom: calc(88px + env(safe-area-inset-bottom) + var(--frame-bottom)); }
+
+    /* Touch-pads mode: the pads replace the camera stage, and the top menu is
+       replaced by the touch bottom bar. (Full settings stay available on
+       phones in every mode — they are ordinary touch-friendly modals.) */
+    body.touch-mode #webcam, body.touch-mode #overlay { display: none; }
+    body.touch-mode #top-right-menu { display: none !important; }
+
+    /* Phone niceties (any mode) */
+    body.mobile-mode #patreon-link, body.mobile-mode #designer-credit { display: none; }
+    body.mobile-mode #choordination-watermark { font-size: 13px; transform: scale(1); letter-spacing: 2px; top: calc(14px + var(--frame-top)); left: calc(14px + var(--frame-sides)); }
+    body.mobile-mode .centered-modal { width: min(480px, 86vw); max-height: 88vh; }
+    @media (orientation: portrait) {
+      body.mobile-mode #rotate-overlay { display: flex; }
+      body.mobile-mode #touch-ui { display: none !important; }
+    }
+
+    /* --- AUTOMATIC SCALING for small screens (phone landscape ≈ ≤520px tall).
+       Shrinks chrome, modals and toolbars so the interface fits the phone;
+       canvas widget/text scaling is handled in JS via uiScale. --- */
+    @media (max-height: 520px) {
+      #choordination-watermark { font-size: 13px !important; transform: scale(1) !important; letter-spacing: 2px; top: calc(10px + var(--frame-top)); left: calc(12px + var(--frame-sides)); }
+      #top-right-menu { top: calc(10px + var(--frame-top)); right: calc(10px + var(--frame-sides)); gap: 6px; }
+      .menu-btn { padding: 6px 10px; font-size: 11px; letter-spacing: 0.5px; }
+      .icon-btn { width: 30px; height: 30px; }
+      .centered-modal { padding: 14px 16px; gap: 8px; max-height: 92vh; width: min(440px, 92vw); font-size: 13px; }
+      .modal-header h2, .modal-header h3 { font-size: 15px; }
+      .modal-header { padding-bottom: 6px; }
+      label { font-size: 10px; }
+      .select-selected { padding: 6px 10px; font-size: 12px; }
+      .select-items div { padding: 6px 10px; font-size: 12px; }
+      .settings-action-btn { padding: 7px; font-size: 11px; }
+      .menu-divider { margin: 8px 0 7px; }
+      .tutorial-content h2 { font-size: 16px; padding-bottom: 8px; }
+      .tutorial-content h3 { font-size: 14px; margin: 8px 0 4px; }
+      .tutorial-content li { font-size: 12px; padding: 6px 8px; margin-bottom: 5px; }
+      .modal-note { font-size: 10px; }
+      .boot-cta { font-size: 13px; padding: 9px 18px; }
+      #loop-bar { gap: 6px 10px; padding: 8px 40px 8px 12px; bottom: calc(46px + var(--frame-bottom)); }
+      .loop-btn-sm { min-width: 38px; min-height: 34px; padding: 4px 8px; font-size: 12px; }
+      #loop-bpm { width: 52px; padding: 6px 3px; font-size: 12px; }
+      .loop-native-select { padding: 6px 4px; font-size: 11px; }
+      .loop-lbl { font-size: 9px; }
+      #ui-edit-bar { padding: 6px 10px; gap: 6px 8px; }
+      #ui-edit-hint { font-size: 10px; min-width: 140px; }
+      #patreon-link, #designer-credit { display: none; }
+      #chord-banner .cb-name { font-size: 20px; }
+      .pad { min-height: 40px; font-size: 14px; border-radius: 10px; }
+      #touch-bottom { padding: 6px 10px calc(6px + env(safe-area-inset-bottom) + var(--frame-bottom)); }
+      #sustain-latch { min-height: 42px; font-size: 13px; }
+      #touch-record-btn, #touch-settings-btn, #touch-loop-btn { min-width: 46px; min-height: 42px; font-size: 16px; }
+    }
+  </style>
+</head>
+<body data-theme="liquid">
+
+<div id="container">
+  <div id="media-wrapper">
+    <video id="webcam" autoplay playsinline muted></video>
+    <canvas id="overlay"></canvas>
+  </div>
+
+  <div id="choordination-watermark" role="button" tabindex="0" data-i18n-aria="aboutAria" aria-label="About Choordination">CHOORDINATION</div>
+  <div id="theme-frame"></div>
+  <div id="scanlines"></div>
+
+  <div id="chord-live" class="visually-hidden" role="status" aria-live="polite"></div>
+
+  <div id="top-right-menu">
+    <button id="loop-toggle-btn" class="menu-btn" data-i18n-aria="loopAria" aria-label="Loop station">⟳ LOOP</button>
+    <button id="record-btn" class="menu-btn" data-i18n-aria="recordAria" aria-label="Record audio">⏺ REC</button>
+    <button id="tutorial-toggle" class="menu-btn icon-btn" data-i18n-aria="helpAria" aria-label="How to play">
+      <span class="circled-question" aria-hidden="true">?</span>
+    </button>
+    <button id="settings-toggle" class="menu-btn" data-i18n="menu">Menu</button>
+  </div>
+
+  <!-- MAIN MENU -->
+  <div id="controls-panel" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1">
+    <div class="modal-header">
+       <h3 id="settings-title" data-i18n="settingsTitle">Studio Settings</h3>
+       <button class="close-btn modal-close" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+
+    <!-- LANGUAGE & NOTATION -->
+    <div class="row row-gap-b">
+        <div class="control-group flex1">
+          <label data-i18n="lang">Language</label>
+          <div class="custom-select">
+            <select id="language-selector">
+              <option value="en" selected>English</option>
+              <option value="es">Español</option>
+              <option value="it">Italiano</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group flex1 mob-hide">
+          <label data-i18n="not">Notation</label>
+          <div class="custom-select">
+            <select id="notation-selector">
+              <option value="letter" selected>C, D, E...</option>
+              <option value="solfeggio">Do, Re, Mi...</option>
+            </select>
+          </div>
+        </div>
+    </div>
+
+    <hr class="menu-divider">
+
+    <!-- HARMONY -->
+    <div class="control-group">
+      <label data-i18n="key" class="highlight-label">Musical Key</label>
+      <div class="custom-select compact-grid">
+        <select id="mode-selector">
+          <!-- Options generated by JS (localized + notation-aware) -->
+        </select>
+      </div>
+    </div>
+
+    <button id="open-modifiers-btn" class="settings-action-btn mob-hide" data-i18n="mods">Chord Modifiers...</button>
+
+    <hr class="menu-divider">
+
+    <!-- SOUND: instrument, then volume + octave beneath it -->
+    <div class="control-group">
+      <label data-i18n="inst">Instrument Rack</label>
+      <div class="custom-select">
+        <select id="instrument-selector">
+          <option value="piano" data-i18n="instPiano">Grand Piano</option>
+          <option value="epiano" data-i18n="instEpiano">Classic Electric Piano</option>
+          <option value="esynth" data-i18n="instEsynth">Electric Synth</option>
+          <option value="pad" data-i18n="instPad">Smooth Analog Pad</option>
+          <option value="organ" data-i18n="instOrgan">Warm Organ</option>
+          <option value="harp" data-i18n="instHarp">Dream Harp</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row row-gap-t mob-hide">
+        <div class="control-group flex1">
+          <label data-i18n="vol">Volume</label>
+          <div class="custom-select">
+            <select id="volume-selector">
+              <option value="0">0%</option>
+              <option value="25">25%</option>
+              <option value="50">50%</option>
+              <option value="75">75%</option>
+              <option value="100" selected>100%</option>
+              <option value="125">125%</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group flex1">
+          <label data-i18n="oct">Octave</label>
+          <div class="custom-select">
+            <select id="octave-selector">
+              <option value="-1" data-i18n="octMellow">Mellow (-1)</option>
+              <option value="0" selected data-i18n="octNormal">Normal (0)</option>
+              <option value="1" data-i18n="octBright">Bright (+1)</option>
+            </select>
+          </div>
+        </div>
+    </div>
+
+    <hr class="menu-divider mob-hide">
+
+    <!-- INTERACTION: accessibility above the shapes -->
+    <div class="control-group mob-hide">
+      <label data-i18n="acc">Accessibility</label>
+      <div class="custom-select">
+        <select id="acc-mode">
+          <option value="none" data-i18n="accNone">Two-Handed Mode</option>
+          <option value="left" data-i18n="accLeft">Left Hand + Head Tilt</option>
+          <option value="right" data-i18n="accRight">Right Hand + Head Tilt</option>
+          <option value="keyboard" data-i18n="accKeyboard">Keyboard Only (camera optional)</option>
+          <option value="touch" data-i18n="accTouch">Touch Pads (no camera)</option>
+          <option value="handsfree" disabled data-i18n="accHandsfree">Hands-Free Mode (Coming Soon)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row row-gap-t mob-hide">
+        <div class="control-group flex1">
+          <label data-i18n="leftShape">Left Shape</label>
+          <div class="custom-select">
+            <select id="left-shape">
+              <option value="wheel" selected data-i18n="shapeWheel">Donut</option>
+              <option value="slider" data-i18n="shapeSlider">Pill</option>
+              <option value="columns" data-i18n="shapeGrid">Grid</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group flex1">
+          <label data-i18n="rightShape">Right Shape</label>
+          <div class="custom-select">
+            <select id="right-shape">
+              <option value="wheel" selected data-i18n="shapeWheel">Donut</option>
+              <option value="slider" data-i18n="shapeSlider">Pill</option>
+              <option value="columns" data-i18n="shapeGrid">Grid</option>
+            </select>
+          </div>
+        </div>
+    </div>
+
+    <div class="control-group row-gap-t mob-hide">
+      <label data-i18n="handLayout">Hand Layout</label>
+      <div class="custom-select">
+        <select id="handedness-mode">
+          <option value="right" selected data-i18n="handRight">Right-Handed</option>
+          <option value="left" data-i18n="handLeft">Left-Handed</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control-group row-gap-t mob-hide">
+      <label data-i18n="browSustain">Eyebrow Sustain</label>
+      <div class="custom-select">
+        <select id="brow-sustain">
+          <option value="on" selected data-i18n="onLabel">On</option>
+          <option value="off" data-i18n="offLabel">Off</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="menu-divider">
+
+    <!-- APPEARANCE -->
+    <div class="control-group">
+      <label data-i18n="theme">Aesthetic Theme</label>
+      <div class="custom-select">
+        <select id="theme-selector">
+          <option value="liquid" selected data-i18n="themeLiquid">Liquid Glass</option>
+          <option value="y2k" data-i18n="themeY2k">Y2K Cyber</option>
+          <option value="pink" data-i18n="themePink">Soft Pink</option>
+          <option value="bw" data-i18n="themeBw">Monochrome</option>
+          <option value="retro" data-i18n="themeRetro">Retro CRT</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="menu-divider mob-hide">
+
+    <button id="open-ui-layout-btn" class="settings-action-btn mob-hide" data-i18n="uiPos">UI Positioning & Size...</button>
+  </div>
+
+  <!-- SUB-MENU: MODIFIERS -->
+  <div id="modifiers-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="modifiers-title" tabindex="-1">
+    <div class="modal-header">
+       <h3 id="modifiers-title" data-i18n="modsTitle">Chord Modifiers</h3>
+       <button class="close-btn modal-close" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <div class="modifier-list" id="modifier-checkboxes">
+      <!-- Generated by JS -->
+    </div>
+    <button class="settings-action-btn back-to-menu-btn" data-i18n="back">← Back to Menu</button>
+  </div>
+
+  <!-- SUB-MENU: UI POSITIONING -->
+  <div id="ui-layout-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="ui-layout-title" tabindex="-1">
+    <div class="modal-header">
+       <h3 id="ui-layout-title" data-i18n="uiPosTitle">UI Positioning</h3>
+       <button class="close-btn modal-close" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <button id="ui-drag-btn" class="settings-action-btn" style="margin-top:0;" data-i18n="uiEditBtn">✋ Drag &amp; resize on screen</button>
+    <p class="modal-note" data-i18n="uiFineTune">Or fine-tune precisely:</p>
+    <div class="ui-cols">
+      <div class="ui-col">
+        <span class="ui-col-label left" data-i18n="lh">LEFT UI</span>
+        <div class="slider-row"><span class="slider-tag" aria-hidden="true">X</span><input type="range" id="lx" min="-40" max="40" value="0" data-i18n-aria="ariaLX" aria-label="Left UI horizontal position"></div>
+        <div class="slider-row"><span class="slider-tag" aria-hidden="true">Y</span><input type="range" id="ly" min="-40" max="40" value="0" data-i18n-aria="ariaLY" aria-label="Left UI vertical position"></div>
+        <div class="slider-row"><span class="slider-tag" aria-hidden="true">SZ</span><input type="range" id="ls" min="50" max="150" value="100" data-i18n-aria="ariaLS" aria-label="Left UI size"></div>
+      </div>
+      <div class="ui-col">
+        <span class="ui-col-label right" data-i18n="rh">RIGHT UI</span>
+        <div class="slider-row"><span class="slider-tag" aria-hidden="true">X</span><input type="range" id="rx" min="-40" max="40" value="0" data-i18n-aria="ariaRX" aria-label="Right UI horizontal position"></div>
+        <div class="slider-row"><span class="slider-tag" aria-hidden="true">Y</span><input type="range" id="ry" min="-40" max="40" value="0" data-i18n-aria="ariaRY" aria-label="Right UI vertical position"></div>
+        <div class="slider-row"><span class="slider-tag" aria-hidden="true">SZ</span><input type="range" id="rs" min="50" max="150" value="100" data-i18n-aria="ariaRS" aria-label="Right UI size"></div>
+      </div>
+    </div>
+    <button id="reset-ui-btn" class="settings-action-btn compact-btn" data-i18n="reset">Reset Placements</button>
+    <button class="settings-action-btn back-to-menu-btn spaced-btn" data-i18n="back">← Back to Menu</button>
+  </div>
+
+  <!-- Boot Up Modal: Step 1 (About / trust page) then Step 2 (How to play + Start) -->
+  <div id="boot-modal" class="centered-modal tutorial-content" style="display:flex;" role="dialog" aria-modal="true" aria-labelledby="boot-title" tabindex="-1">
+    <h2 id="boot-title" class="boot-title" data-i18n="bootWelcome">Welcome to Choordination</h2>
+    <div id="boot-step-1">
+      <div id="boot-about-text">
+        <!-- Injected via JS (i18n) -->
+      </div>
+      <button id="boot-continue-btn" class="settings-action-btn boot-cta" data-i18n="continueBtn">Continue</button>
+    </div>
+    <div id="boot-step-2" style="display:none;">
+      <div id="boot-tutorial-text">
+        <!-- Injected via JS (i18n) -->
+      </div>
+      <p id="boot-calib-note" class="modal-note" data-i18n="calibNote"></p>
+      <button id="start-btn" class="settings-action-btn boot-cta" data-i18n="startBtn">Start Engine</button>
+    </div>
+  </div>
+
+  <!-- Dynamic Tutorial Modal (Menu) -->
+  <div id="tutorial-modal" class="centered-modal tutorial-content" role="dialog" aria-modal="true" aria-labelledby="tutorial-title" tabindex="-1">
+    <div class="modal-header">
+       <h2 id="tutorial-title" data-i18n="howToPlay">How to Play</h2>
+       <button class="close-btn modal-close" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <div id="menu-tutorial-text">
+        <!-- Injected via JS -->
+    </div>
+  </div>
+
+  <!-- About / Logo Modal -->
+  <div id="logo-info-modal" class="centered-modal tutorial-content" role="dialog" aria-modal="true" aria-labelledby="about-title" tabindex="-1">
+    <div class="modal-header">
+       <h3 id="about-title" data-i18n="aboutTitle">About Choordination</h3>
+       <button class="close-btn modal-close" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <p id="about-body" class="about-text" data-i18n="aboutBody">
+       <!-- Injected via i18n -->
+    </p>
+  </div>
+
+  <!-- Patreon Nag Modal (idle-only, instantly dismissible) -->
+  <div id="patreon-nag" class="centered-modal tutorial-content" role="dialog" aria-modal="true" aria-labelledby="nag-title" tabindex="-1">
+    <button id="nag-close" class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    <h2 id="nag-title" data-i18n="nagTitle">Support Choordination</h2>
+    <p class="nag-body" data-i18n="nagBody">Love creating with Choordination? Help keep the studio alive, ad-free, and full of new features!</p>
+    <a href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" class="start-btn patreon-glow-btn" data-i18n="nagPatreon">Support on Patreon</a>
+    <button id="skip-nag" class="settings-action-btn" data-i18n="nagContinue">Continue playing</button>
+  </div>
+
+  <div id="patreon-link">
+    <a href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+  </div>
+
+  <div id="designer-credit">
+    <span data-i18n="designedBy">Designed by</span> <a href="https://instagram.com/drephie" target="_blank" rel="noopener noreferrer">@drephie</a>
+  </div>
+
+  <!-- MOBILE TOUCH UI -->
+  <div id="touch-ui">
+    <div id="chord-banner" class="idle" aria-hidden="true">
+      <div class="cb-name"></div>
+      <div class="cb-notes"></div>
+    </div>
+    <div id="touch-pads">
+      <div id="touch-roots" class="pad-col"></div>
+      <div id="touch-mods" class="pad-col"></div>
+    </div>
+    <div id="touch-bottom">
+      <button id="sustain-latch" data-i18n="sustainLatch" aria-pressed="false">SUSTAIN</button>
+      <button id="touch-loop-btn" data-i18n-aria="loopAria" aria-label="Loop station">⟳</button>
+      <button id="touch-record-btn" data-i18n-aria="recordAria" aria-label="Record audio">⏺</button>
+      <button id="touch-settings-btn" data-i18n-aria="touchSettingsAria" aria-label="Settings">⚙</button>
+    </div>
+  </div>
+
+  <div id="rotate-overlay">
+    <div class="rotate-emoji" aria-hidden="true">📱➡️</div>
+    <h2 data-i18n="rotateTitle">Rotate your device</h2>
+    <p data-i18n="rotateBody">Choordination plays in landscape. Turn your device sideways to continue.</p>
+  </div>
+
+  <!-- Recording chooser: audio only, or screen + audio -->
+  <div id="rec-choice-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="rec-choice-title" tabindex="-1">
+    <div class="modal-header">
+       <h3 id="rec-choice-title" data-i18n="recChoiceTitle">Record</h3>
+       <button class="close-btn modal-close" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <p class="modal-note" data-i18n="recChoiceBody">What would you like to capture?</p>
+    <button id="rec-audio-btn" class="settings-action-btn" data-i18n="recAudio">🎙 Audio only</button>
+    <button id="rec-screen-btn" class="settings-action-btn" data-i18n="recScreen">🖥 Screen + audio</button>
+  </div>
+
+  <!-- Loop station toolbar -->
+  <div id="loop-bar" role="toolbar" data-i18n-aria="loopAria" aria-label="Loop station">
+    <div id="loop-beats" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="loop-group">
+      <label class="loop-lbl" for="loop-bpm">BPM</label>
+      <input type="number" id="loop-bpm" min="40" max="240" step="1" value="100" data-i18n-aria="loopBpmAria" aria-label="Tempo (BPM)">
+      <button id="loop-tap" class="loop-btn-sm">TAP</button>
+    </div>
+    <div class="loop-group">
+      <label class="loop-lbl" for="loop-bars" data-i18n="loopBars">Bars</label>
+      <select id="loop-bars" class="loop-native-select">
+        <option value="1">1</option>
+        <option value="2" selected>2</option>
+        <option value="4">4</option>
+        <option value="8">8</option>
+      </select>
+    </div>
+    <div class="loop-group">
+      <button id="loop-met" class="loop-btn-sm active" data-i18n-aria="loopMetAria" aria-label="Metronome" aria-pressed="true">🔔</button>
+      <select id="loop-met-sound" class="loop-native-select" data-i18n-aria="loopMetSoundAria" aria-label="Metronome sound">
+        <option value="click" data-i18n="metClick">Click</option>
+        <option value="beep" data-i18n="metBeep">Beep</option>
+        <option value="wood" data-i18n="metWood">Wood</option>
+        <option value="hat" data-i18n="metHat">Hi-hat</option>
+      </select>
+      <button id="loop-countin" class="loop-btn-sm active" data-i18n-aria="loopCountInAria" aria-label="1-bar count-in" aria-pressed="true">1·2·3·4</button>
+    </div>
+    <div class="loop-group">
+      <button id="loop-rec" class="loop-btn-sm" data-i18n-aria="loopRecAria" aria-label="Record / overdub loop">⏺</button>
+      <button id="loop-play" class="loop-btn-sm" data-i18n-aria="loopPlayAria" aria-label="Play or stop loops">▶</button>
+      <button id="loop-undo" class="loop-btn-sm" data-i18n-aria="loopUndoAria" aria-label="Undo last layer">↩</button>
+      <button id="loop-clear" class="loop-btn-sm" data-i18n-aria="loopClearAria" aria-label="Clear all layers">✕</button>
+      <span id="loop-layers" class="loop-lbl"></span>
+    </div>
+    <button id="loop-close" class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+  </div>
+
+  <!-- Floating toolbar shown while dragging/resizing the on-canvas widgets -->
+  <div id="ui-edit-bar">
+    <span id="ui-edit-hint" data-i18n="uiEditHint">Drag a widget to move it — drag the ⤢ handle to resize (kept to scale).</span>
+    <button id="ui-edit-reset" class="menu-btn" data-i18n="reset">Reset Placements</button>
+    <button id="ui-edit-done" class="menu-btn" data-i18n="uiEditDone">Done</button>
+  </div>
+
+  <div id="ui-layer" style="display: none;"></div>
+</div>
+
+<script type="module">
+  import { HandLandmarker, FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs";
+  // (SRI cannot be applied to ES-module imports without an import map; the file is
+  //  cached by sw.js after first load.)
+
+  // --- roundRect polyfill (older Safari) ---
+  if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+      let radii = Array.isArray(r) ? r : [r, r, r, r];
+      while (radii.length < 4) radii.push(radii[radii.length - 1] ?? 0);
+      radii = radii.map(v => Math.max(0, Math.min(typeof v === 'number' ? v : 0, w / 2, h / 2)));
+      this.moveTo(x + radii[0], y);
+      this.arcTo(x + w, y, x + w, y + h, radii[1]);
+      this.arcTo(x + w, y + h, x, y + h, radii[2]);
+      this.arcTo(x, y + h, x, y, radii[3]);
+      this.arcTo(x, y, x + w, y, radii[0]);
+      this.closePath();
+      return this;
+    };
+  }
+
+  // TODO: point at the real public repository before release.
+  const REPO_URL = "https://github.com/drephie/choordination";
+  const PATREON_URL = "https://patreon.com/drephie";
+
+  const IS_MOBILE = (() => {
+    const coarse = window.matchMedia('(pointer: coarse)').matches;
+    const touch = (navigator.maxTouchPoints || 0) > 0;
+    const small = Math.min(screen.width, screen.height) <= 900;
+    return coarse && touch && small;
+  })();
+  if (IS_MOBILE) document.body.classList.add('mobile-mode');
+
+  // --- DOM REFS ---
+  const $ = id => document.getElementById(id);
+  const video = $("webcam");
+  const canvas = $("overlay");
+  const ctx = canvas.getContext("2d");
+  const uiLayer = $("ui-layer");
+
+  const settingsToggle = $("settings-toggle");
+  const tutorialToggle = $("tutorial-toggle");
+  const logoTrigger = $("choordination-watermark");
+  const recordBtn = $("record-btn");
+
+  const controlsPanel = $("controls-panel");
+  const modifiersModal = $("modifiers-modal");
+  const uiLayoutModal = $("ui-layout-modal");
+  const tutorialModal = $("tutorial-modal");
+  const bootModal = $("boot-modal");
+  const logoInfoModal = $("logo-info-modal");
+  const patreonNag = $("patreon-nag");
+  const topRightMenu = $("top-right-menu");
+
+  const themeSelector = $("theme-selector");
+  const instrumentSelector = $("instrument-selector");
+  const modeSelector = $("mode-selector");
+  const leftShape = $("left-shape");
+  const rightShape = $("right-shape");
+  const accMode = $("acc-mode");
+  const browSustainSel = $("brow-sustain");
+  const handednessMode = $("handedness-mode");
+  const modifierCheckboxes = $("modifier-checkboxes");
+  const languageSelector = $("language-selector");
+  const notationSelector = $("notation-selector");
+  const volumeSelector = $("volume-selector");
+  const octaveSelector = $("octave-selector");
+
+  const bootTitle = $("boot-title");
+  const bootStep1 = $("boot-step-1");
+  const bootStep2 = $("boot-step-2");
+  const bootAboutText = $("boot-about-text");
+  const bootTutorialText = $("boot-tutorial-text");
+  const bootCalibNote = $("boot-calib-note");
+  const bootContinueBtn = $("boot-continue-btn");
+  const startBtn = $("start-btn");
+  const menuTutorialText = $("menu-tutorial-text");
+  const chordLive = $("chord-live");
+  const nagCloseBtn = $("nag-close");
+  const skipNagBtn = $("skip-nag");
+
+  const touchUi = $("touch-ui");
+  const chordBanner = $("chord-banner");
+  const chordBannerName = chordBanner.querySelector(".cb-name");
+  const chordBannerNotes = chordBanner.querySelector(".cb-notes");
+  const touchRoots = $("touch-roots");
+  const touchMods = $("touch-mods");
+  const sustainLatchBtn = $("sustain-latch");
+  const touchRecordBtn = $("touch-record-btn");
+  const touchSettingsBtn = $("touch-settings-btn");
+
+  const recChoiceModal = $("rec-choice-modal");
+  const loopToggleBtn = $("loop-toggle-btn");
+  const touchLoopBtn = $("touch-loop-btn");
+  const loopBpmInput = $("loop-bpm");
+  const loopBarsSelect = $("loop-bars");
+  const loopMetSoundSelect = $("loop-met-sound");
+  const loopBeatsEl = $("loop-beats");
+
+  const allModals = [controlsPanel, modifiersModal, uiLayoutModal, tutorialModal, logoInfoModal, patreonNag, recChoiceModal];
+
+  // --- I18N DICTIONARY (all user-facing strings; {repo}/{patreon} are interpolated) ---
+  const i18n = {
+    en: {
+      menu: "Menu", settingsTitle: "Studio Settings",
+      lang: "Language", not: "Notation", vol: "Master Volume", oct: "Octave Shift",
+      key: "Musical Key", mods: "Chord Modifiers...", modsTitle: "Chord Modifiers",
+      inst: "Instrument Rack", theme: "Aesthetic Theme", acc: "Accessibility",
+      leftShape: "Left Shape", rightShape: "Right Shape", handLayout: "Hand Layout",
+      uiPos: "UI Positioning & Size...", uiPosTitle: "UI Positioning",
+      uiEditBtn: "✋ Drag & resize on screen", uiFineTune: "Or fine-tune precisely:",
+      uiEditHint: "Drag a widget to move it — drag the ⤢ handle to resize (always kept to scale). Esc or Done to finish.", uiEditDone: "Done",
+      reset: "Reset Placements", back: "← Back to Menu", lh: "LEFT UI", rh: "RIGHT UI",
+      closeAria: "Close", helpAria: "How to play", recordAria: "Record audio", recStopAria: "Stop recording",
+      aboutAria: "About Choordination", touchSettingsAria: "Settings",
+      loopAria: "Loop station", loopBpmAria: "Tempo (BPM)", loopBars: "Bars",
+      metClick: "Click", metBeep: "Beep", metWood: "Wood", metHat: "Hi-hat",
+      loopMetAria: "Metronome", loopMetSoundAria: "Metronome sound", loopCountInAria: "1-bar count-in",
+      loopRecAria: "Record / overdub loop", loopPlayAria: "Play or stop loops",
+      loopUndoAria: "Undo last layer", loopClearAria: "Clear all layers",
+      recChoiceTitle: "Record", recChoiceBody: "What would you like to capture?",
+      recAudio: "🎙 Audio only", recScreen: "🖥 Screen + audio",
+      ariaLX: "Left UI horizontal position", ariaLY: "Left UI vertical position", ariaLS: "Left UI size",
+      ariaRX: "Right UI horizontal position", ariaRY: "Right UI vertical position", ariaRS: "Right UI size",
+      octMellow: "Mellow (-1)", octNormal: "Normal (0)", octBright: "Bright (+1)",
+      chromatic: "Chromatic", major: "Major", minor: "Minor",
+      instPiano: "Grand Piano", instEpiano: "Classic Electric Piano", instEsynth: "Electric Synth", instPad: "Smooth Analog Pad",
+      instOrgan: "Warm Organ", instHarp: "Dream Harp",
+      shapeWheel: "Donut", shapeSlider: "Pill", shapeGrid: "Grid",
+      handRight: "Right-Handed", handLeft: "Left-Handed",
+      accNone: "Two-Handed Mode", accLeft: "Left Hand + Head Tilt", accRight: "Right Hand + Head Tilt",
+      accKeyboard: "Keyboard Only (camera optional)", accTouch: "Touch Pads (no camera)", accHandsfree: "Hands-Free Mode (Coming Soon)",
+      browSustain: "Eyebrow Sustain", onLabel: "On", offLabel: "Off",
+      themeLiquid: "Liquid Glass", themeY2k: "Y2K Cyber", themePink: "Soft Pink", themeBw: "Monochrome", themeRetro: "Retro CRT",
+      bootWelcome: "Welcome to Choordination", boot1Title: "About this project",
+      boot1Open: '<strong>Open source.</strong> Choordination is free and open source — every line of code is public in the <a href="{repo}" target="_blank" rel="noopener noreferrer">repository</a>.',
+      boot1Privacy: '<strong>100% private.</strong> Your camera and microphone are processed entirely on this device, inside your browser. Nothing is ever uploaded or stored — the mic is only mixed into recordings you choose to make.',
+      boot1Free: '<strong>Ad-free & user-supported.</strong> No ads, no trackers, ever. If you enjoy Choordination you can support it on <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>.',
+      continueBtn: "Continue", howToPlay: "How to Play", startBtn: "Start Engine",
+      calibNote: "When the camera starts, keep a relaxed, neutral face for 2 seconds — Choordination calibrates the eyebrow sustain to you.",
+      leftHand: "Left Hand", rightHand: "Right Hand",
+      tutRoot: "Selects the Root Note.", tutMod: "Selects the Chord Modifier.",
+      tutTrigger: "<strong>Trigger:</strong> Pinch <em>both</em> thumbs and index fingers to play.",
+      tutYolo: "<strong>YOLO Sign 🤙:</strong> Sign this with your Modifier hand — your thumb picks one modifier and your pinky picks another, and the chord blends both!",
+      tutSustain: "<strong>Sustain:</strong> Raise your eyebrows (or hold Space) to let chords ring — your mouth stays free for singing.",
+      tutTip: "Tip: Only have one hand available? Try the Accessibility options in the Settings Menu!",
+      tutAccTitle: "Accessible Mode (Head Tilt)",
+      tutAccHand: "Always controls the Root Note.",
+      tutAccTilt: "<strong>Head Tilt Dial:</strong> Tilt your head slightly left or right to bump the Modifier up or down. Bring your head back to the center to <strong>lock</strong> it.",
+      tutAccTrigger: "<strong>Trigger:</strong> Pinch with your single hand to play the chord.",
+      tutKbdTitle: "Keyboard Mode",
+      tutKbd1: "<strong>1–7:</strong> select the root note (up to 0, - and = in Chromatic).",
+      tutKbd2: "<strong>Q–I:</strong> select the chord modifier.",
+      tutKbd3: "<strong>Enter</strong> (or click the stage) plays the chord.",
+      tutKbd4: "<strong>Space:</strong> hold to sustain.",
+      tutTouchTitle: "Touch Mode",
+      tutTouch1: "<strong>Left pads:</strong> tap a chord to play it.",
+      tutTouch2: "<strong>Right pads:</strong> choose the chord modifier — hold one with a second finger while tapping chords.",
+      tutTouch3: "<strong>SUSTAIN:</strong> latch the sustain button to let chords ring.",
+      loadingAudio: "Loading audio engine...", loadingSamples: "Loading instruments...",
+      loadingModels: "Loading hand & face tracking...", loadingCamera: "Please allow webcam access.",
+      finalizingVideo: "Finalizing your recording…",
+      errAudioTitle: "Audio engine failed to start",
+      errAudioBody: "Your browser blocked or failed to start the audio engine. Check that this tab is allowed to play sound, then try again.",
+      errModelsTitle: "Tracking models failed to load",
+      errModelsBody: "The hand & face tracking models could not be downloaded. Check your internet connection and try again.",
+      errCameraTitle: "Camera access needed",
+      errCameraBody: "Choordination couldn't access your camera. Click the camera icon in your browser's address bar (or check your system settings), allow access for this site, then press Retry. Remember: all video stays on your device.",
+      retry: "Retry", useKeyboard: "Continue with keyboard mode", useTouch: "Continue with touch pads",
+      calibrating: "Calibrating… keep a neutral face",
+      sustainOn: "SUSTAIN ON", playingLabel: "Playing",
+      nagTitle: "Support Choordination",
+      nagBody: "Love creating with Choordination? Help keep the studio alive, ad-free, and full of new features!",
+      nagPatreon: "Support on Patreon", nagContinue: "Continue playing", nagSkip: "Skip in {s}s…",
+      supportLink: "Support on Patreon", designedBy: "Designed by",
+      aboutTitle: "About Choordination",
+      aboutBody: 'Choordination is an open source website designed and curated by Drephie, a singer and vocal coach. The idea behind the project is to make music tools available to everyone — every line of code is public in the <a href="{repo}" target="_blank" rel="noopener noreferrer">repository</a>.<br><br>It is <strong>100% private</strong>: all video is processed on your device, in your browser, and is never uploaded or stored. It is <strong>completely ad-free</strong> and user-supported.<br><br>To follow updates and other projects, or to <u><b>get rid of the watermark</b></u>, check out the <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>!',
+      rotateTitle: "Rotate your device", rotateBody: "Choordination plays in landscape. Turn your device sideways to continue.",
+      sustainLatch: "SUSTAIN",
+      modTriadShort: "Triad", mod7Short: "7th",
+      modName_Triad: "Triad (Auto)", modName_Maj: "Major", modName_Min: "Minor",
+      modName_Dim: "Diminished", modName_Aug: "Augmented", modName_7th: "7th (Auto)",
+      modName_Maj7: "Major 7th", modName_Min7: "Minor 7th", modName_Dom7: "Dominant 7th",
+      modName_Dim7: "Diminished 7th", modName_Sus2: "Sus 2", modName_Sus4: "Sus 4",
+      modName_6: "6th", modName_Add9: "Add 9", modName_Maj9: "Major 9th", modName_Min9: "Minor 9th",
+    },
+    es: {
+      menu: "Menú", settingsTitle: "Ajustes del Estudio",
+      lang: "Idioma", not: "Notación", vol: "Volumen", oct: "Octava",
+      key: "Tonalidad", mods: "Modificadores de Acordes...", modsTitle: "Modificadores de Acordes",
+      inst: "Instrumento", theme: "Tema Estético", acc: "Accesibilidad",
+      leftShape: "Forma Izq.", rightShape: "Forma Der.", handLayout: "Mano Dominante",
+      uiPos: "Posición y Tamaño UI...", uiPosTitle: "Posición de la UI",
+      uiEditBtn: "✋ Arrastrar y redimensionar en pantalla", uiFineTune: "O ajusta con precisión:",
+      uiEditHint: "Arrastra un elemento para moverlo — arrastra el tirador ⤢ para redimensionar (siempre a escala). Esc o Listo para terminar.", uiEditDone: "Listo",
+      reset: "Restablecer", back: "← Volver al Menú", lh: "UI IZQ.", rh: "UI DER.",
+      closeAria: "Cerrar", helpAria: "Cómo tocar", recordAria: "Grabar audio", recStopAria: "Detener la grabación",
+      aboutAria: "Acerca de Choordination", touchSettingsAria: "Ajustes",
+      loopAria: "Estación de loops", loopBpmAria: "Tempo (BPM)", loopBars: "Compases",
+      metClick: "Clic", metBeep: "Bip", metWood: "Madera", metHat: "Hi-hat",
+      loopMetAria: "Metrónomo", loopMetSoundAria: "Sonido del metrónomo", loopCountInAria: "Claqueta de 1 compás",
+      loopRecAria: "Grabar / superponer loop", loopPlayAria: "Reproducir o detener los loops",
+      loopUndoAria: "Deshacer la última capa", loopClearAria: "Borrar todas las capas",
+      recChoiceTitle: "Grabar", recChoiceBody: "¿Qué quieres capturar?",
+      recAudio: "🎙 Solo audio", recScreen: "🖥 Pantalla + audio",
+      ariaLX: "Posición horizontal de la UI izquierda", ariaLY: "Posición vertical de la UI izquierda", ariaLS: "Tamaño de la UI izquierda",
+      ariaRX: "Posición horizontal de la UI derecha", ariaRY: "Posición vertical de la UI derecha", ariaRS: "Tamaño de la UI derecha",
+      octMellow: "Grave (-1)", octNormal: "Normal (0)", octBright: "Brillante (+1)",
+      chromatic: "Cromática", major: "Mayor", minor: "Menor",
+      instPiano: "Piano de Cola", instEpiano: "Piano Eléctrico Clásico", instEsynth: "Sinte Eléctrico", instPad: "Pad Analógico Suave",
+      instOrgan: "Órgano Cálido", instHarp: "Arpa de Ensueño",
+      shapeWheel: "Dónut", shapeSlider: "Píldora", shapeGrid: "Cuadrícula",
+      handRight: "Diestro", handLeft: "Zurdo",
+      accNone: "Modo a Dos Manos", accLeft: "Mano Izquierda + Inclinación de Cabeza", accRight: "Mano Derecha + Inclinación de Cabeza",
+      accKeyboard: "Solo Teclado (cámara opcional)", accTouch: "Pads Táctiles (sin cámara)", accHandsfree: "Manos Libres (Próximamente)",
+      browSustain: "Sustain con Cejas", onLabel: "Activado", offLabel: "Desactivado",
+      themeLiquid: "Cristal Líquido", themeY2k: "Cyber Y2K", themePink: "Rosa Suave", themeBw: "Monocromo", themeRetro: "CRT Retro",
+      bootWelcome: "Bienvenido a Choordination", boot1Title: "Sobre este proyecto",
+      boot1Open: '<strong>Código abierto.</strong> Choordination es gratuito y de código abierto: cada línea de código es pública en el <a href="{repo}" target="_blank" rel="noopener noreferrer">repositorio</a>.',
+      boot1Privacy: '<strong>100% privado.</strong> La cámara y el micrófono se procesan por completo en este dispositivo, dentro de tu navegador. Nada se sube ni se almacena: el micrófono solo se mezcla en las grabaciones que tú decidas hacer.',
+      boot1Free: '<strong>Sin anuncios y financiado por la comunidad.</strong> Nunca habrá anuncios ni rastreadores. Si disfrutas de Choordination, puedes apoyarlo en <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>.',
+      continueBtn: "Continuar", howToPlay: "Cómo Tocar", startBtn: "Iniciar Motor",
+      calibNote: "Cuando la cámara se active, mantén el rostro relajado y neutro durante 2 segundos: Choordination calibra el sustain de cejas a tu medida.",
+      leftHand: "Mano Izquierda", rightHand: "Mano Derecha",
+      tutRoot: "Selecciona la nota fundamental.", tutMod: "Selecciona el modificador del acorde.",
+      tutTrigger: "<strong>Disparo:</strong> Pellizca con <em>ambas</em> manos (pulgar e índice) para tocar.",
+      tutYolo: "<strong>Seña YOLO 🤙:</strong> Haz esta seña con la mano de modificadores: el pulgar elige un modificador y el meñique otro, ¡y el acorde combina ambos!",
+      tutSustain: "<strong>Sustain:</strong> Levanta las cejas (o mantén pulsada la barra espaciadora) para que los acordes sigan sonando: tu boca queda libre para cantar.",
+      tutTip: "Consejo: ¿Solo tienes una mano disponible? ¡Prueba las opciones de Accesibilidad en el menú de Ajustes!",
+      tutAccTitle: "Modo Accesible (Inclinación de Cabeza)",
+      tutAccHand: "Controla siempre la nota fundamental.",
+      tutAccTilt: "<strong>Dial de cabeza:</strong> Inclina ligeramente la cabeza a izquierda o derecha para subir o bajar el modificador. Vuelve al centro para <strong>fijarlo</strong>.",
+      tutAccTrigger: "<strong>Disparo:</strong> Pellizca con tu mano para tocar el acorde.",
+      tutKbdTitle: "Modo Teclado",
+      tutKbd1: "<strong>1–7:</strong> seleccionan la fundamental (hasta 0, - y = en modo Cromático).",
+      tutKbd2: "<strong>Q–I:</strong> seleccionan el modificador del acorde.",
+      tutKbd3: "<strong>Intro</strong> (o un clic en el escenario) toca el acorde.",
+      tutKbd4: "<strong>Espacio:</strong> mantén pulsado para el sustain.",
+      tutTouchTitle: "Modo Táctil",
+      tutTouch1: "<strong>Pads izquierdos:</strong> toca un acorde para reproducirlo.",
+      tutTouch2: "<strong>Pads derechos:</strong> elige el modificador; puedes mantener uno con un segundo dedo mientras tocas acordes.",
+      tutTouch3: "<strong>SUSTAIN:</strong> fija el botón de sustain para que los acordes sigan sonando.",
+      loadingAudio: "Cargando el motor de audio...", loadingSamples: "Cargando instrumentos...",
+      loadingModels: "Cargando el seguimiento de manos y rostro...", loadingCamera: "Permite el acceso a la cámara, por favor.",
+      finalizingVideo: "Finalizando tu grabación…",
+      errAudioTitle: "El motor de audio no pudo iniciarse",
+      errAudioBody: "Tu navegador bloqueó o no pudo iniciar el motor de audio. Comprueba que esta pestaña puede reproducir sonido y vuelve a intentarlo.",
+      errModelsTitle: "No se pudieron cargar los modelos de seguimiento",
+      errModelsBody: "No se pudieron descargar los modelos de seguimiento de manos y rostro. Comprueba tu conexión a internet y vuelve a intentarlo.",
+      errCameraTitle: "Se necesita acceso a la cámara",
+      errCameraBody: "Choordination no pudo acceder a tu cámara. Haz clic en el icono de la cámara en la barra de direcciones del navegador (o revisa los ajustes del sistema), permite el acceso para este sitio y pulsa Reintentar. Recuerda: todo el vídeo se queda en tu dispositivo.",
+      retry: "Reintentar", useKeyboard: "Continuar en modo teclado", useTouch: "Continuar con pads táctiles",
+      calibrating: "Calibrando… mantén el rostro neutro",
+      sustainOn: "SUSTAIN ACTIVO", playingLabel: "Sonando",
+      nagTitle: "Apoya a Choordination",
+      nagBody: "¿Te encanta crear con Choordination? ¡Ayuda a mantener el estudio vivo, sin anuncios y lleno de novedades!",
+      nagPatreon: "Apóyanos en Patreon", nagContinue: "Seguir tocando", nagSkip: "Saltar en {s} s…",
+      supportLink: "Apóyanos en Patreon", designedBy: "Diseñado por",
+      aboutTitle: "Acerca de Choordination",
+      aboutBody: 'Choordination es un sitio web de código abierto diseñado y cuidado por Drephie, cantante y coach vocal. La idea del proyecto es poner herramientas musicales al alcance de todo el mundo: cada línea de código es pública en el <a href="{repo}" target="_blank" rel="noopener noreferrer">repositorio</a>.<br><br>Es <strong>100% privado</strong>: todo el vídeo se procesa en tu dispositivo, dentro de tu navegador, y nunca se sube ni se almacena. Además es <strong>totalmente libre de anuncios</strong> y se financia gracias a la comunidad.<br><br>Para seguir las novedades y otros proyectos, o para <u><b>quitar la marca de agua</b></u>, ¡pásate por el <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>!',
+      rotateTitle: "Gira tu dispositivo", rotateBody: "Choordination se toca en horizontal. Gira tu dispositivo para continuar.",
+      sustainLatch: "SUSTAIN",
+      modTriadShort: "Tríada", mod7Short: "7ª",
+      modName_Triad: "Tríada (Auto)", modName_Maj: "Mayor", modName_Min: "Menor",
+      modName_Dim: "Disminuido", modName_Aug: "Aumentado", modName_7th: "7ª (Auto)",
+      modName_Maj7: "Séptima Mayor", modName_Min7: "Séptima Menor", modName_Dom7: "Séptima de Dominante",
+      modName_Dim7: "Séptima Disminuida", modName_Sus2: "Sus 2", modName_Sus4: "Sus 4",
+      modName_6: "Sexta", modName_Add9: "Add 9", modName_Maj9: "Novena Mayor", modName_Min9: "Novena Menor",
+    },
+    it: {
+      menu: "Menu", settingsTitle: "Impostazioni Studio",
+      lang: "Lingua", not: "Notazione", vol: "Volume", oct: "Ottava",
+      key: "Tonalità", mods: "Modificatori di Accordi...", modsTitle: "Modificatori di Accordi",
+      inst: "Strumento", theme: "Tema Estetico", acc: "Accessibilità",
+      leftShape: "Forma Sinistra", rightShape: "Forma Destra", handLayout: "Mano Dominante",
+      uiPos: "Posizionamento UI...", uiPosTitle: "Posizionamento UI",
+      uiEditBtn: "✋ Trascina e ridimensiona sullo schermo", uiFineTune: "Oppure regola con precisione:",
+      uiEditHint: "Trascina un elemento per spostarlo — trascina la maniglia ⤢ per ridimensionare (sempre in scala). Esc o Fatto per terminare.", uiEditDone: "Fatto",
+      reset: "Ripristina", back: "← Torna al Menu", lh: "UI SINISTRA", rh: "UI DESTRA",
+      closeAria: "Chiudi", helpAria: "Come si suona", recordAria: "Registra audio", recStopAria: "Interrompi la registrazione",
+      aboutAria: "Informazioni su Choordination", touchSettingsAria: "Impostazioni",
+      loopAria: "Stazione loop", loopBpmAria: "Tempo (BPM)", loopBars: "Battute",
+      metClick: "Clic", metBeep: "Bip", metWood: "Legno", metHat: "Hi-hat",
+      loopMetAria: "Metronomo", loopMetSoundAria: "Suono del metronomo", loopCountInAria: "Pre-conteggio di 1 battuta",
+      loopRecAria: "Registra / sovraincidi loop", loopPlayAria: "Avvia o ferma i loop",
+      loopUndoAria: "Annulla l'ultimo livello", loopClearAria: "Cancella tutti i livelli",
+      recChoiceTitle: "Registra", recChoiceBody: "Cosa vuoi registrare?",
+      recAudio: "🎙 Solo audio", recScreen: "🖥 Schermo + audio",
+      ariaLX: "Posizione orizzontale della UI sinistra", ariaLY: "Posizione verticale della UI sinistra", ariaLS: "Dimensione della UI sinistra",
+      ariaRX: "Posizione orizzontale della UI destra", ariaRY: "Posizione verticale della UI destra", ariaRS: "Dimensione della UI destra",
+      octMellow: "Scuro (-1)", octNormal: "Normale (0)", octBright: "Brillante (+1)",
+      chromatic: "Cromatica", major: "Maggiore", minor: "Minore",
+      instPiano: "Pianoforte a Coda", instEpiano: "Piano Elettrico Classico", instEsynth: "Synth Elettrico", instPad: "Pad Analogico Morbido",
+      instOrgan: "Organo Caldo", instHarp: "Arpa da Sogno",
+      shapeWheel: "Ciambella", shapeSlider: "Pillola", shapeGrid: "Griglia",
+      handRight: "Destrimano", handLeft: "Mancino",
+      accNone: "Modalità a Due Mani", accLeft: "Mano Sinistra + Inclinazione della Testa", accRight: "Mano Destra + Inclinazione della Testa",
+      accKeyboard: "Solo Tastiera (fotocamera opzionale)", accTouch: "Pad Touch (senza fotocamera)", accHandsfree: "Senza Mani (Prossimamente)",
+      browSustain: "Sustain con Sopracciglia", onLabel: "Attivo", offLabel: "Disattivato",
+      themeLiquid: "Vetro Liquido", themeY2k: "Cyber Y2K", themePink: "Rosa Tenue", themeBw: "Monocromatico", themeRetro: "CRT Retrò",
+      bootWelcome: "Benvenuto in Choordination", boot1Title: "Su questo progetto",
+      boot1Open: '<strong>Open source.</strong> Choordination è gratuito e open source: ogni riga di codice è pubblica nel <a href="{repo}" target="_blank" rel="noopener noreferrer">repository</a>.',
+      boot1Privacy: '<strong>100% privato.</strong> Fotocamera e microfono vengono elaborati interamente su questo dispositivo, nel tuo browser. Nulla viene caricato o salvato: il microfono viene mixato solo nelle registrazioni che scegli di fare.',
+      boot1Free: '<strong>Senza pubblicità, sostenuto dagli utenti.</strong> Mai pubblicità né tracker. Se Choordination ti piace, puoi sostenerlo su <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>.',
+      continueBtn: "Continua", howToPlay: "Come si Suona", startBtn: "Avvia il Motore",
+      calibNote: "Quando la fotocamera si attiva, mantieni il viso rilassato e neutro per 2 secondi: Choordination calibra il sustain delle sopracciglia su di te.",
+      leftHand: "Mano Sinistra", rightHand: "Mano Destra",
+      tutRoot: "Seleziona la nota fondamentale.", tutMod: "Seleziona il modificatore dell'accordo.",
+      tutTrigger: "<strong>Attivazione:</strong> Fai il gesto della pinza con <em>entrambe</em> le mani (pollice e indice) per suonare.",
+      tutYolo: "<strong>Segno YOLO 🤙:</strong> Fai questo segno con la mano dei modificatori: il pollice sceglie un modificatore e il mignolo l'altro, e l'accordo li combina!",
+      tutSustain: "<strong>Sustain:</strong> Alza le sopracciglia (o tieni premuta la barra spaziatrice) per far durare gli accordi: la bocca resta libera per cantare.",
+      tutTip: "Suggerimento: Hai una sola mano disponibile? Prova le opzioni di Accessibilità nel menu Impostazioni!",
+      tutAccTitle: "Modalità Accessibile (Inclinazione della Testa)",
+      tutAccHand: "Controlla sempre la nota fondamentale.",
+      tutAccTilt: "<strong>Selettore a testa:</strong> Inclina leggermente la testa a sinistra o a destra per cambiare il modificatore. Torna al centro per <strong>bloccarlo</strong>.",
+      tutAccTrigger: "<strong>Attivazione:</strong> Fai la pinza con la tua mano per suonare l'accordo.",
+      tutKbdTitle: "Modalità Tastiera",
+      tutKbd1: "<strong>1–7:</strong> selezionano la fondamentale (fino a 0, - e = in modalità Cromatica).",
+      tutKbd2: "<strong>Q–I:</strong> selezionano il modificatore dell'accordo.",
+      tutKbd3: "<strong>Invio</strong> (o un clic sul palco) suona l'accordo.",
+      tutKbd4: "<strong>Spazio:</strong> tieni premuto per il sustain.",
+      tutTouchTitle: "Modalità Touch",
+      tutTouch1: "<strong>Pad a sinistra:</strong> tocca un accordo per suonarlo.",
+      tutTouch2: "<strong>Pad a destra:</strong> scegli il modificatore; puoi tenerne premuto uno con un secondo dito mentre suoni gli accordi.",
+      tutTouch3: "<strong>SUSTAIN:</strong> blocca il pulsante sustain per far durare gli accordi.",
+      loadingAudio: "Caricamento del motore audio...", loadingSamples: "Caricamento degli strumenti...",
+      loadingModels: "Caricamento del tracciamento di mani e volto...", loadingCamera: "Consenti l'accesso alla fotocamera.",
+      finalizingVideo: "Finalizzazione della registrazione…",
+      errAudioTitle: "Impossibile avviare il motore audio",
+      errAudioBody: "Il browser ha bloccato o non è riuscito ad avviare il motore audio. Controlla che questa scheda possa riprodurre suoni e riprova.",
+      errModelsTitle: "Impossibile caricare i modelli di tracciamento",
+      errModelsBody: "Non è stato possibile scaricare i modelli di tracciamento di mani e volto. Controlla la connessione a internet e riprova.",
+      errCameraTitle: "Serve l'accesso alla fotocamera",
+      errCameraBody: "Choordination non è riuscito ad accedere alla fotocamera. Fai clic sull'icona della fotocamera nella barra degli indirizzi (o controlla le impostazioni di sistema), consenti l'accesso per questo sito e premi Riprova. Ricorda: tutto il video resta sul tuo dispositivo.",
+      retry: "Riprova", useKeyboard: "Continua in modalità tastiera", useTouch: "Continua con i pad touch",
+      calibrating: "Calibrazione… mantieni il viso neutro",
+      sustainOn: "SUSTAIN ATTIVO", playingLabel: "In riproduzione",
+      nagTitle: "Sostieni Choordination",
+      nagBody: "Ti piace creare con Choordination? Aiutaci a mantenere lo studio vivo, senza pubblicità e pieno di novità!",
+      nagPatreon: "Sostienici su Patreon", nagContinue: "Continua a suonare", nagSkip: "Salta tra {s} s…",
+      supportLink: "Sostienici su Patreon", designedBy: "Progettato da",
+      aboutTitle: "Informazioni su Choordination",
+      aboutBody: 'Choordination è un sito web open source progettato e curato da Drephie, cantante e vocal coach. L\'idea alla base del progetto è rendere gli strumenti musicali accessibili a tutti: ogni riga di codice è pubblica nel <a href="{repo}" target="_blank" rel="noopener noreferrer">repository</a>.<br><br>È <strong>100% privato</strong>: tutto il video viene elaborato sul tuo dispositivo, nel tuo browser, e non viene mai caricato né salvato. È inoltre <strong>completamente senza pubblicità</strong> e sostenuto dagli utenti.<br><br>Per seguire aggiornamenti e altri progetti, o per <u><b>rimuovere la filigrana</b></u>, dai un\'occhiata al <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>!',
+      rotateTitle: "Ruota il dispositivo", rotateBody: "Choordination si suona in orizzontale. Ruota il dispositivo per continuare.",
+      sustainLatch: "SUSTAIN",
+      modTriadShort: "Triade", mod7Short: "7ª",
+      modName_Triad: "Triade (Auto)", modName_Maj: "Maggiore", modName_Min: "Minore",
+      modName_Dim: "Diminuito", modName_Aug: "Aumentato", modName_7th: "7ª (Auto)",
+      modName_Maj7: "Settima Maggiore", modName_Min7: "Settima Minore", modName_Dom7: "Settima di Dominante",
+      modName_Dim7: "Settima Diminuita", modName_Sus2: "Sus 2", modName_Sus4: "Sus 4",
+      modName_6: "Sesta", modName_Add9: "Add 9", modName_Maj9: "Nona Maggiore", modName_Min9: "Nona Minore",
+    }
+  };
+
+  function t(key) {
+    const lang = languageSelector.value;
+    return (i18n[lang] && i18n[lang][key]) ?? i18n.en[key] ?? key;
+  }
+  function interp(str) { return String(str).replaceAll('{repo}', REPO_URL).replaceAll('{patreon}', PATREON_URL); }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  // --- SETTINGS PERSISTENCE ---
+  const SETTINGS_KEY = 'choordination.settings.v1';
+  const uiOffsets = { lx: 0, ly: 0, ls: 100, rx: 0, ry: 0, rs: 100 };
+  let browThreshold = 0.5;
+  let savedModifiers = null;
+  let currentModifiers = [];
+
+  function loadStoredSettings() {
+    try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch { return {}; }
+  }
+  // Deliberately narrow: only widget shapes and on-screen placement/size persist.
+  // Everything else (theme, language, key, instrument, volume, …) starts fresh
+  // each visit — the app always boots in the default Liquid Glass look.
+  function saveSettings() {
+    const data = { leftShape: leftShape.value, rightShape: rightShape.value, uiOffsets: { ...uiOffsets } };
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(data)); } catch { /* storage unavailable */ }
+  }
+  function restoreSettings() {
+    const s = loadStoredSettings();
+    const setSel = (el, v) => {
+      if (v == null) return;
+      const opt = [...el.options].find(o => o.value === String(v) && !o.disabled);
+      if (opt) el.value = opt.value;
+    };
+    setSel(leftShape, s.leftShape); setSel(rightShape, s.rightShape);
+    if (s.uiOffsets) for (const k of Object.keys(uiOffsets)) {
+      const v = parseInt(s.uiOffsets[k], 10);
+      if (!isNaN(v)) { uiOffsets[k] = v; const el = $(k); if (el) el.value = v; }
+    }
+    themeSelector.value = 'liquid';
+    document.body.setAttribute('data-theme', 'liquid');
+  }
+
+  // --- ACCESSIBLE CUSTOM SELECTS (combobox + listbox pattern) ---
+  function closeAllSelect(except) {
+    document.querySelectorAll('.custom-select').forEach(cs => {
+      if (cs === except) return;
+      const list = cs.querySelector('.select-items');
+      const trig = cs.querySelector('.select-selected');
+      if (list) list.classList.add('select-hide');
+      if (trig) { trig.classList.remove('select-arrow-active'); trig.setAttribute('aria-expanded', 'false'); trig.removeAttribute('aria-activedescendant'); }
+    });
+  }
+  document.addEventListener('click', () => closeAllSelect(null));
+
+  function buildCustomSelect(container) {
+    const sel = container.querySelector('select');
+    if (!sel) return;
+    container.querySelectorAll('.select-selected, .select-items').forEach(n => n.remove());
+
+    const labelEl = container.closest('.control-group')?.querySelector('label');
+    const listId = 'listbox-' + sel.id;
+    const trigger = document.createElement('div');
+    trigger.className = 'select-selected';
+    trigger.tabIndex = 0;
+    trigger.setAttribute('role', 'combobox');
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.setAttribute('aria-controls', listId);
+    if (labelEl) trigger.setAttribute('aria-label', labelEl.textContent);
+
+    const list = document.createElement('div');
+    list.className = 'select-items select-hide';
+    list.id = listId;
+    list.setAttribute('role', 'listbox');
+
+    const optionEls = [];
+    let highlight = Math.max(0, sel.selectedIndex);
+
+    const syncTriggerText = () => {
+      const opt = sel.options[Math.max(0, sel.selectedIndex)];
+      trigger.textContent = opt ? opt.textContent : '';
+    };
+    const isOpen = () => !list.classList.contains('select-hide');
+    const open = () => {
+      closeAllSelect(container);
+      list.classList.remove('select-hide');
+      trigger.classList.add('select-arrow-active');
+      trigger.setAttribute('aria-expanded', 'true');
+      highlight = Math.max(0, sel.selectedIndex);
+      updateHighlight();
+    };
+    const close = () => {
+      list.classList.add('select-hide');
+      trigger.classList.remove('select-arrow-active');
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.removeAttribute('aria-activedescendant');
+    };
+    const updateHighlight = () => {
+      optionEls.forEach((o, i) => o.classList.toggle('option-highlight', i === highlight));
+      const o = optionEls[highlight];
+      if (o) { trigger.setAttribute('aria-activedescendant', o.id); o.scrollIntoView({ block: 'nearest' }); }
+    };
+    // Match by value (via selectedIndex), never by innerHTML.
+    const commit = (i) => {
+      if (!sel.options[i] || sel.options[i].disabled) return;
+      if (sel.selectedIndex !== i) {
+        sel.selectedIndex = i;
+        optionEls.forEach((o, j) => { o.classList.toggle('same-as-selected', j === i); o.setAttribute('aria-selected', String(j === i)); });
+        syncTriggerText();
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    };
+    const move = (delta) => {
+      let i = highlight;
+      for (let guard = 0; guard < sel.options.length; guard++) {
+        i = (i + delta + sel.options.length) % sel.options.length;
+        if (!sel.options[i].disabled) { highlight = i; break; }
+      }
+      updateHighlight();
+    };
+
+    [...sel.options].forEach((opt, i) => {
+      const o = document.createElement('div');
+      o.id = listId + '-opt-' + i;
+      o.setAttribute('role', 'option');
+      o.dataset.value = opt.value;
+      o.textContent = opt.textContent;
+      o.setAttribute('aria-selected', String(i === sel.selectedIndex));
+      if (i === sel.selectedIndex) o.classList.add('same-as-selected');
+      if (opt.disabled) { o.setAttribute('aria-disabled', 'true'); o.classList.add('option-disabled'); }
+      o.addEventListener('click', (e) => { e.stopPropagation(); if (opt.disabled) return; commit(i); close(); trigger.focus(); });
+      list.appendChild(o);
+      optionEls.push(o);
+    });
+    syncTriggerText();
+
+    trigger.addEventListener('click', (e) => { e.stopPropagation(); isOpen() ? close() : open(); });
+    trigger.addEventListener('keydown', (e) => {
+      switch (e.key) {
+        case 'ArrowDown': e.preventDefault(); isOpen() ? move(1) : open(); break;
+        case 'ArrowUp': e.preventDefault(); isOpen() ? move(-1) : open(); break;
+        case 'Enter': case ' ': e.preventDefault(); if (isOpen()) { commit(highlight); close(); } else open(); break;
+        case 'Home': if (isOpen()) { e.preventDefault(); highlight = -1; move(1); } break;
+        case 'End': if (isOpen()) { e.preventDefault(); highlight = 0; move(-1); } break;
+        case 'Escape': if (isOpen()) { e.preventDefault(); e.stopPropagation(); close(); } break;
+        case 'Tab': if (isOpen()) close(); break;
+      }
+    });
+
+    container.appendChild(trigger);
+    container.appendChild(list);
+  }
+  function setupCustomSelects() {
+    document.querySelectorAll('.custom-select').forEach(buildCustomSelect);
+  }
+
+  // --- MODAL MANAGER (dialog semantics, focus trap, Escape, focus return) ---
+  let openModalEl = null;
+  let modalOpener = null;
+
+  const focusablesIn = (el) => [...el.querySelectorAll('button, [href], input, select, [tabindex]:not([tabindex="-1"])')]
+    .filter(n => !n.disabled && n.offsetParent !== null);
+
+  function openModal(modal, opener) {
+    hideAllModals(false);
+    modal.style.display = 'flex';
+    openModalEl = modal;
+    modalOpener = opener || null;
+    const f = focusablesIn(modal);
+    (f.find(n => !n.classList.contains('close-btn')) || f[0] || modal).focus();
+  }
+  function hideAllModals(returnFocus = true) {
+    const nagWasOpen = patreonNag.style.display === 'flex';
+    allModals.forEach(m => m.style.display = 'none');
+    if (nagWasOpen) nagDismissed();
+    if (returnFocus && modalOpener && document.contains(modalOpener)) modalOpener.focus();
+    openModalEl = null;
+    modalOpener = null;
+  }
+  function currentDialog() {
+    if (openModalEl) return openModalEl;
+    if (bootModal.style.display !== 'none') return bootModal;
+    return null;
+  }
+  document.addEventListener('keydown', (e) => {
+    const modal = currentDialog();
+    if (!modal) return;
+    if (e.key === 'Escape') {
+      if (modal === patreonNag) { e.preventDefault(); dismissNag(); }
+      else if (modal !== bootModal) { e.preventDefault(); hideAllModals(); }
+      return;
+    }
+    if (e.key === 'Tab') {
+      const f = focusablesIn(modal);
+      if (f.length === 0) { e.preventDefault(); return; }
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (document.activeElement === last || !modal.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  // --- NOTE SPELLING (key-signature aware) ---
+  // Real-world key names follow the circle of fifths: sharp keys are spelled
+  // with sharps (D, A, E, B, F#; E/B/F#/C#/G# minor) and flat keys with flats
+  // (F, Bb, Eb, Ab, Db; C/D/F/G/Bb/Eb minor). Chord roots use proper letter
+  // stacking so every degree gets a distinct letter (e.g. D major → D E F# G
+  // A B C#, not Gb/Db), and chord tones are spelled from that root.
+  const SHARP_LETTERS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const FLAT_LETTERS  = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+  const SHARP_SOLFEGE = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
+  const FLAT_SOLFEGE  = ['Do', 'Reb', 'Re', 'Mib', 'Mi', 'Fa', 'Solb', 'Sol', 'Lab', 'La', 'Sib', 'Si'];
+  // Kept for chromatic mode (no key context → conventional flats).
+  const chromaticNotes = FLAT_LETTERS, chromaticSolfeggio = FLAT_SOLFEGE;
+  const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+  const LETTER_PC = [0, 2, 4, 5, 7, 9, 11];
+  const SOLFEGE_OF = { C: 'Do', D: 'Re', E: 'Mi', F: 'Fa', G: 'Sol', A: 'La', B: 'Si' };
+  // Whether each key (by chromatic root 0=C..11=B) is spelled with sharps.
+  const KEY_SHARP = {
+    maj: [false, false, true, false, true, false, true, true, false, true, false, true],
+    min: [false, true, false, false, true, false, true, false, true, true, false, true],
+  };
+  const keyUsesSharps = (rootIdx, type) => KEY_SHARP[type][rootIdx];
+  const keyRootName = (rootIdx, type, solfege) =>
+    (keyUsesSharps(rootIdx, type) ? (solfege ? SHARP_SOLFEGE : SHARP_LETTERS) : (solfege ? FLAT_SOLFEGE : FLAT_LETTERS))[rootIdx];
+
+  function accSym(acc) { return acc === 0 ? '' : acc > 0 ? '#'.repeat(acc) : 'b'.repeat(-acc); }
+  // Spell a pitch class onto a specific letter (index 0..6), choosing the
+  // accidental that turns that letter into the target pitch.
+  function spellOnLetter(letterIdx, targetPc, solfege) {
+    letterIdx = ((letterIdx % 7) + 7) % 7;
+    let acc = (((targetPc - LETTER_PC[letterIdx]) % 12) + 12) % 12;
+    if (acc > 6) acc -= 12;
+    return (solfege ? SOLFEGE_OF[LETTERS[letterIdx]] : LETTERS[letterIdx]) + accSym(acc);
+  }
+  const tonicLetterIdx = (rootIdx, type) => LETTERS.indexOf(keyRootName(rootIdx, type, false)[0]);
+
+  function buildKeyOptions() {
+    const prev = modeSelector.value || '0_maj';
+    const solfege = notationSelector.value === 'solfeggio';
+    modeSelector.innerHTML = '';
+    const add = (value, label) => {
+      const o = document.createElement('option');
+      o.value = value; o.textContent = label;
+      modeSelector.appendChild(o);
+    };
+    add('chromatic', t('chromatic'));
+    for (let i = 0; i < 12; i++) add(`${i}_maj`, `${keyRootName(i, 'maj', solfege)} ${t('major')}`);
+    for (let i = 0; i < 12; i++) add(`${i}_min`, `${keyRootName(i, 'min', solfege)} ${t('minor')}`);
+    modeSelector.value = [...modeSelector.options].some(o => o.value === prev) ? prev : '0_maj';
+  }
+
+  // --- LANGUAGE ---
+  function updateLanguage() {
+    const lang = languageSelector.value;
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.innerHTML = interp(t(el.getAttribute('data-i18n')));
+    });
+    document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+      el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
+    });
+    buildKeyOptions();
+    buildModifierCheckboxes();
+    setupCustomSelects();
+    updateTutorialText();
+    buildBootAbout();
+    updateRecordButtons();
+    buildTouchPads();
+  }
+
+  // --- BOOT FLOW (two steps) ---
+  function buildBootAbout() {
+    bootAboutText.innerHTML = `<h3>${t('boot1Title')}</h3><ul>
+      <li>${interp(t('boot1Open'))}</li>
+      <li>${interp(t('boot1Privacy'))}</li>
+      <li>${interp(t('boot1Free'))}</li>
+    </ul>`;
+  }
+  function showBootStep(step, focus = true) {
+    bootStep1.style.display = step === 1 ? 'flex' : 'none';
+    bootStep2.style.display = step === 2 ? 'flex' : 'none';
+    bootTitle.innerHTML = step === 1 ? t('bootWelcome') : t('howToPlay');
+    // Never steal focus on initial page load; only on user-driven step changes.
+    if (focus) (step === 1 ? bootContinueBtn : startBtn).focus();
+  }
+
+  // --- TUTORIAL TEXT ---
+  function tutorialHtml() {
+    if (touchOnly()) {
+      return `<h3>${t('tutTouchTitle')}</h3><ul><li>${t('tutTouch1')}</li><li>${t('tutTouch2')}</li><li>${t('tutTouch3')}</li></ul>`;
+    }
+    const mode = accMode.value;
+    if (mode === 'keyboard') {
+      return `<h3>${t('tutKbdTitle')}</h3><ul><li>${t('tutKbd1')}</li><li>${t('tutKbd2')}</li><li>${t('tutKbd3')}</li><li>${t('tutKbd4')}</li></ul>`;
+    }
+    if (mode === 'none') {
+      const isRH = handednessMode.value === 'right';
+      const rootHand = t(isRH ? 'rightHand' : 'leftHand');
+      const modHand = t(isRH ? 'leftHand' : 'rightHand');
+      return `<ul>
+        <li><strong>${rootHand}:</strong> ${t('tutRoot')}</li>
+        <li><strong>${modHand}:</strong> ${t('tutMod')}</li>
+        <li>${t('tutTrigger')}</li>
+        <li>${t('tutYolo')}</li>
+        <li>${t('tutSustain')}</li>
+      </ul>
+      <p class="tutorial-tip"><em>${t('tutTip')}</em></p>`;
+    }
+    const activeHand = t(mode === 'left' ? 'leftHand' : 'rightHand');
+    return `<h3>${t('tutAccTitle')}</h3><ul>
+      <li><strong>${activeHand}:</strong> ${t('tutAccHand')}</li>
+      <li>${t('tutAccTilt')}</li>
+      <li>${t('tutAccTrigger')}</li>
+      <li>${t('tutSustain')}</li>
+    </ul>`;
+  }
+  function updateTutorialText() {
+    const html = tutorialHtml();
+    bootTutorialText.innerHTML = html;
+    menuTutorialText.innerHTML = html;
+    const cameraless = accMode.value === 'keyboard' || touchOnly();
+    bootCalibNote.style.display = cameraless ? 'none' : '';
+  }
+
+  // --- MODIFIERS ---
+  const allAvailableModifiers = [
+    { id: 'Triad', default: true }, { id: 'Maj', default: false }, { id: 'Min', default: false },
+    { id: 'Dim', default: false }, { id: 'Aug', default: false },
+    { id: '7th', default: true }, { id: 'Maj7', default: false },
+    { id: 'Min7', default: false }, { id: 'Dom7', default: false }, { id: 'Dim7', default: false },
+    { id: 'Sus2', default: false }, { id: 'Sus4', default: true },
+    { id: '6', default: false }, { id: 'Add9', default: true },
+    { id: 'Maj9', default: false }, { id: 'Min9', default: false }
+  ];
+  function modShortLabel(id) {
+    if (id === 'Triad') return t('modTriadShort');
+    if (id === '7th') return t('mod7Short');
+    return id;
+  }
+  function buildModifierCheckboxes() {
+    const checked = new Set(currentModifiers.length ? currentModifiers : (savedModifiers || allAvailableModifiers.filter(m => m.default).map(m => m.id)));
+    modifierCheckboxes.innerHTML = '';
+    allAvailableModifiers.forEach(mod => {
+      const label = document.createElement('label');
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.value = mod.id;
+      input.checked = checked.has(mod.id);
+      input.addEventListener('change', updateModifiersList);
+      label.appendChild(input);
+      label.appendChild(document.createTextNode(' ' + t('modName_' + mod.id)));
+      modifierCheckboxes.appendChild(label);
+    });
+  }
+
+  // --- MUSIC THEORY / STATE ---
+  const midiBase = 48; // C3
+  const majorScaleSteps = [0, 2, 4, 5, 7, 9, 11];
+  const minorScaleSteps = [0, 2, 3, 5, 7, 8, 10];
+  const diatonicQualities = {
+    maj: ['Major', 'Minor', 'Minor', 'Major', 'Major', 'Minor', 'Dim'],
+    min: ['Minor', 'Dim', 'Major', 'Minor', 'Minor', 'Major', 'Major']
+  };
+
+  let leftChordNames = [];
+  let currentKeyRootIdx = 0;
+  let isChromatic = false;
+  let currentScaleType = 'maj';
+  let activeNoteIdx = 0;
+  let activeTypeIdx = 0;
+  let currentlyPlayingKeys = [];
+  let headTiltTriggered = false;
+  let wasTriggering = false;
+
+  let engineStarted = false;
+  let audioReady = false;
+  let visionReady = false;
+  let cameraReady = false;
+  let handLandmarker = null, faceLandmarker = null, currentStream = null;
+
+  let kbdTrigger = false, mouseTrigger = false;
+  let sustainKey = false, sustainBrow = false, sustainLatchOn = false;
+  let browSustainOn = true; // eyebrow-raise sustain; off for singers
+  const sustainActive = () => sustainBrow || sustainKey || sustainLatchOn;
+  // "Touch Pads (no camera)" is a regular accessibility mode now — phones
+  // default to full camera hand-tracking like desktop.
+  const touchOnly = () => accMode.value === 'touch';
+  const visionOn = () => cameraReady && visionReady && accMode.value !== 'keyboard' && !touchOnly();
+  function applyTouchClass() { document.body.classList.toggle('touch-mode', touchOnly()); }
+
+  function updateModifiersList() {
+    const checkedBoxes = [...modifierCheckboxes.querySelectorAll('input:checked')];
+    currentModifiers = checkedBoxes.map(box => box.value);
+    if (currentModifiers.length === 0) {
+      currentModifiers = ['Triad'];
+      const cb = modifierCheckboxes.querySelector('input[value="Triad"]');
+      if (cb) cb.checked = true;
+    }
+    activeTypeIdx = 0;
+    releaseAudio(true);
+    saveSettings();
+    buildTouchPads();
+  }
+
+  function updateKeyContext() {
+    const solfege = notationSelector.value === 'solfeggio';
+    const val = modeSelector.value;
+    if (val === 'chromatic') {
+      isChromatic = true;
+      leftChordNames = (solfege ? chromaticSolfeggio : chromaticNotes).slice();
+    } else {
+      isChromatic = false;
+      const parts = val.split('_');
+      currentKeyRootIdx = parseInt(parts[0], 10);
+      currentScaleType = parts[1];
+      const scaleSteps = currentScaleType === 'maj' ? majorScaleSteps : minorScaleSteps;
+      const qualities = diatonicQualities[currentScaleType];
+      const tonicLet = tonicLetterIdx(currentKeyRootIdx, currentScaleType);
+      leftChordNames = scaleSteps.map((step, idx) => {
+        // Each degree walks one letter further, so every chord root is spelled
+        // with a distinct letter and the correct accidental for this key.
+        const rootNote = spellOnLetter(tonicLet + idx, (currentKeyRootIdx + step) % 12, solfege);
+        const quality = qualities[idx];
+        if (quality === 'Minor') return rootNote + 'm';
+        if (quality === 'Dim') return rootNote + 'dim';
+        return rootNote;
+      });
+    }
+    if (activeNoteIdx >= leftChordNames.length) activeNoteIdx = 0;
+    updateModifiersList();
+  }
+
+  function modifierIntervals(mod, baseThird, baseFifth, baseSeventh) {
+    switch (mod) {
+      case 'Triad': return [0, baseThird, baseFifth];
+      case 'Maj': return [0, 4, 7];
+      case 'Min': return [0, 3, 7];
+      case 'Dim': return [0, 3, 6];
+      case 'Aug': return [0, 4, 8];
+      case '7th': return [0, baseThird, baseFifth, baseSeventh];
+      case 'Maj7': return [0, 4, 7, 11];
+      case 'Min7': return [0, 3, 7, 10];
+      case 'Dom7': return [0, 4, 7, 10];
+      case 'Dim7': return [0, 3, 6, 9];
+      case 'Sus2': return [0, 2, 7];
+      case 'Sus4': return [0, 5, 7];
+      case '6': return [0, 4, 7, 9];
+      case 'Add9': return [0, baseThird, baseFifth, 14];
+      case 'Maj9': return [0, 4, 7, 11, 14];
+      case 'Min9': return [0, 3, 7, 10, 14];
+      default: return [0, baseThird, baseFifth];
+    }
+  }
+  function modifierSuffix(mod, baseThird, baseFifth, baseSeventh) {
+    switch (mod) {
+      case 'Triad': if (baseThird === 3 && baseFifth === 6) return 'dim'; return baseThird === 3 ? 'm' : '';
+      case 'Maj': return '';
+      case 'Min': return 'm';
+      case 'Dim': return 'dim';
+      case 'Aug': return 'aug';
+      case '7th':
+        if (baseThird === 4 && baseSeventh === 11) return 'maj7';
+        if (baseThird === 3 && baseFifth === 6) return 'm7♭5';
+        return baseThird === 3 ? 'm7' : '7';
+      case 'Maj7': return 'maj7';
+      case 'Min7': return 'm7';
+      case 'Dom7': return '7';
+      case 'Dim7': return 'dim7';
+      case 'Sus2': return 'sus2';
+      case 'Sus4': return 'sus4';
+      case '6': return '6';
+      case 'Add9': return baseThird === 3 ? 'm(add9)' : 'add9';
+      case 'Maj9': return 'maj9';
+      case 'Min9': return 'm9';
+      default: return '';
+    }
+  }
+
+  // Chord-tone letter offsets: how many scale letters a semitone interval is
+  // above the root (stacked-thirds spelling). e.g. a major 3rd (4) is the 3rd
+  // letter → offset 2, a 5th (7) → offset 4. 9ths fold to a 2nd letter.
+  const IV_LETTER = [0, 1, 1, 2, 2, 3, 4, 4, 4, 5, 6, 6];
+  const ivLetterOffset = (iv) => IV_LETTER[((iv % 12) + 12) % 12];
+  const pc = (n) => ((n % 12) + 12) % 12;
+  const pcLetterIdx = (p) => LETTERS.indexOf(FLAT_LETTERS[p][0]);
+
+  // One source of truth for what a gesture/keypress means musically:
+  // frequencies for Tone, note numbers, and correctly-spelled names.
+  // modPair (optional) = [idxA, idxB]: the two modifiers chosen by the YOLO
+  // sign's thumb and pinky; otherwise a single modifier is used.
+  function getChordInfo(dualMod, modPair) {
+    const solfege = notationSelector.value === 'solfeggio';
+    const scaleSteps = currentScaleType === 'maj' ? majorScaleSteps : minorScaleSteps;
+    const qualities = diatonicQualities[currentScaleType];
+    let baseThird = 4, baseFifth = 7, baseSeventh = 10;
+    const noteIdx = Math.max(0, Math.min(leftChordNames.length - 1, activeNoteIdx));
+    let rootMidi, rootLetterIdx;
+    if (isChromatic) {
+      rootMidi = midiBase + noteIdx;
+      rootLetterIdx = pcLetterIdx(pc(rootMidi));
+    } else {
+      rootMidi = midiBase + currentKeyRootIdx + scaleSteps[noteIdx];
+      rootLetterIdx = (tonicLetterIdx(currentKeyRootIdx, currentScaleType) + noteIdx) % 7;
+      const dq = qualities[noteIdx];
+      baseThird = (dq === 'Minor' || dq === 'Dim') ? 3 : 4;
+      baseFifth = (dq === 'Dim') ? 6 : 7;
+      baseSeventh = (dq === 'Major') ? 11 : 10;
+    }
+    rootMidi += parseInt(octaveSelector.value, 10) * 12;
+
+    const clampMod = i => Math.max(0, Math.min(currentModifiers.length - 1, i));
+    let modifier1, modifier2 = null;
+    if (modPair) {
+      modifier1 = currentModifiers[clampMod(modPair[0])];
+      modifier2 = currentModifiers[clampMod(modPair[1])];
+    } else {
+      modifier1 = currentModifiers[clampMod(activeTypeIdx)];
+      if (dualMod) modifier2 = currentModifiers[(clampMod(activeTypeIdx) + 1) % currentModifiers.length];
+    }
+
+    const intervals = new Set();
+    [modifier1, modifier2].forEach(mod => {
+      if (!mod) return;
+      modifierIntervals(mod, baseThird, baseFifth, baseSeventh).forEach(v => intervals.add(v));
+    });
+    const sorted = [...intervals].sort((a, b) => a - b);
+    const midiNotes = sorted.map(iv => rootMidi + iv);
+    const freqs = midiNotes.map(n => Tone.Frequency(n, 'midi').toFrequency());
+    const noteNames = sorted.map(iv => spellOnLetter(rootLetterIdx + ivLetterOffset(iv), pc(rootMidi + iv), solfege));
+
+    const rootName = spellOnLetter(rootLetterIdx, pc(rootMidi), solfege);
+    const sep = solfege ? ' ' : '';
+    let suffix = modifierSuffix(modifier1, baseThird, baseFifth, baseSeventh);
+    if (modifier2 && modifier2 !== modifier1) {
+      suffix = (suffix || 'maj') + '+' + (modifierSuffix(modifier2, baseThird, baseFifth, baseSeventh) || 'maj');
+    }
+    return { freqs, midiNotes, name: rootName + sep + suffix, noteNames };
+  }
+
+  // --- AUDIO ENGINE ---
+  // Chain: instruments -> Reverb -> Compressor -> Limiter -> master Volume -> Destination.
+  // The -3 dB limiter ceiling leaves headroom for the +1.9 dB max master volume
+  // (125%), so full volume can never clip the output.
+  let instruments = {};
+  let currentInstrument = 'piano';
+  let masterVolume = null, limiter = null, compressor = null, reverb = null;
+  let padFilter = null, synthFilter = null, organVibrato = null, recorder = null, streamDest = null;
+
+  function disposeAudioNodes() {
+    [...Object.values(instruments), padFilter, synthFilter, organVibrato, reverb, compressor, limiter, masterVolume, recorder].forEach(n => {
+      try { if (n) n.dispose(); } catch { /* already disposed */ }
+    });
+    instruments = {};
+    masterVolume = limiter = compressor = reverb = padFilter = synthFilter = organVibrato = recorder = null;
+    streamDest = null;
+    disposeLooperNodes();
+  }
+
+  async function initAudio() {
+    if (audioReady) return;
+    await Tone.start();
+    // Tone's default 100 ms scheduling look-ahead makes gestures feel laggy;
+    // 20 ms keeps scheduling stable while making pinch->sound near-instant.
+    Tone.getContext().lookAhead = 0.02;
+    disposeAudioNodes();
+
+    masterVolume = new Tone.Volume(0).toDestination();
+    limiter = new Tone.Limiter(-3).connect(masterVolume);
+    compressor = new Tone.Compressor({ threshold: -18, ratio: 3, attack: 0.005, release: 0.25 }).connect(limiter);
+    reverb = new Tone.Reverb({ decay: 2.2, preDelay: 0.02, wet: 0.28 }).connect(compressor);
+    await reverb.ready;
+
+    padFilter = new Tone.Filter(2400, 'lowpass').connect(reverb);
+    synthFilter = new Tone.Filter(1700, 'lowpass').connect(reverb);
+
+    // Salamander grand, sampled every 3 semitones across C2-C6 (17 files, ~2 MB).
+    const pianoUrls = {};
+    for (const oct of [2, 3, 4, 5]) {
+      pianoUrls['C' + oct] = 'C' + oct + '.mp3';
+      pianoUrls['D#' + oct] = 'Ds' + oct + '.mp3';
+      pianoUrls['F#' + oct] = 'Fs' + oct + '.mp3';
+      pianoUrls['A' + oct] = 'A' + oct + '.mp3';
+    }
+    pianoUrls['C6'] = 'C6.mp3';
+
+    instruments = {
+      piano: new Tone.Sampler({
+        urls: pianoUrls,
+        baseUrl: 'https://tonejs.github.io/audio/salamander/',
+        release: 1.2
+      }).connect(reverb),
+      // Rhodes-style FM electric piano
+      epiano: new Tone.PolySynth(Tone.FMSynth, {
+        harmonicity: 3,
+        modulationIndex: 12,
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.004, decay: 1.4, sustain: 0.35, release: 0.8 },
+        modulation: { type: 'sine' },
+        modulationEnvelope: { attack: 0.002, decay: 0.35, sustain: 0.05, release: 0.4 }
+      }).connect(reverb),
+      esynth: new Tone.PolySynth(Tone.Synth, {
+        oscillator: { type: 'fatsawtooth', count: 3, spread: 18 },
+        envelope: { attack: 0.015, decay: 0.35, sustain: 0.5, release: 0.7 }
+      }).connect(synthFilter),
+      pad: new Tone.PolySynth(Tone.Synth, {
+        oscillator: { type: 'fatsine', count: 3, spread: 24 },
+        envelope: { attack: 0.5, decay: 0.6, sustain: 0.8, release: 2.4 }
+      }).connect(padFilter),
+      // Drawbar-style additive organ with gentle vibrato
+      organ: new Tone.PolySynth(Tone.Synth, {
+        oscillator: { type: 'custom', partials: [1, 0.7, 0.45, 0.3, 0.15, 0.1] },
+        envelope: { attack: 0.04, decay: 0.2, sustain: 0.9, release: 0.35 }
+      }).connect(organVibrato = new Tone.Vibrato(5.5, 0.08).connect(reverb)),
+      // Plucked FM harp: bell-like attack, no sustain, long shimmering tail
+      harp: new Tone.PolySynth(Tone.FMSynth, {
+        harmonicity: 2,
+        modulationIndex: 5,
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.002, decay: 1.8, sustain: 0, release: 1.6 },
+        modulation: { type: 'sine' },
+        modulationEnvelope: { attack: 0.002, decay: 0.25, sustain: 0, release: 0.2 }
+      }).connect(reverb)
+    };
+    // Level-match the rack
+    instruments.piano.volume.value = -1;
+    instruments.epiano.volume.value = -7;
+    instruments.esynth.volume.value = -14;
+    instruments.pad.volume.value = -9;
+    instruments.organ.volume.value = -12;
+    instruments.harp.volume.value = -6;
+
+    showLoading('loadingSamples');
+    await Tone.loaded();
+
+    recorder = new Tone.Recorder();
+    masterVolume.connect(recorder);
+    // Raw MediaStream of the master mix, used when recording screen + audio together.
+    streamDest = Tone.getContext().rawContext.createMediaStreamDestination();
+    masterVolume.connect(streamDest);
+
+    initLooper();
+    audioReady = true;
+  }
+
+  function applyVolume() {
+    if (!masterVolume) return;
+    let pct = parseInt(volumeSelector.value, 10);
+    if (isNaN(pct)) pct = 100;
+    pct = Math.max(0, Math.min(125, pct));
+    if (pct === 0) {
+      masterVolume.mute = true;
+    } else {
+      masterVolume.mute = false;
+      masterVolume.volume.value = Tone.gainToDb(pct / 100);
+    }
+  }
+
+  // Push every pre-boot setting into the freshly built engine so nothing chosen
+  // before "Start Engine" is lost.
+  function syncAudioSettings() {
+    currentInstrument = instrumentSelector.value;
+    applyVolume();
+    updateKeyContext();
+  }
+
+  // Stuck-note strategy: releasing a live chord uses the leak-proof releaseAll
+  // whenever the loop station is NOT playing (i.e. almost always) — every voice
+  // gets a note-off, so nothing can ever hang. Targeted release of the tracked
+  // live notes is used ONLY while loops are running, to avoid cutting layers on
+  // the same instrument. Either way liveNotes tracks what we attacked.
+  let liveNotes = [];
+  let lastAttackAt = 0;
+  const loopsPlaying = () => audioReady && Tone.Transport.state === 'started';
+
+  function releaseLiveVoices(now) {
+    if (!audioReady) return;
+    if (loopsPlaying()) {
+      if (liveNotes.length && instruments[currentInstrument]) {
+        // Never schedule a release before a just-scheduled attack, or that
+        // voice's note-off is skipped and the note hangs.
+        instruments[currentInstrument].triggerRelease(liveNotes, Math.max(now, lastAttackAt + 0.005));
+      }
+    } else {
+      for (const key in instruments) instruments[key].releaseAll(now);
+    }
+    liveNotes = [];
+  }
+
+  function playChord(info) {
+    if (!audioReady || !instruments[currentInstrument]) return;
+    const now = Tone.now();
+    if (!sustainActive()) releaseLiveVoices(now);
+    lastAttackAt = now + 0.01;
+    instruments[currentInstrument].triggerAttack(info.freqs, lastAttackAt);
+    liveNotes = liveNotes.concat(info.freqs);
+    currentlyPlayingKeys = info.freqs;
+    setChordDisplay(info);
+    loopCaptureAttack(info.freqs, currentInstrument);
+    lastActivityTime = Date.now();
+  }
+
+  function releaseAudio(forceAll = false) {
+    if (audioReady) {
+      const now = Tone.now();
+      if (forceAll || !loopsPlaying()) {
+        for (const key in instruments) instruments[key].releaseAll(now);
+      } else if (liveNotes.length > 0 && instruments[currentInstrument]) {
+        instruments[currentInstrument].triggerRelease(liveNotes, Math.max(now, lastAttackAt + 0.005));
+      }
+    }
+    liveNotes = [];
+    currentlyPlayingKeys = [];
+    loopCaptureRelease();
+    clearChordDisplay();
+  }
+
+  // --- LIVE CHORD DISPLAY ---
+  const chordDisplayState = { name: '', notes: [], playing: false, fadeStart: 0 };
+  function setChordDisplay(info) {
+    chordDisplayState.name = info.name;
+    chordDisplayState.notes = info.noteNames;
+    chordDisplayState.playing = true;
+    chordLive.textContent = `${t('playingLabel')}: ${info.name} (${info.noteNames.join(', ')})`;
+    if (touchOnly()) {
+      chordBannerName.textContent = info.name;
+      chordBannerNotes.textContent = info.noteNames.join(' · ');
+      chordBanner.classList.remove('idle');
+    }
+  }
+  function clearChordDisplay() {
+    if (!chordDisplayState.playing) return;
+    chordDisplayState.playing = false;
+    chordDisplayState.fadeStart = performance.now();
+    chordLive.textContent = '';
+    chordBanner.classList.add('idle');
+  }
+
+  // --- RECORDER ---
+  let isRecording = false, recStartTime = 0, recTimer = null;
+  const fmtTime = ms => {
+    const s = Math.floor(ms / 1000);
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  };
+  function updateRecordButtons() {
+    recordBtn.textContent = isRecording ? '⏹ ' + fmtTime(Date.now() - recStartTime) : '⏺ REC';
+    recordBtn.classList.toggle('recording', isRecording);
+    recordBtn.setAttribute('aria-label', t(isRecording ? 'recStopAria' : 'recordAria'));
+    touchRecordBtn.textContent = isRecording ? fmtTime(Date.now() - recStartTime) : '⏺';
+    touchRecordBtn.classList.toggle('recording', isRecording);
+    touchRecordBtn.setAttribute('aria-label', t(isRecording ? 'recStopAria' : 'recordAria'));
+  }
+  let recMode = 'audio'; // 'audio' | 'screen'
+  let screenRecorder = null, screenStream = null, screenChunks = [];
+
+  // Encode an AudioBuffer as 16-bit PCM WAV so audio exports open anywhere.
+  function audioBufferToWavBlob(buffer) {
+    const numCh = Math.min(2, buffer.numberOfChannels || 1);
+    const rate = buffer.sampleRate;
+    const frames = buffer.length;
+    const dataSize = frames * numCh * 2;
+    const ab = new ArrayBuffer(44 + dataSize);
+    const dv = new DataView(ab);
+    const wstr = (off, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(off + i, s.charCodeAt(i)); };
+    wstr(0, 'RIFF'); dv.setUint32(4, 36 + dataSize, true); wstr(8, 'WAVE');
+    wstr(12, 'fmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true);
+    dv.setUint16(22, numCh, true); dv.setUint32(24, rate, true);
+    dv.setUint32(28, rate * numCh * 2, true); dv.setUint16(32, numCh * 2, true); dv.setUint16(34, 16, true);
+    wstr(36, 'data'); dv.setUint32(40, dataSize, true);
+    const chans = [];
+    for (let c = 0; c < numCh; c++) chans.push(buffer.getChannelData(c));
+    let off = 44;
+    for (let i = 0; i < frames; i++) {
+      for (let c = 0; c < numCh; c++) {
+        const s = Math.max(-1, Math.min(1, chans[c][i]));
+        dv.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+        off += 2;
+      }
+    }
+    return new Blob([ab], { type: 'audio/wav' });
+  }
+
+  function downloadBlob(blob, prefix, ext) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = prefix + '-' + new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19) + '.' + ext;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
+  function beginRecordingUI() {
+    isRecording = true;
+    recStartTime = Date.now();
+    recTimer = setInterval(updateRecordButtons, 500);
+    updateRecordButtons();
+  }
+  // The REC button first asks what to capture: just the audio, or the screen too.
+  function toggleRecording(opener) {
+    if (!audioReady || !recorder) return;
+    if (isRecording) { stopRecording(); return; }
+    $("rec-screen-btn").style.display = navigator.mediaDevices?.getDisplayMedia ? '' : 'none';
+    openModal(recChoiceModal, opener || null);
+  }
+  function startAudioRecording() {
+    hideAllModals();
+    recMode = 'audio';
+    recorder.start();
+    beginRecordingUI();
+  }
+  // Brief overlay shown while a finished recording is assembled/encoded, so the
+  // heavy work happens AFTER capture instead of stuttering the live interface.
+  function showFinalizing() {
+    uiLayer.style.display = 'flex';
+    uiLayer.innerHTML = `<div class="loading-text"><div class="boot-logo">${LOGO_SVG}</div><h2 class="loading-sub">${t('finalizingVideo')}</h2></div>`;
+  }
+  function hideFinalizing() { uiLayer.style.display = 'none'; uiLayer.innerHTML = ''; }
+  const nextPaint = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+  async function startScreenRecording() {
+    hideAllModals();
+    let stream;
+    try {
+      // Cap the capture at 30 fps so software encoders don't choke the UI.
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: false });
+    } catch { return; } // user dismissed the browser's screen picker
+    recMode = 'screen';
+    screenStream = stream;
+    const mixed = new MediaStream([...stream.getVideoTracks(), ...streamDest.stream.getAudioTracks()]);
+    // Prefer hardware-accelerated codecs (MP4/H.264 first — shareable and fast
+    // where available; then lightweight VP8; VP9 only as a last resort since its
+    // software encoder is the usual cause of recording lag).
+    const mime = ['video/mp4;codecs=avc1,mp4a', 'video/mp4', 'video/webm;codecs=vp8,opus', 'video/webm;codecs=vp9,opus', 'video/webm']
+      .find(m => MediaRecorder.isTypeSupported(m)) || '';
+    const opts = { videoBitsPerSecond: 8000000, audioBitsPerSecond: 128000 };
+    if (mime) opts.mimeType = mime;
+    screenChunks = [];
+    screenRecorder = new MediaRecorder(mixed, opts);
+    screenRecorder.ondataavailable = (e) => { if (e.data && e.data.size) screenChunks.push(e.data); };
+    screenRecorder.onstop = async () => {
+      showFinalizing();
+      await nextPaint(); // let the overlay paint before assembling the file
+      const type = (screenRecorder && screenRecorder.mimeType) || mime || 'video/webm';
+      downloadBlob(new Blob(screenChunks, { type }), 'choordination-video', type.includes('mp4') ? 'mp4' : 'webm');
+      screenChunks = [];
+      if (screenStream) screenStream.getTracks().forEach(tr => tr.stop());
+      screenStream = null;
+      screenRecorder = null;
+      hideFinalizing();
+    };
+    // If the user ends the share from the browser chrome, wrap up the recording.
+    stream.getVideoTracks()[0].addEventListener('ended', () => { if (isRecording && recMode === 'screen') stopRecording(); });
+    screenRecorder.start(); // no timeslice → one blob at stop, minimal overhead
+    beginRecordingUI();
+  }
+  async function stopRecording() {
+    clearInterval(recTimer);
+    isRecording = false;
+    updateRecordButtons();
+    if (recMode === 'screen') {
+      if (screenRecorder && screenRecorder.state !== 'inactive') screenRecorder.stop(); // onstop finalizes
+    } else {
+      const blob = await recorder.stop();
+      showFinalizing();
+      await nextPaint();
+      try {
+        // Re-encode the compressed capture as WAV — universally usable.
+        const buf = await Tone.getContext().rawContext.decodeAudioData(await blob.arrayBuffer());
+        downloadBlob(audioBufferToWavBlob(buf), 'choordination-audio', 'wav');
+      } catch (err) {
+        console.warn('WAV conversion failed, saving original capture', err);
+        const ext = blob.type.includes('mp4') ? 'm4a' : (blob.type.includes('ogg') ? 'ogg' : 'webm');
+        downloadBlob(blob, 'choordination-audio', ext);
+      }
+      hideFinalizing();
+    }
+  }
+
+  // --- LOOP STATION ---
+  // Event looper: chords are captured as Transport-tick events and replayed via
+  // Tone.Part, so loops stay sample-locked to the grid, follow live BPM changes,
+  // and never drift the way browser audio-buffer loopers do. Each event also
+  // remembers the instrument it was recorded with, so layers can stack sounds.
+  // The metronome is routed straight to the destination — it is heard, but kept
+  // out of recordings and the master-volume/limiter path.
+  const looper = {
+    bars: 2, countIn: true, metOn: true, metSound: 'click',
+    state: 'idle',        // idle | recording | playing | overdub
+    layers: [], events: null, pending: null,
+    loopTicks: 0, commitId: null,
+  };
+  let metSynths = null, metVol = null, hatFilter = null, metLoop = null;
+  let loopUiTimer = null;
+  const tapTimes = [];
+
+  function disposeLooperNodes() {
+    try { if (metLoop) metLoop.dispose(); } catch { /* already disposed */ }
+    looper.layers.forEach(l => { try { l.part.dispose(); } catch { /* already disposed */ } });
+    looper.layers = [];
+    [...(metSynths ? Object.values(metSynths) : []), hatFilter, metVol].forEach(n => {
+      try { if (n) n.dispose(); } catch { /* already disposed */ }
+    });
+    metSynths = null; metVol = null; hatFilter = null; metLoop = null;
+    looper.state = 'idle'; looper.events = null; looper.pending = null; looper.commitId = null;
+  }
+
+  function initLooper() {
+    metVol = new Tone.Volume(-8).toDestination();
+    hatFilter = new Tone.Filter(8000, 'highpass').connect(metVol);
+    metSynths = {
+      click: new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.03, sustain: 0 } }).connect(metVol),
+      beep: new Tone.Synth({ oscillator: { type: 'sine' }, envelope: { attack: 0.001, decay: 0.07, sustain: 0, release: 0.02 } }).connect(metVol),
+      wood: new Tone.MembraneSynth({ pitchDecay: 0.008, octaves: 2, envelope: { attack: 0.001, decay: 0.06, sustain: 0 } }).connect(metVol),
+      hat: new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.05, sustain: 0 } }).connect(hatFilter),
+    };
+    Tone.Transport.bpm.value = clampBpm(parseInt(loopBpmInput.value, 10));
+    Tone.Transport.loop = true;
+    Tone.Transport.loopStart = 0;
+    setLoopLen();
+    metLoop = new Tone.Loop(metTick, '4n').start(0);
+  }
+
+  const clampBpm = (v) => Math.max(40, Math.min(240, isNaN(v) ? 100 : v));
+  function setLoopLen() {
+    looper.loopTicks = looper.bars * 4 * Tone.Transport.PPQ;
+    Tone.Transport.loopEnd = looper.bars + 'm';
+  }
+
+  function playMet(time, accent) {
+    if (!metSynths) return;
+    switch (looper.metSound) {
+      case 'beep': metSynths.beep.triggerAttackRelease(accent ? 'E6' : 'A5', 0.05, time); break;
+      case 'wood': metSynths.wood.triggerAttackRelease(accent ? 'A4' : 'E4', 0.05, time); break;
+      case 'hat': metSynths.hat.triggerAttackRelease(0.03, time, accent ? 0.9 : 0.5); break;
+      default: metSynths.click.triggerAttackRelease(0.02, time, accent ? 1 : 0.55);
+    }
+  }
+  function metTick(time) {
+    if (!looper.metOn) return;
+    const beat = Math.floor(Tone.Transport.getTicksAtTime(time) / Tone.Transport.PPQ) % 4;
+    playMet(time, beat === 0);
+  }
+
+  // Capture hooks, called from playChord()/releaseAudio()
+  const loopCapturing = () => (looper.state === 'recording' || looper.state === 'overdub') && Tone.Transport.state === 'started';
+  function loopCaptureAttack(freqs, inst) {
+    if (!loopCapturing()) return;
+    const pos = Tone.Transport.ticks % looper.loopTicks;
+    if (looper.pending) closePending(pos);
+    looper.pending = { startTicks: pos, freqs: freqs.slice(), inst };
+  }
+  function loopCaptureRelease() {
+    if (!looper.pending) return;
+    if (!loopCapturing()) { looper.pending = null; return; }
+    closePending(Tone.Transport.ticks % looper.loopTicks);
+  }
+  function closePending(endTicks) {
+    const p = looper.pending;
+    looper.pending = null;
+    if (!p || !looper.events) return;
+    let dur = endTicks - p.startTicks;
+    if (dur <= 0) dur += looper.loopTicks; // chord held across the loop seam
+    dur = Math.max(dur, Tone.Transport.PPQ / 8);
+    looper.events.push({ startTicks: Math.round(p.startTicks), durTicks: Math.round(dur), freqs: p.freqs, inst: p.inst });
+  }
+
+  function commitLayer() {
+    if (looper.pending) closePending(Tone.Transport.ticks % looper.loopTicks);
+    const events = looper.events || [];
+    looper.events = null;
+    if (events.length === 0) return;
+    const part = new Tone.Part((time, ev) => {
+      const inst = instruments[ev.inst] || instruments[currentInstrument];
+      if (inst) inst.triggerAttackRelease(ev.freqs, Tone.Ticks(ev.durTicks).toSeconds(), time);
+    }, events.map(ev => [`${ev.startTicks}i`, ev]));
+    part.loop = true;
+    part.loopStart = 0;
+    part.loopEnd = `${looper.loopTicks}i`;
+    part.start(0);
+    looper.layers.push({ part, events });
+  }
+
+  function setLooperState(s) { looper.state = s; updateLoopBar(); }
+
+  function loopRecord() {
+    if (!audioReady) return;
+    if (looper.state === 'recording') return;                                   // first take finishes on the bar line
+    if (looper.state === 'playing') { looper.events = []; setLooperState('overdub'); return; }
+    if (looper.state === 'overdub') { commitLayer(); setLooperState('playing'); return; }
+    // idle -> arm a fresh first take (with optional 1-bar count-in before the transport starts)
+    Tone.Transport.stop();
+    Tone.Transport.position = 0;
+    setLoopLen();
+    looper.events = [];
+    looper.pending = null;
+    const beatSec = 60 / Tone.Transport.bpm.value;
+    const t0 = Tone.now() + 0.12;
+    if (looper.countIn) {
+      for (let k = 0; k < 4; k++) playMet(t0 + k * beatSec, k === 0);
+      Tone.Transport.start(t0 + 4 * beatSec);
+    } else {
+      Tone.Transport.start(t0);
+    }
+    looper.commitId = Tone.Transport.scheduleOnce(() => {
+      commitLayer();
+      looper.commitId = null;
+      setLooperState('playing');
+    }, `${looper.loopTicks - 1}i`);
+    setLooperState('recording');
+  }
+
+  // Stop everything: aborts an in-progress take/overdub capture, halts the
+  // transport and silences ringing notes. Layers are kept (Clear removes them).
+  function loopStop() {
+    if (!audioReady) return;
+    if (looper.commitId !== null) { Tone.Transport.clear(looper.commitId); looper.commitId = null; }
+    if (looper.state === 'recording' || looper.state === 'overdub') { looper.events = null; looper.pending = null; }
+    if (Tone.Transport.state === 'started') Tone.Transport.stop();
+    releaseAudio(true);
+    setLooperState('idle');
+  }
+
+  function loopTogglePlay() {
+    if (!audioReady) return;
+    if (looper.state === 'recording' || Tone.Transport.state === 'started') { loopStop(); return; }
+    Tone.Transport.position = 0;
+    setLoopLen();
+    Tone.Transport.start('+0.05');
+    // With no layers this doubles as a plain metronome.
+    setLooperState(looper.layers.length ? 'playing' : 'idle');
+  }
+
+  function loopUndo() {
+    const layer = looper.layers.pop();
+    if (layer) { try { layer.part.stop(); layer.part.dispose(); } catch { /* already disposed */ } }
+    if (looper.layers.length === 0 && (looper.state === 'playing' || looper.state === 'overdub')) {
+      looper.events = null; looper.pending = null;
+      setLooperState('idle');
+    }
+    updateLoopBar();
+  }
+  function loopClear() {
+    looper.layers.forEach(l => { try { l.part.stop(); l.part.dispose(); } catch { /* already disposed */ } });
+    looper.layers = [];
+    looper.events = null; looper.pending = null;
+    if (looper.commitId !== null) { Tone.Transport.clear(looper.commitId); looper.commitId = null; }
+    setLooperState('idle');
+  }
+
+  function loopTap() {
+    const now = performance.now();
+    if (tapTimes.length && now - tapTimes[tapTimes.length - 1] > 2500) tapTimes.length = 0;
+    tapTimes.push(now);
+    if (tapTimes.length > 5) tapTimes.shift();
+    if (tapTimes.length >= 2) {
+      const gaps = [];
+      for (let i = 1; i < tapTimes.length; i++) gaps.push(tapTimes[i] - tapTimes[i - 1]);
+      const bpm = clampBpm(Math.round(60000 / (gaps.reduce((a, b) => a + b, 0) / gaps.length)));
+      loopBpmInput.value = bpm;
+      if (audioReady) Tone.Transport.bpm.value = bpm;
+    }
+  }
+
+  function toggleLoopBar() {
+    const open = document.body.classList.toggle('loop-open');
+    if (open) {
+      if (!loopUiTimer) loopUiTimer = setInterval(updateLoopBar, 60);
+      updateLoopBar();
+    } else {
+      if (loopUiTimer) { clearInterval(loopUiTimer); loopUiTimer = null; }
+      // Closing the loop station stops it — nothing keeps playing invisibly.
+      if (audioReady && (Tone.Transport.state === 'started' || looper.state !== 'idle')) loopStop();
+    }
+  }
+
+  function updateLoopBar() {
+    if (!document.body.classList.contains('loop-open')) return;
+    const rec = $("loop-rec"), play = $("loop-play");
+    rec.classList.toggle('recording', looper.state === 'recording');
+    rec.classList.toggle('overdub', looper.state === 'overdub');
+    const running = audioReady && Tone.Transport.state === 'started';
+    play.textContent = running ? '⏹' : '▶';
+    $("loop-layers").textContent = looper.layers.length ? '× ' + looper.layers.length : '';
+    $("loop-undo").disabled = looper.layers.length === 0;
+    $("loop-clear").disabled = looper.layers.length === 0 && looper.state === 'idle';
+    const busy = looper.layers.length > 0 || looper.state !== 'idle';
+    loopBarsSelect.disabled = busy;
+    const dots = loopBeatsEl.children;
+    const beat = running ? Math.floor(Tone.Transport.ticks / Tone.Transport.PPQ) % 4 : -1;
+    for (let i = 0; i < dots.length; i++) dots[i].classList.toggle('on', i === beat);
+  }
+
+  // --- PATREON NAG (idle-only, >=10 min apart, instantly dismissible) ---
+  const FIRST_NAG_MS = 3 * 60 * 1000;
+  const NAG_INTERVAL_MS = 10 * 60 * 1000;
+  const NAG_IDLE_MS = 10 * 1000;
+  let nagEligibleAt = null;
+  let lastActivityTime = Date.now();
+
+  let nagLocked = false, nagCountdownTimer = null;
+  function startNagCountdown() {
+    nagLocked = true;
+    nagCloseBtn.style.display = 'none';
+    skipNagBtn.disabled = true;
+    let left = 5;
+    const paint = () => { skipNagBtn.textContent = t('nagSkip').replace('{s}', left); };
+    paint();
+    nagCountdownTimer = setInterval(() => {
+      left--;
+      if (left <= 0) {
+        clearInterval(nagCountdownTimer);
+        nagCountdownTimer = null;
+        nagLocked = false;
+        skipNagBtn.disabled = false;
+        skipNagBtn.textContent = t('nagContinue');
+        nagCloseBtn.style.display = '';
+      } else {
+        paint();
+      }
+    }, 1000);
+  }
+  function nagDismissed() {
+    nagEligibleAt = Date.now() + NAG_INTERVAL_MS;
+    if (nagCountdownTimer) { clearInterval(nagCountdownTimer); nagCountdownTimer = null; }
+    nagLocked = false;
+  }
+  function dismissNag() { if (nagLocked) return; hideAllModals(); }
+  function checkNag() {
+    if (!engineStarted || nagEligibleAt === null) return;
+    if (patreonNag.style.display === 'flex') return;
+    if (Date.now() < nagEligibleAt) return;
+    if (openModalEl || currentDialog()) return;
+    if (isRecording) return;
+    if (audioReady && Tone.Transport.state === 'started') { lastActivityTime = Date.now(); return; } // loops sounding
+    if (currentlyPlayingKeys.length > 0) { lastActivityTime = Date.now(); return; }
+    if (Date.now() - lastActivityTime < NAG_IDLE_MS) return; // wait for a 10 s idle window
+    openModal(patreonNag, null);
+    startNagCountdown();
+  }
+  setInterval(checkNag, 1000);
+
+  // --- LOADING / ERROR SCREENS ---
+  const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" aria-hidden="true">
+    <defs>
+      <linearGradient id="ringLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/><stop offset="100%" stop-color="#ffffff" stop-opacity="0.1"/>
+      </linearGradient>
+      <linearGradient id="ringRight" x1="100%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" stop-color="#8ad4ff" stop-opacity="1"/><stop offset="100%" stop-color="#8ad4ff" stop-opacity="0.1"/>
+      </linearGradient>
+      <linearGradient id="diamondGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#8ad4ff"/>
+      </linearGradient>
+      <filter id="glass-glow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="12" result="blur" /><feComposite in="SourceGraphic" in2="blur" operator="over" />
+      </filter>
+      <filter id="intense-glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="8" result="blur1" /><feGaussianBlur stdDeviation="20" result="blur2" />
+        <feMerge><feMergeNode in="blur2" /><feMergeNode in="blur1" /><feMergeNode in="SourceGraphic" /></feMerge>
+      </filter>
+    </defs>
+    <circle cx="190" cy="256" r="140" fill="#ffffff" opacity="0.04" filter="url(#glass-glow)" />
+    <circle cx="322" cy="256" r="140" fill="#8ad4ff" opacity="0.06" filter="url(#glass-glow)" />
+    <g filter="url(#glass-glow)">
+      <circle cx="190" cy="256" r="140" fill="none" stroke="url(#ringLeft)" stroke-width="14" />
+      <circle cx="190" cy="256" r="60" fill="none" stroke="#ffffff" stroke-width="4" stroke-dasharray="6 12" opacity="0.4" />
+      <circle cx="190" cy="256" r="10" fill="#ffffff" opacity="0.9" />
+    </g>
+    <g filter="url(#glass-glow)">
+      <circle cx="322" cy="256" r="140" fill="none" stroke="url(#ringRight)" stroke-width="14" />
+      <circle cx="322" cy="256" r="60" fill="none" stroke="#8ad4ff" stroke-width="4" stroke-dasharray="6 12" opacity="0.5" />
+      <circle cx="322" cy="256" r="10" fill="#8ad4ff" opacity="0.9" />
+    </g>
+    <line x1="190" y1="256" x2="322" y2="256" stroke="#ffffff" stroke-width="3" stroke-dasharray="4 8" opacity="0.3" />
+    <g filter="url(#intense-glow)">
+      <path d="M 256 210 L 302 256 L 256 302 L 210 256 Z" fill="none" stroke="#8ad4ff" stroke-width="4" opacity="0.8" />
+      <path d="M 256 228 L 284 256 L 256 284 L 228 256 Z" fill="url(#diamondGrad)" />
+    </g>
+  </svg>`;
+  function showLoading(key) {
+    uiLayer.style.display = 'flex';
+    uiLayer.innerHTML = `<div class="loading-text"><div class="boot-logo">${LOGO_SVG}</div><h1 class="brand-title">CHOORDINATION</h1><h2 class="loading-sub">${t(key)}</h2></div>`;
+  }
+  function showError(titleKey, bodyKey, err, retryFn, offerKeyboard) {
+    uiLayer.style.display = 'flex';
+    uiLayer.innerHTML = `<div class="loading-text">
+      <h1 class="brand-title">CHOORDINATION</h1>
+      <h2 class="error-title">${t(titleKey)}</h2>
+      <p class="error-body">${t(bodyKey)}</p>
+      ${err ? `<p class="error-detail">${escapeHtml(err.message || err)}</p>` : ''}
+      <div class="error-actions"></div>
+    </div>`;
+    const actions = uiLayer.querySelector('.error-actions');
+    const mk = (label, fn) => {
+      const b = document.createElement('button');
+      b.className = 'settings-action-btn';
+      b.textContent = label;
+      b.addEventListener('click', fn);
+      actions.appendChild(b);
+      return b;
+    };
+    const retryBtn = mk(t('retry'), retryFn);
+    // On camera trouble, offer the fitting no-camera fallback: touch pads on
+    // touchscreens, keyboard mode elsewhere.
+    if (offerKeyboard) mk(IS_MOBILE ? t('useTouch') : t('useKeyboard'), IS_MOBILE ? switchToTouchMode : switchToKeyboardMode);
+    retryBtn.focus();
+  }
+  function switchToNoCameraMode(value) {
+    accMode.value = value;
+    applyTouchClass();
+    setupCustomSelects();
+    updateTutorialText();
+    saveSettings();
+    stopCamera();
+    buildTouchPads();
+    finishStartup();
+  }
+  const switchToKeyboardMode = () => switchToNoCameraMode('keyboard');
+  const switchToTouchMode = () => switchToNoCameraMode('touch');
+
+  // --- STARTUP PIPELINE ---
+  // Audio, tracking models and the camera request all start in PARALLEL, so the
+  // webcam permission prompt appears the moment "Start Engine" is pressed
+  // instead of after every sample and model has finished downloading.
+  async function startEngine() {
+    bootModal.style.display = 'none';
+    showLoading('loadingAudio');
+    const wantVision = accMode.value !== 'keyboard' && !touchOnly();
+    const camP = wantVision ? initCamera().then(() => null, err => err) : null;
+    const visionP = wantVision ? initVisionModels().then(() => null, err => err) : null;
+    try {
+      await initAudio();
+    } catch (err) {
+      console.error('Audio initialization failed', err);
+      showError('errAudioTitle', 'errAudioBody', err, startEngine, false);
+      return;
+    }
+    if (!wantVision) { finishStartup(); return; }
+    showLoading('loadingModels');
+    const visErr = await visionP;
+    if (visErr) { console.error('Model load failed', visErr); showError('errModelsTitle', 'errModelsBody', visErr, startVision, true); return; }
+    showLoading('loadingCamera');
+    const camErr = await camP;
+    if (camErr) { console.error('Camera failed', camErr); showError('errCameraTitle', 'errCameraBody', camErr, startVision, true); return; }
+    finishStartup();
+  }
+
+  async function initVisionModels() {
+    const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm');
+    handLandmarker = await HandLandmarker.createFromOptions(vision, {
+      baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task', delegate: 'GPU' },
+      runningMode: 'VIDEO', numHands: 2
+    });
+    faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+      baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: 'GPU' },
+      outputFaceBlendshapes: true, runningMode: 'VIDEO', numFaces: 1
+    });
+    visionReady = true;
+  }
+  async function initCamera() {
+    // Ask for camera AND microphone together (one prompt). The mic is mixed
+    // into recordings only — it is never monitored, so there is no feedback.
+    try {
+      currentStream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 1280, height: 720 },
+        audio: { echoCancellation: true, noiseSuppression: true }
+      });
+    } catch (err) {
+      // Mic may be missing/denied separately — fall back to camera-only.
+      currentStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
+    }
+    video.srcObject = currentStream;
+    await new Promise(res => {
+      if (video.readyState >= 2) res();
+      else video.addEventListener('loadeddata', res, { once: true });
+    });
+    cameraReady = true;
+    lastVideoTime = -1;
+    resetCalibration();
+    hookMicToRecordings();
+  }
+  // Route the mic into BOTH recording paths (Tone.Recorder for audio takes and
+  // streamDest for screen recordings) so a singer's voice lands in the file.
+  let micTapSrc = null, micTapGain = null;
+  function hookMicToRecordings() {
+    if (!audioReady || !currentStream || micTapSrc) return;
+    if (currentStream.getAudioTracks().length === 0) return;
+    try {
+      const rawCtx = Tone.getContext().rawContext;
+      micTapSrc = rawCtx.createMediaStreamSource(currentStream);
+      micTapGain = rawCtx.createGain();
+      micTapGain.gain.value = 1;
+      micTapSrc.connect(micTapGain);
+      if (streamDest) micTapGain.connect(streamDest);
+      if (recorder) Tone.connect(micTapGain, recorder);
+    } catch (err) { console.warn('Mic tap failed', err); }
+  }
+  function stopCamera() {
+    if (currentStream) currentStream.getTracks().forEach(tr => tr.stop());
+    try { if (micTapSrc) micTapSrc.disconnect(); if (micTapGain) micTapGain.disconnect(); } catch { /* ignore */ }
+    micTapSrc = null; micTapGain = null;
+    currentStream = null;
+    video.srcObject = null;
+    cameraReady = false;
+  }
+  // Sequential fallback used for retries and accessibility-mode switches.
+  async function startVision() {
+    if (!visionReady) {
+      showLoading('loadingModels');
+      try { await initVisionModels(); }
+      catch (err) { console.error('Model load failed', err); showError('errModelsTitle', 'errModelsBody', err, startVision, true); return; }
+    }
+    if (!cameraReady) {
+      showLoading('loadingCamera');
+      try { await initCamera(); }
+      catch (err) { console.error('Camera failed', err); showError('errCameraTitle', 'errCameraBody', err, startVision, true); return; }
+    }
+    finishStartup();
+  }
+
+  function finishStartup() {
+    uiLayer.style.display = 'none';
+    applyTouchClass();
+    hookMicToRecordings(); // audio + camera may finish in either order
+    if (!engineStarted) {
+      engineStarted = true;
+      document.body.classList.add('engine-on');
+      topRightMenu.style.display = 'flex';
+      nagEligibleAt = Date.now() + FIRST_NAG_MS;
+      lastActivityTime = Date.now();
+      buildTouchPads();
+      sizeCanvas();
+      requestAnimationFrame(renderLoop);
+    }
+    syncAudioSettings();
+  }
+
+  // --- BROW CALIBRATION ---
+  let calib = { done: true, startedAt: 0, samples: [] };
+  function resetCalibration() { calib = { done: false, startedAt: 0, samples: [] }; }
+
+  // --- COMPUTER VISION ---
+  const handConnections = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+  const visionState = { hands: [] };
+  const pinchState = { Left: false, Right: false };
+  const faceState = { present: false, brow: 0, tiltNorm: 0, eyes: null };
+  let frameCount = 0;
+  let lastVideoTime = -1;
+  let lastFrameAdvanceMs = 0;   // when the camera feed last delivered a new frame
+  let handsGoneSince = 0;       // when hands last disappeared from frame
+  let sweepDone = false;        // one releaseAll sweep per hands-gone episode
+
+  // Pinch is normalized by hand size (wrist -> middle MCP) so it works the same
+  // at 0.5 m and 2 m. Tight thresholds: it only fires when thumb and index
+  // actually touch (engage 0.22 / release 0.30 hysteresis stops flicker).
+  function computePinch(lm, hand) {
+    const ref = Math.hypot(lm[0].x - lm[9].x, lm[0].y - lm[9].y) || 1e-4;
+    const d = Math.hypot(lm[8].x - lm[4].x, lm[8].y - lm[4].y) / ref;
+    const was = pinchState[hand] || false;
+    const now = was ? d < 0.30 : d < 0.22;
+    pinchState[hand] = now;
+    return now;
+  }
+
+  // YOLO 🤙: thumb + pinky extended, index/middle/ring curled. Detected by
+  // comparing each fingertip's distance from the wrist against its own middle
+  // joint — robust to hand size, distance and rotation, unlike fixed thresholds.
+  function isYoloSign(lm) {
+    if (!lm) return false;
+    const d = (a, b) => Math.hypot(lm[a].x - lm[b].x, lm[a].y - lm[b].y);
+    const curled = (tip, pip) => d(tip, 0) < d(pip, 0) * 1.05;
+    const extended = (tip, pip) => d(tip, 0) > d(pip, 0) * 1.15;
+    return extended(4, 2) && extended(20, 18) && curled(8, 6) && curled(12, 10) && curled(16, 14);
+  }
+
+  // Precision aspect-crop matching (mirrored view)
+  function mapLandmarkToCanvas(lm, w, h) {
+    const vw = video.videoWidth || 1280, vh = video.videoHeight || 720;
+    const videoRatio = vw / vh;
+    const windowRatio = w / h;
+    const rx = 1 - lm.x;
+    if (windowRatio > videoRatio) {
+      const renderedHeight = w / videoRatio;
+      return { x: rx * w, y: lm.y * renderedHeight - (renderedHeight - h) / 2 };
+    }
+    const renderedWidth = h * videoRatio;
+    return { x: rx * renderedWidth - (renderedWidth - w) / 2, y: lm.y * h };
+  }
+
+  function processVision(nowMs) {
+    if (!handLandmarker || video.readyState < 2) return;
+    if (video.currentTime === lastVideoTime) return; // no new frame
+    lastVideoTime = video.currentTime;
+    lastFrameAdvanceMs = nowMs;
+    frameCount++;
+
+    const results = handLandmarker.detectForVideo(video, nowMs);
+    visionState.hands = [];
+    const lms = results.landmarks || [];
+    const handedness = results.handednesses || results.handedness || [];
+    for (let i = 0; i < lms.length; i++) {
+      const lm = lms[i];
+      const raw = handedness[i]?.[0]?.categoryName || null;
+      // MediaPipe labels assume mirrored (selfie) input; getUserMedia frames are
+      // unmirrored, so swap the label to get the user's true hand.
+      let userHand;
+      if (raw === 'Left') userHand = 'Right';
+      else if (raw === 'Right') userHand = 'Left';
+      else userHand = (1 - lm[0].x) < 0.5 ? 'Left' : 'Right';
+      visionState.hands.push({ lm, userHand, pinched: computePinch(lm, userHand), yolo: isYoloSign(lm) });
+    }
+    if (visionState.hands.length > 0) lastActivityTime = Date.now();
+
+    // FaceLandmarker runs every 2nd frame; values are held in between.
+    if (faceLandmarker && frameCount % 2 === 0) {
+      const fr = faceLandmarker.detectForVideo(video, nowMs);
+      const cats = fr.faceBlendshapes?.[0]?.categories;
+      if (cats) {
+        faceState.present = true;
+        faceState.brow = cats.find(c => c.categoryName === 'browInnerUp')?.score || 0;
+      } else {
+        faceState.present = false;
+      }
+      const face = fr.faceLandmarks?.[0];
+      if (face) {
+        const le = face[33], re = face[263];
+        const eyeDist = Math.hypot(re.x - le.x, re.y - le.y) || 1e-4;
+        faceState.tiltNorm = (re.y - le.y) / eyeDist; // distance-invariant tilt
+        faceState.eyes = { le, re };
+      } else {
+        faceState.eyes = null;
+      }
+      if (!calib.done && faceState.present) {
+        if (!calib.startedAt) calib.startedAt = Date.now();
+        calib.samples.push(faceState.brow);
+        if (Date.now() - calib.startedAt >= 2000 && calib.samples.length >= 8) {
+          const avg = calib.samples.reduce((a, b) => a + b, 0) / calib.samples.length;
+          browThreshold = Math.min(0.7, Math.max(0.35, avg + 0.25));
+          calib.done = true;
+          saveSettings();
+        }
+      }
+    }
+  }
+
+  // --- ZONE SELECTION (bounded + retrigger hysteresis) ---
+  const zoneSel = { left: { pending: -1, pendingSince: 0 }, right: { pending: -1, pendingSince: 0 } };
+  function debounceSelect(st, currentIdx, newIdx, pinched, nowMs) {
+    if (newIdx === currentIdx) { st.pending = -1; return currentIdx; }
+    if (!pinched) { st.pending = -1; return newIdx; }
+    if (st.pending === newIdx) {
+      if (nowMs - st.pendingSince >= 60) { st.pending = -1; return newIdx; }
+    } else {
+      st.pending = newIdx;
+      st.pendingSince = nowMs;
+    }
+    return currentIdx;
+  }
+  function withinZone(z, tip) {
+    const m = 1.3;
+    if (z.shape === 'wheel') return Math.hypot(tip.x - z.x, tip.y - z.y) <= z.r * m;
+    if (z.shape === 'slider') return Math.abs(tip.x - z.x) <= z.r * 0.55 * m && Math.abs(tip.y - z.y) <= z.r * m;
+    return Math.abs(tip.x - z.x) <= z.r * 1.1 * m && Math.abs(tip.y - z.y) <= z.r * m;
+  }
+  function getAngle(center, point) {
+    let angle = Math.atan2(point.y - center.y, point.x - center.x);
+    if (angle < 0) angle += Math.PI * 2;
+    return angle;
+  }
+  function getSelectionInfo(shape, x, y, mappedY, centerX, centerY, radius, itemsLen) {
+    if (shape === 'wheel') {
+      const dist = Math.hypot(x - centerX, y - centerY);
+      if (dist < radius * 0.4) return { index: -1, inDeadzone: true };
+      const idx = Math.floor(getAngle({ x: centerX, y: centerY }, { x, y }) / (Math.PI * 2 / Math.max(1, itemsLen)));
+      return { index: Math.min(itemsLen - 1, idx), inDeadzone: false };
+    }
+    if (shape === 'slider') return { index: Math.floor(mappedY * Math.max(1, itemsLen)), inDeadzone: false };
+    const rows = Math.ceil(Math.max(1, itemsLen) / 2);
+    const c = (x < centerX) ? 0 : 1;
+    return { index: Math.max(0, Math.min(itemsLen - 1, Math.floor(mappedY * rows) * 2 + c)), inDeadzone: false };
+  }
+
+  // For the YOLO sign: map the thumb tip (4) and pinky tip (20) each to a
+  // modifier segment in the given zone. Falls back to the current selection if
+  // a fingertip is in the wheel deadzone.
+  function yoloModifierPair(z, W, H) {
+    const len = Math.max(1, currentModifiers.length);
+    const idxAt = (lmIdx) => {
+      const p = mapLandmarkToCanvas(z.hand.lm[lmIdx], W, H);
+      const mappedY = Math.max(0, Math.min(0.999, (p.y - (z.y - z.r)) / (z.r * 2)));
+      const info = getSelectionInfo(z.shape, p.x, p.y, mappedY, z.x, z.y, z.r, len);
+      if (info.inDeadzone || info.index < 0) return activeTypeIdx;
+      return Math.max(0, Math.min(len - 1, info.index));
+    };
+    return [idxAt(4), idxAt(20)];
+  }
+
+  // Zone routing follows hand IDENTITY (handedness), not screen half, so crossed
+  // hands and two hands on the same side still map correctly. In head-tilt modes
+  // the active hand drives the root zone on its own side.
+  function computeLayout() {
+    const mode = accMode.value;
+    if (mode === 'left') return { left: 'note', right: 'type' };
+    if (mode === 'right') return { left: 'type', right: 'note' };
+    return handednessMode.value === 'right' ? { left: 'type', right: 'note' } : { left: 'note', right: 'type' };
+  }
+
+  function arraysEqual(a, b) {
+    if (a === b) return true;
+    if (a == null || b == null || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; ++i) if (a[i] !== b[i]) return false;
+    return true;
+  }
+
+  // --- THEME CACHE (computed once per theme change, not per frame/item) ---
+  let themeCache = {};
+  function refreshThemeCache() {
+    const cs = getComputedStyle(document.body);
+    const g = v => cs.getPropertyValue(v).trim();
+    themeCache = {
+      colorLeft: g('--color-left'),
+      colorRight: g('--color-right'),
+      text: g('--color-text'),
+      textPinched: g('--color-text-pinched') || '#000000',
+      textInactive: g('--color-text-inactive'),
+      font: g('--font-main'),
+      blur: parseInt(g('--shadow-blur')) || 0,
+      isRetro: document.body.getAttribute('data-theme') === 'retro'
+    };
+  }
+
+  // uiScale shrinks canvas text/overlays proportionally on short screens
+  // (phone landscape) so the interface auto-fits instead of overflowing.
+  let uiScale = 1;
+  function sizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    uiScale = Math.max(0.55, Math.min(1, canvas.height / 640));
+  }
+
+  // --- RENDER LOOP ---
+  function renderLoop() {
+    const nowMs = performance.now();
+    // Touch-pads mode: the DOM pads drive the audio directly and the canvas is
+    // hidden — skip the whole gate/draw pass (it would auto-release pad-held
+    // notes) but keep the loop alive for mode switches.
+    if (touchOnly()) { requestAnimationFrame(renderLoop); return; }
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    const mode = accMode.value;
+    const active = visionOn();
+    const layout = computeLayout();
+    if (activeNoteIdx >= leftChordNames.length) activeNoteIdx = 0;
+    if (activeTypeIdx >= currentModifiers.length) activeTypeIdx = 0;
+
+    const zones = {
+      left: { x: W * 0.25 + uiOffsets.lx / 100 * W, y: H * 0.5 + uiOffsets.ly / 100 * H, r: H * 0.25 * (uiOffsets.ls / 100), shape: leftShape.value, hand: null, pinch: false, yolo: false },
+      right: { x: W * 0.75 + uiOffsets.rx / 100 * W, y: H * 0.5 + uiOffsets.ry / 100 * H, r: H * 0.25 * (uiOffsets.rs / 100), shape: rightShape.value, hand: null, pinch: false, yolo: false }
+    };
+
+    if (active) {
+      processVision(nowMs);
+      // If the camera feed froze (tab switch, device hiccup), the last detected
+      // hands are stale — never let a frozen "pinch" keep holding notes.
+      if (visionState.hands.length > 0 && lastFrameAdvanceMs && nowMs - lastFrameAdvanceMs > 1000) visionState.hands = [];
+      for (const hand of visionState.hands) {
+        if (mode === 'left' && hand.userHand !== 'Left') continue;
+        if (mode === 'right' && hand.userHand !== 'Right') continue;
+        const zoneName = (mode === 'none') ? (hand.userHand === 'Left' ? 'left' : 'right') : (mode === 'left' ? 'left' : 'right');
+        const z = zones[zoneName];
+        z.hand = hand; z.pinch = hand.pinched; z.yolo = hand.yolo;
+
+        const tip = mapLandmarkToCanvas(hand.lm[8], W, H);
+        if (!withinZone(z, tip)) continue; // outside bounds: hold last selection
+        const kind = layout[zoneName];
+        const items = kind === 'note' ? leftChordNames : currentModifiers;
+        const mappedY = Math.max(0, Math.min(0.999, (tip.y - (z.y - z.r)) / (z.r * 2)));
+        const info = getSelectionInfo(z.shape, tip.x, tip.y, mappedY, z.x, z.y, z.r, items.length);
+        if (info.inDeadzone || info.index < 0) continue;
+        const idx = Math.max(0, Math.min(items.length - 1, info.index));
+        if (kind === 'note') activeNoteIdx = debounceSelect(zoneSel[zoneName], activeNoteIdx, idx, hand.pinched, nowMs);
+        else activeTypeIdx = debounceSelect(zoneSel[zoneName], activeTypeIdx, idx, hand.pinched, nowMs);
+      }
+
+      // Head tilt (accessibility modes): distance-invariant modifier dial
+      if (mode !== 'none' && faceState.eyes && currentModifiers.length > 0) {
+        const tilt = faceState.tiltNorm;
+        if (tilt > 0.28 && !headTiltTriggered) {
+          activeTypeIdx = (activeTypeIdx + 1) % currentModifiers.length;
+          headTiltTriggered = true;
+        } else if (tilt < -0.28 && !headTiltTriggered) {
+          activeTypeIdx = (activeTypeIdx - 1 + currentModifiers.length) % currentModifiers.length;
+          headTiltTriggered = true;
+        } else if (Math.abs(tilt) < 0.12) {
+          headTiltTriggered = false;
+        }
+      }
+
+      // Eyebrow sustain with hysteresis around the calibrated threshold.
+      // Optional: singers move their brows, so it can be switched off entirely.
+      if (browSustainOn && faceState.present && calib.done) {
+        if (!sustainBrow && faceState.brow > browThreshold) sustainBrow = true;
+        else if (sustainBrow && faceState.brow < browThreshold - 0.1) sustainBrow = false;
+      } else {
+        sustainBrow = false;
+      }
+    } else {
+      sustainBrow = false;
+    }
+
+    // Trigger gate. In two-handed mode the modifier hand can either pinch or
+    // hold the YOLO sign 🤙 — you physically can't pinch while signing, so the
+    // sign itself counts as that hand's half of the trigger.
+    let isTriggering = false;
+    let applyDualMod = false;
+    let yoloPair = null;
+    if (mode === 'keyboard') {
+      isTriggering = kbdTrigger || mouseTrigger;
+    } else if (active) {
+      if (mode === 'none') {
+        const typeZone = layout.left === 'type' ? zones.left : zones.right;
+        const noteZone = layout.left === 'type' ? zones.right : zones.left;
+        applyDualMod = typeZone.yolo;
+        // YOLO 🤙: thumb picks one modifier, pinky the other; the chord blends
+        // whichever two segments those fingertips point at (not just adjacent).
+        if (typeZone.yolo && typeZone.hand) yoloPair = yoloModifierPair(typeZone, W, H);
+        isTriggering = !!(zones.left.hand && zones.right.hand && noteZone.pinch && (typeZone.pinch || typeZone.yolo));
+      }
+      else if (mode === 'left') isTriggering = !!(zones.left.hand && zones.left.pinch);
+      else if (mode === 'right') isTriggering = !!(zones.right.hand && zones.right.pinch);
+    }
+
+    if (uiEditMode) isTriggering = false; // no notes while laying out widgets
+    if (audioReady && engineStarted && !uiEditMode) {
+      const info = getChordInfo(applyDualMod, yoloPair);
+      if (isTriggering && (!wasTriggering || !arraysEqual(currentlyPlayingKeys, info.freqs))) playChord(info);
+      if (!isTriggering && !sustainActive() && (currentlyPlayingKeys.length > 0 || liveNotes.length > 0)) releaseAudio();
+    }
+    wasTriggering = isTriggering;
+
+    // Stuck-note watchdog: hands out of frame + no sustain means NOTHING may
+    // keep ringing. Live notes are released immediately; 400 ms later one deep
+    // releaseAll sweep kills any orphaned voice the bookkeeping ever missed
+    // (skipped while the loop station plays, so layers survive).
+    if (active && audioReady) {
+      if (visionState.hands.length > 0) {
+        handsGoneSince = 0;
+        sweepDone = false;
+      } else if (!sustainActive() && !isTriggering) {
+        if (!handsGoneSince) handsGoneSince = nowMs;
+        if (liveNotes.length > 0 || currentlyPlayingKeys.length > 0) releaseAudio();
+        if (!sweepDone && nowMs - handsGoneSince > 400 && Tone.Transport.state !== 'started') {
+          for (const key in instruments) instruments[key].releaseAll();
+          sweepDone = true;
+        }
+      }
+    }
+
+    // Draw widgets
+    const th = themeCache;
+    const typeLabels = currentModifiers.map(modShortLabel);
+    const leftItems = layout.left === 'type' ? typeLabels : leftChordNames;
+    const rightItems = layout.right === 'type' ? typeLabels : leftChordNames;
+    const lPinchRender = zones.left.hand ? (zones.left.pinch || zones.left.yolo) : isTriggering;
+    const rPinchRender = zones.right.hand ? (zones.right.pinch || zones.right.yolo) : isTriggering;
+    // Which segments to light up: the YOLO pair on the modifier zone, else the
+    // single active segment (or the adjacent pair for keyboard-less dual mode).
+    const typeIndices = yoloPair ? yoloPair.slice()
+      : (applyDualMod ? [activeTypeIdx, (activeTypeIdx + 1) % Math.max(1, currentModifiers.length)] : [activeTypeIdx]);
+    const leftIndices = layout.left === 'type' ? typeIndices : [activeNoteIdx];
+    const rightIndices = layout.right === 'type' ? typeIndices : [activeNoteIdx];
+
+    drawZone(zones.left, leftItems, leftIndices, lPinchRender, th.colorLeft);
+    drawZone(zones.right, rightItems, rightIndices, rPinchRender, th.colorRight);
+
+    if (uiEditMode) drawEditHandles(zones);
+
+    // Eye-line indicator in head-tilt modes
+    if (active && mode !== 'none' && faceState.eyes) {
+      const pl = mapLandmarkToCanvas(faceState.eyes.le, W, H);
+      const pr = mapLandmarkToCanvas(faceState.eyes.re, W, H);
+      const eyeColor = mode === 'right' ? th.colorRight : th.colorLeft;
+      ctx.beginPath(); ctx.moveTo(pl.x, pl.y); ctx.lineTo(pr.x, pr.y);
+      ctx.strokeStyle = eyeColor; ctx.lineWidth = 4; ctx.shadowBlur = 15; ctx.shadowColor = eyeColor;
+      ctx.stroke(); ctx.shadowBlur = 0;
+    }
+
+    drawChordDisplay(nowMs, W);
+
+    if (sustainActive()) {
+      ctx.font = `bold ${Math.round((th.isRetro ? 26 : 20) * uiScale)}px ${th.font}`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = th.colorLeft;
+      ctx.fillText(t('sustainOn'), W / 2, 152 * uiScale);
+    }
+    if (active && !calib.done) {
+      ctx.font = `bold ${Math.round((th.isRetro ? 24 : 16) * uiScale)}px ${th.font}`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = th.colorRight;
+      ctx.fillText(t('calibrating'), W / 2, H - 70 * uiScale);
+    }
+
+    if (active) for (const hand of visionState.hands) drawSkeleton(hand, W, H);
+
+    requestAnimationFrame(renderLoop);
+  }
+
+  // --- DRAWING ENGINE (shared helpers consolidate the three widget shapes) ---
+  function setStyles(color, isPinched, isActive) {
+    if (isActive) {
+      ctx.fillStyle = isPinched ? color : 'transparent';
+      ctx.strokeStyle = color;
+      ctx.shadowBlur = isPinched ? themeCache.blur : 0;
+      ctx.shadowColor = color;
+    } else {
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.strokeStyle = 'rgba(128,128,128,0.2)';
+      ctx.shadowBlur = 0;
+    }
+    ctx.lineWidth = 2;
+  }
+  function getTextColor(isActive, isPinched, colorHex) {
+    if (isActive && isPinched) return themeCache.textPinched;
+    if (isActive) return colorHex;
+    return themeCache.textInactive;
+  }
+  function drawItemText(text, x, y, basePx, isActive, isPinched, colorHex) {
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = getTextColor(isActive, isPinched, colorHex);
+    ctx.font = `bold ${Math.round((themeCache.isRetro ? basePx + 6 : basePx) * uiScale)}px ${themeCache.font}`;
+    ctx.fillText(text, x, y);
+  }
+
+  function drawZone(z, items, activeIndices, isPinched, colorHex) {
+    if (!items || items.length === 0) return;
+    activeIndices = (activeIndices || []).map(i => ((i % items.length) + items.length) % items.length);
+    if (z.shape === 'wheel') drawWheel(z.x, z.y, z.r, items, activeIndices, isPinched, colorHex);
+    else if (z.shape === 'slider') drawPill(z.x, z.y, z.r * 1.1, z.r * 2, items, activeIndices, isPinched, colorHex);
+    else drawColumns(z.x, z.y, z.r * 2.2, z.r * 2, items, activeIndices, isPinched, colorHex);
+  }
+
+  function drawColumns(xCenter, yCenter, totalWidth, totalHeight, items, activeIndices, isPinched, colorHex) {
+    const cols = 2, rows = Math.max(1, Math.ceil(items.length / cols));
+    const itemWidth = totalWidth / cols, itemHeight = totalHeight / rows;
+    const startX = xCenter - totalWidth / 2, startY = yCenter - totalHeight / 2;
+    for (let i = 0; i < items.length; i++) {
+      const itemX = startX + (i % cols) * itemWidth, itemY = startY + Math.floor(i / cols) * itemHeight;
+      const isActive = activeIndices.includes(i);
+      setStyles(colorHex, isPinched, isActive);
+      const w = Math.max(1, itemWidth - 12), h = Math.max(1, itemHeight - 12);
+      const r = Math.min(12, w / 2, h / 2);
+      ctx.beginPath(); ctx.roundRect(itemX + 6, itemY + 6, w, h, r); ctx.fill(); ctx.stroke();
+      drawItemText(items[i], itemX + itemWidth / 2, itemY + itemHeight / 2, 16, isActive, isPinched, colorHex);
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  function drawPill(xCenter, yCenter, width, height, items, activeIndices, isPinched, colorHex) {
+    const itemHeight = Math.max(1, height / items.length), startY = yCenter - height / 2;
+    for (let i = 0; i < items.length; i++) {
+      const itemY = startY + i * itemHeight, isActive = activeIndices.includes(i);
+      setStyles(colorHex, isPinched, isActive);
+      const w = Math.max(1, width), h = Math.max(1, itemHeight - 8);
+      const r = Math.min(h / 2, w / 2);
+      ctx.beginPath(); ctx.roundRect(xCenter - w / 2, itemY + 4, w, h, r); ctx.fill(); ctx.stroke();
+      drawItemText(items[i], xCenter, itemY + itemHeight / 2, 16, isActive, isPinched, colorHex);
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  function drawWheel(x, y, radius, items, activeIndices, isPinched, colorHex) {
+    const sliceAngle = (Math.PI * 2) / Math.max(1, items.length);
+    for (let i = 0; i < items.length; i++) {
+      const isActive = activeIndices.includes(i);
+      setStyles(colorHex, isPinched, isActive);
+      ctx.beginPath();
+      ctx.arc(x, y, radius, i * sliceAngle, (i + 1) * sliceAngle);
+      ctx.arc(x, y, radius * 0.4, (i + 1) * sliceAngle, i * sliceAngle, true);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      const midAngle = i * sliceAngle + sliceAngle / 2;
+      const textRadius = radius * 0.4 + (radius - radius * 0.4) / 2;
+      drawItemText(items[i], x + textRadius * Math.cos(midAngle), y + textRadius * Math.sin(midAngle), 18, isActive, isPinched, colorHex);
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  function drawChordDisplay(nowMs, W) {
+    const st = chordDisplayState;
+    if (!st.name) return;
+    const alpha = st.playing ? 1 : Math.max(0, 1 - (nowMs - st.fadeStart) / 700);
+    if (alpha <= 0) return;
+    const th = themeCache;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.shadowColor = th.colorLeft;
+    ctx.shadowBlur = Math.max(th.blur, 14);
+    ctx.fillStyle = th.text;
+    ctx.font = `900 ${Math.round((th.isRetro ? 56 : 42) * uiScale)}px ${th.font}`;
+    ctx.fillText(st.name, W / 2, 74 * uiScale);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = th.colorRight;
+    ctx.font = `700 ${Math.round((th.isRetro ? 26 : 17) * uiScale)}px ${th.font}`;
+    ctx.fillText(st.notes.join('  ·  '), W / 2, 112 * uiScale);
+    ctx.restore();
+  }
+
+  function drawSkeleton(hand, W, H) {
+    const th = themeCache;
+    const glowColor = hand.userHand === 'Left' ? th.colorLeft : th.colorRight;
+    const pts = hand.lm.map(p => mapLandmarkToCanvas(p, W, H));
+    ctx.strokeStyle = glowColor; ctx.lineWidth = 3; ctx.shadowBlur = th.blur; ctx.shadowColor = glowColor;
+    for (const [i, j] of handConnections) { ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); ctx.stroke(); }
+    ctx.fillStyle = th.text; ctx.shadowBlur = 0;
+    for (const p of pts) { ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill(); }
+    if (hand.pinched) {
+      ctx.beginPath(); ctx.moveTo(pts[8].x, pts[8].y); ctx.lineTo(pts[4].x, pts[4].y);
+      ctx.strokeStyle = th.text; ctx.lineWidth = 5;
+      ctx.shadowBlur = th.blur; ctx.shadowColor = th.text; ctx.stroke();
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  // --- KEYBOARD MODE + SPACEBAR SUSTAIN ---
+  const ROOT_KEYS = { Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3, Digit5: 4, Digit6: 5, Digit7: 6, Digit8: 7, Digit9: 8, Digit0: 9, Minus: 10, Equal: 11 };
+  const MOD_KEYS = { KeyQ: 0, KeyW: 1, KeyE: 2, KeyR: 3, KeyT: 4, KeyY: 5, KeyU: 6, KeyI: 7 };
+
+  document.addEventListener('keydown', (e) => {
+    lastActivityTime = Date.now();
+    const onControl = e.target.closest && e.target.closest('input, select, textarea, button, a, [role="combobox"], [contenteditable]');
+    if (e.code === 'Space' && !onControl) { sustainKey = true; e.preventDefault(); }
+    if (e.repeat) return;
+    if (accMode.value !== 'keyboard' || onControl || currentDialog()) return;
+    // Keyboard mode triggers audio directly in the handlers (not the render
+    // loop) so latency never depends on animation-frame timing.
+    if (e.code in ROOT_KEYS) {
+      const i = ROOT_KEYS[e.code];
+      if (i < leftChordNames.length) {
+        activeNoteIdx = i;
+        if (kbdTrigger || mouseTrigger) kbdPlayNow();
+      }
+    } else if (e.code in MOD_KEYS) {
+      const i = MOD_KEYS[e.code];
+      if (i < currentModifiers.length) {
+        activeTypeIdx = i;
+        if (kbdTrigger || mouseTrigger) kbdPlayNow();
+      }
+    } else if (e.code === 'Enter') {
+      kbdTrigger = true;
+      kbdPlayNow();
+    }
+  });
+  document.addEventListener('keyup', (e) => {
+    if (e.code === 'Space') { sustainKey = false; kbdMaybeRelease(); }
+    if (e.code === 'Enter') { kbdTrigger = false; kbdMaybeRelease(); }
+  });
+  window.addEventListener('blur', () => { kbdTrigger = false; mouseTrigger = false; sustainKey = false; kbdMaybeRelease(); });
+  // A hidden tab pauses the render loop, so its release logic never runs —
+  // silence live notes on the way out (the mobile SUSTAIN latch is respected).
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden || !engineStarted) return;
+    sustainBrow = false; sustainKey = false; kbdTrigger = false; mouseTrigger = false;
+    if (!sustainLatchOn) releaseAudio();
+  });
+
+  function kbdPlayNow() {
+    if (!engineStarted || uiEditMode) return;
+    playChord(getChordInfo(false));
+    wasTriggering = true;
+  }
+  function kbdMaybeRelease() {
+    if (accMode.value !== 'keyboard') return;
+    if (!kbdTrigger && !mouseTrigger) {
+      wasTriggering = false;
+      if (!sustainActive() && currentlyPlayingKeys.length > 0) releaseAudio();
+    }
+  }
+
+  document.addEventListener('pointerdown', (e) => {
+    lastActivityTime = Date.now();
+    if (uiEditMode) return;
+    if (accMode.value === 'keyboard' && engineStarted && !currentDialog()) {
+      if (e.target === video || e.target.id === 'media-wrapper' || e.target.id === 'container') {
+        mouseTrigger = true;
+        kbdPlayNow();
+      }
+    }
+  });
+  document.addEventListener('pointerup', () => {
+    if (mouseTrigger) { mouseTrigger = false; kbdMaybeRelease(); }
+  });
+
+  // --- ON-CANVAS WIDGET EDIT MODE (drag to move, pull to resize — uniform scale) ---
+  // Every widget's size comes from a single radius `r`, so scaling is inherently
+  // uniform: a donut can never become an oval. Move updates lx/ly|rx/ry, resize
+  // updates ls|rs, all clamped to the same ranges the sliders use and persisted.
+  let uiEditMode = false;
+  let editDrag = null;
+  const clampN = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const BASE_X = { left: 0.25, right: 0.75 };
+
+  function zoneGeom(side, W, H) {
+    const o = uiOffsets;
+    const sz = side === 'left' ? o.ls : o.rs;
+    return {
+      x: W * BASE_X[side] + (side === 'left' ? o.lx : o.rx) / 100 * W,
+      y: H * 0.5 + (side === 'left' ? o.ly : o.ry) / 100 * H,
+      r: H * 0.25 * (sz / 100),
+      shape: (side === 'left' ? leftShape : rightShape).value
+    };
+  }
+  // Half-extents of each shape's bounding box, expressed as multiples of r.
+  function unitExtents(shape) {
+    if (shape === 'wheel') return { hw: 1, hh: 1 };
+    if (shape === 'slider') return { hw: 0.55, hh: 1 };
+    return { hw: 1.1, hh: 1 }; // columns/grid
+  }
+
+  function drawEditHandles(zones) {
+    const th = themeCache;
+    for (const side of ['left', 'right']) {
+      const z = zones[side];
+      const col = side === 'left' ? th.colorLeft : th.colorRight;
+      const { hw, hh } = unitExtents(z.shape);
+      const bw = hw * z.r, bh = hh * z.r;
+      ctx.save();
+      ctx.globalAlpha = 0.95;
+      ctx.setLineDash([9, 7]); ctx.lineWidth = 2; ctx.strokeStyle = col; ctx.shadowBlur = 0;
+      ctx.strokeRect(z.x - bw, z.y - bh, bw * 2, bh * 2);
+      ctx.setLineDash([]);
+      // size readout
+      ctx.fillStyle = col; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = `bold ${th.isRetro ? 22 : 15}px ${th.font}`;
+      ctx.fillText(Math.round(side === 'left' ? uiOffsets.ls : uiOffsets.rs) + '%', z.x, z.y - bh - 16);
+      // resize handle (bottom-right corner of the bounding box)
+      const hx = z.x + bw, hy = z.y + bh;
+      ctx.beginPath(); ctx.arc(hx, hy, 13, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
+      ctx.fillStyle = th.textPinched; ctx.font = `bold 15px ${th.font}`;
+      ctx.fillText('⤢', hx, hy + 1);
+      ctx.restore();
+    }
+  }
+
+  function editHitTest(px, py) {
+    const W = canvas.width, H = canvas.height;
+    const geo = { left: zoneGeom('left', W, H), right: zoneGeom('right', W, H) };
+    // Resize handles take priority over the body.
+    for (const side of ['left', 'right']) {
+      const z = geo[side]; const { hw, hh } = unitExtents(z.shape);
+      if (Math.hypot(px - (z.x + hw * z.r), py - (z.y + hh * z.r)) <= 18) {
+        return { side, kind: 'resize', uhw: hw, uhh: hh };
+      }
+    }
+    for (const side of ['left', 'right']) {
+      const z = geo[side]; const { hw, hh } = unitExtents(z.shape);
+      const inside = z.shape === 'wheel'
+        ? Math.hypot(px - z.x, py - z.y) <= z.r
+        : (Math.abs(px - z.x) <= hw * z.r && Math.abs(py - z.y) <= hh * z.r);
+      if (inside) return { side, kind: 'move', grabX: px - z.x, grabY: py - z.y };
+    }
+    return null;
+  }
+
+  function syncOffsetSliders() {
+    ['lx', 'ly', 'ls', 'rx', 'ry', 'rs'].forEach(id => { const el = $(id); if (el) el.value = Math.round(uiOffsets[id]); });
+  }
+
+  function enterUiEdit() {
+    if (touchOnly() || !engineStarted) return;
+    hideAllModals();
+    releaseAudio(true);
+    uiEditMode = true;
+    document.body.classList.add('ui-editing');
+    canvas.style.pointerEvents = 'auto';
+    $("ui-edit-done").focus();
+  }
+  function exitUiEdit() {
+    if (!uiEditMode) return;
+    uiEditMode = false; editDrag = null;
+    document.body.classList.remove('ui-editing');
+    canvas.style.pointerEvents = 'none';
+    saveSettings();
+  }
+
+  canvas.addEventListener('pointerdown', (e) => {
+    if (!uiEditMode) return;
+    const hit = editHitTest(e.clientX, e.clientY);
+    if (!hit) return;
+    e.preventDefault();
+    editDrag = hit;
+    try { canvas.setPointerCapture(e.pointerId); } catch { /* ignore */ }
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!uiEditMode || !editDrag) return;
+    const W = canvas.width, H = canvas.height, side = editDrag.side;
+    if (editDrag.kind === 'move') {
+      const nx = e.clientX - editDrag.grabX, ny = e.clientY - editDrag.grabY;
+      const ox = clampN(Math.round((nx - W * BASE_X[side]) / W * 100), -40, 40);
+      const oy = clampN(Math.round((ny - H * 0.5) / H * 100), -40, 40);
+      if (side === 'left') { uiOffsets.lx = ox; uiOffsets.ly = oy; } else { uiOffsets.rx = ox; uiOffsets.ry = oy; }
+    } else {
+      const z = zoneGeom(side, W, H);
+      // Uniform scale: map the finger's distance from centre along the corner
+      // diagonal back to a single radius, then to a size percentage.
+      const unitDiag = Math.hypot(editDrag.uhw, editDrag.uhh) || 1;
+      const newR = Math.hypot(e.clientX - z.x, e.clientY - z.y) / unitDiag;
+      const sz = clampN(Math.round(newR / (H * 0.25) * 100), 50, 150);
+      if (side === 'left') uiOffsets.ls = sz; else uiOffsets.rs = sz;
+    }
+    syncOffsetSliders();
+  });
+  window.addEventListener('pointerup', () => { if (editDrag) { editDrag = null; saveSettings(); } });
+
+  $("ui-drag-btn").addEventListener('click', enterUiEdit);
+  $("ui-edit-done").addEventListener('click', exitUiEdit);
+  document.addEventListener('keydown', (e) => { if (uiEditMode && e.key === 'Escape') { e.preventDefault(); exitUiEdit(); } }, true);
+  $("ui-edit-reset").addEventListener('click', () => {
+    Object.assign(uiOffsets, { lx: 0, ly: 0, ls: 100, rx: 0, ry: 0, rs: 100 });
+    syncOffsetSliders();
+    saveSettings();
+  });
+
+  // --- MOBILE TOUCH UI ---
+  const heldRootPointers = new Map();
+  function buildTouchPads() {
+    if (!touchOnly()) return;
+    touchRoots.innerHTML = '';
+    touchMods.innerHTML = '';
+    leftChordNames.forEach((name, idx) => {
+      const b = document.createElement('button');
+      b.className = 'pad pad-root';
+      b.textContent = name;
+      b.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (b.setPointerCapture) try { b.setPointerCapture(e.pointerId); } catch { /* ignore */ }
+        heldRootPointers.set(e.pointerId, idx);
+        activeNoteIdx = idx;
+        b.classList.add('held');
+        if (audioReady) playChord(getChordInfo(false));
+        lastActivityTime = Date.now();
+      });
+      const up = (e) => {
+        if (!heldRootPointers.has(e.pointerId)) return;
+        heldRootPointers.delete(e.pointerId);
+        b.classList.remove('held');
+        if (heldRootPointers.size === 0 && !sustainActive() && currentlyPlayingKeys.length > 0) releaseAudio();
+      };
+      b.addEventListener('pointerup', up);
+      b.addEventListener('pointercancel', up);
+      touchRoots.appendChild(b);
+    });
+    currentModifiers.forEach((id, idx) => {
+      const b = document.createElement('button');
+      b.className = 'pad pad-mod' + (idx === activeTypeIdx ? ' selected' : '');
+      b.textContent = modShortLabel(id);
+      b.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        activeTypeIdx = idx;
+        [...touchMods.children].forEach((c, i) => c.classList.toggle('selected', i === idx));
+        if (heldRootPointers.size > 0 && audioReady) playChord(getChordInfo(false));
+        lastActivityTime = Date.now();
+      });
+      touchMods.appendChild(b);
+    });
+  }
+  sustainLatchBtn.addEventListener('click', () => {
+    sustainLatchOn = !sustainLatchOn;
+    sustainLatchBtn.classList.toggle('latched', sustainLatchOn);
+    sustainLatchBtn.setAttribute('aria-pressed', String(sustainLatchOn));
+    if (!sustainLatchOn && heldRootPointers.size === 0 && currentlyPlayingKeys.length > 0) releaseAudio();
+  });
+  touchSettingsBtn.addEventListener('click', () => openModal(controlsPanel, touchSettingsBtn));
+  touchRecordBtn.addEventListener('click', () => toggleRecording(touchRecordBtn));
+  touchLoopBtn.addEventListener('click', toggleLoopBar);
+  window.matchMedia('(orientation: portrait)').addEventListener('change', (e) => {
+    if (IS_MOBILE && e.matches) { heldRootPointers.clear(); releaseAudio(true); }
+  });
+
+  // --- EVENT WIRING ---
+  settingsToggle.addEventListener('click', () => {
+    if (controlsPanel.style.display === 'flex') hideAllModals();
+    else openModal(controlsPanel, settingsToggle);
+  });
+  tutorialToggle.addEventListener('click', () => openModal(tutorialModal, tutorialToggle));
+  logoTrigger.addEventListener('click', () => openModal(logoInfoModal, logoTrigger));
+  logoTrigger.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(logoInfoModal, logoTrigger); }
+  });
+  $("open-modifiers-btn").addEventListener('click', (e) => openModal(modifiersModal, e.currentTarget));
+  $("open-ui-layout-btn").addEventListener('click', (e) => openModal(uiLayoutModal, e.currentTarget));
+  document.querySelectorAll('.back-to-menu-btn').forEach(btn => {
+    btn.addEventListener('click', () => openModal(controlsPanel, settingsToggle));
+  });
+  document.querySelectorAll('.modal-close').forEach(btn => {
+    btn.addEventListener('click', () => hideAllModals());
+  });
+  nagCloseBtn.addEventListener('click', dismissNag);
+  skipNagBtn.addEventListener('click', dismissNag);
+  document.addEventListener('click', (e) => {
+    if (e.target === video || e.target.id === 'media-wrapper' || e.target.id === 'overlay') {
+      if (patreonNag.style.display === 'flex') dismissNag();
+      else hideAllModals(false);
+    }
+  });
+
+  ['lx', 'ly', 'ls', 'rx', 'ry', 'rs'].forEach(id => {
+    $(id).addEventListener('input', (e) => { uiOffsets[id] = parseInt(e.target.value, 10); saveSettings(); });
+  });
+  $("reset-ui-btn").addEventListener('click', () => {
+    Object.assign(uiOffsets, { lx: 0, ly: 0, ls: 100, rx: 0, ry: 0, rs: 100 });
+    ['lx', 'ly', 'rx', 'ry'].forEach(id => $(id).value = 0);
+    ['ls', 'rs'].forEach(id => $(id).value = 100);
+    saveSettings();
+  });
+
+  themeSelector.addEventListener('change', (e) => {
+    document.body.setAttribute('data-theme', e.target.value);
+    refreshThemeCache();
+    saveSettings();
+  });
+  modeSelector.addEventListener('change', () => { updateKeyContext(); });
+  notationSelector.addEventListener('change', () => {
+    buildKeyOptions();
+    updateKeyContext();
+    setupCustomSelects();
+  });
+  instrumentSelector.addEventListener('change', (e) => {
+    releaseAudio(true);
+    currentInstrument = e.target.value;
+    saveSettings();
+  });
+  volumeSelector.addEventListener('change', () => { applyVolume(); saveSettings(); });
+  octaveSelector.addEventListener('change', () => { releaseAudio(true); saveSettings(); });
+  handednessMode.addEventListener('change', () => { updateTutorialText(); saveSettings(); });
+  languageSelector.addEventListener('change', () => { updateLanguage(); saveSettings(); });
+  accMode.addEventListener('change', () => {
+    updateTutorialText();
+    applyTouchClass();
+    saveSettings();
+    if (!engineStarted) return;
+    releaseAudio(true); // never carry held notes across control modes
+    if (accMode.value === 'keyboard' || touchOnly()) { stopCamera(); buildTouchPads(); }
+    else if (!cameraReady) startVision();
+  });
+  browSustainSel.addEventListener('change', () => {
+    browSustainOn = browSustainSel.value === 'on';
+    if (!browSustainOn) sustainBrow = false;
+  });
+  recordBtn.addEventListener('click', () => toggleRecording(recordBtn));
+  $("rec-audio-btn").addEventListener('click', startAudioRecording);
+  $("rec-screen-btn").addEventListener('click', startScreenRecording);
+
+  // Loop station controls
+  loopToggleBtn.addEventListener('click', toggleLoopBar);
+  $("loop-close").addEventListener('click', toggleLoopBar);
+  loopBpmInput.addEventListener('change', () => {
+    const bpm = clampBpm(parseInt(loopBpmInput.value, 10));
+    loopBpmInput.value = bpm;
+    if (audioReady) Tone.Transport.bpm.value = bpm;
+  });
+  $("loop-tap").addEventListener('click', loopTap);
+  loopBarsSelect.addEventListener('change', () => {
+    looper.bars = parseInt(loopBarsSelect.value, 10) || 2;
+    if (audioReady) setLoopLen();
+  });
+  $("loop-met").addEventListener('click', (e) => {
+    looper.metOn = !looper.metOn;
+    e.currentTarget.classList.toggle('active', looper.metOn);
+    e.currentTarget.setAttribute('aria-pressed', String(looper.metOn));
+  });
+  loopMetSoundSelect.addEventListener('change', () => { looper.metSound = loopMetSoundSelect.value; });
+  $("loop-countin").addEventListener('click', (e) => {
+    looper.countIn = !looper.countIn;
+    e.currentTarget.classList.toggle('active', looper.countIn);
+    e.currentTarget.setAttribute('aria-pressed', String(looper.countIn));
+  });
+  $("loop-rec").addEventListener('click', loopRecord);
+  $("loop-play").addEventListener('click', loopTogglePlay);
+  $("loop-undo").addEventListener('click', loopUndo);
+  $("loop-clear").addEventListener('click', loopClear);
+  bootContinueBtn.addEventListener('click', () => showBootStep(2));
+  startBtn.addEventListener('click', startEngine);
+  window.addEventListener('resize', sizeCanvas);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refreshThemeCache);
+
+  // --- INIT ---
+  buildKeyOptions();      // create native options first so restore can match values
+  restoreSettings();
+  buildModifierCheckboxes();
+  updateKeyContext();
+  updateLanguage();       // localizes labels/options, rebuilds custom selects, boot + tutorials
+  refreshThemeCache();
+  sizeCanvas();
+  showBootStep(1);
+
+  // --- SERVICE WORKER (asset cache for instant repeat visits) ---
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname))) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => { /* offline cache unavailable */ }));
+  }
+</script>
+</body>
+</html>
