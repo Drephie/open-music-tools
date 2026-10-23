@@ -17,6 +17,7 @@ Free, open-source music tools that build musical literacy and help people make t
 
 - `shared/`: engines every tool imports (theory, sound, transport, offline, `ui/`). Each module's header comment is its API: read the header, not the implementation.
 - `choordination/`: the hand-tracking chord instrument. `index.html` (about 2,800 lines, roughly 40k tokens) with its own `manifest.json`. Its `sw.js` is a retired worker that only removes itself from old installs.
+- `index.html` at the root and `hub/`: the home page (a card for every tool; planned tools greyed out). When a tool is finished, move its card up there.
 - `sw.js` at the root: the one service worker for the whole hub.
 - `tests/`: browser test pages (`theory.html`) and their fixtures.
 - One folder per new tool (see ROADMAP.md), e.g. `metronome/`. New tools build their page on `shared/ui/page.css` and `page.js`.
@@ -27,7 +28,7 @@ Free, open-source music tools that build musical literacy and help people make t
 
 - **No build step and no npm** (Node isn't installed). Plain HTML, CSS and JavaScript; ES modules for shared code.
 - Libraries come from CDNs with pinned versions: Tone.js 14.8.49 (cdnjs, with SRI) and MediaPipe tasks-vision 0.10.3 (jsDelivr).
-- Run locally from the repo root with `python3 -m http.server 8000`, then open http://localhost:8000/choordination/. ES modules, camera, microphone and service workers don't work from `file://`.
+- Run locally from the repo root with `python3 -m http.server 8000`, then open http://localhost:8000/ (the home page) or a tool, e.g. http://localhost:8000/choordination/. ES modules, camera, microphone and service workers don't work from `file://`.
 - When you change a file the service worker caches, bump `CACHE_NAME` in `/sw.js`; list each new tool's files in its `APP_SHELL`.
 - Tests run in the browser: open http://localhost:8000/tests/theory.html, http://localhost:8000/tests/transport.html (metronome timing, levels and volume) and http://localhost:8000/tests/ear-trainer.html (every Ear Trainer question checked against `nameNotes`). The theory and Ear Trainer checks also run from the terminal with macOS's built-in JavaScriptCore: `/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc -m tests/tools/run-theory-test.js` (and `run-ear-trainer-test.js`).
 

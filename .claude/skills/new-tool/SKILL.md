@@ -17,7 +17,7 @@ The Metronome (`metronome/`) is the working example: copy its structure, not its
 `<tool>/index.html`, `<tool>.css`, `<tool>.js` (ES module), `strings.js` (en/es/it), `favicon.svg`. Start from the Metronome's files:
 
 - **Head:** Tone.js 14.8.49 from cdnjs with its SRI hash (only if the tool makes sound), the Google Fonts link from `shared/ui/themes.css`, then `themes.css`, `select.css`, `page.css`, then the tool's CSS.
-- **Body:** `<body data-theme="liquid">`, `#theme-frame`, `.page` with `.tool-header` (title, About and Settings icon buttons), `<main>` with `.panel`s, `.tool-footer` (Support on Patreon, Designed by @drephie).
+- **Body:** `<body data-theme="liquid">`, `#theme-frame`, `.page` with `.tool-header` (the house button `<a class="icon-btn home-btn" href="../" data-i18n-aria="home">` to the home page, title, About and Settings icon buttons), `<main>` with `.panel`s, `.tool-footer` (Support on Patreon, Designed by @drephie).
 - **Windows** (all from `shared/ui/page.css`/`page.js`; see the Metronome's markup):
   - Settings: `.centered-modal.has-dropdowns` with Theme and Language. Their lists must show on top of the window.
   - About: a short text (name linked to Instagram via `{instagram}`), a `.btn.patreon-btn`, keyboard tips in `.computer-only`.
@@ -25,7 +25,8 @@ The Metronome (`metronome/`) is the working example: copy its structure, not its
 
 ## 2. JavaScript wiring (copy from `metronome/metronome.js`)
 
-- Settings: `loadSettings('<tool>.settings.v1')`, validate every field (range, list membership) with a default, `saveSettings` on every change. Theme and language are remembered; language defaults to `browserLanguage()`. Never store people's work.
+- Settings: `loadSettings('<tool>.settings.v1')`, validate every field (range, list membership) with a default, `saveSettings` on every change. Never store people's work.
+- Theme and language are the hub's one choice: after reading the settings, `Object.assign(settings, loadLook(loadSettings(SETTINGS_KEY)))`; on a change also `saveLook({ theme })` or `saveLook({ lang })`; and `watchLook(apply)` so the page follows a choice made in another tab or before coming Back (see `metronome/metronome.js`).
 - i18n: `createI18n({ strings: mergeStrings(HUB_STRINGS, TOOL_STRINGS), getLang, vars: { patreon: PATREON_URL, instagram: DESIGNER_URL } })`. On language change: `apply()`, update `document.title` and any text set in JS, then `setupCustomSelects()`.
 - Windows: `createModalManager({ modals: [settings, about, support], escapeAction: (m) => (m === support && prompt.locked() ? 'ignore' : 'hide') })`, `closeOnBackdrop(modals)`, close buttons in `.modal-header`.
 - Patreon window: `createSupportPrompt({ dialog, modals, t, isBusy })`. `isBusy()` is true while the tool is in use without touches (playing, listening), so it never interrupts practice.
@@ -53,7 +54,7 @@ Every visible string and every `aria-label` goes through i18n, in English, Spani
 
 ## 6. Hub files
 
-Add every new file to `APP_SHELL` in `/sw.js` and bump `CACHE_NAME` whenever a cached file changes. Update `ROADMAP.md` (status, shared engines, open decisions), and the spec when Drephie changes something.
+Add every new file to `APP_SHELL` in `/sw.js` and bump `CACHE_NAME` whenever a cached file changes. On the home page (`index.html`), move the tool's card up from "Coming soon" to the finished tools (its `<div class="tool-card soon">` becomes `<a class="tool-card" href="<tool>/">`) and update its description in `hub/strings.js` in all three languages. Update `ROADMAP.md` (status, shared engines, open decisions), and the spec when Drephie changes something.
 
 ## 7. Checks in the built-in browser
 

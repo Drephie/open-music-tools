@@ -1,6 +1,7 @@
 # Home page (hub): spec
 
-**Status:** approved by Drephie, 2026-10-24 (after one change: every tool a square card of the same size, the planned ones greyed out with descriptions, and the page may scroll).
+**Status:** approved by Drephie, 2026-10-24 (after one change: every tool a square card of the same size, the planned ones greyed out with descriptions, and the page may scroll). Built the same day; Drephie's phone test on 2026-10-24: all good.
+*(At build time)* marks details settled while building.
 Items marked *(Claude's pick)* weren't asked: say if you want them changed.
 
 ## What it is for
@@ -16,7 +17,7 @@ The front door of the hub: one page at the site's main address that shows every 
   - Then, under the heading **"Coming soon"**, the **7 planned tools as greyed-out cards** with their descriptions (we adjust them as each tool takes shape): Tuner, Pitch Detector, Pitch Training, BPM Finder, Chord Finder, Practice Player, Jam Machine (the order of the plan). They don't open anything or react to taps *(Claude's pick)*. When a tool is finished, its card lights up and moves up with the others.
   - The home page **may scroll** on a phone (Drephie, at approval: many tools are coming).
 - **One theme and one language for the whole hub.** Choosing them on the home page, or in any tool, changes them everywhere, Choordination included (today it always starts in Liquid Glass and English). What you already chose in the Metronome, Piano or Ear Trainer is kept: the first tool you open after the change passes its choice on to the others. Going back to a page you had open shows the new choice there too.
-- **A home button in every tool**: a round house button at the left of the title bar of the Metronome, Piano and Ear Trainer, and a "Home" button in Choordination's menu. On a sideways phone the Piano's house sits with its (i) and ⚙ buttons *(at build time, if there's room; otherwise in its Settings)*.
+- **A home button in every tool**: a round house button at the left of the title bar of the Metronome, Piano and Ear Trainer, and a "Home" button in Choordination's menu. On a sideways phone the Piano's house sits with its (i) and ⚙ buttons *(at build time: it fits; it takes room only from the sound list, and every sound name still fits)*. In Choordination the button reads "Home: all the tools", under the theme in its Menu.
 - **No Patreon pop-up on the home page** *(Claude's pick)*: people only pass through it, so the window that opens after 30 s untouched stays in the tools. The footer link and the About window have the Patreon button.
 
 ## Not in this version
@@ -60,7 +61,7 @@ Support on Patreon      Designed by @drephie
 
 ## Wording (English)
 
-Descriptions *(Claude's picks; you check the words)*: Piano "Play, and see the name of the chord"; Ear Trainer "Lessons and a game to train your ear"; Metronome "A steady click to practise with, and tap tempo"; Choordination "Play chords with your hands, using your camera. Nothing leaves your device." Coming soon: Tuner "Tune your voice or instrument: see if a note is too high or too low"; Pitch Detector "See the note you sing, live, and how your pitch moves"; Pitch Training "Singing exercises that show how in tune you are"; BPM Finder "Find the speed (BPM) of a song you own"; Chord Finder "Find the key and the chords of a song you own"; Practice Player "Slow a song down without changing its pitch, and loop a part"; Jam Machine "Chord progressions in many styles to play and sing over". Coming soon; Home (the house button). Spanish and Italian come at build time, with the tool names already used (Metrónomo/Metronomo, Oído musical/Orecchio musicale).
+Descriptions *(Claude's picks; you check the words)*: Piano "Play, and see the name of the chord"; Ear Trainer "Lessons and a game to train your ear"; Metronome "A steady click to practise with, and tap tempo"; Choordination "Play chords with your hands, using your camera. Nothing leaves your device." Coming soon: Tuner "Tune your voice or instrument: see if a note is too high or too low"; Pitch Detector "See the note you sing, live, and how your pitch moves"; Pitch Training "Singing exercises that show how in tune you are"; BPM Finder "Find the speed (BPM) of a song you own"; Chord Finder "Find the key and the chords of a song you own"; Practice Player "Slow a song down without changing its pitch, and loop a part"; Jam Machine "Chord progressions in many styles to play and sing over". Coming soon; Home (the house button). Spanish and Italian *(at build time; Drephie's phone test: all good)*: the tool names already used (Metrónomo/Metronomo, Oído musical/Orecchio musicale); planned tools: Afinador/Accordatore, Detector de tono/Rilevatore di intonazione, Ejercicios de afinación/Esercizi di intonazione, Buscador de BPM/Trova BPM, Buscador de acordes/Trova accordi, Reproductor de práctica/Lettore per esercitarsi, Jam Machine. On the first visit the language follows the browser, in Choordination too (it used to start in English).
 
 ## Remembered
 
@@ -80,3 +81,5 @@ Nothing is recorded or uploaded; the page makes no sound and uses no camera. The
 **Claude:** 5 themes, 3 languages, phones 375 × 667 and 390 × 664, and a computer; every name inside its card; keyboard only; every card opens its tool and every tool's house button comes back; theme and language chosen on the home page show in every tool and back again (also with the browser's back button); what each tool had saved is kept; Choordination still loads and its menu works; `tests/theory.html` and `tests/transport.html` pass.
 
 **Drephie, on the phone:** the logo; the cards and scrolling; each card opens its tool and the house brings you back; change the theme and language in one tool and see the others follow; the wording in all three languages.
+
+**Drephie's phone test (2026-10-24):** all good: the logo, the cards, the house buttons, the shared theme and language, and the wording. Two things found outside the home page, recorded in the roadmap: the Piano's first sound comes about 10 s late with the silent switch on, and Choordination's camera can't start on the plain-http test link (phones need https for the camera).
