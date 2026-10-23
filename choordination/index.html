@@ -808,6 +808,7 @@
   // (SRI cannot be applied to ES-module imports without an import map; the file is
   //  cached by sw.js after first load.)
   import { parseKey, keyRootName, keyChordNames, pickModifiers, getChordInfo as theoryChordInfo } from '../shared/theory.js';
+  import { startAudio, createRack } from '../shared/sound.js';
 
   // --- roundRect polyfill (older Safari) ---
   if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
@@ -1547,122 +1548,41 @@
     });
   }
 
-  // --- AUDIO ENGINE ---
-  // Chain: instruments -> Reverb -> Compressor -> Limiter -> master Volume -> Destination.
-  // The -3 dB limiter ceiling leaves headroom for the +1.9 dB max master volume
-  // (125%), so full volume can never clip the output.
+  // --- AUDIO ENGINE (the instrument rack lives in shared/sound.js) ---
+  let rack = null;
   let instruments = {};
   let currentInstrument = 'piano';
-  let masterVolume = null, limiter = null, compressor = null, reverb = null;
-  let padFilter = null, synthFilter = null, organVibrato = null, recorder = null, streamDest = null;
+  let recorder = null, streamDest = null;
 
   function disposeAudioNodes() {
-    [...Object.values(instruments), padFilter, synthFilter, organVibrato, reverb, compressor, limiter, masterVolume, recorder].forEach(n => {
-      try { if (n) n.dispose(); } catch { /* already disposed */ }
-    });
+    if (rack) rack.dispose();
+    try { if (recorder) recorder.dispose(); } catch { /* already disposed */ }
+    rack = null;
     instruments = {};
-    masterVolume = limiter = compressor = reverb = padFilter = synthFilter = organVibrato = recorder = null;
+    recorder = null;
     streamDest = null;
     disposeLooperNodes();
   }
 
   async function initAudio() {
     if (audioReady) return;
-    await Tone.start();
-    // Tone's default 100 ms scheduling look-ahead makes gestures feel laggy;
-    // 20 ms keeps scheduling stable while making pinch->sound near-instant.
-    Tone.getContext().lookAhead = 0.02;
+    await startAudio();
     disposeAudioNodes();
-
-    masterVolume = new Tone.Volume(0).toDestination();
-    limiter = new Tone.Limiter(-3).connect(masterVolume);
-    compressor = new Tone.Compressor({ threshold: -18, ratio: 3, attack: 0.005, release: 0.25 }).connect(limiter);
-    reverb = new Tone.Reverb({ decay: 2.2, preDelay: 0.02, wet: 0.28 }).connect(compressor);
-    await reverb.ready;
-
-    padFilter = new Tone.Filter(2400, 'lowpass').connect(reverb);
-    synthFilter = new Tone.Filter(1700, 'lowpass').connect(reverb);
-
-    // Salamander grand, sampled every 3 semitones across C2-C6 (17 files, ~2 MB).
-    const pianoUrls = {};
-    for (const oct of [2, 3, 4, 5]) {
-      pianoUrls['C' + oct] = 'C' + oct + '.mp3';
-      pianoUrls['D#' + oct] = 'Ds' + oct + '.mp3';
-      pianoUrls['F#' + oct] = 'Fs' + oct + '.mp3';
-      pianoUrls['A' + oct] = 'A' + oct + '.mp3';
-    }
-    pianoUrls['C6'] = 'C6.mp3';
-
-    instruments = {
-      piano: new Tone.Sampler({
-        urls: pianoUrls,
-        baseUrl: 'https://tonejs.github.io/audio/salamander/',
-        release: 1.2
-      }).connect(reverb),
-      // Rhodes-style FM electric piano
-      epiano: new Tone.PolySynth(Tone.FMSynth, {
-        harmonicity: 3,
-        modulationIndex: 12,
-        oscillator: { type: 'sine' },
-        envelope: { attack: 0.004, decay: 1.4, sustain: 0.35, release: 0.8 },
-        modulation: { type: 'sine' },
-        modulationEnvelope: { attack: 0.002, decay: 0.35, sustain: 0.05, release: 0.4 }
-      }).connect(reverb),
-      esynth: new Tone.PolySynth(Tone.Synth, {
-        oscillator: { type: 'fatsawtooth', count: 3, spread: 18 },
-        envelope: { attack: 0.015, decay: 0.35, sustain: 0.5, release: 0.7 }
-      }).connect(synthFilter),
-      pad: new Tone.PolySynth(Tone.Synth, {
-        oscillator: { type: 'fatsine', count: 3, spread: 24 },
-        envelope: { attack: 0.5, decay: 0.6, sustain: 0.8, release: 2.4 }
-      }).connect(padFilter),
-      // Drawbar-style additive organ with gentle vibrato
-      organ: new Tone.PolySynth(Tone.Synth, {
-        oscillator: { type: 'custom', partials: [1, 0.7, 0.45, 0.3, 0.15, 0.1] },
-        envelope: { attack: 0.04, decay: 0.2, sustain: 0.9, release: 0.35 }
-      }).connect(organVibrato = new Tone.Vibrato(5.5, 0.08).connect(reverb)),
-      // Plucked FM harp: bell-like attack, no sustain, long shimmering tail
-      harp: new Tone.PolySynth(Tone.FMSynth, {
-        harmonicity: 2,
-        modulationIndex: 5,
-        oscillator: { type: 'sine' },
-        envelope: { attack: 0.002, decay: 1.8, sustain: 0, release: 1.6 },
-        modulation: { type: 'sine' },
-        modulationEnvelope: { attack: 0.002, decay: 0.25, sustain: 0, release: 0.2 }
-      }).connect(reverb)
-    };
-    // Level-match the rack
-    instruments.piano.volume.value = -1;
-    instruments.epiano.volume.value = -7;
-    instruments.esynth.volume.value = -14;
-    instruments.pad.volume.value = -9;
-    instruments.organ.volume.value = -12;
-    instruments.harp.volume.value = -6;
-
-    showLoading('loadingSamples');
-    await Tone.loaded();
+    rack = await createRack({ onSamplesLoading: () => showLoading('loadingSamples') });
+    instruments = rack.instruments;
 
     recorder = new Tone.Recorder();
-    masterVolume.connect(recorder);
+    rack.master.connect(recorder);
     // Raw MediaStream of the master mix, used when recording screen + audio together.
     streamDest = Tone.getContext().rawContext.createMediaStreamDestination();
-    masterVolume.connect(streamDest);
+    rack.master.connect(streamDest);
 
     initLooper();
     audioReady = true;
   }
 
   function applyVolume() {
-    if (!masterVolume) return;
-    let pct = parseInt(volumeSelector.value, 10);
-    if (isNaN(pct)) pct = 100;
-    pct = Math.max(0, Math.min(125, pct));
-    if (pct === 0) {
-      masterVolume.mute = true;
-    } else {
-      masterVolume.mute = false;
-      masterVolume.volume.value = Tone.gainToDb(pct / 100);
-    }
+    if (rack) rack.setVolume(volumeSelector.value);
   }
 
   // Push every pre-boot setting into the freshly built engine so nothing chosen
