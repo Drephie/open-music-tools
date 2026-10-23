@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transport tests</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" integrity="sha384-c6Uo4N9c3SOEigMVzP6IshUG1wQ5uMp3xeoQFiHWAQ86joWdgyajkvopySyKy/Z6" crossorigin="anonymous"></script>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { margin: 0 auto; padding: 16px; max-width: 900px; background: Canvas; color: CanvasText; }
+    h1 { font-size: 1.4rem; }
+    #summary { font-size: 1.2rem; font-weight: 700; }
+    .pass { color: green; } .fail { color: #d22; }
+    table { border-collapse: collapse; width: 100%; }
+    td, th { text-align: left; padding: 4px 8px; border-bottom: 1px solid GrayText; vertical-align: top; }
+    pre { white-space: pre-wrap; word-break: break-word; font-size: 12px; margin: 4px 0 0; }
+  </style>
+</head>
+<body>
+  <h1>shared/transport.js tests</h1>
+  <p id="summary">Running…</p>
+  <table>
+    <thead><tr><th>Check</th><th>Compared</th><th>Result</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <p>Beat timing is checked by calling the metronome loop's callback at known times on a Transport started far in the future,
+    so the result doesn't depend on the audio clock (the built-in browser slows it while its pane is hidden).
+    Volume and levels are checked by rendering the real click sounds offline and measuring their peaks.</p>
+
+<script type="module">
+  import * as T from '../shared/transport.js';
+
+  const rows = document.getElementById('rows');
+  const results = [];
+  function report(name, checked, failed, examples = []) {
+    results.push({ name, checked, failed });
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${name}</td><td>${checked}</td><td class="${failed ? 'fail' : 'pass'}">${failed ? `FAIL (${failed})` : 'pass'}</td>`;
+    if (examples.length) {
+      const pre = document.createElement('pre');
+      pre.textContent = examples.slice(0, 10).join('\n');
+      tr.children[0].appendChild(pre);
+    }
+    rows.appendChild(tr);
+  }
+  // Compares two lists of plain values; times within 1 µs count as equal.
+  function check(name, expected, actual) {
+    const ex = [];
+    const n = Math.max(expected.length, actual.length);
+    const same = (a, b) => (typeof a === 'number' && typeof b === 'number') ? Math.abs(a - b) < 1e-6 : a === b;
+    let bad = 0;
+    for (let i = 0; i < n; i++) {
+      const e = expected[i], a = actual[i];
+      const ok = e && a && Object.keys(e).every(k => same(e[k], a[k]));
+      if (!ok) { bad++; ex.push(`#${i}: expected ${JSON.stringify(e)}, got ${JSON.stringify(a)}`); }
+    }
+    report(name, n, bad, ex);
+  }
+  const r6 = (x) => Math.round(x * 1e6) / 1e6;
+
+  // Runs startMetronome's loop by hand: `steps` grid steps (12 per beat) from
+  // Transport position 0. `at[k]()` runs just before step k (to change options).
+  function simulate({ bpm = 100, steps, opts = {}, at = {}, timeOfStep = null }) {
+    Tone.Transport.stop();
+    Tone.Transport.cancel(0);
+    Tone.Transport.bpm.cancelScheduledValues(0);
+    Tone.Transport.bpm.value = bpm;
+    const t0 = Tone.now() + 1000;
+    Tone.Transport.start(t0);
+    const clicks = [], beats = [];
+    const fake = { play: (sound, time, level) => clicks.push({ t: r6(time - t0), level, sound }) };
+    const loop = T.startMetronome(fake, { ...opts, onBeat: (beat, time, level) => beats.push({ beat, t: r6(time - t0), level }) });
+    const stepTime = timeOfStep || ((k) => k * 60 / bpm / 12);
+    for (let k = 0; k < steps; k++) {
+      if (at[k]) at[k](loop, t0);
+      loop.callback(t0 + stepTime(k));
+    }
+    loop.dispose();
+    Tone.Transport.stop();
+    Tone.Transport.bpm.cancelScheduledValues(0);
+    return { clicks, beats, loop };
+  }
+  const beatList = (bpm, levels) => levels.map((level, i) => ({ t: r6(i * 60 / bpm), level }));
+
+  try {
+    // Defaults: 4 beats, beat 1 strong, one click per beat.
+    {
+      const { clicks, beats } = simulate({ bpm: 100, steps: 8 * 12 });
+      const lv = ['strong', 'normal', 'normal', 'normal', 'strong', 'normal', 'normal', 'normal'];
+      check('defaults: 2 bars of 4 at 100 BPM, beat 1 strong', beatList(100, lv).map(e => ({ ...e, sound: 'click' })), clicks);
+      check('defaults: onBeat reports beats 0–3 at the click times', lv.map((l, i) => ({ beat: i % 4, t: r6(i * 0.6) })), beats);
+    }
+    // Strong / normal / silent pattern.
+    {
+      const acc = ['strong', 'normal', 'silent', 'normal'];
+      const { clicks, beats } = simulate({ bpm: 120, steps: 4 * 12, opts: { accents: () => acc, sound: () => 'wood' } });
+      check('accents: silent beat makes no click', [
+        { t: 0, level: 'strong', sound: 'wood' }, { t: 0.5, level: 'normal', sound: 'wood' }, { t: 1.5, level: 'normal', sound: 'wood' }], clicks);
+      check('accents: silent beat is still reported (dot lights up)', acc.map((level, i) => ({ beat: i, t: i * 0.5, level })), beats);
+    }
+    // In-between clicks: 2, 3, 4 per beat.
+    for (const sub of [2, 3, 4]) {
+      const { clicks } = simulate({ bpm: 120, steps: 2 * 12, opts: { beatsPerBar: 4, subdivision: () => sub } });
+      const exp = [];
+      for (let b = 0; b < 2; b++) for (let j = 0; j < sub; j++) exp.push({ t: r6(b * 0.5 + j * 0.5 / sub), level: j ? 'soft' : b === 0 ? 'strong' : 'normal' });
+      check(`in-between: ${sub} per beat at 120 BPM (soft, evenly spaced)`, exp, clicks);
+    }
+    // In-between clicks after a silent beat still play.
+    {
+      const { clicks } = simulate({ bpm: 60, steps: 12, opts: { accents: () => ['silent'], subdivision: () => 2 } });
+      check('in-between: still clicks after a silent beat', [{ t: 0.5, level: 'soft' }], clicks);
+    }
+    // Beats per bar 1, 3, 7, 12.
+    for (const n of [1, 3, 7, 12]) {
+      const { beats } = simulate({ bpm: 200, steps: 2 * n * 12, opts: { beatsPerBar: n } });
+      check(`beats per bar ${n}: two bars count 0…${n - 1} twice`,
+        Array.from({ length: 2 * n }, (_, i) => ({ beat: i % n, level: i % n === 0 ? 'strong' : 'normal' })), beats);
+    }
+    // Changing beats per bar while playing.
+    {
+      let bpb = 4;
+      const { beats } = simulate({ bpm: 100, steps: 9 * 12, opts: { beatsPerBar: () => bpb }, at: { [4 * 12]: () => { bpb = 3; } } });
+      check('beats per bar 4 → 3 after a full bar: next bars have 3 beats', [0, 1, 2, 3, 0, 1, 2, 0, 1].map(beat => ({ beat })), beats);
+    }
+    {
+      let bpb = 6;
+      const { beats } = simulate({ bpm: 100, steps: 8 * 12, opts: { beatsPerBar: () => bpb }, at: { [5 * 12]: () => { bpb = 4; } } });
+      check('beats per bar 6 → 4 on beat 6: a new bar starts at once', [0, 1, 2, 3, 4, 0, 1, 2].map(beat => ({ beat })), beats);
+    }
+    // Stopping (Transport rewinds to 0) and starting again begins a new bar.
+    {
+      Tone.Transport.stop();
+      Tone.Transport.bpm.value = 120;
+      let t0 = Tone.now() + 1000;
+      Tone.Transport.start(t0);
+      const beats = [];
+      const loop = T.startMetronome({ play() {} }, { onBeat: (beat) => beats.push({ beat }) });
+      for (let k = 0; k < 6; k++) loop.callback(t0 + k * 0.5);
+      Tone.Transport.stop();
+      t0 = Tone.now() + 2000;
+      Tone.Transport.start(t0);
+      for (let k = 0; k < 3; k++) loop.callback(t0 + k * 0.5);
+      loop.dispose();
+      Tone.Transport.stop();
+      check('restart: beats count from 1 again after stop and start', [0, 1, 2, 3, 0, 1, 0, 1, 2].map(beat => ({ beat })), beats);
+    }
+    // Tempo change while playing: 60 BPM for 2 beats, then 120 BPM, with 2 per beat.
+    {
+      const timeOfStep = (k) => (k <= 24 ? k / 12 : 2 + (k - 24) * 0.5 / 12);
+      const { clicks } = simulate({
+        bpm: 60, steps: 4 * 12, timeOfStep, opts: { subdivision: () => 2 },
+        at: { 0: (loop, t0) => Tone.Transport.bpm.setValueAtTime(120, t0 + 2) },
+      });
+      check('tempo change 60 → 120 BPM mid-bar: clicks follow the new tempo', [
+        { t: 0, level: 'strong' }, { t: 0.5, level: 'soft' }, { t: 1, level: 'normal' }, { t: 1.5, level: 'soft' },
+        { t: 2, level: 'normal' }, { t: 2.25, level: 'soft' }, { t: 2.5, level: 'normal' }, { t: 2.75, level: 'soft' }], clicks);
+    }
+    // enabled() false: no sound, beats still counted.
+    {
+      const { clicks, beats } = simulate({ bpm: 100, steps: 4 * 12, opts: { enabled: () => false, subdivision: () => 3 } });
+      report('enabled() false: no clicks, 4 beats reported', 2, (clicks.length !== 0) + (beats.length !== 4),
+        [`clicks ${clicks.length}, beats ${beats.length}`]);
+    }
+    // countIn
+    {
+      Tone.Transport.bpm.value = 90;
+      const got = [];
+      const end = T.countIn({ play: (sound, time, level) => got.push({ t: r6(time - 10), level, sound }) }, 'beep', 10, 3);
+      check('countIn: 3 beats at 90 BPM, first strong', [
+        { t: 0, level: 'strong', sound: 'beep' }, { t: r6(60 / 90), level: 'normal' }, { t: r6(120 / 90), level: 'normal' }], got);
+      report('countIn returns the time after the bar', 1, Math.abs(end - (10 + 2)) < 1e-9 ? 0 : 1, [`got ${end}`]);
+    }
+
+    // clampBpm, tempoMarking
+    {
+      const cases = [[39, 40], [40, 40], [240, 240], [241, 240], [NaN, 100], [123, 123]];
+      const bad = cases.filter(([v, e]) => T.clampBpm(v) !== e);
+      report('clampBpm 40–240, NaN → 100', cases.length, bad.length, bad.map(([v, e]) => `${v}: expected ${e}, got ${T.clampBpm(v)}`));
+      const marks = [[10, 'Largo'], [40, 'Largo'], [59, 'Largo'], [60, 'Larghetto'], [65, 'Larghetto'], [66, 'Adagio'], [75, 'Adagio'],
+        [76, 'Andante'], [107, 'Andante'], [108, 'Moderato'], [119, 'Moderato'], [120, 'Allegro'], [167, 'Allegro'],
+        [168, 'Presto'], [199, 'Presto'], [200, 'Prestissimo'], [240, 'Prestissimo'], [300, 'Prestissimo']];
+      const badM = marks.filter(([v, e]) => T.tempoMarking(v) !== e);
+      report('tempoMarking at every range edge', marks.length, badM.length, badM.map(([v, e]) => `${v}: expected ${e}, got ${T.tempoMarking(v)}`));
+    }
+    // Tap tempo
+    {
+      const tt = T.createTapTempo();
+      const got = [tt.tap(0), tt.tap(500), tt.tap(1000), tt.tap(1500), tt.tap(2000), tt.tap(2600), tt.tap(6000), tt.tap(6400)];
+      const exp = [null, 120, 120, 120, 120, 114, null, 150];
+      report('tap tempo: null after one tap, averages the last 5 taps, a long pause starts over', exp.length,
+        exp.filter((e, i) => e !== got[i]).length, [`expected ${JSON.stringify(exp)}`, `got      ${JSON.stringify(got)}`]);
+      const fast = T.createTapTempo();
+      fast.tap(0);
+      const capped = fast.tap(100);
+      report('tap tempo: very fast taps are capped at 240', 1, capped === 240 ? 0 : 1, [`got ${capped}`]);
+    }
+
+    // Real sounds, rendered offline: volume, no clipping at 200%, level order.
+    const peak = async (sound, level, gain) => {
+      const buf = await Tone.Offline(() => {
+        const c = T.createClicks();
+        c.setVolume(gain);
+        c.play(sound, 0.05, level);
+      }, 0.3);
+      const data = buf.getChannelData(0);
+      let p = 0;
+      for (let i = 0; i < data.length; i++) p = Math.max(p, Math.abs(data[i]));
+      return p;
+    };
+    {
+      const ex = [];
+      let bad = 0, n = 0;
+      for (const sound of ['beep', 'wood']) {   // deterministic sounds: exact ratios
+        const p1 = await peak(sound, 'normal', 1), p2 = await peak(sound, 'normal', 2), ph = await peak(sound, 'normal', 0.5), p0 = await peak(sound, 'normal', 0);
+        for (const [name, ok] of [[`${sound} 200% = 2 × 100%`, Math.abs(p2 / p1 - 2) < 0.01], [`${sound} 50% = ½ × 100%`, Math.abs(ph / p1 - 0.5) < 0.01], [`${sound} 0% is silent`, p0 === 0]]) {
+          n++; if (!ok) { bad++; ex.push(`${name}: peaks 100% ${p1}, 200% ${p2}, 50% ${ph}, 0% ${p0}`); }
+        }
+      }
+      report('setVolume: 200% doubles the signal, 50% halves it, 0% is silent', n, bad, ex);
+    }
+    {
+      const ex = [];
+      let bad = 0, n = 0;
+      // Noise sounds start at a random point of their noise, so render them many times.
+      for (const sound of T.CLICK_SOUNDS) {
+        let p = 0;
+        for (let i = 0; i < (sound === 'click' || sound === 'hat' ? 40 : 1); i++) p = Math.max(p, await peak(sound, 'strong', 2));
+        n++;
+        if (!(p > 0.05 && p < 0.97)) { bad++; ex.push(`${sound} strong at 200%: peak ${p}`); }
+      }
+      report('no clipping: every sound, strong, at 200% peaks below 0.97 (noise: worst of 40)', n, bad, ex);
+    }
+    {
+      const ex = [];
+      let bad = 0, n = 0;
+      for (const sound of T.CLICK_SOUNDS) {
+        const [s, nm, so] = [await peak(sound, 'strong', 1), await peak(sound, 'normal', 1), await peak(sound, 'soft', 1)];
+        n++;
+        // Noise sounds are random, so allow a little slack; beep/wood strong only changes pitch.
+        if (!(so < nm * 0.9 && s >= nm * 0.9)) { bad++; ex.push(`${sound}: strong ${s.toFixed(3)}, normal ${nm.toFixed(3)}, soft ${so.toFixed(3)}`); }
+      }
+      report('levels: soft is quieter than normal; strong is at least as loud', n, bad, ex);
+    }
+  } catch (err) {
+    report('test run', 0, 1, [String(err && err.stack || err)]);
+  }
+
+  const failed = results.filter(r => r.failed).length;
+  const summary = document.getElementById('summary');
+  summary.className = failed ? 'fail' : 'pass';
+  summary.textContent = failed ? `FAIL: ${failed} of ${results.length} checks failed` : `PASS: ${results.length} checks passed`;
+  document.title = (failed ? 'FAIL' : 'PASS') + ' · Transport tests';
+  window.testResult = { pass: failed === 0, results };
+</script>
+</body>
+</html>

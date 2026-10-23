@@ -2,33 +2,58 @@
  *
  *   clampBpm(v)       40..240; NaN -> 100
  *   CLICK_SOUNDS      ['click', 'beep', 'wood', 'hat']
- *   createClicks()    the four metronome sounds at -8 dB, routed straight to
- *                     the speakers (not through a rack's master volume, so
- *                     they are heard but stay out of recordings)
- *     clicks.play(sound, time, accent)   unknown sounds play 'click'
+ *   createClicks()    the four metronome sounds, routed straight to the
+ *                     speakers (not through a rack's master volume, so they
+ *                     are heard but stay out of recordings)
+ *     clicks.play(sound, time, level = 'normal')
+ *       level 'strong' (higher/louder, for accents), 'normal', or 'soft' (for
+ *       in-between clicks). Unknown sounds play 'click'.
+ *     clicks.setVolume(gain)   1 = the normal level (-8 dB), 2 = twice the
+ *                              signal (+6 dB, still below clipping), 0 = silent
  *     clicks.dispose()
- *   startMetronome(clicks, { enabled, sound, beatsPerBar = 4 })
- *     A Tone.Loop on every quarter note of Tone.Transport from 0 (returned;
- *     call .dispose() to remove it). enabled() and sound() are read on each
- *     beat; the first beat of each bar is accented. Start, stop and set the
- *     tempo with Tone.Transport itself (Tone.Transport.bpm.value = clampBpm(x)).
+ *   startMetronome(clicks, { enabled, sound, beatsPerBar, accents, subdivision, onBeat })
+ *     A Tone.Loop on Tone.Transport from 0, 12 steps per quarter-note beat so
+ *     in-between clicks follow tempo changes (returned; call .dispose() to
+ *     remove it). Every option is read again on each beat or in-between
+ *     click, so changes apply from the next one:
+ *       enabled()      false = no sound (beats are still counted and reported)
+ *       sound()        one of CLICK_SOUNDS
+ *       beatsPerBar    a number or a function (default 4). When it shrinks
+ *                      below the current beat, the next beat starts a new bar.
+ *       accents()      one level per beat: 'strong' | 'normal' | 'silent';
+ *                      missing entries are 'normal'. Default: beat 1 strong.
+ *       subdivision()  clicks per beat, 1..4 (default 1). The in-between clicks
+ *                      play 'soft', also after a silent beat.
+ *       onBeat(beat, time, level)   for each beat (0 = downbeat) at its audio
+ *                      time, ahead of time: draw with Tone.Draw.schedule(fn, time).
+ *     Bars are counted from the Transport position, so stopping the Transport
+ *     (which rewinds it to 0) and starting again begins a new bar.
+ *     Start, stop and set the tempo with Tone.Transport itself
+ *     (Tone.Transport.bpm.value = clampBpm(x)).
  *   countIn(clicks, sound, startTime, beats = 4)
  *     schedules one bar of clicks at the current tempo from startTime and
  *     returns the time the bar after it starts (start the Transport there).
  *   beatAt(time, beatsPerBar = 4), currentBeat(beatsPerBar = 4)
- *     beat index within the bar (0 = downbeat) at a time / right now.
+ *     beat index within the bar (0 = downbeat) at a time / right now, counted
+ *     from Transport position 0 with a fixed bar length.
  *   createTapTempo({ resetAfterMs = 2500, maxTaps = 5 })
  *     .tap(nowMs = performance.now()) -> BPM averaged over the last taps
  *     (clamped), or null until there are two taps. A pause longer than
  *     resetAfterMs starts over. .reset()
+ *   TEMPO_MARKINGS, tempoMarking(bpm)
+ *     the Italian tempo word for a speed: Largo 40-59, Larghetto 60-65,
+ *     Adagio 66-75, Andante 76-107, Moderato 108-119, Allegro 120-167,
+ *     Presto 168-199, Prestissimo 200-240 (bpm is clamped first).
  */
 
 export const clampBpm = (v) => Math.max(40, Math.min(240, isNaN(v) ? 100 : v));
 
 export const CLICK_SOUNDS = ['click', 'beep', 'wood', 'hat'];
 
+const BASE_DB = -8;
+
 export function createClicks() {
-  const metVol = new Tone.Volume(-8).toDestination();
+  const metVol = new Tone.Volume(BASE_DB).toDestination();
   const hatFilter = new Tone.Filter(8000, 'highpass').connect(metVol);
   const metSynths = {
     click: new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.03, sustain: 0 } }).connect(metVol),
@@ -37,13 +62,19 @@ export function createClicks() {
     hat: new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.05, sustain: 0 } }).connect(hatFilter),
   };
   return {
-    play(sound, time, accent) {
+    play(sound, time, level = 'normal') {
+      const strong = level === 'strong', soft = level === 'soft';
       switch (sound) {
-        case 'beep': metSynths.beep.triggerAttackRelease(accent ? 'E6' : 'A5', 0.05, time); break;
-        case 'wood': metSynths.wood.triggerAttackRelease(accent ? 'A4' : 'E4', 0.05, time); break;
-        case 'hat': metSynths.hat.triggerAttackRelease(0.03, time, accent ? 0.9 : 0.5); break;
-        default: metSynths.click.triggerAttackRelease(0.02, time, accent ? 1 : 0.55);
+        case 'beep': metSynths.beep.triggerAttackRelease(strong ? 'E6' : 'A5', 0.05, time, soft ? 0.55 : 1); break;
+        case 'wood': metSynths.wood.triggerAttackRelease(strong ? 'A4' : 'E4', 0.05, time, soft ? 0.55 : 1); break;
+        // The hi-hat's filtered noise peaks higher, so it sits lower to stay clean at 200%.
+        case 'hat': metSynths.hat.triggerAttackRelease(0.03, time, strong ? 0.6 : soft ? 0.2 : 0.35); break;
+        default: metSynths.click.triggerAttackRelease(0.02, time, strong ? 1 : soft ? 0.3 : 0.55);
       }
+    },
+    setVolume(gain) {
+      metVol.mute = !(gain > 0);
+      if (gain > 0) metVol.volume.value = BASE_DB + 20 * Math.log10(gain);
     },
     dispose() {
       [...Object.values(metSynths), hatFilter, metVol].forEach(n => {
@@ -58,17 +89,36 @@ export const beatAt = (time, beatsPerBar = 4) =>
 export const currentBeat = (beatsPerBar = 4) =>
   Math.floor(Tone.Transport.ticks / Tone.Transport.PPQ) % beatsPerBar;
 
-export function startMetronome(clicks, { enabled = () => true, sound = () => 'click', beatsPerBar = 4 } = {}) {
+export function startMetronome(clicks, {
+  enabled = () => true, sound = () => 'click', beatsPerBar = 4,
+  accents = () => ['strong'], subdivision = () => 1, onBeat = null,
+} = {}) {
+  const STEPS = 12;          // per beat: divisible by 1, 2, 3 and 4
+  let barStart = 0;          // Transport beat number where the current bar began
+  let lastBeat = Infinity;   // so the first beat (or a rewind) starts a bar
   const metTick = (time) => {
-    if (!enabled()) return;
-    clicks.play(sound(), time, beatAt(time, beatsPerBar) === 0);
+    const step = Math.round(Tone.Transport.getTicksAtTime(time) / (Tone.Transport.PPQ / STEPS));
+    const inBeat = step % STEPS;
+    if (inBeat !== 0) {
+      const sub = Math.max(1, Math.min(4, Math.round(subdivision()) || 1));
+      if (inBeat % (STEPS / sub) === 0 && enabled()) clicks.play(sound(), time, 'soft');
+      return;
+    }
+    const total = step / STEPS;
+    const bpb = Math.max(1, Math.round(typeof beatsPerBar === 'function' ? beatsPerBar() : beatsPerBar) || 1);
+    if (total <= lastBeat || total - barStart >= bpb) barStart = total;
+    lastBeat = total;
+    const beat = total - barStart;
+    const level = accents()[beat] || 'normal';
+    if (level !== 'silent' && enabled()) clicks.play(sound(), time, level);
+    if (onBeat) onBeat(beat, time, level);
   };
-  return new Tone.Loop(metTick, '4n').start(0);
+  return new Tone.Loop(metTick, `${Tone.Transport.PPQ / STEPS}i`).start(0);
 }
 
 export function countIn(clicks, sound, startTime, beats = 4) {
   const beatSec = 60 / Tone.Transport.bpm.value;
-  for (let k = 0; k < beats; k++) clicks.play(sound, startTime + k * beatSec, k === 0);
+  for (let k = 0; k < beats; k++) clicks.play(sound, startTime + k * beatSec, k === 0 ? 'strong' : 'normal');
   return startTime + beats * beatSec;
 }
 
@@ -86,4 +136,15 @@ export function createTapTempo({ resetAfterMs = 2500, maxTaps = 5 } = {}) {
     },
     reset() { tapTimes.length = 0; },
   };
+}
+
+export const TEMPO_MARKINGS = [
+  ['Largo', 40], ['Larghetto', 60], ['Adagio', 66], ['Andante', 76],
+  ['Moderato', 108], ['Allegro', 120], ['Presto', 168], ['Prestissimo', 200],
+];
+export function tempoMarking(bpm) {
+  const v = clampBpm(bpm);
+  let name = TEMPO_MARKINGS[0][0];
+  for (const [n, from] of TEMPO_MARKINGS) if (v >= from) name = n;
+  return name;
 }
