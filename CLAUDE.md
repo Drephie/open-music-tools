@@ -29,7 +29,7 @@ Free, open-source music tools that build musical literacy and help people make t
 - Libraries come from CDNs with pinned versions: Tone.js 14.8.49 (cdnjs, with SRI) and MediaPipe tasks-vision 0.10.3 (jsDelivr).
 - Run locally from the repo root with `python3 -m http.server 8000`, then open http://localhost:8000/choordination/. ES modules, camera, microphone and service workers don't work from `file://`.
 - When you change a file the service worker caches, bump `CACHE_NAME` in `/sw.js`; list each new tool's files in its `APP_SHELL`.
-- Tests run in the browser: open http://localhost:8000/tests/theory.html and http://localhost:8000/tests/transport.html (metronome timing, levels and volume). The same check runs from the terminal with macOS's built-in JavaScriptCore: `/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc -m tests/tools/run-theory-test.js`.
+- Tests run in the browser: open http://localhost:8000/tests/theory.html, http://localhost:8000/tests/transport.html (metronome timing, levels and volume) and http://localhost:8000/tests/ear-trainer.html (every Ear Trainer question checked against `nameNotes`). The theory and Ear Trainer checks also run from the terminal with macOS's built-in JavaScriptCore: `/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc -m tests/tools/run-theory-test.js` (and `run-ear-trainer-test.js`).
 
 ## Conventions
 

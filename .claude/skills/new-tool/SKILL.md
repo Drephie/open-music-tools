@@ -48,6 +48,7 @@ Every visible string and every `aria-label` goes through i18n, in English, Spani
 - `await Tone.start()` first thing in the tap or click handler. Set `navigator.audioSession.type = 'playback'` at load (iPhone silent switch); keep the screen awake while playing (`navigator.wakeLock`, https only).
 - Things that sound on `pointerdown` (piano keys, pads): for a finger, browsers count the lift, not the touch, as the tap that allows sound, so also call `startAudio()` on `pointerup`/`touchend` (see `piano/piano.js`). Play live notes at `Tone.immediate()`, not `Tone.now()` (which adds the look-ahead).
 - Light the screen in time with `Tone.Draw.schedule(fn, time)`.
+- A sequence that a replay must be able to cut short (the Ear Trainer's questions): schedule its notes on `Tone.Transport` with `Transport.schedule(cb, Transport.seconds + at)`, and stop it with `Transport.cancel(0)`, `Tone.Draw.cancel(0)` and the instrument's `releaseAll()`. Notes scheduled straight on a Sampler at future times can't be cancelled.
 - Claude can't hear: test timing by calling loop callbacks at known times on a Transport started far in the future, and levels by rendering with `Tone.Offline` and measuring peaks and energy. Noise sounds start at a random point: take the worst of many renders. Nothing may peak above 1.0 at the loudest setting. Note: `Tone.Transport` stays bound to the original context, so `Tone.Offline` can render sounds but not the Transport.
 
 ## 6. Hub files
@@ -60,6 +61,9 @@ Add every new file to `APP_SHELL` in `/sw.js` and bump `CACHE_NAME` whenever a c
 - All 5 themes, all 3 languages, phone sizes (`resize_window` 375 × 667 and 390 × 664) and desktop, keyboard only, every window and dropdown, settings remembered after reload. Wait for theme transitions (about 0.5 s) before judging colors.
 - `tests/theory.html` and `tests/transport.html` pass. If a shared file changed, Choordination still loads and its dropdowns work.
 - The built-in browser slows its audio clock while its pane is hidden and reports a mouse and no touch, so phone-only and timing behaviour need the methods above, or Drephie's phone. With `resize_window` below 768 px wide it emulates touch (`pointer: coarse`).
+- While the pane is hidden the page gets about 3 frames a second, so `Tone.Draw` callbacks arrive more than 0.25 s late and Tone drops them: lights that follow the sound look missing there, not on a phone.
+- To check what a tool plays without hearing it, wrap `Tone.Sampler.prototype.triggerAttackRelease` in the page and log the MIDI notes and times (the Ear Trainer's questions were checked this way). A page reload removes the wrapper.
+- Soft Pink's `--color-btn-text` is white, for its pink-filled `.btn`s: custom buttons on `--color-panel` (tabs, segmented choices, chips, cards) need `color: var(--color-left)` in Pink, or their text is white on white.
 - Taking a screenshot blurs the page: a tool that lets go of held notes on `blur` (the Piano) shows them released. Read held state with JavaScript instead, or use a state that survives (the Piano's Drone).
 - A tool drawn turned sideways on upright phones (the Piano's `#stage`): measure in the stage's own frame (`DOMMatrix` inverse for pointers, `setSelectRoom` for dropdowns), size with px or container units (`cqw`/`cqh`) rather than vw/vh, and map the safe areas with the turn.
 - Don't overwrite Drephie's saved settings or the Patreon window's last-shown time (`open-music-tools.supportPrompt`) without putting them back.

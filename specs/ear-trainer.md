@@ -1,7 +1,7 @@
 # Ear Trainer: spec
 
-**Status:** approved by Drephie, 2026-10-23.
-Items marked *(Claude's pick)* weren't asked: say if you want them changed.
+**Status:** approved by Drephie, 2026-10-23. Built the same day; waiting for Drephie's phone test.
+Items marked *(Claude's pick)* weren't asked: say if you want them changed. *(At build time)* marks details settled while building.
 
 ## What it is for
 
@@ -22,7 +22,8 @@ Learn to recognise what you hear, for anyone, no theory needed: the distance bet
 - **Scale degrees are named with numbers 1 to 7** (1 = home, the key's first note). Major keys only in this version.
 - The notes are shown small under the answer, e.g. "Do4 → Mi4" for an interval or "Do · Mi · Sol" for a chord, in Do Re Mi in Italian and Spanish and C D E in English, with a switch in Settings, like the Piano *(Claude's pick; scale degrees show only the number, as you chose)*.
 - **Gamified look** *(Claude's pick)*: the lesson path with stars and locks, the next lesson glowing, hearts for lives, a flame with the score, a short burst of sparkles in the theme's colors when a lesson ends or a best is beaten. No extra sounds (no "ding"), so nothing gets in the way of listening.
-- **Keyboard on computers** *(Claude's pick)*: Space = hear again, 1 to 9 and 0 = the answer buttons (numbered on computers only), Enter = Next, Escape = back to the lessons.
+- **Keyboard on computers** *(Claude's pick)*: Space = hear again, 1 to 9 and 0 = the answer buttons (numbered on computers only; - and = for the 11th and 12th interval), Enter = Next, Escape = back to the lessons.
+- **In the streak game** *(at build time)*: when an answer comes in, the line under the buttons says "New answer: Octave" and its button gets a star; after a mistake the question plays again while the right button glows green.
 - **Patreon window**, as in the Metronome and Piano; while a question plays, the page counts as in use.
 
 ## The lessons (going up unless said)
@@ -40,7 +41,7 @@ Minor keys for scale degrees; chord inversions; intervals wider than an octave; 
 
 **Phone, upright** *(Claude's pick: no keyboard to show, so no need for sideways)*. Everything fits one screen of 375 × 667 and 390 × 664, in every theme and language.
 - **Lessons screen:** header (Ear Trainer, About (i), Settings (⚙)); the three tabs; the lesson path (numbered circles, 4 per row, stars under finished ones, a lock on locked ones); under it the chosen lesson's name and **Start**; two cards side by side: **Streak game** (flame, "Best 23") and **Free practice**; footer.
-- **Question screen** (lessons, game and practice): top bar with × (back) and the bar "4 / 10" (in the game: hearts and the flame with the score); "Which interval is it?"; a big **Hear again**; the answer buttons (2 or 3 per row); the answer line; **Compare** and **Next**.
+- **Question screen** (lessons, game and practice): on phones the title bar is hidden, as in the mock-up, so the question has the whole screen *(at build time)*; top bar with × (back) and the bar "4 / 10" (in the game: hearts and the flame with the score); "Which interval is it?"; a big **Hear again**; the answer buttons (2 or 3 per row); the answer line; **Compare** and **Next**.
 - **End of a lesson:** stars, "Lesson 5 done!", **Next lesson** and **Back**. **End of a game:** score, best, **Play again** and **Back**.
 - **Free practice window:** the answers to tick, how they are played, **Start**.
 - **Computer:** the same in a centered column, answer buttons up to 4 per row.
@@ -49,7 +50,7 @@ Minor keys for scale degrees; chord inversions; intervals wider than an octave; 
 
 ## Wording (English)
 
-Ear Trainer; Intervals, Chords, Scale degrees; Lessons, Start, Streak game, Best, Free practice; Which interval is it? / Which chord is it? / Which step of the key is it?; Hear again, Compare, Next; Right!, Not quite; New best!; Play again. Interval names as in the Piano (minor 2nd … octave, tritone). Spanish and Italian come at build time.
+Ear Trainer (Spanish "Oído musical", Italian "Orecchio musicale", short enough for a phone's title bar; *at build time*); Intervals, Chords, Scale degrees; Lessons, Start, Streak game, Best, Free practice; Which interval is it? / Which chord is it? / Which step of the key is it?; Hear again, Compare, Next; Right!, Not quite; New best!; Play again. Interval names as in the Piano (minor 2nd … octave, tritone). Spanish and Italian come at build time.
 
 ## Remembered
 
