@@ -471,6 +471,10 @@
       </div>
     </div>
 
+    <hr class="menu-divider">
+
+    <a class="settings-action-btn" href="../" data-i18n="home">Home: all the tools</a>
+
     <hr class="menu-divider mob-hide">
 
     <button id="open-ui-layout-btn" class="settings-action-btn mob-hide" data-i18n="uiPos">UI Positioning & Size...</button>
@@ -631,6 +635,7 @@
   import { setupCustomSelects } from '../shared/ui/select.js';
   import { createModalManager } from '../shared/ui/modal.js';
   import { registerHubWorker } from '../shared/offline.js';
+  import { loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 
   // --- roundRect polyfill (older Safari) ---
   if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
@@ -978,8 +983,9 @@
     try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch { return {}; }
   }
   // Deliberately narrow: only widget shapes and on-screen placement/size persist.
-  // Everything else (theme, language, key, instrument, volume, …) starts fresh
-  // each visit — the app always boots in the default Liquid Glass look.
+  // Theme and language are the hub's one shared choice (loadLook/saveLook in
+  // shared/ui/page.js); everything else (key, instrument, volume, …) starts
+  // fresh each visit.
   function saveSettings() {
     const data = { leftShape: leftShape.value, rightShape: rightShape.value, uiOffsets: { ...uiOffsets } };
     try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(data)); } catch { /* storage unavailable */ }
@@ -996,8 +1002,10 @@
       const v = parseInt(s.uiOffsets[k], 10);
       if (!isNaN(v)) { uiOffsets[k] = v; const el = $(k); if (el) el.value = v; }
     }
-    themeSelector.value = 'liquid';
-    document.body.setAttribute('data-theme', 'liquid');
+    const look = loadLook();
+    themeSelector.value = look.theme;
+    document.body.setAttribute('data-theme', look.theme);
+    languageSelector.value = look.lang;
   }
 
   // --- CUSTOM SELECTS: shared/ui/select.js ---
@@ -2458,7 +2466,7 @@
   themeSelector.addEventListener('change', (e) => {
     document.body.setAttribute('data-theme', e.target.value);
     refreshThemeCache();
-    saveSettings();
+    saveLook({ theme: e.target.value });
   });
   modeSelector.addEventListener('change', () => { updateKeyContext(); });
   notationSelector.addEventListener('change', () => {
@@ -2475,7 +2483,17 @@
   octaveSelector.addEventListener('change', () => { lastUpper = null; releaseAudio(); saveSettings(); });
   chordStyleSelector.addEventListener('change', () => { lastUpper = null; releaseAudio(); });
   handednessMode.addEventListener('change', () => { updateTutorialText(); saveSettings(); });
-  languageSelector.addEventListener('change', () => { updateLanguage(); saveSettings(); });
+  languageSelector.addEventListener('change', () => { updateLanguage(); saveLook({ lang: languageSelector.value }); });
+  // Chosen on the home page or in another tool, in another tab or before coming Back here.
+  watchLook((look) => {
+    if (look.theme !== themeSelector.value) {
+      themeSelector.value = look.theme;
+      document.body.setAttribute('data-theme', look.theme);
+      refreshThemeCache();
+      setupCustomSelects();
+    }
+    if (look.lang !== languageSelector.value) { languageSelector.value = look.lang; updateLanguage(); }
+  });
   accMode.addEventListener('change', () => {
     updateTutorialText();
     applyTouchClass();
