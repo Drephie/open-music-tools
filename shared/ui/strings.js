@@ -15,6 +15,8 @@ export const HUB_STRINGS = {
     // Common controls
     lang: "Language", vol: "Master Volume", closeAria: "Close", retry: "Retry",
     settings: "Settings", about: "About",
+    // Patreon window (shared/ui/page.js createSupportPrompt)
+    supportContinue: "Continue", supportWait: "Continue in {s} s…",
     // Themes (shared/ui/themes.css)
     theme: "Aesthetic Theme", themeLiquid: "Liquid Glass", themeY2k: "Y2K Cyber", themePink: "Soft Pink", themeBw: "Monochrome", themeRetro: "Retro CRT",
     // Instrument rack (shared/sound.js INSTRUMENTS)
@@ -28,6 +30,8 @@ export const HUB_STRINGS = {
     // Common controls
     lang: "Idioma", vol: "Volumen", closeAria: "Cerrar", retry: "Reintentar",
     settings: "Ajustes", about: "Información",
+    // Patreon window (shared/ui/page.js createSupportPrompt)
+    supportContinue: "Continuar", supportWait: "Continuar en {s} s…",
     // Themes (shared/ui/themes.css)
     theme: "Tema Estético", themeLiquid: "Cristal Líquido", themeY2k: "Cyber Y2K", themePink: "Rosa Suave", themeBw: "Monocromo", themeRetro: "CRT Retro",
     // Instrument rack (shared/sound.js INSTRUMENTS)
@@ -41,6 +45,8 @@ export const HUB_STRINGS = {
     // Common controls
     lang: "Lingua", vol: "Volume", closeAria: "Chiudi", retry: "Riprova",
     settings: "Impostazioni", about: "Informazioni",
+    // Patreon window (shared/ui/page.js createSupportPrompt)
+    supportContinue: "Continua", supportWait: "Continua tra {s} s…",
     // Themes (shared/ui/themes.css)
     theme: "Tema Estetico", themeLiquid: "Vetro Liquido", themeY2k: "Cyber Y2K", themePink: "Rosa Tenue", themeBw: "Monocromatico", themeRetro: "CRT Retrò",
     // Instrument rack (shared/sound.js INSTRUMENTS)

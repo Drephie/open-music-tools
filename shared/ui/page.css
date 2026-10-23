@@ -14,7 +14,14 @@
  *   Windows: <div class="centered-modal" role="dialog" aria-modal="true"
  *     style="display:none"><div class="modal-header"><h2>…</h2>
  *     <button class="close-btn">×</button></div>…</div>  (shared/ui/modal.js)
- *   Buttons: .btn, .btn.btn-primary, .icon-btn, .round-btn (− / +).
+ *   A window holding dropdowns: add class "has-dropdowns" so their lists can
+ *     reach past its edge (it then doesn't scroll; keep it short).
+ *   Patreon window (page.js createSupportPrompt): <div class="modal-overlay"
+ *     role="dialog" aria-modal="true" style="display:none"><div class="centered-modal
+ *     support-card"><button class="close-btn support-close">×</button>…
+ *     <a class="btn patreon-btn">…</a><button class="btn support-continue"></button></div></div>
+ *   Buttons: .btn, .btn.btn-primary, .btn.patreon-btn, .icon-btn, .round-btn (− / +).
+ *   .computer-only: hidden on touch screens (no mouse), e.g. keyboard tips.
  *   Rows: .setting-row (label left, control right).
  *   Sliders: <input type="range" class="range">; set --fill (e.g. "40%") for
  *     the filled part, or --range-bg for a whole custom track, and --thumb
@@ -36,6 +43,9 @@ body {
 /* Phones: thinner theme frames, so they don't eat the screen. */
 @media (max-width: 600px) {
   body { --fx: min(var(--frame-sides), 8px); --fy-top: min(var(--frame-top), 8px); --fy-bottom: min(var(--frame-bottom), 8px); }
+}
+@media not ((hover: hover) and (pointer: fine)) {
+  .computer-only { display: none !important; }
 }
 body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 60; background: var(--crt-scanline); }
 
@@ -70,6 +80,8 @@ body[data-theme="retro"] #theme-frame { border: var(--fy-top) solid rgb(17, 17, 
 }
 .btn { min-height: 48px; padding: 10px 18px; border-radius: 12px; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
 .btn-primary { background: var(--color-right); border-color: var(--color-right); color: var(--color-text-pinched); }
+.btn.patreon-btn { display: flex; align-items: center; justify-content: center; text-decoration: none; background: var(--color-patreon); border-color: var(--color-patreon); color: var(--color-patreon-text); box-shadow: 0 4px 20px color-mix(in srgb, var(--color-patreon) 40%, transparent); }
+.btn:disabled { opacity: 0.6; cursor: default; }
 .icon-btn { width: 44px; height: 44px; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
 .icon-btn svg { width: 22px; height: 22px; }
 .round-btn { width: 48px; height: 48px; flex: none; padding: 0; border-radius: 50%; font-size: 26px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
@@ -77,6 +89,8 @@ body[data-theme="retro"] #theme-frame { border: var(--fy-top) solid rgb(17, 17, 
 @media (hover: hover) {
   .btn:hover, .icon-btn:hover, .round-btn:hover { background: var(--border-panel); color: var(--color-text-pinched); }
   .btn-primary:hover { background: var(--color-left); border-color: var(--color-left); }
+  .btn.patreon-btn:hover { background: var(--color-patreon); color: var(--color-patreon-text); transform: scale(1.03); }
+  .btn:disabled:hover { background: var(--color-panel); color: var(--color-btn-text); }
 }
 :is(.btn, .icon-btn, .round-btn, .close-btn, a):focus-visible { outline: 2px solid var(--color-right); outline-offset: 3px; }
 
@@ -102,6 +116,13 @@ body[data-theme="retro"] #theme-frame { border: var(--fy-top) solid rgb(17, 17, 
   box-shadow: 0 10px 50px rgba(0, 0, 0, 0.6), 0 0 0 100vmax rgba(0, 0, 0, 0.45);
   scrollbar-width: thin; scrollbar-color: var(--color-left) transparent;
 }
+.centered-modal.has-dropdowns { overflow: visible; }
+.modal-overlay { position: fixed; inset: 0; z-index: 80; box-sizing: border-box; padding: 16px; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.55); }
+.modal-overlay > .centered-modal { position: relative; top: auto; left: auto; transform: none; display: flex; box-shadow: 0 10px 50px rgba(0, 0, 0, 0.6); }
+.support-card { text-align: center; gap: 14px; padding-top: 28px; }
+.support-card h2 { margin: 0; color: var(--color-left); font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
+.support-card p { margin: 0; font-size: 15px; line-height: 1.5; }
+.support-close { position: absolute; top: 6px; right: 6px; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-panel); padding-bottom: 10px; }
 .modal-header h2 { margin: 0; color: var(--color-left); font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
 .close-btn { background: transparent; border: none; color: var(--color-text); font-size: 28px; font-weight: 700; line-height: 1; cursor: pointer; padding: 4px 8px; min-width: 44px; min-height: 44px; }
@@ -119,7 +140,7 @@ body[data-theme="retro"] #theme-frame { border: var(--fy-top) solid rgb(17, 17, 
 
 /* Theme shapes */
 body[data-theme="pink"] :is(.btn, .select-selected) { border-radius: 999px; }
-body[data-theme="pink"] :is(.btn:not(.btn-primary), .icon-btn, .round-btn) { background: var(--color-left); border-color: var(--border-panel); color: var(--color-text-pinched); }
+body[data-theme="pink"] :is(.btn:not(.btn-primary):not(.patreon-btn), .icon-btn, .round-btn) { background: var(--color-left); border-color: var(--border-panel); color: var(--color-text-pinched); }
 body[data-theme="pink"] .panel, body[data-theme="pink"] .centered-modal { border-radius: 28px; border-width: 3px; }
 body[data-theme="pink"] .select-items { border-radius: 18px; }
 body[data-theme="bw"] :is(.panel, .btn, .centered-modal) { border-radius: 0; }
@@ -131,3 +152,20 @@ body[data-theme="retro"] .custom-select { font-size: 19px; }
 body[data-theme="retro"] .about-text { font-size: 19px; }
 body[data-theme="retro"] .about-small { font-size: 17px; }
 body[data-theme="retro"] .tool-footer { font-size: 16px; }
+body[data-theme="retro"] .support-card p { font-size: 19px; }
+
+/* Phones: everything on one screen. */
+@media (max-width: 600px) {
+  .page {
+    gap: 8px;
+    padding: calc(var(--fy-top) + 8px + env(safe-area-inset-top)) calc(var(--fx) + 12px + env(safe-area-inset-right))
+             calc(var(--fy-bottom) + 8px + env(safe-area-inset-bottom)) calc(var(--fx) + 12px + env(safe-area-inset-left));
+  }
+  .tool-title { font-size: 16px; }
+  .icon-btn { width: 40px; height: 40px; }
+  .panel { padding: 12px 14px; border-radius: 14px; }
+  .setting-row { min-height: 44px; }
+  .tool-footer { flex-wrap: nowrap; white-space: nowrap; gap: 8px; font-size: 10px; letter-spacing: 0.5px; line-height: 1.2; }
+  body[data-theme="retro"] .tool-footer { font-size: 13px; line-height: 1.1; }
+  body[data-theme="pink"] .panel { border-radius: 22px; }
+}

@@ -11,7 +11,9 @@
  *   --frame-top / --frame-bottom / --frame-sides / --frame-radius (theme frame insets),
  *   --bg-page (solid page color for tools with no camera behind them),
  *   --color-warn-start / --color-warn-end (a warning that grows, e.g. volume
- *   above 100%: yellow to red; tools mix between them).
+ *   above 100%: yellow to red; tools mix between them),
+ *   --color-patreon / --color-patreon-text (the Patreon button: the one
+ *   brand color, the same in every theme).
  * Theme-specific decoration (frames, button shapes) stays in each tool.
  * Load it before the tool's own styles, plus the fonts it names:
  *   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
@@ -20,6 +22,8 @@
   --bg-page: #0f1419;
   --color-warn-start: #ffd60a;
   --color-warn-end: #ff3b30;
+  --color-patreon: #ff424d;
+  --color-patreon-text: #ffffff;
   --bg-overlay: rgba(15, 20, 25, 0.65);
   --font-main: 'Orbitron', sans-serif;
   --color-left: #ffffff;
