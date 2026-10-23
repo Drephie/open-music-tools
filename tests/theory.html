@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theory tests</title>
+  <!-- Tone.js only to check that midiToFreq gives exactly Tone's numbers. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" integrity="sha384-c6Uo4N9c3SOEigMVzP6IshUG1wQ5uMp3xeoQFiHWAQ86joWdgyajkvopySyKy/Z6" crossorigin="anonymous"></script>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { margin: 0 auto; padding: 16px; max-width: 900px; background: Canvas; color: CanvasText; }
+    h1 { font-size: 1.4rem; }
+    #summary { font-size: 1.2rem; font-weight: 700; }
+    .pass { color: green; } .fail { color: #d22; } .skip { opacity: 0.7; }
+    table { border-collapse: collapse; width: 100%; }
+    td, th { text-align: left; padding: 4px 8px; border-bottom: 1px solid GrayText; vertical-align: top; }
+    pre { white-space: pre-wrap; word-break: break-word; font-size: 12px; margin: 4px 0 0; }
+  </style>
+</head>
+<body>
+  <h1>shared/theory.js against the Choordination snapshot</h1>
+  <p id="summary">Running…</p>
+  <table>
+    <thead><tr><th>Check</th><th>Compared</th><th>Result</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <p>The snapshot (<code>fixtures/theory-snapshot.json</code>) was recorded from the original Choordination code. See <code>tools/make-theory-snapshot.js</code>.</p>
+
+<script type="module">
+  import * as theory from '../shared/theory.js';
+  import { buildSnapshot, compareSnapshots } from './theory-cases.js';
+
+  const rows = document.getElementById('rows');
+  const results = [];
+  function report(name, checked, failed, examples = [], skipped = false) {
+    results.push({ name, checked, failed, skipped });
+    const tr = document.createElement('tr');
+    const cls = skipped ? 'skip' : failed ? 'fail' : 'pass';
+    const verdict = skipped ? 'skipped' : failed ? `FAIL (${failed})` : 'pass';
+    tr.innerHTML = `<td>${name}</td><td>${checked}</td><td class="${cls}">${verdict}</td>`;
+    if (examples.length) {
+      const pre = document.createElement('pre');
+      pre.textContent = examples.join('\n');
+      tr.children[0].appendChild(pre);
+    }
+    rows.appendChild(tr);
+  }
+
+  const toneFreq = (typeof Tone !== 'undefined') ? (n) => Tone.Frequency(n, 'midi').toFrequency() : null;
+  let freqChecked = 0, freqFailed = 0;
+  const freqExamples = [];
+
+  // The adapter Choordination uses: degree, modifier list and octave become parameters.
+  const api = {
+    modifiers: null,
+    keyRootName: theory.keyRootName,
+    chordNames: (mode, solfege) => theory.keyChordNames(theory.parseKey(mode), solfege),
+    chord(spec) {
+      const info = theory.getChordInfo({
+        key: theory.parseKey(spec.mode),
+        degree: spec.root,
+        modifiers: theory.pickModifiers(spec.list, spec.typeIdx, spec.dualMod, spec.modPair),
+        octave: spec.octave,
+        solfege: spec.notation === 'solfeggio',
+      });
+      if (toneFreq) {
+        info.midiNotes.forEach((n, i) => {
+          freqChecked++;
+          if (info.freqs[i] !== toneFreq(n)) {
+            freqFailed++;
+            if (freqExamples.length < 10) freqExamples.push(`MIDI ${n}: Tone ${toneFreq(n)}, midiToFreq ${info.freqs[i]}`);
+          }
+        });
+      }
+      return info;
+    },
+  };
+
+  try {
+    const expected = await (await fetch('fixtures/theory-snapshot.json', { cache: 'no-store' })).json();
+    api.modifiers = expected.modifiers;
+
+    const sameList = JSON.stringify(theory.CHORD_MODIFIERS) === JSON.stringify(expected.modifiers);
+    report('CHORD_MODIFIERS matches the original menu order', 1, sameList ? 0 : 1,
+      sameList ? [] : [`expected ${expected.modifiers}, got ${theory.CHORD_MODIFIERS}`]);
+
+    const actual = buildSnapshot(api);
+    for (const row of compareSnapshots(expected, actual)) report(`snapshot: ${row.section}`, row.checked, row.failed, row.examples);
+
+    if (toneFreq) {
+      const ex = [];
+      let bad = 0;
+      for (let n = 0; n < 128; n++) if (theory.midiToFreq(n) !== toneFreq(n)) { bad++; if (ex.length < 10) ex.push(`MIDI ${n}: Tone ${toneFreq(n)}, midiToFreq ${theory.midiToFreq(n)}`); }
+      report('midiToFreq equals Tone.Frequency for MIDI 0–127', 128, bad, ex);
+      report('every chord’s freqs equal Tone.Frequency of its MIDI notes', freqChecked, freqFailed, freqExamples);
+    } else {
+      report('frequencies against Tone.js (Tone.js did not load)', 0, 0, [], true);
+    }
+  } catch (err) {
+    report('test run', 0, 1, [String(err && err.stack || err)]);
+  }
+
+  const failed = results.filter(r => r.failed).length;
+  const skipped = results.filter(r => r.skipped).length;
+  const summary = document.getElementById('summary');
+  summary.className = failed ? 'fail' : 'pass';
+  summary.textContent = failed ? `FAIL: ${failed} of ${results.length} checks failed`
+    : `PASS: ${results.length - skipped} checks passed` + (skipped ? `, ${skipped} skipped` : '');
+  document.title = (failed ? 'FAIL' : 'PASS') + ' · Theory tests';
+  window.testResult = { pass: failed === 0, results };
+</script>
+</body>
+</html>
