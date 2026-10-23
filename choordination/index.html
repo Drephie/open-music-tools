@@ -100,13 +100,12 @@
     body[data-theme="pink"] .menu-btn:hover { background: #d61f84; color: #ffffff; }
     body[data-theme="pink"] .centered-modal { border-radius: 28px; border: 3px solid #ffb3e0; }
     body[data-theme="pink"] .select-selected, body[data-theme="pink"] .settings-action-btn,
-    body[data-theme="pink"] .loop-btn-sm, body[data-theme="pink"] #loop-bpm,
-    body[data-theme="pink"] .loop-native-select, body[data-theme="pink"] button.start-btn { border-radius: 999px; }
+    body[data-theme="pink"] button.start-btn { border-radius: 999px; }
     body[data-theme="pink"] .select-items { border-radius: 18px; }
     body[data-theme="pink"] .pad, body[data-theme="pink"] #sustain-latch,
-    body[data-theme="pink"] #touch-record-btn, body[data-theme="pink"] #touch-loop-btn,
+    body[data-theme="pink"] #touch-record-btn,
     body[data-theme="pink"] #touch-settings-btn { border-radius: 24px; }
-    body[data-theme="pink"] #loop-bar, body[data-theme="pink"] #ui-edit-bar { border-radius: 26px; border: 3px solid #ffb3e0; }
+    body[data-theme="pink"] #ui-edit-bar { border-radius: 26px; border: 3px solid #ffb3e0; }
     body[data-theme="pink"] .tutorial-content li { border-left-color: #ff3ea5; background: rgba(255, 62, 165, 0.07); border-radius: 14px; }
 
     #record-btn.recording { color: #ff4d4d; border-color: #ff4d4d; animation: recblink 1.2s infinite; }
@@ -212,7 +211,7 @@
     #touch-bottom { display: flex; gap: 10px; padding: 8px 12px calc(10px + env(safe-area-inset-bottom) + var(--frame-bottom)); }
     #sustain-latch { flex: 1; min-height: 52px; border-radius: 12px; border: 1px solid var(--color-left); background: transparent; color: var(--color-left); font-family: var(--font-main); font-weight: 900; font-size: 16px; letter-spacing: 2px; text-transform: uppercase; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     #sustain-latch.latched { background: var(--color-left); color: var(--color-text-pinched); box-shadow: 0 0 var(--shadow-blur) var(--color-left); }
-    #touch-record-btn, #touch-settings-btn, #touch-loop-btn { min-width: 56px; min-height: 52px; border-radius: 12px; border: 1px solid var(--border-panel); background: var(--color-panel); color: var(--color-text); font-size: 20px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    #touch-record-btn, #touch-settings-btn { min-width: 56px; min-height: 52px; border-radius: 12px; border: 1px solid var(--border-panel); background: var(--color-panel); color: var(--color-text); font-size: 20px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     #touch-record-btn.recording { color: #ff4d4d; border-color: #ff4d4d; animation: recblink 1.2s infinite; }
 
     #rotate-overlay { position: fixed; inset: 0; z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: var(--bg-overlay); backdrop-filter: blur(12px); text-align: center; font-family: var(--font-main); padding: 30px; box-sizing: border-box; }
@@ -227,27 +226,6 @@
     body.ui-editing #overlay { cursor: grab; }
     #ui-edit-hint { flex: 1 1 260px; min-width: 200px; font-size: 13px; font-weight: 700; color: var(--color-text); letter-spacing: 0.5px; line-height: 1.4; }
     #ui-edit-bar .menu-btn { flex: none; }
-
-    /* Loop station toolbar */
-    /* z-index 15 keeps the loop bar above the stage but BELOW modals (z 20). */
-    #loop-bar { position: absolute; bottom: calc(64px + var(--frame-bottom)); left: 50%; transform: translateX(-50%); z-index: 15; display: none; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; max-width: min(94vw, 920px); padding: 12px 46px 12px 18px; background: var(--color-panel); border: 1px solid var(--border-panel); border-radius: 12px; backdrop-filter: blur(14px); box-shadow: 0 8px 30px rgba(0,0,0,0.5); font-family: var(--font-main); }
-    body.loop-open #loop-bar { display: flex; }
-    .loop-group { display: flex; align-items: center; gap: 6px; }
-    .loop-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--color-text); letter-spacing: 1px; }
-    #loop-bpm { width: 62px; background: var(--bg-select); color: var(--color-select-text); border: 1px solid var(--border-panel); border-radius: 6px; padding: 8px 4px; font-family: var(--font-main); font-weight: 700; font-size: 14px; text-align: center; }
-    .loop-native-select { background: var(--bg-select); color: var(--color-select-text); border: 1px solid var(--border-panel); border-radius: 6px; padding: 8px 6px; font-family: var(--font-main); font-weight: 700; font-size: 13px; cursor: pointer; }
-    .loop-btn-sm { min-width: 44px; min-height: 40px; padding: 6px 10px; background: var(--bg-select); color: var(--color-select-text); border: 1px solid var(--border-panel); border-radius: 8px; font-family: var(--font-main); font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.15s; -webkit-tap-highlight-color: transparent; }
-    .loop-btn-sm:hover { border-color: var(--color-left); }
-    .loop-btn-sm.active { background: var(--color-left); color: var(--color-text-pinched); box-shadow: 0 0 10px var(--color-left); }
-    .loop-btn-sm:disabled, .loop-native-select:disabled { opacity: 0.4; cursor: not-allowed; }
-    #loop-rec.recording { background: #ff424d; border-color: #ff424d; color: #ffffff; animation: recblink 1s infinite; }
-    #loop-rec.overdub { background: var(--color-right); border-color: var(--color-right); color: var(--color-text-pinched); animation: recblink 1.4s infinite; }
-    #loop-beats { display: flex; gap: 6px; align-items: center; }
-    #loop-beats i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--border-panel); background: transparent; transition: background 0.05s; }
-    #loop-beats i.on { background: var(--color-left); box-shadow: 0 0 10px var(--color-left); border-color: var(--color-left); }
-    #loop-beats i:first-child.on { background: var(--color-right); box-shadow: 0 0 10px var(--color-right); border-color: var(--color-right); }
-    #loop-close { position: absolute; top: 4px; right: 10px; }
-    body.touch-mode #loop-bar { bottom: calc(88px + env(safe-area-inset-bottom) + var(--frame-bottom)); }
 
     /* Touch-pads mode: the pads replace the camera stage, and the top menu is
        replaced by the touch bottom bar. (Full settings stay available on
@@ -285,11 +263,6 @@
       .tutorial-content li { font-size: 12px; padding: 6px 8px; margin-bottom: 5px; }
       .modal-note { font-size: 10px; }
       .boot-cta { font-size: 13px; padding: 9px 18px; }
-      #loop-bar { gap: 6px 10px; padding: 8px 40px 8px 12px; bottom: calc(46px + var(--frame-bottom)); }
-      .loop-btn-sm { min-width: 38px; min-height: 34px; padding: 4px 8px; font-size: 12px; }
-      #loop-bpm { width: 52px; padding: 6px 3px; font-size: 12px; }
-      .loop-native-select { padding: 6px 4px; font-size: 11px; }
-      .loop-lbl { font-size: 9px; }
       #ui-edit-bar { padding: 6px 10px; gap: 6px 8px; }
       #ui-edit-hint { font-size: 10px; min-width: 140px; }
       #patreon-link, #designer-credit { display: none; }
@@ -297,7 +270,7 @@
       .pad { min-height: 40px; font-size: 14px; border-radius: 10px; }
       #touch-bottom { padding: 6px 10px calc(6px + env(safe-area-inset-bottom) + var(--frame-bottom)); }
       #sustain-latch { min-height: 42px; font-size: 13px; }
-      #touch-record-btn, #touch-settings-btn, #touch-loop-btn { min-width: 46px; min-height: 42px; font-size: 16px; }
+      #touch-record-btn, #touch-settings-btn { min-width: 46px; min-height: 42px; font-size: 16px; }
     }
   </style>
 </head>
@@ -316,7 +289,6 @@
   <div id="chord-live" class="visually-hidden" role="status" aria-live="polite"></div>
 
   <div id="top-right-menu">
-    <button id="loop-toggle-btn" class="menu-btn" data-i18n-aria="loopAria" aria-label="Loop station">⟳ LOOP</button>
     <button id="record-btn" class="menu-btn" data-i18n-aria="recordAria" aria-label="Record audio">⏺ REC</button>
     <button id="tutorial-toggle" class="menu-btn icon-btn" data-i18n-aria="helpAria" aria-label="How to play">
       <span class="circled-question" aria-hidden="true">?</span>
@@ -602,7 +574,6 @@
     </div>
     <div id="touch-bottom">
       <button id="sustain-latch" data-i18n="sustainLatch" aria-pressed="false">SUSTAIN</button>
-      <button id="touch-loop-btn" data-i18n-aria="loopAria" aria-label="Loop station">⟳</button>
       <button id="touch-record-btn" data-i18n-aria="recordAria" aria-label="Record audio">⏺</button>
       <button id="touch-settings-btn" data-i18n-aria="touchSettingsAria" aria-label="Settings">⚙</button>
     </div>
@@ -625,43 +596,6 @@
     <button id="rec-screen-btn" class="settings-action-btn" data-i18n="recScreen">🖥 Screen + audio</button>
   </div>
 
-  <!-- Loop station toolbar -->
-  <div id="loop-bar" role="toolbar" data-i18n-aria="loopAria" aria-label="Loop station">
-    <div id="loop-beats" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-    <div class="loop-group">
-      <label class="loop-lbl" for="loop-bpm">BPM</label>
-      <input type="number" id="loop-bpm" min="40" max="240" step="1" value="100" data-i18n-aria="loopBpmAria" aria-label="Tempo (BPM)">
-      <button id="loop-tap" class="loop-btn-sm">TAP</button>
-    </div>
-    <div class="loop-group">
-      <label class="loop-lbl" for="loop-bars" data-i18n="loopBars">Bars</label>
-      <select id="loop-bars" class="loop-native-select">
-        <option value="1">1</option>
-        <option value="2" selected>2</option>
-        <option value="4">4</option>
-        <option value="8">8</option>
-      </select>
-    </div>
-    <div class="loop-group">
-      <button id="loop-met" class="loop-btn-sm active" data-i18n-aria="loopMetAria" aria-label="Metronome" aria-pressed="true">🔔</button>
-      <select id="loop-met-sound" class="loop-native-select" data-i18n-aria="loopMetSoundAria" aria-label="Metronome sound">
-        <option value="click" data-i18n="metClick">Click</option>
-        <option value="beep" data-i18n="metBeep">Beep</option>
-        <option value="wood" data-i18n="metWood">Wood</option>
-        <option value="hat" data-i18n="metHat">Hi-hat</option>
-      </select>
-      <button id="loop-countin" class="loop-btn-sm active" data-i18n-aria="loopCountInAria" aria-label="1-bar count-in" aria-pressed="true">1·2·3·4</button>
-    </div>
-    <div class="loop-group">
-      <button id="loop-rec" class="loop-btn-sm" data-i18n-aria="loopRecAria" aria-label="Record / overdub loop">⏺</button>
-      <button id="loop-play" class="loop-btn-sm" data-i18n-aria="loopPlayAria" aria-label="Play or stop loops">▶</button>
-      <button id="loop-undo" class="loop-btn-sm" data-i18n-aria="loopUndoAria" aria-label="Undo last layer">↩</button>
-      <button id="loop-clear" class="loop-btn-sm" data-i18n-aria="loopClearAria" aria-label="Clear all layers">✕</button>
-      <span id="loop-layers" class="loop-lbl"></span>
-    </div>
-    <button id="loop-close" class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
-  </div>
-
   <!-- Floating toolbar shown while dragging/resizing the on-canvas widgets -->
   <div id="ui-edit-bar">
     <span id="ui-edit-hint" data-i18n="uiEditHint">Drag a widget to move it — drag the ⤢ handle to resize (kept to scale).</span>
@@ -678,7 +612,6 @@
   //  cached by the hub's service worker, ../sw.js, after first load.)
   import { parseKey, keyRootName, keyChordNames, pickModifiers, getChordInfo as theoryChordInfo } from '../shared/theory.js';
   import { startAudio, createRack } from '../shared/sound.js';
-  import { clampBpm, createClicks, startMetronome, countIn, currentBeat, createTapTempo } from '../shared/transport.js';
   import { createI18n, mergeStrings } from '../shared/ui/i18n.js';
   import { HUB_STRINGS } from '../shared/ui/strings.js';
   import { setupCustomSelects } from '../shared/ui/select.js';
@@ -772,12 +705,6 @@
   const touchSettingsBtn = $("touch-settings-btn");
 
   const recChoiceModal = $("rec-choice-modal");
-  const loopToggleBtn = $("loop-toggle-btn");
-  const touchLoopBtn = $("touch-loop-btn");
-  const loopBpmInput = $("loop-bpm");
-  const loopBarsSelect = $("loop-bars");
-  const loopMetSoundSelect = $("loop-met-sound");
-  const loopBeatsEl = $("loop-beats");
 
   const allModals = [controlsPanel, modifiersModal, uiLayoutModal, tutorialModal, logoInfoModal, patreonNag, recChoiceModal];
 
@@ -796,10 +723,6 @@
       reset: "Reset Placements", back: "← Back to Menu", lh: "LEFT UI", rh: "RIGHT UI",
       helpAria: "How to play", recordAria: "Record audio", recStopAria: "Stop recording",
       aboutAria: "About Choordination", touchSettingsAria: "Settings",
-      loopAria: "Loop station", loopBpmAria: "Tempo (BPM)", loopBars: "Bars",
-      loopMetAria: "Metronome", loopMetSoundAria: "Metronome sound", loopCountInAria: "1-bar count-in",
-      loopRecAria: "Record / overdub loop", loopPlayAria: "Play or stop loops",
-      loopUndoAria: "Undo last layer", loopClearAria: "Clear all layers",
       recChoiceTitle: "Record", recChoiceBody: "What would you like to capture?",
       recAudio: "🎙 Audio only", recScreen: "🖥 Screen + audio",
       ariaLX: "Left UI horizontal position", ariaLY: "Left UI vertical position", ariaLS: "Left UI size",
@@ -874,10 +797,6 @@
       reset: "Restablecer", back: "← Volver al Menú", lh: "UI IZQ.", rh: "UI DER.",
       helpAria: "Cómo tocar", recordAria: "Grabar audio", recStopAria: "Detener la grabación",
       aboutAria: "Acerca de Choordination", touchSettingsAria: "Ajustes",
-      loopAria: "Estación de loops", loopBpmAria: "Tempo (BPM)", loopBars: "Compases",
-      loopMetAria: "Metrónomo", loopMetSoundAria: "Sonido del metrónomo", loopCountInAria: "Claqueta de 1 compás",
-      loopRecAria: "Grabar / superponer loop", loopPlayAria: "Reproducir o detener los loops",
-      loopUndoAria: "Deshacer la última capa", loopClearAria: "Borrar todas las capas",
       recChoiceTitle: "Grabar", recChoiceBody: "¿Qué quieres capturar?",
       recAudio: "🎙 Solo audio", recScreen: "🖥 Pantalla + audio",
       ariaLX: "Posición horizontal de la UI izquierda", ariaLY: "Posición vertical de la UI izquierda", ariaLS: "Tamaño de la UI izquierda",
@@ -952,10 +871,6 @@
       reset: "Ripristina", back: "← Torna al Menu", lh: "UI SINISTRA", rh: "UI DESTRA",
       helpAria: "Come si suona", recordAria: "Registra audio", recStopAria: "Interrompi la registrazione",
       aboutAria: "Informazioni su Choordination", touchSettingsAria: "Impostazioni",
-      loopAria: "Stazione loop", loopBpmAria: "Tempo (BPM)", loopBars: "Battute",
-      loopMetAria: "Metronomo", loopMetSoundAria: "Suono del metronomo", loopCountInAria: "Pre-conteggio di 1 battuta",
-      loopRecAria: "Registra / sovraincidi loop", loopPlayAria: "Avvia o ferma i loop",
-      loopUndoAria: "Annulla l'ultimo livello", loopClearAria: "Cancella tutti i livelli",
       recChoiceTitle: "Registra", recChoiceBody: "Cosa vuoi registrare?",
       recAudio: "🎙 Solo audio", recScreen: "🖥 Schermo + audio",
       ariaLX: "Posizione orizzontale della UI sinistra", ariaLY: "Posizione verticale della UI sinistra", ariaLS: "Dimensione della UI sinistra",
@@ -1221,7 +1136,7 @@
       if (cb) cb.checked = true;
     }
     activeTypeIdx = 0;
-    releaseAudio(true);
+    releaseAudio();
     saveSettings();
     buildTouchPads();
   }
@@ -1263,7 +1178,6 @@
     instruments = {};
     recorder = null;
     streamDest = null;
-    disposeLooperNodes();
   }
 
   async function initAudio() {
@@ -1279,7 +1193,6 @@
     streamDest = Tone.getContext().rawContext.createMediaStreamDestination();
     rack.master.connect(streamDest);
 
-    initLooper();
     audioReady = true;
   }
 
@@ -1295,26 +1208,14 @@
     updateKeyContext();
   }
 
-  // Stuck-note strategy: releasing a live chord uses the leak-proof releaseAll
-  // whenever the loop station is NOT playing (i.e. almost always) — every voice
-  // gets a note-off, so nothing can ever hang. Targeted release of the tracked
-  // live notes is used ONLY while loops are running, to avoid cutting layers on
-  // the same instrument. Either way liveNotes tracks what we attacked.
+  // Stuck-note strategy: releasing a live chord always uses the leak-proof
+  // releaseAll on every instrument, so every voice gets a note-off and nothing
+  // can ever hang. liveNotes tracks what we attacked.
   let liveNotes = [];
-  let lastAttackAt = 0;
-  const loopsPlaying = () => audioReady && Tone.Transport.state === 'started';
 
   function releaseLiveVoices(now) {
     if (!audioReady) return;
-    if (loopsPlaying()) {
-      if (liveNotes.length && instruments[currentInstrument]) {
-        // Never schedule a release before a just-scheduled attack, or that
-        // voice's note-off is skipped and the note hangs.
-        instruments[currentInstrument].triggerRelease(liveNotes, Math.max(now, lastAttackAt + 0.005));
-      }
-    } else {
-      for (const key in instruments) instruments[key].releaseAll(now);
-    }
+    for (const key in instruments) instruments[key].releaseAll(now);
     liveNotes = [];
   }
 
@@ -1322,27 +1223,20 @@
     if (!audioReady || !instruments[currentInstrument]) return;
     const now = Tone.now();
     if (!sustainActive()) releaseLiveVoices(now);
-    lastAttackAt = now + 0.01;
-    instruments[currentInstrument].triggerAttack(info.freqs, lastAttackAt);
+    instruments[currentInstrument].triggerAttack(info.freqs, now + 0.01);
     liveNotes = liveNotes.concat(info.freqs);
     currentlyPlayingKeys = info.freqs;
     setChordDisplay(info);
-    loopCaptureAttack(info.freqs, currentInstrument);
     lastActivityTime = Date.now();
   }
 
-  function releaseAudio(forceAll = false) {
+  function releaseAudio() {
     if (audioReady) {
       const now = Tone.now();
-      if (forceAll || !loopsPlaying()) {
-        for (const key in instruments) instruments[key].releaseAll(now);
-      } else if (liveNotes.length > 0 && instruments[currentInstrument]) {
-        instruments[currentInstrument].triggerRelease(liveNotes, Math.max(now, lastAttackAt + 0.005));
-      }
+      for (const key in instruments) instruments[key].releaseAll(now);
     }
     liveNotes = [];
     currentlyPlayingKeys = [];
-    loopCaptureRelease();
     clearChordDisplay();
   }
 
@@ -1508,182 +1402,6 @@
     }
   }
 
-  // --- LOOP STATION ---
-  // Event looper: chords are captured as Transport-tick events and replayed via
-  // Tone.Part, so loops stay sample-locked to the grid, follow live BPM changes,
-  // and never drift the way browser audio-buffer loopers do. Each event also
-  // remembers the instrument it was recorded with, so layers can stack sounds.
-  // The metronome is routed straight to the destination — it is heard, but kept
-  // out of recordings and the master-volume/limiter path.
-  const looper = {
-    bars: 2, countIn: true, metOn: true, metSound: 'click',
-    state: 'idle',        // idle | recording | playing | overdub
-    layers: [], events: null, pending: null,
-    loopTicks: 0, commitId: null,
-  };
-  let clicks = null, metLoop = null; // metronome sounds and loop: shared/transport.js
-  let loopUiTimer = null;
-  const tapTempo = createTapTempo();
-
-  function disposeLooperNodes() {
-    try { if (metLoop) metLoop.dispose(); } catch { /* already disposed */ }
-    looper.layers.forEach(l => { try { l.part.dispose(); } catch { /* already disposed */ } });
-    looper.layers = [];
-    if (clicks) clicks.dispose();
-    clicks = null; metLoop = null;
-    looper.state = 'idle'; looper.events = null; looper.pending = null; looper.commitId = null;
-  }
-
-  function initLooper() {
-    clicks = createClicks();
-    Tone.Transport.bpm.value = clampBpm(parseInt(loopBpmInput.value, 10));
-    Tone.Transport.loop = true;
-    Tone.Transport.loopStart = 0;
-    setLoopLen();
-    metLoop = startMetronome(clicks, { enabled: () => looper.metOn, sound: () => looper.metSound });
-  }
-
-  function setLoopLen() {
-    looper.loopTicks = looper.bars * 4 * Tone.Transport.PPQ;
-    Tone.Transport.loopEnd = looper.bars + 'm';
-  }
-
-  // Capture hooks, called from playChord()/releaseAudio()
-  const loopCapturing = () => (looper.state === 'recording' || looper.state === 'overdub') && Tone.Transport.state === 'started';
-  function loopCaptureAttack(freqs, inst) {
-    if (!loopCapturing()) return;
-    const pos = Tone.Transport.ticks % looper.loopTicks;
-    if (looper.pending) closePending(pos);
-    looper.pending = { startTicks: pos, freqs: freqs.slice(), inst };
-  }
-  function loopCaptureRelease() {
-    if (!looper.pending) return;
-    if (!loopCapturing()) { looper.pending = null; return; }
-    closePending(Tone.Transport.ticks % looper.loopTicks);
-  }
-  function closePending(endTicks) {
-    const p = looper.pending;
-    looper.pending = null;
-    if (!p || !looper.events) return;
-    let dur = endTicks - p.startTicks;
-    if (dur <= 0) dur += looper.loopTicks; // chord held across the loop seam
-    dur = Math.max(dur, Tone.Transport.PPQ / 8);
-    looper.events.push({ startTicks: Math.round(p.startTicks), durTicks: Math.round(dur), freqs: p.freqs, inst: p.inst });
-  }
-
-  function commitLayer() {
-    if (looper.pending) closePending(Tone.Transport.ticks % looper.loopTicks);
-    const events = looper.events || [];
-    looper.events = null;
-    if (events.length === 0) return;
-    const part = new Tone.Part((time, ev) => {
-      const inst = instruments[ev.inst] || instruments[currentInstrument];
-      if (inst) inst.triggerAttackRelease(ev.freqs, Tone.Ticks(ev.durTicks).toSeconds(), time);
-    }, events.map(ev => [`${ev.startTicks}i`, ev]));
-    part.loop = true;
-    part.loopStart = 0;
-    part.loopEnd = `${looper.loopTicks}i`;
-    part.start(0);
-    looper.layers.push({ part, events });
-  }
-
-  function setLooperState(s) { looper.state = s; updateLoopBar(); }
-
-  function loopRecord() {
-    if (!audioReady) return;
-    if (looper.state === 'recording') return;                                   // first take finishes on the bar line
-    if (looper.state === 'playing') { looper.events = []; setLooperState('overdub'); return; }
-    if (looper.state === 'overdub') { commitLayer(); setLooperState('playing'); return; }
-    // idle -> arm a fresh first take (with optional 1-bar count-in before the transport starts)
-    Tone.Transport.stop();
-    Tone.Transport.position = 0;
-    setLoopLen();
-    looper.events = [];
-    looper.pending = null;
-    const t0 = Tone.now() + 0.12;
-    Tone.Transport.start(looper.countIn ? countIn(clicks, looper.metSound, t0) : t0);
-    looper.commitId = Tone.Transport.scheduleOnce(() => {
-      commitLayer();
-      looper.commitId = null;
-      setLooperState('playing');
-    }, `${looper.loopTicks - 1}i`);
-    setLooperState('recording');
-  }
-
-  // Stop everything: aborts an in-progress take/overdub capture, halts the
-  // transport and silences ringing notes. Layers are kept (Clear removes them).
-  function loopStop() {
-    if (!audioReady) return;
-    if (looper.commitId !== null) { Tone.Transport.clear(looper.commitId); looper.commitId = null; }
-    if (looper.state === 'recording' || looper.state === 'overdub') { looper.events = null; looper.pending = null; }
-    if (Tone.Transport.state === 'started') Tone.Transport.stop();
-    releaseAudio(true);
-    setLooperState('idle');
-  }
-
-  function loopTogglePlay() {
-    if (!audioReady) return;
-    if (looper.state === 'recording' || Tone.Transport.state === 'started') { loopStop(); return; }
-    Tone.Transport.position = 0;
-    setLoopLen();
-    Tone.Transport.start('+0.05');
-    // With no layers this doubles as a plain metronome.
-    setLooperState(looper.layers.length ? 'playing' : 'idle');
-  }
-
-  function loopUndo() {
-    const layer = looper.layers.pop();
-    if (layer) { try { layer.part.stop(); layer.part.dispose(); } catch { /* already disposed */ } }
-    if (looper.layers.length === 0 && (looper.state === 'playing' || looper.state === 'overdub')) {
-      looper.events = null; looper.pending = null;
-      setLooperState('idle');
-    }
-    updateLoopBar();
-  }
-  function loopClear() {
-    looper.layers.forEach(l => { try { l.part.stop(); l.part.dispose(); } catch { /* already disposed */ } });
-    looper.layers = [];
-    looper.events = null; looper.pending = null;
-    if (looper.commitId !== null) { Tone.Transport.clear(looper.commitId); looper.commitId = null; }
-    setLooperState('idle');
-  }
-
-  function loopTap() {
-    const bpm = tapTempo.tap(performance.now());
-    if (bpm === null) return;
-    loopBpmInput.value = bpm;
-    if (audioReady) Tone.Transport.bpm.value = bpm;
-  }
-
-  function toggleLoopBar() {
-    const open = document.body.classList.toggle('loop-open');
-    if (open) {
-      if (!loopUiTimer) loopUiTimer = setInterval(updateLoopBar, 60);
-      updateLoopBar();
-    } else {
-      if (loopUiTimer) { clearInterval(loopUiTimer); loopUiTimer = null; }
-      // Closing the loop station stops it — nothing keeps playing invisibly.
-      if (audioReady && (Tone.Transport.state === 'started' || looper.state !== 'idle')) loopStop();
-    }
-  }
-
-  function updateLoopBar() {
-    if (!document.body.classList.contains('loop-open')) return;
-    const rec = $("loop-rec"), play = $("loop-play");
-    rec.classList.toggle('recording', looper.state === 'recording');
-    rec.classList.toggle('overdub', looper.state === 'overdub');
-    const running = audioReady && Tone.Transport.state === 'started';
-    play.textContent = running ? '⏹' : '▶';
-    $("loop-layers").textContent = looper.layers.length ? '× ' + looper.layers.length : '';
-    $("loop-undo").disabled = looper.layers.length === 0;
-    $("loop-clear").disabled = looper.layers.length === 0 && looper.state === 'idle';
-    const busy = looper.layers.length > 0 || looper.state !== 'idle';
-    loopBarsSelect.disabled = busy;
-    const dots = loopBeatsEl.children;
-    const beat = running ? currentBeat() : -1;
-    for (let i = 0; i < dots.length; i++) dots[i].classList.toggle('on', i === beat);
-  }
-
   // --- PATREON NAG (idle-only, >=10 min apart, instantly dismissible) ---
   const FIRST_NAG_MS = 3 * 60 * 1000;
   const NAG_INTERVAL_MS = 10 * 60 * 1000;
@@ -1725,7 +1443,6 @@
     if (Date.now() < nagEligibleAt) return;
     if (currentDialog()) return;
     if (isRecording) return;
-    if (audioReady && Tone.Transport.state === 'started') { lastActivityTime = Date.now(); return; } // loops sounding
     if (currentlyPlayingKeys.length > 0) { lastActivityTime = Date.now(); return; }
     if (Date.now() - lastActivityTime < NAG_IDLE_MS) return; // wait for a 10 s idle window
     openModal(patreonNag, null);
@@ -2197,8 +1914,7 @@
 
     // Stuck-note watchdog: hands out of frame + no sustain means NOTHING may
     // keep ringing. Live notes are released immediately; 400 ms later one deep
-    // releaseAll sweep kills any orphaned voice the bookkeeping ever missed
-    // (skipped while the loop station plays, so layers survive).
+    // releaseAll sweep kills any orphaned voice the bookkeeping ever missed.
     if (active && audioReady) {
       if (visionState.hands.length > 0) {
         handsGoneSince = 0;
@@ -2206,7 +1922,7 @@
       } else if (!sustainActive() && !isTriggering) {
         if (!handsGoneSince) handsGoneSince = nowMs;
         if (liveNotes.length > 0 || currentlyPlayingKeys.length > 0) releaseAudio();
-        if (!sweepDone && nowMs - handsGoneSince > 400 && Tone.Transport.state !== 'started') {
+        if (!sweepDone && nowMs - handsGoneSince > 400) {
           for (const key in instruments) instruments[key].releaseAll();
           sweepDone = true;
         }
@@ -2521,7 +2237,7 @@
   function enterUiEdit() {
     if (touchOnly() || !engineStarted) return;
     hideAllModals();
-    releaseAudio(true);
+    releaseAudio();
     uiEditMode = true;
     document.body.classList.add('ui-editing');
     canvas.style.pointerEvents = 'auto';
@@ -2624,9 +2340,8 @@
   });
   touchSettingsBtn.addEventListener('click', () => openModal(controlsPanel, touchSettingsBtn));
   touchRecordBtn.addEventListener('click', () => toggleRecording(touchRecordBtn));
-  touchLoopBtn.addEventListener('click', toggleLoopBar);
   window.matchMedia('(orientation: portrait)').addEventListener('change', (e) => {
-    if (IS_MOBILE && e.matches) { heldRootPointers.clear(); releaseAudio(true); }
+    if (IS_MOBILE && e.matches) { heldRootPointers.clear(); releaseAudio(); }
   });
 
   // --- EVENT WIRING ---
@@ -2678,12 +2393,12 @@
     setupCustomSelects();
   });
   instrumentSelector.addEventListener('change', (e) => {
-    releaseAudio(true);
+    releaseAudio();
     currentInstrument = e.target.value;
     saveSettings();
   });
   volumeSelector.addEventListener('change', () => { applyVolume(); saveSettings(); });
-  octaveSelector.addEventListener('change', () => { releaseAudio(true); saveSettings(); });
+  octaveSelector.addEventListener('change', () => { releaseAudio(); saveSettings(); });
   handednessMode.addEventListener('change', () => { updateTutorialText(); saveSettings(); });
   languageSelector.addEventListener('change', () => { updateLanguage(); saveSettings(); });
   accMode.addEventListener('change', () => {
@@ -2691,7 +2406,7 @@
     applyTouchClass();
     saveSettings();
     if (!engineStarted) return;
-    releaseAudio(true); // never carry held notes across control modes
+    releaseAudio(); // never carry held notes across control modes
     if (accMode.value === 'keyboard' || touchOnly()) { stopCamera(); buildTouchPads(); }
     else if (!cameraReady) startVision();
   });
@@ -2703,34 +2418,6 @@
   $("rec-audio-btn").addEventListener('click', startAudioRecording);
   $("rec-screen-btn").addEventListener('click', startScreenRecording);
 
-  // Loop station controls
-  loopToggleBtn.addEventListener('click', toggleLoopBar);
-  $("loop-close").addEventListener('click', toggleLoopBar);
-  loopBpmInput.addEventListener('change', () => {
-    const bpm = clampBpm(parseInt(loopBpmInput.value, 10));
-    loopBpmInput.value = bpm;
-    if (audioReady) Tone.Transport.bpm.value = bpm;
-  });
-  $("loop-tap").addEventListener('click', loopTap);
-  loopBarsSelect.addEventListener('change', () => {
-    looper.bars = parseInt(loopBarsSelect.value, 10) || 2;
-    if (audioReady) setLoopLen();
-  });
-  $("loop-met").addEventListener('click', (e) => {
-    looper.metOn = !looper.metOn;
-    e.currentTarget.classList.toggle('active', looper.metOn);
-    e.currentTarget.setAttribute('aria-pressed', String(looper.metOn));
-  });
-  loopMetSoundSelect.addEventListener('change', () => { looper.metSound = loopMetSoundSelect.value; });
-  $("loop-countin").addEventListener('click', (e) => {
-    looper.countIn = !looper.countIn;
-    e.currentTarget.classList.toggle('active', looper.countIn);
-    e.currentTarget.setAttribute('aria-pressed', String(looper.countIn));
-  });
-  $("loop-rec").addEventListener('click', loopRecord);
-  $("loop-play").addEventListener('click', loopTogglePlay);
-  $("loop-undo").addEventListener('click', loopUndo);
-  $("loop-clear").addEventListener('click', loopClear);
   bootContinueBtn.addEventListener('click', () => showBootStep(2));
   startBtn.addEventListener('click', startEngine);
   window.addEventListener('resize', sizeCanvas);
