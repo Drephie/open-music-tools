@@ -135,7 +135,12 @@ async function keepScreenAwake(on) {
 
 // --- THE SCREEN ---
 const pretty = (name) => name.replace(/#/g, '♯').replace(/b/g, '♭');
-const prettyHtml = (name) => name.replace(/([#b]+)$/, (acc) => `<span class="acc">${pretty(acc)}</span>`);
+// Sharp and flat drawn, not typed: the themes' fonts have no ♯ or ♭ of their own.
+const ACC_SVG = {
+  '#': '<svg class="acc" viewBox="0 0 10 16" aria-hidden="true"><path d="M3.6 1.5v13.5M6.6 0.8v13.5" stroke-width="1.7"/><path d="M1 6.4 9 4.6M1 11.2 9 9.4" stroke-width="2.6"/></svg>',
+  b: '<svg class="acc" viewBox="0 0 10 16" aria-hidden="true"><path d="M2.6 0.5v14.5c3.2-1.3 6-3.6 5.7-5.7-.3-2-3-2-5.7.2" stroke-width="2.2"/></svg>',
+};
+const prettyHtml = (name) => name.replace(/([#b])$/, (acc) => ACC_SVG[acc]);
 
 let midi = null, cents = 0, glow = 0, level = 0;
 let lastText = { name: null, oct: null, say: null, at: null, note: null, tune: null };
@@ -193,7 +198,16 @@ function measure() {
   ball.resize();
   const box = canvas.getBoundingClientRect(), st = stageEl.getBoundingClientRect();
   centre = { x: st.left - box.left + st.width / 2, y: st.top - box.top + st.height / 2, r: Math.min(st.width, st.height) * 0.47 };
+  fitTitle();
   fitNote();
+}
+
+// The title on one line: smaller in a long language and a wide font.
+const titleEl = document.querySelector('.tool-title');
+function fitTitle() {
+  titleEl.style.removeProperty('font-size');
+  let size = parseFloat(getComputedStyle(titleEl).fontSize);
+  while (size > 11 && titleEl.scrollWidth > titleEl.clientWidth) titleEl.style.fontSize = `${(size -= 0.5)}px`;
 }
 
 function readColors() {
@@ -309,6 +323,7 @@ function applyLanguage() {
   document.title = t('title');
   showButton();
   showChoices();
+  fitTitle();
   fitNote();
   render(true);
   setupCustomSelects();   // labels and option texts changed

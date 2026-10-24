@@ -19,7 +19,8 @@
   color: var(--color-text); transition: color 0.25s;
   text-shadow: 0 0 18px var(--bg-page), 0 0 6px var(--bg-page);
 }
-.note .acc { font-size: 0.6em; margin-left: 0.04em; }
+.note .acc { width: 0.36em; height: 0.58em; margin: 0.06em 0 0 0.05em; flex: none; fill: none; stroke: currentColor; stroke-linecap: round; overflow: visible; }
+.tool-title { white-space: nowrap; overflow: hidden; }
 .note .oct { font-size: 0.26em; margin: 0.12em 0 0 0.12em; opacity: 0.6; }
 .tuner.in-tune .note, .tuner.in-tune .say { color: var(--color-tune); }
 
@@ -68,7 +69,7 @@ body[data-theme="retro"] .listen-btn { font-size: 22px; }
 body[data-theme="retro"] .seg button { font-size: 17px; }
 body[data-theme="retro"] .note { text-shadow: 0 0 var(--shadow-blur) currentColor; }
 body[data-theme="y2k"] .note { text-shadow: 0 0 14px currentColor; }
-body[data-theme="pink"] .listen-btn { background: transparent; color: var(--color-text); border-color: var(--border-panel); }
+body[data-theme="pink"] .tuner .btn.listen-btn { background: transparent; color: var(--color-text); border-color: var(--border-panel); }
 body[data-theme="pink"] .seg { border-radius: 999px; }
 /* Soft Pink's button text is white for its pink buttons: on white windows it is pink. */
 body[data-theme="pink"] .seg button:not([aria-pressed="true"]) { color: var(--color-left); }
@@ -76,8 +77,10 @@ body[data-theme="bw"] :is(.seg, .listen-btn) { border-radius: 0; }
 
 /* Phones: everything on one screen; line heights pinned (Baloo 2 has tall ones). */
 @media (max-width: 600px) {
+  .tool-title { letter-spacing: 1px; }
   .readout { gap: 16px; padding-bottom: 14px; }
   .say { font-size: 15px; line-height: 1.25; }
   .listen-btn { min-height: 46px; margin-bottom: 4px; }
   body[data-theme="retro"] .say { font-size: 20px; line-height: 1.1; }
+  body[data-theme="retro"] #about-modal .about-text { font-size: 17px; line-height: 1.35; }
 }

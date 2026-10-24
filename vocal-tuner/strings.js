@@ -9,7 +9,7 @@ export const TUNER_STRINGS = {
   en: {
     title: "Vocal Tuner",
     aboutTitle: "About the Vocal Tuner",
-    aboutBody: 'Free, open-source music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers.<br><br>Sing a note: the Vocal Tuner names it and shows how far you are from it, in cents (a hundredth of a half step, the step from one piano key to the very next). Within 5 cents you are in tune. Notes are measured from A = 440 Hz.<br><br>The microphone\'s sound is analysed on your device as it comes in, then thrown away: nothing is recorded, kept or uploaded.',
+    aboutBody: 'Free, open-source music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers.<br><br>Sing a note: the Vocal Tuner names it and shows how far off you are in cents (hundredths of a half step). Within 5 cents you are in tune. A = 440 Hz.<br><br>The microphone\'s sound is analysed on your device and thrown away: nothing is recorded or uploaded.',
     aboutKeys: "On a computer: Space starts and stops listening.",
     supportTitle: "Support the Vocal Tuner",
     supportBody: "Enjoying singing in tune? Help keep these music tools free, ad-free and growing!",
@@ -31,7 +31,7 @@ export const TUNER_STRINGS = {
   es: {
     title: "Afinador vocal",
     aboutTitle: "Sobre el afinador vocal",
-    aboutBody: 'Herramientas musicales gratuitas y de código abierto de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios ni rastreadores.<br><br>Canta una nota: el afinador vocal te dice cuál es y cuánto te separa de ella, en cents (la centésima parte de un semitono, el paso de una tecla del piano a la siguiente). A 5 cents o menos estás afinado. Las notas se miden desde La = 440 Hz.<br><br>El sonido del micrófono se analiza en tu dispositivo a medida que llega y luego se descarta: no se graba, no se guarda y no se sube nada.',
+    aboutBody: 'Herramientas musicales gratuitas y de código abierto de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios ni rastreadores.<br><br>Canta una nota: el afinador vocal te dice cuál es y cuánto te desvías, en cents (centésimas de semitono). A 5 cents o menos estás afinado. La = 440 Hz.<br><br>El sonido del micrófono se analiza en tu dispositivo y se descarta: no se graba ni se sube nada.',
     aboutKeys: "En el ordenador: Espacio empieza y deja de escuchar.",
     supportTitle: "Apoya el afinador vocal",
     supportBody: "¿Te gusta cantar afinado? ¡Ayuda a que estas herramientas musicales sigan gratis, sin anuncios y creciendo!",
@@ -53,7 +53,7 @@ export const TUNER_STRINGS = {
   it: {
     title: "Accordatore vocale",
     aboutTitle: "Informazioni sull'accordatore vocale",
-    aboutBody: 'Strumenti musicali gratuiti e open source di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker.<br><br>Canta una nota: l\'accordatore vocale ti dice qual è e quanto ne sei lontano, in cent (un centesimo di semitono, il passo da un tasto del pianoforte a quello subito dopo). Entro 5 cent sei intonato. Le note sono misurate dal La = 440 Hz.<br><br>Il suono del microfono viene analizzato sul tuo dispositivo mentre arriva, poi scartato: niente viene registrato, conservato o caricato online.',
+    aboutBody: 'Strumenti musicali gratuiti e open source di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità né tracker.<br><br>Canta una nota: l\'accordatore vocale ti dice qual è e di quanto sei calante o crescente, in cent (centesimi di semitono). Entro 5 cent sei intonato. La = 440 Hz.<br><br>Il suono del microfono viene analizzato sul tuo dispositivo e scartato: niente viene registrato o caricato online.',
     aboutKeys: "Al computer: Spazio avvia e ferma l'ascolto.",
     supportTitle: "Sostieni l'accordatore vocale",
     supportBody: "Ti piace cantare intonato? Aiutaci a mantenere questi strumenti musicali gratuiti, senza pubblicità e in crescita!",
