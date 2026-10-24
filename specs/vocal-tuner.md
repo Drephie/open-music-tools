@@ -1,6 +1,6 @@
 # Vocal Tuner: spec
 
-**Status:** approved by Drephie, 2026-10-24, after two rounds of changes (a calmer screen, one name per note, and the 3D wave ball, tried in animated prototypes). Built the same day; waiting for Drephie's phone test (https).
+**Status:** approved by Drephie, 2026-10-24, after two rounds of changes (a calmer screen, one name per note, and the 3D wave ball, tried in animated prototypes). Built the same day; Drephie's phone test over https (the Netlify test copy, 2026-10-25): all good, no changes.
 Items marked *(Claude's pick)* weren't asked: say if you want them changed. *(At build time)* marks details settled while building.
 
 ## What it is for
@@ -81,3 +81,5 @@ In this browser only: note names, Calm or Quick, theme and language (the last tw
 **Claude:** the engine test page; in the browser, test tones played to the Tuner instead of a microphone (in tune, 12 cents low, 30 cents high, a slow slide, a vibrato, silence, noise); 5 themes, 3 languages, 375 × 667, 390 × 664 and desktop; keyboard only; the microphone-blocked message; settings after a reload.
 
 **Drephie, on the phone** (the microphone needs an https address, e.g. the Netlify test copy): sing a held La, then slowly slide up and down; do the note, the dot and "In tune" agree with your ear? Calm and Quick, with and without vibrato; a very low and a very high note; whether a quiet room stays clear; the ball (growing, round in tune, chaotic when off); talking near the phone (it shouldn't flash notes); the Spanish and Italian wording.
+
+**Drephie's phone test (2026-10-25):** all good, as built: the note and octave, In tune, the slide, Calm and Quick, low and high notes, a quiet room, talking, the ball, stopping when leaving the app, and the Spanish and Italian wording. No changes asked.
