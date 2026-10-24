@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pitch engine tests</title>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { margin: 0 auto; padding: 16px; max-width: 900px; background: Canvas; color: CanvasText; }
+    h1 { font-size: 1.4rem; }
+    #summary { font-size: 1.2rem; font-weight: 700; }
+    .pass { color: green; } .fail { color: #d22; }
+    table { border-collapse: collapse; width: 100%; }
+    td, th { text-align: left; padding: 4px 8px; border-bottom: 1px solid GrayText; vertical-align: top; }
+    .stats { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+    pre { white-space: pre-wrap; word-break: break-word; font-size: 12px; margin: 4px 0 0; }
+  </style>
+</head>
+<body>
+  <h1>shared/pitch.js tests</h1>
+  <p id="summary">Running…</p>
+  <table>
+    <thead><tr><th>Check</th><th>Checked</th><th>Result</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <p>Every signal is made here, so its pitch is known exactly (<code>pitch-cases.js</code>). The first checks feed the detector directly and also run from the terminal (<code>tools/run-pitch-test.js</code>); the last ones play test tones through the real AudioWorklet and the fallback for old browsers, rendered offline (faster than real time, nothing is heard), and ask for the microphone to check the error it gives here.</p>
+
+<script type="module">
+  import * as core from '../shared/pitch-worklet.js';
+  import * as main from '../shared/pitch.js';
+  import { checkPitch } from './pitch-cases.js';
+
+  const rows = document.getElementById('rows');
+  const summary = document.getElementById('summary');
+  let failed = 0, total = 0;
+
+  function show(row) {
+    total++;
+    if (row.failed) failed++;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td></td><td>${row.checked}</td><td class="${row.failed ? 'fail' : 'pass'}">${row.failed ? `FAIL (${row.failed})` : 'pass'}</td>`;
+    tr.children[0].textContent = row.section;
+    if (row.stats) {
+      const s = document.createElement('div');
+      s.className = 'stats';
+      s.textContent = row.stats;
+      tr.children[0].appendChild(s);
+    }
+    if (row.examples.length) {
+      const pre = document.createElement('pre');
+      pre.textContent = row.examples.join('\n');
+      tr.children[0].appendChild(pre);
+    }
+    rows.appendChild(tr);
+  }
+
+  const cents = (f, ref) => 1200 * Math.log2(f / ref);
+
+  // Renders `seconds` of a sawtooth (220 Hz, then 330 Hz from 1 s) through
+  // startPitch in an OfflineAudioContext; returns the frames it reported.
+  async function renderThrough({ seconds = 2, forceFallback = false, silent = false } = {}) {
+    const sr = 48000;
+    const ctx = new OfflineAudioContext(1, sr * seconds, sr);
+    const osc = new OscillatorNode(ctx, { type: 'sawtooth', frequency: 220 });
+    osc.frequency.setValueAtTime(330, 1);
+    const level = new GainNode(ctx, { gain: 0.1 });
+    osc.connect(level);
+    if (!silent) osc.start(0);
+    const frames = [];
+    const listener = await main.startPitch({ context: ctx, source: level, forceFallback, onFrame: (f) => frames.push(f) });
+    await ctx.startRendering();
+    // Messages from the audio thread may still be on their way.
+    let count = -1;
+    while (count !== frames.length) { count = frames.length; await new Promise((r) => setTimeout(r, 250)); }
+    listener.stop();
+    return { frames, listener };
+  }
+
+  function judgeRender(section, { frames, listener }, expectWorklet) {
+    const row = { section, checked: 0, failed: 0, stats: '', examples: [] };
+    const fail = (m) => { row.failed++; row.examples.push(m); };
+    row.checked++;
+    if (listener.worklet !== expectWorklet) fail(`listener.worklet is ${listener.worklet}`);
+    const hop = frames.length > 1 ? frames[1].time - frames[0].time : 0;
+    const a = frames.filter((f) => f.time > 0.15 && f.time < 1);
+    const b = frames.filter((f) => f.time > 1.15);
+    const errA = a.map((f) => (f.freq ? Math.abs(cents(f.freq, 220)) : Infinity));
+    const errB = b.map((f) => (f.freq ? Math.abs(cents(f.freq, 330)) : Infinity));
+    const switchAt = frames.find((f) => f.time > 1 && f.freq && Math.abs(cents(f.freq, 330)) < 10);
+    row.checked += 3;
+    if (frames.length < 80) fail(`only ${frames.length} frames in 2 s`);
+    if (!(Math.max(...errA) < 1)) fail(`220 Hz: off by up to ${Math.max(...errA).toFixed(2)} cents`);
+    if (!(Math.max(...errB) < 1)) fail(`330 Hz: off by up to ${Math.max(...errB).toFixed(2)} cents`);
+    if (!switchAt || switchAt.time > 1.1) fail(`330 Hz shown at ${switchAt ? switchAt.time.toFixed(3) : 'never'} s (the change is at 1.000 s)`);
+    row.stats = `${frames.length} frames, one every ${(hop * 1000).toFixed(1)} ms; 220 Hz within ${Math.max(...errA).toFixed(3)} cents, 330 Hz within ${Math.max(...errB).toFixed(3)} cents; the change at 1.000 s shown at ${switchAt ? switchAt.time.toFixed(3) : '?'} s`;
+    return row;
+  }
+
+  try {
+    for (const row of checkPitch(core, main, () => performance.now())) show(row);
+
+    show(judgeRender('Real AudioWorklet, rendered offline: a sawtooth at 220 Hz then 330 Hz, frames stamped with the context\'s time', await renderThrough(), true));
+    show(judgeRender('Fallback for browsers without AudioWorklet (ScriptProcessor on the main thread), same signal', await renderThrough({ forceFallback: true }), false));
+
+    {
+      const { frames } = await renderThrough({ silent: true });
+      const row = { section: 'Real AudioWorklet, rendered offline: 2 s of silence gives frames but never a note', checked: 2, failed: 0, stats: `${frames.length} frames`, examples: [] };
+      if (frames.length < 80) { row.failed++; row.examples.push(`only ${frames.length} frames`); }
+      if (frames.some((f) => f.freq > 0)) { row.failed++; row.examples.push('a note was reported'); }
+      show(row);
+    }
+
+    {
+      // The microphone itself: here the browser may have none, or say no. Only the kind of error is checked.
+      const row = { section: 'Asking for the microphone: either it starts, or it fails with one of PITCH_ERRORS', checked: 1, failed: 0, stats: '', examples: [] };
+      try {
+        const l = await Promise.race([
+          main.startPitch({ onFrame() {} }),
+          new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('no answer in 5 s'), { reason: 'timeout' })), 5000)),
+        ]);
+        row.stats = `started (worklet: ${l.worklet}); stopped again`;
+        l.stop();
+      } catch (err) {
+        row.stats = `failed with reason "${err.reason}"${err.cause ? ` (${err.cause.name})` : ''}`;
+        if (err.reason !== 'timeout' && !main.PITCH_ERRORS.includes(err.reason)) { row.failed++; row.examples.push(String(err)); }
+      }
+      show(row);
+    }
+  } catch (err) {
+    failed++;
+    rows.innerHTML += `<tr><td colspan="3" class="fail"><pre></pre></td></tr>`;
+    rows.querySelector('tr:last-child pre').textContent = String(err && err.stack || err);
+  }
+  summary.className = failed ? 'fail' : 'pass';
+  summary.textContent = failed ? `FAIL: ${failed} of ${total} checks failed` : `PASS: all ${total} checks passed`;
+</script>
+</body>
+</html>
