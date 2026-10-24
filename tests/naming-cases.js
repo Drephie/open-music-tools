@@ -127,5 +127,15 @@ export function checkNaming(theory) {
       if (problems.length) fail(inv, `${f.id} on ${root}: ${problems.join(', ')}`);
     }
   }
+  // One name per note with no key (the tuners): C# Eb F# Ab Bb.
+  const common = row('commonNoteName: one name per note, C# Eb F# Ab Bb, octaves from C4 = 60');
+  const want = [[60, false, 'C4'], [61, false, 'C#4'], [63, false, 'Eb4'], [66, false, 'F#4'], [68, false, 'Ab4'], [70, false, 'Bb4'],
+    [71, false, 'B4'], [72, false, 'C5'], [33, false, 'A1'], [57, true, 'La3'], [61, true, 'Do#4'], [63, true, 'Mib4'],
+    [68, true, 'Lab4'], [70, true, 'Sib4'], [66, true, 'Fa#4'], [67, true, 'Sol4'], [95, true, 'Si6']];
+  for (const [midi, solfege, expect] of want) {
+    common.checked++;
+    const n = theory.commonNoteName(midi, solfege);
+    if (n.name + n.octave !== expect) fail(common, `${midi}${solfege ? ' (solfege)' : ''}: expected ${expect}, got ${n.name}${n.octave}`);
+  }
   return rows;
 }

@@ -16,6 +16,9 @@
  *   spellOnLetter(letterIdx, targetPc, solfege)  spells a pitch class on a given
  *     letter: (3, 6) -> 'F#', (4, 6) -> 'Gb'. Letter indices wrap around.
  *   accSym(acc), pc(n), ivLetterOffset(semitones), pcLetterIdx(pc)
+ *   commonNoteName(midi, solfege) -> { name, octave }  one note with no key
+ *     around it (the tuners): one name per note, the spelling singers use
+ *     most: C# Eb F# Ab Bb (Do# Mib Fa# Lab Sib). MIDI 60 is C4.
  *
  * Chords
  *   CHORD_MODIFIERS  the 16 modifier ids, in menu order
@@ -109,6 +112,13 @@ export function spellOnLetter(letterIdx, targetPc, solfege) {
   return (solfege ? SOLFEGE_OF[LETTERS[letterIdx]] : LETTERS[letterIdx]) + accSym(acc);
 }
 export const tonicLetterIdx = (rootIdx, type) => LETTERS.indexOf(keyRootName(rootIdx, type, false)[0]);
+
+// One name per note when there is no key (the tuners): C# Eb F# Ab Bb.
+const COMMON_LETTER = [0, 0, 1, 2, 2, 3, 3, 4, 5, 5, 6, 6];
+export function commonNoteName(midi, solfege) {
+  const p = ((midi % 12) + 12) % 12;
+  return { name: spellOnLetter(COMMON_LETTER[p], p, solfege), octave: Math.floor(midi / 12) - 1 };
+}
 
 // --- KEYS AND DEGREES ---
 export const MIDI_BASE = 48; // C3
