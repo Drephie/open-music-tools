@@ -184,8 +184,17 @@ export function createGate(options = {}) {
     const loudEnough = rms >= Math.max(o.minRms, floor * overFloor);
     const clear = freq > 0 && clarity >= (tracking ? o.keepClarity : o.startClarity);
     if (!(loudEnough && clear)) {
-      // Learn the room from frames with no note (but not from loud bangs).
-      if (!tracking && rms < 0.05) floor += 0.04 * (rms - floor);
+      if (!tracking) {
+        if (clarity < o.keepClarity) {
+          // Learn the room from sound with no clear pitch (but not from loud
+          // bangs): quickly when it gets quieter, slowly when louder.
+          if (rms < 0.05) floor += (rms < floor ? 0.15 : 0.03) * (rms - floor);
+        } else {
+          // A clear note held back only by the room level: the room may have
+          // just gone quiet (a fan stopped), so let the level fall.
+          floor = Math.max(o.minRms / o.startOverFloor, floor * 0.95);
+        }
+      }
       if (tracking && ++misses > o.maxMisses) { tracking = false; misses = 0; }
       recent.length = 0;
       return 0;

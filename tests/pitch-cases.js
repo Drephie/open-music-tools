@@ -224,6 +224,23 @@ export function checkPitch(core, main, now = () => Date.now()) {
     r.stats = 'frames with a note: ' + stats.join(', ');
   }
 
+  // 4b. Loud noise stops while a softer note goes on (a fan switched off mid-note).
+  {
+    const r = row('Loud noise (-25 dBFS) that stops while a softer note (-32 dBFS) goes on: the note shows within 1.5 s and stays');
+    const sr = 48000;
+    const note = tone(sr, 4, { freq: NOTES.C4, shape: 'voice', rmsDb: -32, seed: 9 });
+    const loud = concat(noise(sr, 1.5, -25, 51), new Float32Array(sr * 2.5));
+    const { frames } = run(core, sr, mix(note, loud));
+    const first = frames.find((fr) => fr.time > 1.5 && fr.freq > 0);
+    const ms = first ? (first.time - 1.5) * 1000 : Infinity;
+    const after = frames.filter((fr) => fr.time > 3);
+    const share = after.filter((fr) => fr.freq > 0 && Math.abs(cents(fr.freq, NOTES.C4)) < 2).length / after.length;
+    r.checked += 2;
+    if (ms > 1500) fail(r, `the note showed ${fmt(ms, 0)} ms after the noise stopped`);
+    if (share < 0.98) fail(r, `then a note in only ${fmt(100 * share, 0)}% of frames`);
+    r.stats = `shown ${fmt(ms, 0)} ms after the noise stopped, then in ${fmt(100 * share, 0)}% of frames`;
+  }
+
   // 5. No note at all: silence and noise must never show a note.
   {
     const r = row('Silence and noise with no note (digital silence; white noise at -60, -40, -20 dBFS; rumbling brown noise): never a note');
