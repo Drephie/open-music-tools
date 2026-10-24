@@ -1,0 +1,83 @@
+/* vocal-tuner/vocal-tuner.css: the Vocal Tuner's layout. Page parts (header,
+ * buttons, windows, footer) come from shared/ui/page.css. No panels: the wave
+ * ball (a canvas) fills the middle, the note sits in it. */
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.tuner {
+  position: relative; min-height: 0;
+  display: grid; grid-template-rows: minmax(0, 1fr) auto auto auto; justify-items: center; align-items: center;
+}
+.ball { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.stage, .readout, .listen-btn, .say { position: relative; }
+.stage { align-self: stretch; justify-self: stretch; display: flex; align-items: center; justify-content: center; min-height: 0; }
+
+/* The note: its name big, the octave small beside it. Colour eases into the accent in tune. */
+.note {
+  margin: 0; display: flex; align-items: flex-start; line-height: 1; white-space: nowrap;
+  font-weight: 900; font-size: var(--note-size, clamp(64px, min(26vw, 15dvh), 150px));
+  color: var(--color-text); transition: color 0.25s;
+  text-shadow: 0 0 18px var(--bg-page), 0 0 6px var(--bg-page);
+}
+.note .acc { font-size: 0.6em; margin-left: 0.04em; }
+.note .oct { font-size: 0.26em; margin: 0.12em 0 0 0.12em; opacity: 0.6; }
+.tuner.in-tune .note, .tuner.in-tune .say { color: var(--color-tune); }
+
+.readout { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 6px 0 18px; }
+.say { margin: 0; min-height: 1.3em; font-size: 16px; line-height: 1.3; text-align: center; transition: color 0.25s; }
+
+/* The thin line: a notch in the middle, the dot slides ±50 cents. */
+.line { position: relative; width: min(260px, 70vw); height: 1px; background: color-mix(in srgb, var(--color-text) 35%, transparent); }
+.notch { position: absolute; left: 50%; top: -7px; width: 1px; height: 15px; background: var(--color-text); }
+.dot {
+  position: absolute; left: var(--at, 50%); top: -6px; width: 13px; height: 13px; margin-left: -6.5px; border-radius: 50%;
+  background: var(--color-tune-line); opacity: 0; transition: opacity 0.2s, background 0.25s;
+}
+.tuner.has-note .dot { opacity: 1; }
+.tuner.in-tune .dot { background: var(--color-tune); box-shadow: 0 0 12px var(--color-tune); }
+
+/* A slim button at the bottom. */
+.listen-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-width: min(260px, 70vw); min-height: 48px; border-radius: 999px; font-size: 15px;
+  background: transparent; color: var(--color-text); border-color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
+.listen-btn svg { width: 20px; height: 20px; flex: none; }
+.listen-btn .stop-icon, .listen-btn.on .mic-icon { display: none; }
+.listen-btn.on .stop-icon { display: block; }
+.mic-msg { max-width: 30em; text-align: center; }
+
+/* Settings: segmented choices. */
+.group-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.seg { display: flex; border: 1px solid var(--border-panel); border-radius: 12px; overflow: hidden; }
+.seg button {
+  flex: 1 1 0; min-width: 0; min-height: 44px; padding: 4px 8px; border: 0; background: var(--color-panel); color: var(--color-btn-text); cursor: pointer;
+  font: 700 13px/1.15 var(--font-main); letter-spacing: 0.5px; text-transform: uppercase; touch-action: manipulation; transition: background 0.15s, color 0.15s;
+}
+.seg button + button { border-left: 1px solid var(--border-panel); }
+.seg button[aria-pressed="true"] { background: var(--color-left); color: var(--color-text-pinched); }
+.seg button:focus-visible { outline: 2px solid var(--color-right); outline-offset: -3px; }
+@media (hover: hover) and (pointer: fine) {
+  .seg button:hover:not([aria-pressed="true"]) { background: var(--border-panel); color: var(--color-text-pinched); }
+  .listen-btn:hover { background: color-mix(in srgb, var(--color-text) 12%, transparent); color: var(--color-text); }
+}
+
+/* Themes */
+body[data-theme="retro"] .say { font-size: 22px; }
+body[data-theme="retro"] .listen-btn { font-size: 22px; }
+body[data-theme="retro"] .seg button { font-size: 17px; }
+body[data-theme="retro"] .note { text-shadow: 0 0 var(--shadow-blur) currentColor; }
+body[data-theme="y2k"] .note { text-shadow: 0 0 14px currentColor; }
+body[data-theme="pink"] .listen-btn { background: transparent; color: var(--color-text); border-color: var(--border-panel); }
+body[data-theme="pink"] .seg { border-radius: 999px; }
+/* Soft Pink's button text is white for its pink buttons: on white windows it is pink. */
+body[data-theme="pink"] .seg button:not([aria-pressed="true"]) { color: var(--color-left); }
+body[data-theme="bw"] :is(.seg, .listen-btn) { border-radius: 0; }
+
+/* Phones: everything on one screen; line heights pinned (Baloo 2 has tall ones). */
+@media (max-width: 600px) {
+  .readout { gap: 16px; padding-bottom: 14px; }
+  .say { font-size: 15px; line-height: 1.25; }
+  .listen-btn { min-height: 46px; margin-bottom: 4px; }
+  body[data-theme="retro"] .say { font-size: 20px; line-height: 1.1; }
+}

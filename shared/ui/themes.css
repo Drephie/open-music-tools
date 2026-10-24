@@ -20,11 +20,16 @@
  *   --color-good / --color-good-text, --color-bad / --color-bad-text (a right
  *   and a wrong answer: fill and the text on it), --color-star (earned stars
  *   and the like; unearned ones use --color-text-inactive): the Ear Trainer.
+ *   --color-tune-line / --color-tune: the Vocal Tuner's wave ball and note:
+ *   its lines, and the accent it lights up in when a note is in tune (not
+ *   green: green vanishes in Retro CRT).
  * Theme-specific decoration (frames, button shapes) stays in each tool.
  * Load it before the tool's own styles, plus the fonts it names:
  *   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
  */
 :root {
+  --color-tune-line: #e6eef5;
+  --color-tune: #8ad4ff;
   --bg-page: #0f1419;
   --color-good: #30d158;
   --color-good-text: #04210d;
@@ -65,6 +70,8 @@
 }
 
 body[data-theme="y2k"] {
+  --color-tune-line: #00ffff;
+  --color-tune: #ff69b4;
   --bg-page: #0a0a16;
   --color-good: #39ff14;
   --color-good-text: #001a00;
@@ -94,6 +101,8 @@ body[data-theme="y2k"] {
 /* Soft Pink — "barbie ultra pop lollipop": bubbly rounded font, hot pink +
    candy purple accents, pill-shaped everything. */
 body[data-theme="pink"] {
+  --color-tune-line: #b743ff;
+  --color-tune: #ff2d9c;
   --bg-page: #ffe3f3;
   --color-good: #12a150;
   --color-good-text: #ffffff;
@@ -131,6 +140,8 @@ body[data-theme="pink"] {
 }
 
 body[data-theme="bw"] {
+  --color-tune-line: #8a8a8a;
+  --color-tune: #ffffff;
   --bg-page: #000000;
   --color-good: #ffffff;
   --color-good-text: #000000;
@@ -165,6 +176,8 @@ body[data-theme="bw"] {
 }
 
 body[data-theme="retro"] {
+  --color-tune-line: #00ff00;
+  --color-tune: #ffb000;
   --bg-page: #020a02;
   --color-good: #00ff00;
   --color-good-text: #021002;
