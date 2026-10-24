@@ -52,6 +52,14 @@ Every visible string and every `aria-label` goes through i18n, in English, Spani
 - A sequence that a replay must be able to cut short (the Ear Trainer's questions): schedule its notes on `Tone.Transport` with `Transport.schedule(cb, Transport.seconds + at)`, and stop it with `Transport.cancel(0)`, `Tone.Draw.cancel(0)` and the instrument's `releaseAll()`. Notes scheduled straight on a Sampler at future times can't be cancelled.
 - Claude can't hear: test timing by calling loop callbacks at known times on a Transport started far in the future, and levels by rendering with `Tone.Offline` and measuring peaks and energy. Noise sounds start at a random point: take the worst of many renders. Nothing may peak above 1.0 at the loudest setting. Note: `Tone.Transport` stays bound to the original context, so `Tone.Offline` can render sounds but not the Transport.
 
+## 5b. Microphone (tools that listen)
+
+- Use `shared/pitch.js` (`startPitch`, `createPitchSmoother`, `nearestNote`; see its header and the Vocal Tuner). Call `startPitch` from the tap with no `await` before it, show a plain message for each `PITCH_ERRORS` reason, and stop listening when the page has stayed hidden for a second (`visibilitychange`), so the phone's microphone sign goes off. Nothing heard is kept.
+- Name single notes with `commonNoteName` (C# Eb F# Ab Bb). The themes' fonts have no ♯ or ♭: draw them (inline SVG, as the Vocal Tuner does) where they are big.
+- Phones only allow the microphone on https (or on the computer itself): the plain `http://<LAN address>:8000` link fails. For Drephie's phone test, copy the site files to the Desktop and Drephie drags the folder onto the Netlify test site:
+  `rsync -a --exclude='.*' --exclude='specs' --exclude='tests' --exclude='*.md' ~/CLAUDE/open-music-tools/ ~/Desktop/open-music-tools-site/`
+- Claude can't hear, and the built-in browser has no microphone: check the engine with `tests/pitch.html`, and the tool by replacing `navigator.mediaDevices.getUserMedia` in the page (javascript_tool) with one that returns a `MediaStreamDestination`'s stream fed by an `OscillatorNode` (a `PeriodicWave` with a few harmonics sounds like a voice to the detector); change its frequency and gain to play in tune, off, silence, or a looped noise buffer.
+
 ## 6. Hub files
 
 Add every new file to `APP_SHELL` in `/sw.js` and bump `CACHE_NAME` whenever a cached file changes. On the home page (`index.html`), move the tool's card up from "Coming soon" to the finished tools (its `<div class="tool-card soon">` becomes `<a class="tool-card" href="<tool>/">`) and update its description in `hub/strings.js` in all three languages. Update `ROADMAP.md` (status, shared engines, open decisions), and the spec when Drephie changes something.
@@ -63,6 +71,9 @@ Add every new file to `APP_SHELL` in `/sw.js` and bump `CACHE_NAME` whenever a c
 - `tests/theory.html` and `tests/transport.html` pass. If a shared file changed, Choordination still loads and its dropdowns work.
 - The built-in browser slows its audio clock while its pane is hidden and reports a mouse and no touch, so phone-only and timing behaviour need the methods above, or Drephie's phone. With `resize_window` below 768 px wide it emulates touch (`pointer: coarse`).
 - While the pane is hidden the page gets about 3 frames a second, so `Tone.Draw` callbacks arrive more than 0.25 s late and Tone drops them: lights that follow the sound look missing there, not on a phone.
+- When the Claude window isn't in view, `requestAnimationFrame` may not fire at all (even with the pane shown), so layout code that waits for a frame (the home page's card fitting, a canvas animation) never runs and measurements are stale. Replace it in the page before measuring: `window.requestAnimationFrame = (cb) => setTimeout(() => cb(performance.now()), 16)`, then take one screenshot to release the frame already waiting.
+- Taking a screenshot hides the page for about 25 ms (`visibilitychange` to hidden and back): anything that stops on hidden must wait a moment first.
+- A javascript_tool call that fetches files and reloads the page in one go races the reload: fetch and reload in one call, then do the next steps in a new call.
 - To check what a tool plays without hearing it, wrap `Tone.Sampler.prototype.triggerAttackRelease` in the page and log the MIDI notes and times (the Ear Trainer's questions were checked this way). A page reload removes the wrapper.
 - Soft Pink's `--color-btn-text` is white, for its pink-filled `.btn`s: custom buttons on `--color-panel` (tabs, segmented choices, chips, cards) need `color: var(--color-left)` in Pink, or their text is white on white.
 - Taking a screenshot blurs the page: a tool that lets go of held notes on `blur` (the Piano) shows them released. Read held state with JavaScript instead, or use a state that survives (the Piano's Drone).

@@ -1,7 +1,7 @@
 # Vocal Tuner: spec
 
-**Status:** approved by Drephie, 2026-10-24, after two rounds of changes (a calmer screen, one name per note, and the 3D wave ball, tried in animated prototypes).
-Items marked *(Claude's pick)* weren't asked: say if you want them changed.
+**Status:** approved by Drephie, 2026-10-24, after two rounds of changes (a calmer screen, one name per note, and the 3D wave ball, tried in animated prototypes). Built the same day; waiting for Drephie's phone test (https).
+Items marked *(Claude's pick)* weren't asked: say if you want them changed. *(At build time)* marks details settled while building.
 
 ## What it is for
 
@@ -9,8 +9,8 @@ A quick, calm check of the note you sing: which note it is, and whether you are 
 
 ## What it does
 
-- **Start listening** (a slim button at the bottom): the first time, the browser asks to use the microphone. While it listens the button reads **Stop**. Listening stops by itself when you leave the page or switch apps, so the phone's microphone sign goes off; tap Start again when you are back *(Claude's pick)*.
-- **The note you sing**, big, in the middle, in Do Re Mi or C D E (see Settings), with its octave as a small number beside it: **La** ₄ (middle C is Do4, as in the Piano). **One name per note**, with the real ♯ and ♭ signs, the names singers use most: Do♯, Mi♭, Fa♯, La♭, Si♭ (Drephie, at approval).
+- **Start listening** (a slim button at the bottom): the first time, the browser asks to use the microphone. While it listens the button reads **Stop**. Listening stops by itself when you leave the page or switch apps, so the phone's microphone sign goes off; tap Start again when you are back *(Claude's pick)*. A quick glance at the notifications doesn't stop it: only a second away does *(at build time)*.
+- **The note you sing**, big, in the middle, in Do Re Mi or C D E (see Settings), with its octave as a small number beside it: **La** ₄ (middle C is Do4, as in the Piano). **One name per note**, with the real ♯ and ♭ signs, the names singers use most: Do♯, Mi♭, Fa♯, La♭, Si♭ (Drephie, at approval). The signs are drawn, because the themes' fonts have none of their own *(at build time)*. The title gets a little smaller on phones when it would need two lines (Spanish and Italian) *(at build time)*.
 - **One line of plain words** under it: "12 cents low", "8 cents high" or **In tune** (a cent is a hundredth of a half step, the step from one piano key to the very next).
 - **A thin line with a dot** (Drephie's sliding bar, made lighter): a small notch marks the middle; the dot slides left when you are low and right when you are high; the ends are half a step away (50 cents).
 - **In tune means within ±5 cents** (Drephie's choice, always). Then the note, the words, the dot and the ball light up in the **theme's accent colour**, not green (Drephie, at approval: green disappears in Retro CRT and looks wrong elsewhere): light blue in Liquid Glass, pink in Y2K, hot pink in Soft Pink, bright white in Monochrome, amber in Retro CRT *(Claude's pick of the accents)*.
