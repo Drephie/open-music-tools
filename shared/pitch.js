@@ -2,7 +2,7 @@
  * (shared/pitch-worklet.js) on the audio thread; nothing is recorded, kept or
  * uploaded: the sound is analysed as it comes and thrown away.
  *
- *   const listener = await startPitch({ onFrame, onEnd, minFreq, maxFreq, hopMs, context, source })
+ *   const listener = await startPitch({ onFrame, onEnd, minFreq, maxFreq, hopMs, waveform, context, source })
  *     Call it from a tap or click (it creates and resumes the AudioContext
  *     before its first await, as iPhones require). Asks for the microphone with
  *     echo cancellation, noise suppression and automatic gain off (they bend
@@ -15,6 +15,8 @@
  *       permission taken back, another app took it). Not called by stop().
  *     minFreq, maxFreq  the range of notes to find (default 40..2000 Hz; the
  *       window, and so the delay before a note shows, is 2.5 periods of minFreq)
+ *     waveform  true: also keep the latest WAVEFORM_SIZE samples of the sound,
+ *       for drawing it (listener.readWaveform)
  *     context  an AudioContext to use instead of a new one (it is not closed by stop)
  *     source   an AudioNode in that context to listen to instead of the
  *              microphone (tests and test signals)
@@ -28,8 +30,11 @@
  *     listener.stop()        stops the microphone (the browser's mic sign goes
  *                            off) and closes its own AudioContext
  *     listener.reset()       forgets the room's noise level and the current note
- *     listener.context, listener.worklet (false = the ScriptProcessor fallback,
- *     for browsers without AudioWorklet), listener.windowSeconds
+ *     listener.readWaveform(out)  with waveform: true, fills out (a Float32Array
+ *                            of WAVEFORM_SIZE) with the latest sound, oldest first
+ *     listener.context, listener.sampleRate, listener.worklet (false = the
+ *     ScriptProcessor fallback, for browsers without AudioWorklet),
+ *     listener.windowSeconds
  *
  *   createPitchSmoother({ speed = 'calm', holdMs })
  *     What a display shows, from the frames: .push(frame) -> { freq, clarity }
@@ -54,6 +59,7 @@
 import { createPitchStream } from './pitch-worklet.js';
 
 export const PITCH_ERRORS = ['insecure', 'unsupported', 'denied', 'no-mic', 'busy', 'failed'];
+export const WAVEFORM_SIZE = 2048;
 
 const loadedContexts = new WeakSet();
 
@@ -73,7 +79,7 @@ function micErrorReason(err) {
   }
 }
 
-export async function startPitch({ onFrame, onEnd, minFreq = 40, maxFreq = 2000, hopMs = 20, context, source, forceFallback = false } = {}) {
+export async function startPitch({ onFrame, onEnd, minFreq = 40, maxFreq = 2000, hopMs = 20, waveform = false, context, source, forceFallback = false } = {}) {
   if (!source) {
     if (typeof window !== 'undefined' && window.isSecureContext === false) throw pitchError('insecure');
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw pitchError('unsupported');
@@ -102,7 +108,7 @@ export async function startPitch({ onFrame, onEnd, minFreq = 40, maxFreq = 2000,
     throw pitchError(micErrorReason(err), err);
   }
 
-  let node = null, worklet = false, input = null, mute = null, resetDetector = () => {};
+  let node = null, worklet = false, input = null, mute = null, analyser = null, resetDetector = () => {};
   let ended = false;
   const deliver = (frame) => { if (!ended && onFrame) onFrame(frame); };
   const options = { minFreq, maxFreq, hopMs };
@@ -145,6 +151,13 @@ export async function startPitch({ onFrame, onEnd, minFreq = 40, maxFreq = 2000,
     input.connect(node);
     node.connect(mute);
     mute.connect(ctx.destination);
+    if (waveform) {
+      analyser = ctx.createAnalyser();
+      analyser.fftSize = WAVEFORM_SIZE;
+      analyser.smoothingTimeConstant = 0;
+      input.connect(analyser);
+      analyser.connect(mute);
+    }
   } catch (err) {
     cleanup();
     throw pitchError('failed', err);
@@ -166,6 +179,7 @@ export async function startPitch({ onFrame, onEnd, minFreq = 40, maxFreq = 2000,
       else node.onaudioprocess = null;
       input.disconnect(node);
       node.disconnect();
+      if (analyser) { input.disconnect(analyser); analyser.disconnect(); }
       mute.disconnect();
     } catch { /* already disconnected */ }
     cleanup();
@@ -174,7 +188,9 @@ export async function startPitch({ onFrame, onEnd, minFreq = 40, maxFreq = 2000,
   return {
     stop,
     reset: () => resetDetector(),
+    readWaveform: analyser ? (out) => analyser.getFloatTimeDomainData(out) : undefined,
     context: ctx,
+    sampleRate: ctx.sampleRate,
     worklet,
     windowSeconds: createPitchStream({ ...options, sampleRate: ctx.sampleRate, onFrame() {} }).windowSeconds,
   };

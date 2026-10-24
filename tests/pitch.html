@@ -67,16 +67,23 @@
     osc.connect(level);
     if (!silent) osc.start(0);
     const frames = [];
-    const listener = await main.startPitch({ context: ctx, source: level, forceFallback, onFrame: (f) => frames.push(f) });
+    const listener = await main.startPitch({ context: ctx, source: level, forceFallback, waveform: true, onFrame: (f) => frames.push(f) });
+    // Halfway through, read the waveform: a 220 Hz sawtooth at 0.1.
+    let wave = null;
+    ctx.suspend(0.5).then(() => {
+      wave = new Float32Array(main.WAVEFORM_SIZE);
+      listener.readWaveform(wave);
+      ctx.resume();
+    });
     await ctx.startRendering();
     // Messages from the audio thread may still be on their way.
     let count = -1;
     while (count !== frames.length) { count = frames.length; await new Promise((r) => setTimeout(r, 250)); }
     listener.stop();
-    return { frames, listener };
+    return { frames, listener, wave };
   }
 
-  function judgeRender(section, { frames, listener }, expectWorklet) {
+  function judgeRender(section, { frames, listener, wave }, expectWorklet) {
     const row = { section, checked: 0, failed: 0, stats: '', examples: [] };
     const fail = (m) => { row.failed++; row.examples.push(m); };
     row.checked++;
@@ -92,7 +99,16 @@
     if (!(Math.max(...errA) < 1)) fail(`220 Hz: off by up to ${Math.max(...errA).toFixed(2)} cents`);
     if (!(Math.max(...errB) < 1)) fail(`330 Hz: off by up to ${Math.max(...errB).toFixed(2)} cents`);
     if (!switchAt || switchAt.time > 1.1) fail(`330 Hz shown at ${switchAt ? switchAt.time.toFixed(3) : 'never'} s (the change is at 1.000 s)`);
-    row.stats = `${frames.length} frames, one every ${(hop * 1000).toFixed(1)} ms; 220 Hz within ${Math.max(...errA).toFixed(3)} cents, 330 Hz within ${Math.max(...errB).toFixed(3)} cents; the change at 1.000 s shown at ${switchAt ? switchAt.time.toFixed(3) : '?'} s`;
+    // The waveform: peak near 0.1, and it repeats every 48000 / 220 samples.
+    row.checked++;
+    let peak = 0;
+    for (const v of wave || []) peak = Math.max(peak, Math.abs(v));
+    const period = 48000 / 220, lag = Math.round(period * 4);
+    let sum = 0, n = 0;
+    for (let i = 0; wave && i + lag < wave.length; i++, n++) sum += (wave[i] - wave[i + lag]) ** 2;
+    const diff = Math.sqrt(sum / Math.max(1, n));
+    if (!wave || peak < 0.08 || peak > 0.13 || diff > 0.01) fail(`waveform: peak ${peak.toFixed(3)}, repeats within ${diff.toFixed(4)} (rms)`);
+    row.stats = `waveform peak ${peak.toFixed(3)}, repeats within ${diff.toFixed(4)} (rms); ${frames.length} frames, one every ${(hop * 1000).toFixed(1)} ms; 220 Hz within ${Math.max(...errA).toFixed(3)} cents, 330 Hz within ${Math.max(...errB).toFixed(3)} cents; the change at 1.000 s shown at ${switchAt ? switchAt.time.toFixed(3) : '?'} s`;
     return row;
   }
 
