@@ -18,6 +18,13 @@
       "runtimeExecutable": "sh",
       "runtimeArgs": ["-c", "exec python3 -m http.server \"${PORT:-8002}\""],
       "port": 8002
+    },
+    {
+      "name": "hub-https",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "exec python3 .claude/serve-https.py \"${PORT:-8443}\""],
+      "port": 8443,
+      "url": "https://localhost:8443"
     }
   ]
 }
