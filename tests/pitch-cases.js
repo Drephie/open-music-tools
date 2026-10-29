@@ -93,13 +93,16 @@ function pluck(sr, seconds, f, { B = 0, glide = 6, decay = 1.5, seed = 1, phone 
   const parts = [];
   for (let k = 1; k <= H; k++) {
     parts.push({ phase: rand() * 2 * Math.PI, amp: (k % 5 === 0 ? 0.15 : 1) / k * (k === 1 ? fundamental : 1),
-      tau: decay / (1 + 0.35 * (k - 1)), ratio: k * Math.sqrt(1 + B * k * k) });
+      fade: Math.exp(-(1 + 0.35 * (k - 1)) / (decay * sr)), ratio: k * Math.sqrt(1 + B * k * k) });
   }
+  const settle = Math.exp(-1 / (0.08 * sr));
+  let sharp = glide;
   for (let i = 0; i < n; i++) {
-    const t = i / sr, fi = f * Math.pow(2, glide * Math.exp(-t / 0.08) / 1200);
+    const step = 2 * Math.PI * f * Math.pow(2, sharp / 1200) / sr;
+    sharp *= settle;
     let s = 0;
-    for (const p of parts) { s += p.amp * Math.exp(-t / p.tau) * Math.sin(p.phase); p.phase += 2 * Math.PI * p.ratio * fi / sr; }
-    out[i] = s * Math.min(1, t / 0.003);
+    for (const p of parts) { s += p.amp * Math.sin(p.phase); p.amp *= p.fade; p.phase += p.ratio * step; }
+    out[i] = s * Math.min(1, i / (0.003 * sr));
   }
   if (phone) {
     const w = 2 * Math.PI * phone / sr, al = Math.sin(w) / (2 * Math.SQRT1_2), c = Math.cos(w);
