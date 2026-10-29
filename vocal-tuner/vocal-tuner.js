@@ -11,7 +11,9 @@ import { setupCustomSelects } from '../shared/ui/select.js';
 import { createModalManager } from '../shared/ui/modal.js';
 import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
-import { createWaveBall, ringFromWave, RING_POINTS } from './ball.js';
+import { waveShape } from '../shared/wave.js';
+import { accidentalHtml, prettyName } from '../shared/ui/accidentals.js';
+import { createWaveBall, RING_POINTS } from './ball.js';
 import { TUNER_STRINGS } from './strings.js';
 
 const $ = (id) => document.getElementById(id);
@@ -136,13 +138,8 @@ async function keepScreenAwake(on) {
 }
 
 // --- THE SCREEN ---
-const pretty = (name) => name.replace(/#/g, '♯').replace(/b/g, '♭');
-// Sharp and flat drawn, not typed: the themes' fonts have no ♯ or ♭ of their own.
-const ACC_SVG = {
-  '#': '<svg class="acc" viewBox="0 0 10 16" aria-hidden="true"><path d="M3.6 1.5v13.5M6.6 0.8v13.5" stroke-width="1.7"/><path d="M1 6.4 9 4.6M1 11.2 9 9.4" stroke-width="2.6"/></svg>',
-  b: '<svg class="acc" viewBox="0 0 10 16" aria-hidden="true"><path d="M2.6 0.5v14.5c3.2-1.3 6-3.6 5.7-5.7-.3-2-3-2-5.7.2" stroke-width="2.2"/></svg>',
-};
-const prettyHtml = (name) => name.replace(/([#b])$/, (acc) => ACC_SVG[acc]);
+// Sharp and flat drawn, not typed (shared/ui/accidentals.js).
+const prettyHtml = accidentalHtml;
 
 let midi = null, cents = 0, glow = 0, level = 0;
 let lastText = { name: null, oct: null, prompt: null, say: null, at: null, note: null, tune: null, idle: null };
@@ -183,7 +180,7 @@ function render(force = false) {
   if (force || inTune !== lastText.tune) { tunerEl.classList.toggle('in-tune', inTune); lastText.tune = inTune; }
 
   // Screen readers: the note and the words, at most once a second.
-  const spoken = hasNote ? `${pretty(name)} ${oct}: ${say}` : say || prompt;
+  const spoken = hasNote ? `${prettyName(name)} ${oct}: ${say}` : say || prompt;
   const now = performance.now();
   if (spoken !== lastSpoken && (now - lastSpokenAt > 1000 || !hasNote)) {
     statusEl.textContent = spoken;
@@ -261,7 +258,7 @@ function tick(now) {
     let shape = null;
     if (listener && level > 0.02) {
       listener.readWaveform(wave);
-      shape = ringFromWave(wave, listener.sampleRate, hasNote ? shown.freq : 0, ringShape);
+      shape = waveShape(wave, listener.sampleRate, hasNote ? shown.freq : 0, ringShape);
     }
     // Round in tune, wilder the further off; sound with no note (talking, noise) is wild too.
     const chaos = hasNote ? Math.max(0, Math.min(1, (Math.abs(cents) - tolerance()) / 40)) : level > 0.05 ? 0.8 : 0;

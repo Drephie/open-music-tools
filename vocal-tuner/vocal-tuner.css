@@ -19,7 +19,7 @@
   color: var(--color-text); transition: color 0.25s;
   text-shadow: 0 0 18px var(--bg-page), 0 0 6px var(--bg-page);
 }
-.note .acc { width: 0.36em; height: 0.58em; margin: 0.06em 0 0 0.05em; flex: none; fill: none; stroke: currentColor; stroke-linecap: round; overflow: visible; }
+.note .acc { width: 0.36em; height: 0.58em; margin: 0.06em 0 0 0.05em; }
 .tool-title { white-space: nowrap; overflow: hidden; }
 .note .oct { font-size: 0.26em; margin: 0.12em 0 0 0.12em; opacity: 0.6; }
 .tuner.in-tune .note, .tuner.in-tune .say { color: var(--color-tune); }

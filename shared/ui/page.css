@@ -23,6 +23,7 @@
  *     <a class="btn patreon-btn">…</a><button class="btn support-continue"></button></div></div>
  *   Buttons: .btn, .btn.btn-primary, .btn.patreon-btn, .icon-btn, .round-btn (− / +).
  *   .computer-only: hidden on touch screens (no mouse), e.g. keyboard tips.
+ *   .acc: a drawn sharp or flat (shared/ui/accidentals.js); the tool sizes it.
  *   Rows: .setting-row (label left, control right).
  *   Sliders: <input type="range" class="range">; set --fill (e.g. "40%") for
  *     the filled part, or --range-bg for a whole custom track, and --thumb
@@ -172,3 +173,6 @@ body[data-theme="retro"] .support-card p { font-size: 19px; }
   body[data-theme="retro"] .tool-footer { font-size: 13px; line-height: 1.1; }
   body[data-theme="pink"] .panel { border-radius: 22px; }
 }
+
+/* A drawn sharp or flat (shared/ui/accidentals.js): strokes in the text colour. */
+.acc { flex: none; fill: none; stroke: currentColor; stroke-linecap: round; overflow: visible; }

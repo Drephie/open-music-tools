@@ -8,7 +8,7 @@
  *   const ball = createWaveBall(canvas)
  *   ball.setColors(line, tune)   CSS colours (hex or rgb[a]) of the rings, off and in tune
  *   ball.pushRing(shape, chaos, tune)
- *     shape: Float32Array(RING_POINTS), -1..1 (ringFromWave), or null for silence;
+ *     shape: Float32Array(RING_POINTS), -1..1 (waveShape), or null for silence;
  *     chaos 0 (round) .. 1 (wild); tune 0..1 (how much of the accent colour)
  *   ball.draw(dt, { level, lean, cx, cy, maxR, presence, glow })
  *     level 0..1 (size: 0 = the resting half size), lean -1..1 (tilts toward
@@ -17,43 +17,11 @@
  *   ball.restRadius(maxR)   the resting radius, for fitting a prompt inside
  *   ball.moving()           false when motion is reduced (one still frame is enough)
  *   ball.resize()   after the canvas changed size
- *   ringFromWave(samples, sampleRate, freq, out)
- *     a whole number of periods of the newest sound, starting on a rising zero
- *     crossing so the ring closes smoothly, scaled to -1..1 (freq 0: the
- *     newest stretch as it is)
+ * Ring shapes come from waveShape in shared/wave.js.
  */
 
 export const RING_POINTS = 96;
 const RINGS = 13;
-
-export function ringFromWave(samples, sampleRate, freq, out) {
-  const n = samples.length;
-  let start, span;
-  if (freq > 0) {
-    const period = sampleRate / freq;
-    const periods = Math.max(1, Math.min(4, Math.floor((n - period) / period)));
-    span = periods * period;
-    start = Math.floor(n - span - 1);
-    // Back to the nearest rising zero crossing (within one period).
-    for (let i = start; i > Math.max(1, start - period); i--) {
-      if (samples[i - 1] < 0 && samples[i] >= 0) { start = i; break; }
-    }
-  } else {
-    span = Math.min(n - 1, 1024);
-    start = n - 1 - span;
-  }
-  let peak = 0;
-  for (let i = 0; i < RING_POINTS; i++) {
-    const x = start + (i / RING_POINTS) * span;
-    const j = Math.floor(x), f = x - j;
-    const v = samples[j] * (1 - f) + samples[Math.min(n - 1, j + 1)] * f;
-    out[i] = v;
-    if (Math.abs(v) > peak) peak = Math.abs(v);
-  }
-  const k = peak > 1e-5 ? 1 / peak : 0;
-  for (let i = 0; i < RING_POINTS; i++) out[i] *= k;
-  return out;
-}
 
 function parseColor(c) {
   c = (c || '').trim();
