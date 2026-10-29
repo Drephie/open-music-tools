@@ -37,10 +37,11 @@
       <canvas id="ball" class="ball" aria-hidden="true"></canvas>
       <div class="stage">
         <p id="note" class="note" aria-hidden="true"><span id="note-name"></span><span id="note-oct" class="oct"></span></p>
+        <p id="prompt" class="prompt" aria-hidden="true" data-i18n="idle">Tap to start, then sing</p>
       </div>
       <div class="readout" aria-hidden="true">
-        <p id="say" class="say" data-i18n="idle">Start listening, then sing a note</p>
-        <div class="line"><span class="notch"></span><span id="dot" class="dot"></span></div>
+        <p id="say" class="say"></p>
+        <div class="line"><span class="zone"></span><span class="notch"></span><span id="dot" class="dot"></span></div>
       </div>
       <p id="status" class="visually-hidden" aria-live="polite"></p>
       <button id="listen-btn" class="btn listen-btn" aria-pressed="false">
@@ -74,6 +75,13 @@
       <div id="names-seg" class="seg" role="group" aria-labelledby="names-label">
         <button type="button" data-names="solfege" data-i18n="namesSolfege">Do Re Mi</button>
         <button type="button" data-names="letters" data-i18n="namesLetters">C D E</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <span id="tolerance-label" class="group-label" data-i18n="tolerance">In tune within</span>
+      <div id="tolerance-seg" class="seg" role="group" aria-labelledby="tolerance-label">
+        <button type="button" data-hard="false" data-i18n="tolNormal">10 cents</button>
+        <button type="button" data-hard="true" data-i18n="tolHard">5 cents (hard)</button>
       </div>
     </div>
     <div class="control-group">

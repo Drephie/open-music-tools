@@ -1,17 +1,21 @@
 /* vocal-tuner/ball.js: the wave ball (spec: specs/vocal-tuner.md). A 3D ball of
  * rings drawn on a canvas; each ring is a snapshot of the voice's sound wave.
- * New rings start at the equator and drift to the poles. The ball grows with
- * loudness from a dot, is round and in the accent colour when in tune, and
- * gets more chaotic the further off the note is.
+ * New rings start at the equator and drift to the poles. At rest (silence, or
+ * not listening) it is a calm wireframe sphere at half size that breathes
+ * slowly; it grows with loudness, is round and in the accent colour with a
+ * ring around it when in tune, and gets more chaotic the further off the note is.
  *
  *   const ball = createWaveBall(canvas)
  *   ball.setColors(line, tune)   CSS colours (hex or rgb[a]) of the rings, off and in tune
  *   ball.pushRing(shape, chaos, tune)
  *     shape: Float32Array(RING_POINTS), -1..1 (ringFromWave), or null for silence;
  *     chaos 0 (round) .. 1 (wild); tune 0..1 (how much of the accent colour)
- *   ball.draw(dt, { level, lean, cx, cy, maxR })
- *     level 0..1 (size), lean -1..1 (tilts toward low / high), centre and
- *     full-size radius in CSS px
+ *   ball.draw(dt, { level, lean, cx, cy, maxR, presence, glow })
+ *     level 0..1 (size: 0 = the resting half size), lean -1..1 (tilts toward
+ *     low / high), centre and full-size radius in CSS px, presence 0..1 (how
+ *     visible the resting ball is), glow 0..1 (the in-tune ring)
+ *   ball.restRadius(maxR)   the resting radius, for fitting a prompt inside
+ *   ball.moving()           false when motion is reduced (one still frame is enough)
  *   ball.resize()   after the canvas changed size
  *   ringFromWave(samples, sampleRate, freq, out)
  *     a whole number of periods of the newest sound, starting on a rising zero
@@ -67,7 +71,8 @@ export function createWaveBall(canvas) {
   const rings = [];
   const calm = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
   let line = [255, 255, 255], tune = [138, 212, 255];
-  let w = 0, h = 0, dpr = 1, spin = 0, tilt = 0, seed = 1;
+  let w = 0, h = 0, dpr = 1, spin = 0, tilt = 0, clock = 0, seed = 1;
+  const REST = 0.6;
   const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
 
   function resize() {
@@ -99,16 +104,19 @@ export function createWaveBall(canvas) {
     if (rings.length > RINGS) rings.pop();
   }
 
-  function draw(dt, { level = 0, lean = 0, cx = w / 2, cy = h / 2, maxR = Math.min(w, h) * 0.42 }) {
+  function draw(dt, { level = 0, lean = 0, cx = w / 2, cy = h / 2, maxR = Math.min(w, h) * 0.42, presence = 0.5, glow = 0 }) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
-    const R = 4 + level * (maxR - 4);
+    clock += dt;
+    // At rest it breathes: 3.5% bigger and smaller over about 4 seconds.
+    const breath = calm.matches ? 1 : 1 + 0.035 * Math.sin(clock * 2 * Math.PI / 4.2);
+    const R = (REST + level * (1 - REST)) * maxR * breath;
     const focal = maxR * 3.2;
-    if (!calm.matches) spin += dt * (0.35 + level * 0.5);
+    if (!calm.matches) spin += dt * (0.18 + level * 0.6);
     tilt += (lean - tilt) * Math.min(1, dt * 5);
     const ct = Math.cos(0.38 + tilt * 0.5), st = Math.sin(0.38 + tilt * 0.5);
     const cl = Math.cos(tilt * 0.6), sl = Math.sin(tilt * 0.6);
-    const alpha = Math.min(1, 0.3 + level * 1.4);
+    const alpha = Math.min(1, presence + level * 1.2);
 
     for (let k = rings.length - 1; k >= 0; k--) {
       const ring = rings[k];
@@ -149,9 +157,21 @@ export function createWaveBall(canvas) {
         ctx.stroke(front);
       }
     }
+    // In tune: a crisp ring around the ball, and a fainter one outside it.
+    if (glow > 0.01) {
+      ctx.strokeStyle = `rgb(${tune[0]},${tune[1]},${tune[2]})`;
+      for (const [k, a, lw] of [[1.08, 0.9, 2.2], [1.15, 0.35, 1.2]]) {
+        ctx.globalAlpha = glow * a;
+        ctx.lineWidth = lw;
+        ctx.beginPath();
+        ctx.arc(cx, cy, R * k, 0, 2 * Math.PI);
+        ctx.stroke();
+      }
+    }
     ctx.globalAlpha = 1;
   }
 
   resize();
-  return { pushRing, draw, resize, setColors };
+  for (let i = 0; i < RINGS; i++) pushRing(null);   // the resting sphere from the start
+  return { pushRing, draw, resize, setColors, restRadius: (maxR) => REST * maxR, moving: () => !calm.matches };
 }

@@ -23,6 +23,16 @@
 .tool-title { white-space: nowrap; overflow: hidden; }
 .note .oct { font-size: 0.26em; margin: 0.12em 0 0 0.12em; opacity: 0.6; }
 .tuner.in-tune .note, .tuner.in-tune .say { color: var(--color-tune); }
+/* Monochrome has no accent colour: off the note is grey, in tune it lights up white (with the ring). */
+body[data-theme="bw"] .tuner.has-note:not(.in-tune) :is(.note, .say) { color: var(--color-tune-line); }
+
+/* No note: a prompt inside the resting ball. Before listening, the ball starts it. */
+.prompt {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0;
+  width: var(--prompt-w, 60%); text-align: center; font-size: 18px; line-height: 1.3;
+  color: var(--color-text); text-shadow: 0 0 12px var(--bg-page), 0 0 4px var(--bg-page); pointer-events: none;
+}
+.tuner.idle .stage { cursor: pointer; }
 
 .readout { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 6px 0 18px; }
 .say { margin: 0; min-height: 1.3em; font-size: 16px; line-height: 1.3; text-align: center; transition: color 0.25s; }
@@ -30,6 +40,12 @@
 /* The thin line: a notch in the middle, the dot slides ±50 cents. */
 .line { position: relative; width: min(260px, 70vw); height: 1px; background: color-mix(in srgb, var(--color-text) 35%, transparent); }
 .notch { position: absolute; left: 50%; top: -7px; width: 1px; height: 15px; background: var(--color-text); }
+/* The in-tune zone (±10 cents, or ±5 in Hard mode: --tol is set in JS). */
+.zone {
+  position: absolute; left: calc(50% - var(--tol, 10%)); width: calc(2 * var(--tol, 10%)); top: -1px; height: 3px; border-radius: 2px;
+  background: color-mix(in srgb, var(--color-text) 45%, transparent); transition: background 0.25s, left 0.25s, width 0.25s;
+}
+.tuner.in-tune .zone { background: var(--color-tune); }
 .dot {
   position: absolute; left: var(--at, 50%); top: -6px; width: 13px; height: 13px; margin-left: -6.5px; border-radius: 50%;
   background: var(--color-tune-line); opacity: 0; transition: opacity 0.2s, background 0.25s;
@@ -64,7 +80,7 @@
 }
 
 /* Themes */
-body[data-theme="retro"] .say { font-size: 22px; }
+body[data-theme="retro"] :is(.say, .prompt) { font-size: 22px; }
 body[data-theme="retro"] .listen-btn { font-size: 22px; }
 body[data-theme="retro"] .seg button { font-size: 17px; }
 body[data-theme="retro"] .note { text-shadow: 0 0 var(--shadow-blur) currentColor; }
@@ -73,14 +89,15 @@ body[data-theme="pink"] .tuner .btn.listen-btn { background: transparent; color:
 body[data-theme="pink"] .seg { border-radius: 999px; }
 /* Soft Pink's button text is white for its pink buttons: on white windows it is pink. */
 body[data-theme="pink"] .seg button:not([aria-pressed="true"]) { color: var(--color-left); }
-body[data-theme="bw"] :is(.seg, .listen-btn) { border-radius: 0; }
+body[data-theme="bw"] :is(.seg, .listen-btn, .zone) { border-radius: 0; }
 
 /* Phones: everything on one screen; line heights pinned (Baloo 2 has tall ones). */
 @media (max-width: 600px) {
   .tool-title { letter-spacing: 1px; }
   .readout { gap: 16px; padding-bottom: 14px; }
   .say { font-size: 15px; line-height: 1.25; }
+  .prompt { font-size: 16px; line-height: 1.25; }
   .listen-btn { min-height: 46px; margin-bottom: 4px; }
-  body[data-theme="retro"] .say { font-size: 20px; line-height: 1.1; }
+  body[data-theme="retro"] :is(.say, .prompt) { font-size: 20px; line-height: 1.1; }
   body[data-theme="retro"] #about-modal .about-text { font-size: 17px; line-height: 1.35; }
 }

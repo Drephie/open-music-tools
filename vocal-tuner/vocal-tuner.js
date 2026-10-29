@@ -16,7 +16,8 @@ import { TUNER_STRINGS } from './strings.js';
 
 const $ = (id) => document.getElementById(id);
 const SETTINGS_KEY = 'vocal-tuner.settings.v1';
-const IN_TUNE = 5;                      // cents either side (Drephie: always ±5)
+// In tune within ±10 cents, or ±5 in Hard mode (Drephie, after the phone test).
+const tolerance = () => (settings.hard ? 5 : 10);
 const MIN_FREQ = 55, MAX_FREQ = 2000;   // La1 to about Si6
 const RING_EVERY = 0.065;               // seconds between new rings of the ball
 const ERROR_KEYS = { insecure: 'errInsecure', unsupported: 'errUnsupported', denied: 'errDenied', 'no-mic': 'errNoMic', busy: 'errBusy', ended: 'errEnded' };
@@ -27,6 +28,7 @@ function readSettings() {
   return {
     solfege: typeof s.solfege === 'boolean' ? s.solfege : null,   // null: follows the language
     speed: s.speed === 'quick' ? 'quick' : 'calm',
+    hard: s.hard === true,
   };
 }
 const settings = readSettings();
@@ -43,9 +45,9 @@ const i18n = createI18n({
 const { t } = i18n;
 
 const tunerEl = document.querySelector('.tuner'), stageEl = document.querySelector('.stage');
-const noteEl = $('note'), nameEl = $('note-name'), octEl = $('note-oct'), sayEl = $('say'), dotEl = $('dot'), statusEl = $('status');
+const noteEl = $('note'), nameEl = $('note-name'), octEl = $('note-oct'), promptEl = $('prompt'), sayEl = $('say'), dotEl = $('dot'), statusEl = $('status');
 const listenBtn = $('listen-btn'), listenLabel = $('listen-label');
-const themeSelect = $('theme-select'), langSelect = $('lang-select'), namesSeg = $('names-seg'), movementSeg = $('movement-seg');
+const themeSelect = $('theme-select'), langSelect = $('lang-select'), namesSeg = $('names-seg'), movementSeg = $('movement-seg'), toleranceSeg = $('tolerance-seg');
 const settingsModal = $('settings-modal'), aboutModal = $('about-modal'), supportModal = $('support-modal');
 
 // --- LISTENING ---
@@ -97,7 +99,7 @@ function stopListening() {
   keepScreenAwake(false);
   showButton();
   render(true);
-  run();   // lets the ball shrink back to a dot
+  run();   // lets the ball settle back to rest
 }
 
 const toggle = () => (wanted ? stopListening() : startListening());
@@ -143,7 +145,7 @@ const ACC_SVG = {
 const prettyHtml = (name) => name.replace(/([#b])$/, (acc) => ACC_SVG[acc]);
 
 let midi = null, cents = 0, glow = 0, level = 0;
-let lastText = { name: null, oct: null, say: null, at: null, note: null, tune: null };
+let lastText = { name: null, oct: null, prompt: null, say: null, at: null, note: null, tune: null, idle: null };
 let lastSpoken = '', lastSpokenAt = 0;
 
 // Text and classes change only when they need to; called every frame.
@@ -155,13 +157,14 @@ function render(force = false) {
   } else midi = null;
   const c = Math.round(cents);
   const hasNote = midi !== null;
-  const inTune = hasNote && Math.abs(c) <= IN_TUNE;
+  const inTune = hasNote && Math.abs(c) <= tolerance();
 
-  let name = '', oct = '', say;
+  // No note: a prompt inside the ball; a problem with the microphone: the words under it.
+  let name = '', oct = '', say = '', prompt = '';
   if (errorKey) say = t(errorKey);
-  else if (!wanted) say = t('idle');
-  else if (!listener) say = t('waiting');
-  else if (!hasNote) say = t('sing');
+  else if (!wanted) prompt = t('idle');
+  else if (!listener) prompt = t('waiting');
+  else if (!hasNote) prompt = t('sing');
   else {
     const n = commonNoteName(midi, solfege());
     name = n.name;
@@ -170,7 +173,9 @@ function render(force = false) {
   }
   if (force || name !== lastText.name) { nameEl.innerHTML = prettyHtml(name); lastText.name = name; }
   if (force || oct !== lastText.oct) { octEl.textContent = oct; lastText.oct = oct; }
+  if (force || prompt !== lastText.prompt) { promptEl.textContent = prompt; lastText.prompt = prompt; }
   if (force || say !== lastText.say) { sayEl.textContent = say; lastText.say = say; }
+  if (force || !wanted !== lastText.idle) { tunerEl.classList.toggle('idle', !wanted); lastText.idle = !wanted; }
   sayEl.classList.toggle('mic-msg', !!errorKey);
   const at = hasNote ? 50 + Math.max(-50, Math.min(50, cents)) : 50;
   if (force || Math.abs(at - lastText.at) > 0.05) { dotEl.style.setProperty('--at', `${at}%`); lastText.at = at; }
@@ -178,7 +183,7 @@ function render(force = false) {
   if (force || inTune !== lastText.tune) { tunerEl.classList.toggle('in-tune', inTune); lastText.tune = inTune; }
 
   // Screen readers: the note and the words, at most once a second.
-  const spoken = hasNote ? `${pretty(name)} ${oct}: ${say}` : say;
+  const spoken = hasNote ? `${pretty(name)} ${oct}: ${say}` : say || prompt;
   const now = performance.now();
   if (spoken !== lastSpoken && (now - lastSpokenAt > 1000 || !hasNote)) {
     statusEl.textContent = spoken;
@@ -197,7 +202,8 @@ let centre = { x: 0, y: 0, r: 100 };
 function measure() {
   ball.resize();
   const box = canvas.getBoundingClientRect(), st = stageEl.getBoundingClientRect();
-  centre = { x: st.left - box.left + st.width / 2, y: st.top - box.top + st.height / 2, r: Math.min(st.width, st.height) * 0.47 };
+  centre = { x: st.left - box.left + st.width / 2, y: st.top - box.top + st.height / 2, r: Math.min(st.width, st.height) * 0.42 };
+  promptEl.style.setProperty('--prompt-w', `${Math.round(ball.restRadius(centre.r) * 1.75)}px`);
   fitTitle();
   fitNote();
 }
@@ -244,7 +250,7 @@ function tick(now) {
   lastTime = now;
   const { hasNote, inTune } = render();
 
-  // Size from loudness: -60 dBFS is a dot, -20 dBFS the full ball. Grows fast, shrinks slowly.
+  // Size from loudness: -60 dBFS is the resting ball, -20 dBFS the full ball. Grows fast, shrinks slowly.
   const target = listener && rms > 0 ? Math.max(0, Math.min(1, (20 * Math.log10(rms) + 60) / 40)) : 0;
   level += (target - level) * Math.min(1, dt * (target > level ? 12 : 4));
   glow += ((inTune ? 1 : 0) - glow) * Math.min(1, dt * 6);
@@ -258,13 +264,20 @@ function tick(now) {
       shape = ringFromWave(wave, listener.sampleRate, hasNote ? shown.freq : 0, ringShape);
     }
     // Round in tune, wilder the further off; sound with no note (talking, noise) is wild too.
-    const chaos = hasNote ? Math.max(0, Math.min(1, (Math.abs(cents) - IN_TUNE) / 40)) : level > 0.05 ? 0.8 : 0;
+    const chaos = hasNote ? Math.max(0, Math.min(1, (Math.abs(cents) - tolerance()) / 40)) : level > 0.05 ? 0.8 : 0;
     ball.pushRing(shape, chaos, glow);
   }
-  ball.draw(dt, { level, lean: hasNote ? Math.max(-1, Math.min(1, cents / 50)) : 0, cx: centre.x, cy: centre.y, maxR: centre.r });
+  ball.draw(dt, {
+    level, lean: hasNote ? Math.max(-1, Math.min(1, cents / 50)) : 0, cx: centre.x, cy: centre.y, maxR: centre.r,
+    presence: wanted ? 0.55 : 0.35, glow,
+  });
 
-  if (listener || level > 0.005) frameId = requestAnimationFrame(tick);
+  // The resting ball keeps breathing (the browser pauses this while the page is hidden).
+  if (listener || level > 0.005 || glow > 0.01 || ball.moving()) frameId = requestAnimationFrame(tick);
 }
+
+// Before listening, the ball is a big button too.
+stageEl.addEventListener('click', () => { if (!wanted) startListening(); });
 
 window.addEventListener('resize', () => { measure(); run(); });
 document.fonts?.ready.then(() => { measure(); run(); });
@@ -303,6 +316,8 @@ watchLook((look) => {
 function showChoices() {
   [...namesSeg.children].forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.names === 'solfege') === solfege())));
   [...movementSeg.children].forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.speed === settings.speed)));
+  [...toleranceSeg.children].forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.hard === 'true') === settings.hard)));
+  tunerEl.style.setProperty('--tol', `${tolerance()}%`);   // the line spans ±50 cents, so 1 cent is 1%
 }
 [...namesSeg.children].forEach((b) => b.addEventListener('click', () => {
   settings.solfege = b.dataset.names === 'solfege';
@@ -310,6 +325,11 @@ function showChoices() {
   showChoices();
   fitNote();
   render(true);
+}));
+[...toleranceSeg.children].forEach((b) => b.addEventListener('click', () => {
+  settings.hard = b.dataset.hard === 'true';
+  save();
+  showChoices();
 }));
 [...movementSeg.children].forEach((b) => b.addEventListener('click', () => {
   settings.speed = b.dataset.speed;
