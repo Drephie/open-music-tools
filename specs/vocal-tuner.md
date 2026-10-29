@@ -1,6 +1,6 @@
 # Vocal Tuner: spec
 
-**Status:** approved by Drephie, 2026-10-24, after two rounds of changes (a calmer screen, one name per note, and the 3D wave ball, tried in animated prototypes). Built the same day; waiting for Drephie's phone test (https).
+**Status:** approved by Drephie, 2026-10-24, after two rounds of changes (a calmer screen, one name per note, and the 3D wave ball, tried in animated prototypes). Built the same day. **Changes after Drephie's first phone test (2026-10-30)**, marked *(phone test)*: in tune within ±10 cents with a Hard mode at ±5; a resting ball and a "Sing a note" prompt instead of an empty screen; a ring around the ball when in tune, visible in Monochrome too. Second phone test: waiting.
 Items marked *(Claude's pick)* weren't asked: say if you want them changed. *(At build time)* marks details settled while building.
 
 ## What it is for
@@ -12,15 +12,15 @@ A quick, calm check of the note you sing: which note it is, and whether you are 
 - **Start listening** (a slim button at the bottom): the first time, the browser asks to use the microphone. While it listens the button reads **Stop**. Listening stops by itself when you leave the page or switch apps, so the phone's microphone sign goes off; tap Start again when you are back *(Claude's pick)*. A quick glance at the notifications doesn't stop it: only a second away does *(at build time)*.
 - **The note you sing**, big, in the middle, in Do Re Mi or C D E (see Settings), with its octave as a small number beside it: **La** ₄ (middle C is Do4, as in the Piano). **One name per note**, with the real ♯ and ♭ signs, the names singers use most: Do♯, Mi♭, Fa♯, La♭, Si♭ (Drephie, at approval). The signs are drawn, because the themes' fonts have none of their own *(at build time)*. The title gets a little smaller on phones when it would need two lines (Spanish and Italian) *(at build time)*.
 - **One line of plain words** under it: "12 cents low", "8 cents high" or **In tune** (a cent is a hundredth of a half step, the step from one piano key to the very next).
-- **A thin line with a dot** (Drephie's sliding bar, made lighter): a small notch marks the middle; the dot slides left when you are low and right when you are high; the ends are half a step away (50 cents).
-- **In tune means within ±5 cents** (Drephie's choice, always). Then the note, the words, the dot and the ball light up in the **theme's accent colour**, not green (Drephie, at approval: green disappears in Retro CRT and looks wrong elsewhere): light blue in Liquid Glass, pink in Y2K, hot pink in Soft Pink, bright white in Monochrome, amber in Retro CRT *(Claude's pick of the accents)*.
+- **A thin line with a dot** (Drephie's sliding bar, made lighter): a small notch marks the middle; the dot slides left when you are low and right when you are high; the ends are half a step away (50 cents). A slightly thicker stretch around the middle shows how wide "in tune" is, and lights up when you are in it *(phone test)*.
+- **In tune means within ±10 cents**, or **±5 cents in Hard mode** (a choice in Settings) *(phone test: it was always ±5)*. Then the note, the words, the dot and the ball light up in the **theme's accent colour**, not green (Drephie, at approval: green disappears in Retro CRT and looks wrong elsewhere): light blue in Liquid Glass, pink in Y2K, hot pink in Soft Pink, bright white in Monochrome, amber in Retro CRT *(Claude's pick of the accents)*, and **a ring appears around the ball** *(phone test)*. Monochrome has no colour, so there the note, words and ball are grey when off and turn bright white, with the ring, when in tune *(phone test)*.
 - **A = 440 Hz**, always (Drephie's choice).
 - **How it moves** (a choice in Settings, Drephie's choice): **Calm** (the start: smooth, ignores tiny wobbles, settles in about a quarter of a second) or **Quick** (follows every wobble at once, so you see your vibrato).
 - **The wave ball** (Drephie's design, from the prototypes): behind the note, a 3D ball made of rings of your voice's real sound wave, slowly turning.
-  - It **grows from a dot in the centre** as you sing louder and shrinks back in silence; it reacts to any sound the microphone hears, so you can see it is listening before a note shows.
+  - **At rest** (before you start, and in silence) it is a calm wireframe ball at about half size that breathes slowly, so the screen is never empty *(phone test: it used to shrink to a dot)*. It **grows** as you sing louder and settles back in silence; it reacts to any sound the microphone hears, so you can see it is listening before a note shows.
   - New rings start at its middle and drift to the top and bottom. Their wave changes with your vowel and your voice.
   - **In tune it becomes round and smooth**, in the accent colour; **the further off you are, the more chaotic it looks** (bumpier, wobblier rings). It also tilts a little toward low or high.
-- **When it hears nothing**: the note, words and dot clear (Drephie's choice), only "Sing a note" stays. A note stays a quarter of a second after you stop, so it doesn't flicker.
+- **When it hears nothing**: the note, words and dot clear (Drephie's choice), and **"Sing a note"** shows inside the resting ball *(phone test)*. Before listening it says "Tap to start, then sing", and tapping the ball starts listening too *(phone test)*. A note stays a quarter of a second after you stop, so it doesn't flicker.
 - **Range:** from La1 (55 Hz, a very low bass) to Si6 (about 2000 Hz, far above a soprano's top C) *(Claude's pick)*.
 - **If the microphone can't start**, a plain message says why and what to do: it was blocked (allow it for this site in the browser's settings), the page isn't secure (it needs an https address), no microphone was found, or another app is using it.
 - Keeps the phone screen awake while it listens *(Claude's pick)*. **Keyboard on computers** *(Claude's pick)*: Space = start/stop listening.
@@ -48,14 +48,14 @@ Playing a note to tune to (Drephie: no sound in this version); instrument string
           ·  ~~~~~~~  ·
 
            12 cents low
-      ───────●──┼────────
+      ───────●─━┿━───────      ━ the in-tune zone
 
           ( Stop )
  Support on Patreon   Designed by @drephie
 ```
 
 **Computer:** the same, centred, with a bigger ball.
-**Settings (⚙):** Theme, Language, Note names (Do Re Mi / C D E; follows the language until you choose, as in the Piano), Movement: Calm / Quick (shows vibrato).
+**Settings (⚙):** Theme, Language, Note names (Do Re Mi / C D E; follows the language until you choose, as in the Piano), In tune within: 10 cents / 5 cents (hard) *(phone test)*, Movement: Calm / Quick (shows vibrato).
 **About (i):** the short hub text, the privacy line (below), the Patreon button, the keyboard tip on computers only.
 
 ## Wording (English)
@@ -64,7 +64,7 @@ Vocal Tuner (Spanish "Afinador vocal", Italian "Accordatore vocale" *(Claude's p
 
 ## Remembered
 
-In this browser only: note names, Calm or Quick, theme and language (the last two for the whole hub). Nothing you sing is kept.
+In this browser only: note names, Hard mode, Calm or Quick, theme and language (the last two for the whole hub). Nothing you sing is kept.
 
 ## Built on
 
