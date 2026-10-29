@@ -279,20 +279,26 @@ if (typeof registerProcessor === 'function' && typeof AudioWorkletProcessor === 
   registerProcessor('pitch-detector', class extends AudioWorkletProcessor {
     constructor(options) {
       super();
-      const opts = (options && options.processorOptions) || {};
+      this.opts = (options && options.processorOptions) || {};
       this.alive = true;
       this.mono = null;
       this.base = 0;
-      // `sampleRate` and `currentTime` are globals of the worklet scope.
-      this.stream = createPitchStream({
-        ...opts,
-        sampleRate,
-        onFrame: (f) => this.port.postMessage({ time: this.base + f.time, freq: f.freq, clarity: f.clarity, rms: f.rms }),
-      });
+      this.makeStream();
       this.port.onmessage = (e) => {
         if (e.data === 'stop') this.alive = false;
         else if (e.data === 'reset') this.stream.reset();
+        else if (e.data && e.data.range) { this.opts = { ...this.opts, ...e.data.range }; this.makeStream(); }
       };
+    }
+
+    // A new stream for the current range (a new range starts afresh: room level, note, window).
+    makeStream() {
+      // `sampleRate` and `currentTime` are globals of the worklet scope.
+      this.stream = createPitchStream({
+        ...this.opts,
+        sampleRate,
+        onFrame: (f) => this.port.postMessage({ time: this.base + f.time, freq: f.freq, clarity: f.clarity, rms: f.rms }),
+      });
     }
 
     process(inputs) {

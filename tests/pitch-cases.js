@@ -1,7 +1,8 @@
 /* tests/pitch-cases.js: known-answer checks for the pitch engine
  * (shared/pitch-worklet.js and shared/pitch.js). Every signal is made here,
  * so its pitch is known exactly: sines, harmonic tones (bright, voice-like,
- * a strong 2nd harmonic, a missing fundamental), noise at known levels,
+ * a strong 2nd harmonic, a missing fundamental), plucked strings that fade
+ * (also inharmonic, and through a phone-like microphone), noise at known levels,
  * quiet notes, vibrato, note changes, silence and noise with no note.
  * The signals go through createPitchStream exactly as the AudioWorklet feeds
  * it: 128 samples at a time.
@@ -76,6 +77,44 @@ function tone(sr, seconds, { freq, shape = 'sine', rmsDb = -20, seed = 1, vibrat
     out[i] = s;
   }
   return scaleTo(out, rmsDb);
+}
+
+// A plucked string of `seconds` (the Instrument Tuner): harmonics falling as
+// 1/n (plucked near a fifth of the length, so every 5th is weak), each
+// fading faster than the one below; B makes it inharmonic like a real string
+// (harmonic n sits at n * sqrt(1 + B n^2) times f); the pitch starts `glide`
+// cents sharp and settles within about 0.1 s. phone > 0: a 2nd-order high-pass
+// at that many Hz, like a phone microphone that hears little of low notes.
+// Peaks at `peak`, with very quiet room noise.
+function pluck(sr, seconds, f, { B = 0, glide = 6, decay = 1.5, seed = 1, phone = 0, peak = 0.3, fundamental = 1 } = {}) {
+  const rand = rng(seed);
+  const n = Math.round(sr * seconds), out = new Float32Array(n);
+  const H = Math.min(40, Math.floor(8000 / f));
+  const parts = [];
+  for (let k = 1; k <= H; k++) {
+    parts.push({ phase: rand() * 2 * Math.PI, amp: (k % 5 === 0 ? 0.15 : 1) / k * (k === 1 ? fundamental : 1),
+      tau: decay / (1 + 0.35 * (k - 1)), ratio: k * Math.sqrt(1 + B * k * k) });
+  }
+  for (let i = 0; i < n; i++) {
+    const t = i / sr, fi = f * Math.pow(2, glide * Math.exp(-t / 0.08) / 1200);
+    let s = 0;
+    for (const p of parts) { s += p.amp * Math.exp(-t / p.tau) * Math.sin(p.phase); p.phase += 2 * Math.PI * p.ratio * fi / sr; }
+    out[i] = s * Math.min(1, t / 0.003);
+  }
+  if (phone) {
+    const w = 2 * Math.PI * phone / sr, al = Math.sin(w) / (2 * Math.SQRT1_2), c = Math.cos(w);
+    const b0 = (1 + c) / 2, b1 = -(1 + c), a0 = 1 + al, a1 = -2 * c, a2 = 1 - al;
+    let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+    for (let i = 0; i < n; i++) {
+      const x = out[i], y = (b0 * x + b1 * x1 + b0 * x2 - a1 * y1 - a2 * y2) / a0;
+      x2 = x1; x1 = x; y2 = y1; y1 = y; out[i] = y;
+    }
+  }
+  let top = 0;
+  for (let i = 0; i < n; i++) top = Math.max(top, Math.abs(out[i]));
+  const room = rng(seed + 99);
+  for (let i = 0; i < n; i++) out[i] = out[i] * peak / (top || 1) + (room() - 0.5) * 0.0006;
+  return out;
 }
 
 function noise(sr, seconds, rmsDb, seed = 7, color = 'white') {
@@ -372,13 +411,65 @@ export function checkPitch(core, main, now = () => Date.now()) {
     }
   }
 
+  // 9b. Plucked strings (the Instrument Tuner), each with the range its instrument uses.
+  {
+    const r = row('Plucked strings that fade (guitar, bass down to the 5-string low B, ukulele, violin, cello), also through a phone-like microphone that hears little below 120 Hz: within 1 cent from 0.3 s until the string has faded, never an octave off');
+    const strings = [
+      ['bass B0', 30.868, 24, 230], ['bass E1', 41.203, 24, 230], ['bass G2', 97.999, 24, 230],
+      ['guitar D2', 73.416, 29, 760], ['guitar E2', 82.407, 29, 760], ['guitar A2', 110, 29, 760], ['guitar G3', 195.998, 29, 760], ['guitar E4', 329.628, 29, 760],
+      ['cello C2', 65.406, 52, 1520], ['ukulele C4', 261.626, 52, 1520], ['ukulele A4', 440, 52, 1520], ['violin E5', 659.255, 52, 1520],
+    ];
+    const errs = [], firsts = [];
+    let lastHeard = Infinity;
+    for (const [name, f, minFreq, maxFreq] of strings) {
+      for (const phone of [0, 120]) {
+        const { frames } = run(core, 48000, pluck(48000, 3, f, { phone, seed: Math.round(f) }), { minFreq, maxFreq });
+        const label = `${name}${phone ? ' (phone)' : ''}`;
+        const heard = frames.filter((fr) => fr.freq > 0);
+        const late = heard.filter((fr) => fr.time >= 0.3).map((fr) => Math.abs(cents(fr.freq, f)));
+        const octave = heard.filter((fr) => Math.abs(cents(fr.freq, f)) > 300);
+        const end = heard.length ? heard[heard.length - 1].time : 0;
+        r.checked += 3;
+        errs.push(...late);
+        if (heard.length) firsts.push(heard[0].time * 1000);
+        lastHeard = Math.min(lastHeard, end);
+        if (octave.length) fail(r, `${label}: ${octave.length} frames an octave or more off, e.g. ${fmt(octave[0].freq, 1)} Hz`);
+        if (!late.length || Math.max(...late) > 1) fail(r, `${label}: off by up to ${fmt(Math.max(...late))} cents after 0.3 s`);
+        if (end < 2.5) fail(r, `${label}: lost after ${fmt(end)} s while the string still sounds`);
+      }
+    }
+    r.stats = `worst ${fmt(Math.max(...errs), 3)} cents after 0.3 s; found ${fmt(Math.min(...firsts), 0)}-${fmt(Math.max(...firsts), 0)} ms after the pluck; still heard after ${fmt(lastHeard, 1)} s`;
+  }
+
+  // 9c. Real strings are a little inharmonic: their upper harmonics are sharp,
+  // so the pitch reads a little sharp at first and settles as they fade.
+  {
+    const r = row('Inharmonic plucked strings (real strings\' upper harmonics are a little sharp), through a phone-like microphone: never an octave off; guitar within 3 cents after 1 s; bass low E within 4 cents after 2 s (the low B is reported, not checked)');
+    const cases = [
+      ['guitar E2', 82.407, 29, 760, 1e-4, 150, 1, 3], ['guitar A2', 110, 29, 760, 1e-4, 150, 1, 3], ['guitar D3', 146.832, 29, 760, 1e-4, 150, 1, 3],
+      ['bass E1', 41.203, 24, 230, 3e-4, 120, 2, 4], ['bass B0', 30.868, 24, 230, 5e-4, 120, 2, Infinity],
+    ];
+    const stats = [];
+    for (const [name, f, minFreq, maxFreq, B, phone, after, limit] of cases) {
+      const { frames } = run(core, 48000, pluck(48000, 4, f, { B, phone, seed: 7 }), { minFreq, maxFreq });
+      const heard = frames.filter((fr) => fr.freq > 0);
+      const at = (t) => { const fr = heard.find((x) => x.time >= t); return fr ? cents(fr.freq, f) : NaN; };
+      const late = heard.filter((fr) => fr.time >= after).map((fr) => Math.abs(cents(fr.freq, f)));
+      r.checked += 2;
+      if (heard.some((fr) => Math.abs(cents(fr.freq, f)) > 300)) fail(r, `${name}: an octave error`);
+      if (Number.isFinite(limit) && !(Math.max(...late) <= limit)) fail(r, `${name}: off by up to ${fmt(Math.max(...late))} cents after ${after} s`);
+      stats.push(`${name} ${fmt(at(0.5), 1)} / ${fmt(at(1), 1)} / ${fmt(at(2), 1)} / ${fmt(at(3), 1)}`);
+    }
+    r.stats = `cents sharp at 0.5 / 1 / 2 / 3 s: ${stats.join('; ')}`;
+  }
+
   // 10. Speed: the share of one processor core the detector needs in real time.
   {
     const r = row('Speed: the detector needs under 10% of one processor core in real time');
     const sr = 48000;
     const sig = tone(sr, 3, { freq: NOTES.A2, shape: 'voice', rmsDb: -25 });
     const stats = [];
-    for (const minFreq of [40, 55]) {
+    for (const minFreq of [24, 40, 55]) {
       run(core, sr, sig.subarray(0, sr), { minFreq });   // warm up the JIT
       const t0 = now();
       const { frames } = run(core, sr, sig, { minFreq });
@@ -394,4 +485,4 @@ export function checkPitch(core, main, now = () => Date.now()) {
   return rows;
 }
 
-export const TEST_SIGNALS = { NOTES, tone, noise, concat, mix, cents };
+export const TEST_SIGNALS = { NOTES, tone, pluck, noise, concat, mix, cents };

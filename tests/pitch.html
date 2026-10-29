@@ -118,6 +118,35 @@
     show(judgeRender('Real AudioWorklet, rendered offline: a sawtooth at 220 Hz then 330 Hz, frames stamped with the context\'s time', await renderThrough(), true));
     show(judgeRender('Fallback for browsers without AudioWorklet (ScriptProcessor on the main thread), same signal', await renderThrough({ forceFallback: true }), false));
 
+    // setRange while listening: a 5-string bass's low B (30.87 Hz) is below the
+    // default range; after setRange(24, 230) at 1 s it is found.
+    for (const forceFallback of [false, true]) {
+      const sr = 48000, B0 = 30.868;
+      const ctx = new OfflineAudioContext(1, sr * 2, sr);
+      const osc = new OscillatorNode(ctx, { type: 'sawtooth', frequency: B0 });
+      const level = new GainNode(ctx, { gain: 0.1 });
+      osc.connect(level);
+      osc.start(0);
+      const frames = [];
+      const listener = await main.startPitch({ context: ctx, source: level, forceFallback, onFrame: (f) => frames.push(f) });
+      const before = listener.windowSeconds;
+      ctx.suspend(1).then(() => { listener.setRange(24, 230); ctx.resume(); });
+      await ctx.startRendering();
+      let count = -1;
+      while (count !== frames.length) { count = frames.length; await new Promise((r) => setTimeout(r, 250)); }
+      listener.stop();
+      const after = frames.filter((f) => f.time > 1.3);
+      const errs = after.map((f) => (f.freq ? Math.abs(cents(f.freq, B0)) : Infinity));
+      const early = frames.filter((f) => f.time < 1 && f.freq && Math.abs(cents(f.freq, B0)) < 50).length;
+      const first = frames.find((f) => f.time > 1 && f.freq && Math.abs(cents(f.freq, B0)) < 10);
+      const row = { section: `${forceFallback ? 'Fallback' : 'Real AudioWorklet'}, rendered offline: setRange(24, 230) while listening finds a 5-string bass's low B (30.87 Hz), which the default range (40 Hz up) can't`, checked: 3, failed: 0, examples: [],
+        stats: `window ${(before * 1000).toFixed(0)} ms, then ${(listener.windowSeconds * 1000).toFixed(0)} ms; low B shown ${first ? ((first.time - 1) * 1000).toFixed(0) : '?'} ms after the change, then within ${Math.max(...errs).toFixed(3)} cents` };
+      if (early) { row.failed++; row.examples.push(`${early} frames showed the low B before the change`); }
+      if (!first || first.time > 1.25) { row.failed++; row.examples.push(`low B shown at ${first ? first.time.toFixed(3) : 'never'} s (the change is at 1 s)`); }
+      if (!(Math.max(...errs) < 1)) { row.failed++; row.examples.push(`after the change, off by up to ${Math.max(...errs).toFixed(2)} cents`); }
+      show(row);
+    }
+
     {
       const { frames } = await renderThrough({ silent: true });
       const row = { section: 'Real AudioWorklet, rendered offline: 2 s of silence gives frames but never a note', checked: 2, failed: 0, stats: `${frames.length} frames`, examples: [] };

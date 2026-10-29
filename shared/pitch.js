@@ -30,11 +30,14 @@
  *     listener.stop()        stops the microphone (the browser's mic sign goes
  *                            off) and closes its own AudioContext
  *     listener.reset()       forgets the room's noise level and the current note
+ *     listener.setRange(minFreq, maxFreq)  a new range of notes while listening
+ *                            (the Instrument Tuner's instruments), without asking
+ *                            for the microphone again; starts afresh like reset()
  *     listener.readWaveform(out)  with waveform: true, fills out (a Float32Array
  *                            of WAVEFORM_SIZE) with the latest sound, oldest first
  *     listener.context, listener.sampleRate, listener.worklet (false = the
  *     ScriptProcessor fallback, for browsers without AudioWorklet),
- *     listener.windowSeconds
+ *     listener.windowSeconds (for the current range)
  *
  *   createPitchSmoother({ speed = 'calm', holdMs })
  *     What a display shows, from the frames: .push(frame) -> { freq, clarity }
@@ -111,7 +114,8 @@ export async function startPitch({ onFrame, onEnd, minFreq = 40, maxFreq = 2000,
   let node = null, worklet = false, input = null, mute = null, analyser = null, resetDetector = () => {};
   let ended = false;
   const deliver = (frame) => { if (!ended && onFrame) onFrame(frame); };
-  const options = { minFreq, maxFreq, hopMs };
+  let options = { minFreq, maxFreq, hopMs };
+  let setRange = () => {};
   try {
     input = source || ctx.createMediaStreamSource(stream);
     if (ctx.audioWorklet && typeof AudioWorkletNode !== 'undefined' && !forceFallback) {
@@ -125,16 +129,19 @@ export async function startPitch({ onFrame, onEnd, minFreq = 40, maxFreq = 2000,
         });
         node.port.onmessage = (e) => deliver(e.data);
         resetDetector = () => node.port.postMessage('reset');
+        setRange = () => node.port.postMessage({ range: { minFreq: options.minFreq, maxFreq: options.maxFreq } });
         worklet = true;
       } catch { node = null; }
     }
     // Fallback for browsers without AudioWorklet: the same detector on the main thread.
     if (!node) {
       let base = 0;
-      const ps = createPitchStream({
+      const makeStream = () => createPitchStream({
         ...options, sampleRate: ctx.sampleRate,
         onFrame: (f) => deliver({ time: base + f.time, freq: f.freq, clarity: f.clarity, rms: f.rms }),
       });
+      let ps = makeStream();
+      setRange = () => { ps = makeStream(); };
       node = ctx.createScriptProcessor(1024, 1, 1);
       // playbackTime is when this block's output would be heard, about two
       // blocks after its input arrived.
@@ -188,11 +195,16 @@ export async function startPitch({ onFrame, onEnd, minFreq = 40, maxFreq = 2000,
   return {
     stop,
     reset: () => resetDetector(),
+    setRange(min, max) {
+      if (ended) return;
+      options = { ...options, minFreq: min, maxFreq: max };
+      setRange();
+    },
     readWaveform: analyser ? (out) => analyser.getFloatTimeDomainData(out) : undefined,
     context: ctx,
     sampleRate: ctx.sampleRate,
     worklet,
-    windowSeconds: createPitchStream({ ...options, sampleRate: ctx.sampleRate, onFrame() {} }).windowSeconds,
+    get windowSeconds() { return createPitchStream({ ...options, sampleRate: ctx.sampleRate, onFrame() {} }).windowSeconds; },
   };
 }
 
