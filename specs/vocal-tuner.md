@@ -1,6 +1,6 @@
 # Vocal Tuner: spec
 
-**Status:** approved by Drephie, 2026-10-24, after two rounds of changes (a calmer screen, one name per note, and the 3D wave ball, tried in animated prototypes). Built the same day. **Changes after Drephie's first phone test (2026-10-30)**, marked *(phone test)*: in tune within ±10 cents with a Hard mode at ±5; a resting ball and a "Sing a note" prompt instead of an empty screen; a ring around the ball when in tune, visible in Monochrome too. Second phone test: waiting.
+**Status:** approved by Drephie, 2026-10-24, after two rounds of changes (a calmer screen, one name per note, and the 3D wave ball, tried in animated prototypes). Built the same day. **Changes after Drephie's first phone test (2026-10-30)**, marked *(phone test)*: in tune within ±10 cents with a Hard mode at ±5; a resting ball and a "Sing a note" prompt instead of an empty screen; a ring around the ball when in tune, visible in Monochrome too. **Second phone test (2026-10-30): all good**, no more changes.
 Items marked *(Claude's pick)* weren't asked: say if you want them changed. *(At build time)* marks details settled while building.
 
 ## What it is for
