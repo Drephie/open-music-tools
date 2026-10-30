@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Instrument Tuner</title>
+  <meta name="description" content="A free, open-source tuner for guitar, bass, ukulele, violin, viola and cello: play a string and see which way to turn the peg. Runs in your browser; nothing is recorded or uploaded.">
+  <meta name="theme-color" content="#0f1419">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <!-- Google Fonts CSS is UA-dependent, so SRI cannot be applied to it. -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/ui/themes.css">
+  <link rel="stylesheet" href="../shared/ui/select.css">
+  <link rel="stylesheet" href="../shared/ui/page.css">
+  <link rel="stylesheet" href="instrument-tuner.css">
+</head>
+<body data-theme="liquid">
+  <div id="theme-frame" aria-hidden="true"></div>
+  <div class="page">
+    <header class="tool-header">
+      <a class="icon-btn home-btn" href="../" data-i18n-aria="home" aria-label="Home: all the tools">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>
+      </a>
+      <h1 class="tool-title" data-i18n="title">Instrument Tuner</h1>
+      <div class="header-actions">
+        <button id="about-btn" class="icon-btn" data-i18n-aria="about" aria-label="About">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
+        </button>
+        <button id="settings-btn" class="icon-btn" data-i18n-aria="settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="tuner">
+      <canvas id="strings" class="strings-canvas" aria-hidden="true"></canvas>
+      <div class="tuning-row">
+        <div class="custom-select tuning-select"><select id="tuning-select" data-i18n-aria="tuningAria" aria-label="Instrument and tuning"></select></div>
+      </div>
+      <div class="head">
+        <p id="note" class="note" aria-hidden="true"><span id="note-name"></span><span id="note-oct" class="oct"></span></p>
+        <p id="prompt" class="prompt" aria-hidden="true" data-i18n="idle">Tap to start, then play</p>
+      </div>
+      <div id="stage" class="stage"></div>
+      <div id="string-btns" class="string-btns" role="group" data-i18n-aria="stringsAria" aria-label="Strings"></div>
+      <div class="readout" aria-hidden="true">
+        <p id="say" class="say"></p>
+        <div class="line"><span class="zone"></span><span class="notch"></span><span id="dot" class="dot"></span></div>
+      </div>
+      <p id="status" class="visually-hidden" aria-live="polite"></p>
+      <button id="listen-btn" class="btn listen-btn" aria-pressed="false">
+        <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4"/></svg>
+        <svg class="stop-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor"/></svg>
+        <span id="listen-label" data-i18n="start">Start listening</span>
+      </button>
+    </main>
+
+    <footer class="tool-footer">
+      <a class="support-link" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+      <span class="designer-credit"><span data-i18n="designedBy">Designed by</span> <a href="https://instagram.com/drephie" target="_blank" rel="noopener noreferrer">@drephie</a></span>
+    </footer>
+  </div>
+
+  <div id="settings-modal" class="centered-modal has-dropdowns" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="settings-title" data-i18n="settings">Settings</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <div class="control-group">
+      <label for="theme-select" data-i18n="theme">Aesthetic Theme</label>
+      <div class="custom-select"><select id="theme-select"></select></div>
+    </div>
+    <div class="control-group">
+      <label for="lang-select" data-i18n="lang">Language</label>
+      <div class="custom-select"><select id="lang-select"></select></div>
+    </div>
+    <div class="control-group">
+      <span id="names-label" class="group-label" data-i18n="names">Note names</span>
+      <div id="names-seg" class="seg" role="group" aria-labelledby="names-label">
+        <button type="button" data-names="solfege" data-i18n="namesSolfege">Do Re Mi</button>
+        <button type="button" data-names="letters" data-i18n="namesLetters">C D E</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <span id="tolerance-label" class="group-label" data-i18n="tolerance">In tune within</span>
+      <div id="tolerance-seg" class="seg" role="group" aria-labelledby="tolerance-label">
+        <button type="button" data-hard="false" data-i18n="tolNormal">5 cents</button>
+        <button type="button" data-hard="true" data-i18n="tolHard">2 cents (hard)</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="about-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="about-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="about-title" data-i18n="aboutTitle">About the Instrument Tuner</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <p class="about-text" data-i18n="aboutBody"></p>
+    <a class="btn patreon-btn" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+    <p class="about-small computer-only" data-i18n="aboutKeys"></p>
+  </div>
+
+  <div id="support-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="support-title" aria-describedby="support-body" style="display:none">
+    <div class="centered-modal support-card">
+      <button class="close-btn support-close" data-i18n-aria="closeAria" aria-label="Close" hidden>×</button>
+      <h2 id="support-title" data-i18n="supportTitle">Support the Instrument Tuner</h2>
+      <p id="support-body" data-i18n="supportBody"></p>
+      <a class="btn patreon-btn" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+      <button class="btn support-continue" disabled></button>
+    </div>
+  </div>
+
+  <script type="module" src="instrument-tuner.js"></script>
+</body>
+</html>
