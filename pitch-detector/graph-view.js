@@ -87,7 +87,8 @@ export function createGraphView(canvas) {
       const [light, dark] = luma(text) > luma(page) ? [text, page] : [page, text];
       ctx.fillStyle = n === pressed ? rgba(accent, 1) : black ? rgba(dark, 1) : rgba(light, 0.7);
       ctx.fillRect(0, y - lane / 2 + 0.5, kWidth, lane - 1);
-      if (black && n !== pressed) { ctx.strokeStyle = rgba(light, 0.45); ctx.lineWidth = 1; ctx.strokeRect(0.5, y - lane / 2 + 1, kWidth - 1, lane - 2); }
+      // An outline, so keys stand out on a light page too.
+      if (n !== pressed) { ctx.strokeStyle = black ? rgba(light, 0.45) : rgba(dark, 0.2); ctx.lineWidth = 1; ctx.strokeRect(0.5, y - lane / 2 + 1, kWidth - 1, lane - 2); }
       if (names && names[pc]) {
         // The name fits on its key: smaller when it is long (Sol♯ on a black key).
         const label = pretty(names[pc]) + (pc === 0 ? String(Math.floor(n / 12) - 1) : '');

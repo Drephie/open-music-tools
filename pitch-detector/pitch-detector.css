@@ -22,6 +22,8 @@
 .prompt { font-size: 17px; line-height: 1.25; text-align: center; white-space: normal; }
 .readout [hidden] { display: none; }
 .mic-msg { font-size: 15px; max-width: 30em; }
+/* A microphone message may take a few lines: the top grows, the graph gives way. */
+.readout.msg { height: auto; min-height: clamp(46px, 8dvh, 64px); padding: 4px 8px; }
 
 /* The graph fills the middle; the canvas draws the keys, lanes and the line. */
 .graph { position: relative; min-height: 0; border-top: 1px solid color-mix(in srgb, var(--color-text) 15%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 15%, transparent); }
@@ -81,5 +83,5 @@ body[data-theme="bw"] :is(.seg, .listen-btn) { border-radius: 0; }
   .listen-btn { min-height: 46px; }
   body[data-theme="retro"] :is(.prompt, .cents) { font-size: 19px; line-height: 1.1; }
   body[data-theme="retro"] #about-modal .about-text { font-size: 17px; line-height: 1.35; }
-  #about-modal .about-text { line-height: 1.45; }
+  #about-modal .about-text { font-size: 14px; line-height: 1.4; }
 }

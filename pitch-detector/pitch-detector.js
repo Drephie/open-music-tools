@@ -252,7 +252,7 @@ function render(force = false) {
   if (force || oct !== lastText.oct) { octEl.textContent = oct; lastText.oct = oct; }
   if (force || cents !== lastText.cents) { centsEl.textContent = cents; lastText.cents = cents; }
   if (force || prompt !== lastText.prompt) { promptEl.textContent = prompt; promptEl.hidden = !prompt; lastText.prompt = prompt; }
-  if (force || msg !== lastText.msg) { promptEl.classList.toggle('mic-msg', msg); lastText.msg = msg; }
+  if (force || msg !== lastText.msg) { promptEl.classList.toggle('mic-msg', msg); readoutEl.classList.toggle('msg', msg); lastText.msg = msg; }
   const looking = !live && trace.size > 1;
   if (force || looking !== lastText.looking) { detectorEl.classList.toggle('looking', looking); lastText.looking = looking; }
 
