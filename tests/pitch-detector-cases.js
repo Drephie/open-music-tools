@@ -64,7 +64,7 @@ export function checkDetector(T, core = null) {
 
   // 3. The line: glitches, breaks, steps, and the last 2 minutes.
   {
-    const r = row('The line: a single glitch an octave off is smoothed away, a real step and a break are kept, and only the last 2 minutes stay');
+    const r = row('The line: strays (a lone octave glitch, one or two wrong frames at a note change) are smoothed away, a real step and a break are kept, and only the last 2 minutes stay');
     const tr = T.createTrace({ seconds: 120 });
     let t = 0;
     const feed = (seconds, m) => { for (const end = t + seconds; t < end - 1e-9; t += 0.02) tr.push(t, typeof m === 'function' ? m(t) : m); };
@@ -72,15 +72,24 @@ export function checkDetector(T, core = null) {
     tr.push(t, 81); t += 0.02;          // one frame an octave up
     feed(1, 69);
     feed(0.2, NaN);                      // a breath
+    feed(0.5, 57);                       // A3, then a jump to C4 with one wrong frame between
+    tr.push(t, 40); t += 0.02;
+    feed(0.5, 60);
+    tr.push(t, 46); t += 0.02;           // then to F4 with two wrong frames (as seen in the browser)
+    tr.push(t, 58.04); t += 0.02;
+    feed(0.5, 65);
+    feed(0.2, NaN);
     feed(1, 71);                         // a real step to B4
     feed(0.02, 71.5);                    // keeps the last point out of the wait
     const pts = [];
     tr.forEach(-1, 1e9, (time, m) => pts.push([time, m]));
-    r.checked += 4;
+    r.checked += 6;
     if (pts.some(([, m]) => m > 75)) fail(r, 'the octave glitch is still in the line');
+    if (pts.some(([, m]) => m < 56)) fail(r, 'the wrong frame at the jump from A3 to C4 is still in the line');
+    if (pts.some(([time, m]) => time > 3.4 && time < 3.5 && m < 59.5)) fail(r, 'the two wrong frames at the jump from C4 to F4 are still in the line');
     if (!pts.some(([, m]) => Number.isNaN(m))) fail(r, 'the breath is not a break');
     const b4 = pts.find(([time, m]) => Math.abs(m - 71) < 0.01);
-    if (!b4 || b4[0] > 2.25 + 0.03) fail(r, `the step to B4 shows at ${b4 ? fmt(b4[0]) : 'never'} s (it starts at 2.24 s)`);
+    if (!b4 || b4[0] > 3.99 + 0.03) fail(r, `the step to B4 shows at ${b4 ? fmt(b4[0]) : 'never'} s (it starts at 3.98 s)`);
     if (Math.abs(tr.average(0, 0.9) - 69) > 1e-4 || !Number.isNaN(tr.average(2.05, 2.2))) fail(r, `average: ${fmt(tr.average(0, 0.9), 4)} and ${tr.average(2.05, 2.2)} (a break)`);
     // forEach gives one point either side of the window.
     const win = [];
@@ -94,12 +103,12 @@ export function checkDetector(T, core = null) {
     tr.clear();
     r.checked++;
     if (tr.size !== 0 || !Number.isNaN(tr.oldest)) fail(r, 'clear()');
-    r.stats = `${pts.length} points for 3.2 s; then 150 s pushed, the last 120 s kept`;
+    r.stats = `${pts.length} points for 5 s; then 150 s pushed, the last 120 s kept`;
   }
 
   // 4. End to end: voice-like tones through the pitch engine into the line.
   if (core) {
-    const r = row('Voice-like tones through the pitch engine into the line: a held note within 1 cent, vibrato kept (not smoothed away), a slide followed, silence and noise draw nothing');
+    const r = row('Voice-like tones through the pitch engine into the line: a held note within 1 cent, vibrato kept (not smoothed away), a slide followed, sudden note changes with nothing in between, silence and noise draw nothing');
     const sr = 48000;
     const run = (signal) => {
       const tr = T.createTrace();
@@ -120,6 +129,11 @@ export function checkDetector(T, core = null) {
     const swing = Math.max(...vib) - Math.min(...vib);
     r.checked++;
     if (!(swing > 70 && swing < 90)) fail(r, `vibrato: the line swings ${fmt(swing)} cents (the voice swings 80)`);
+    // A wide, fast vibrato (±100 cents, 6.5 a second): still kept, not flattened.
+    const wide = run(tone(sr, 2, { freq: NOTES.A4, shape: 'voice', rmsDb: -25, vibratoCents: 100, vibratoHz: 6.5, seed: 8 })).filter(([t, m]) => t > 0.3 && !Number.isNaN(m)).map(([, m]) => (m - 69) * 100);
+    const wideSwing = Math.max(...wide) - Math.min(...wide);
+    r.checked++;
+    if (!(wideSwing > 170)) fail(r, `wide vibrato: the line swings ${fmt(wideSwing)} cents (the voice swings 200)`);
     // A slide from C4 up to G4 over a second, then held.
     const slide = run(tone(sr, 2, { freq: (t) => NOTES.C4 * Math.pow(2, Math.min(1, Math.max(0, t - 0.3)) * 7 / 12), shape: 'voice', rmsDb: -25, seed: 5 })).filter(([, m]) => !Number.isNaN(m));
     let backwards = 0;
@@ -128,11 +142,21 @@ export function checkDetector(T, core = null) {
     r.checked += 2;
     if (backwards) fail(r, `slide: the line goes back down ${backwards} times`);
     if (!(Math.max(...end) < 2)) fail(r, `slide: ends ${fmt(Math.max(...end))} cents from G4`);
+    // Sudden note changes, up and down, small and large: nothing outside the two notes.
+    let strays = 0;
+    for (const [a, b] of [[220, 261.63], [261.63, 220], [220, 440], [440, 220], [196, 329.63], [330, 165], [NOTES.E2, NOTES.A2], [NOTES.C5, NOTES.G5]]) {
+      const pts = run(tone(sr, 1, { freq: (t) => (t < 0.5 ? a : b), shape: 'voice', rmsDb: -25, seed: 3 }));
+      const lo = Math.min(toMidi(a), toMidi(b)) - 0.5, hi = Math.max(toMidi(a), toMidi(b)) + 0.5;
+      const out = pts.filter(([, m]) => !Number.isNaN(m) && (m < lo || m > hi));
+      strays += out.length;
+      r.checked++;
+      if (out.length) fail(r, `jump ${fmt(a, 0)} to ${fmt(b, 0)} Hz: ${out.length} points outside the two notes, e.g. ${fmt(out[0][1], 1)}`);
+    }
     // Silence, then room noise: only breaks.
     const quiet = run(concat(new Float32Array(sr), noise(sr, 2, -40, 9)));
     r.checked++;
     if (quiet.some(([, m]) => !Number.isNaN(m))) fail(r, 'silence or noise drew a line');
-    r.stats = `held A3 within ${fmt(heldErr, 3)} cents; vibrato swings ${fmt(swing, 1)} cents in the line (80 in the voice); slide ends within ${fmt(Math.max(...end), 2)} cents; ${quiet.length} points of silence and noise, no line`;
+    r.stats = `held A3 within ${fmt(heldErr, 3)} cents; vibrato swings ${fmt(swing, 1)} cents in the line (80 in the voice), a wide one ${fmt(wideSwing, 0)} (200); slide ends within ${fmt(Math.max(...end), 2)} cents; 8 sudden jumps, ${strays} stray points; ${quiet.length} points of silence and noise, no line`;
   }
 
   return rows;
