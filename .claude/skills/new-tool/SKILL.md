@@ -55,7 +55,8 @@ Every visible string and every `aria-label` goes through i18n, in English, Spani
 ## 5b. Microphone (tools that listen)
 
 - Use `shared/pitch.js` (`startPitch`, `createPitchSmoother`, `nearestNote`; see its header and the Vocal Tuner). Call `startPitch` from the tap with no `await` before it, show a plain message for each `PITCH_ERRORS` reason, and stop listening when the page has stayed hidden for a second (`visibilitychange`), so the phone's microphone sign goes off. Nothing heard is kept.
-- Name single notes with `commonNoteName` (C# Eb F# Ab Bb). The themes' fonts have no ♯ or ♭: draw them (inline SVG, as the Vocal Tuner does) where they are big.
+- Name single notes with `commonNoteName` (C# Eb F# Ab Bb). The themes' fonts have no ♯ or ♭: draw them with `shared/ui/accidentals.js` (`accidentalHtml`) where they are big. To draw the sound's wave, `shared/wave.js` (`waveShape`).
+- A tool whose range of notes changes (the Instrument Tuner's instruments) calls `listener.setRange(minFreq, maxFreq)` while listening: no new microphone prompt. Plucked strings for tests: `TEST_SIGNALS.pluck` in `tests/pitch-cases.js` (fading, inharmonic, phone-like).
 - Phones only allow the microphone on https (or on the computer itself): the plain `http://<LAN address>:8000` link fails. To try it on the phone before anything goes online, start the `hub-https` server (`.claude/serve-https.py`: https on the home Wi-Fi with a self-signed certificate made for this computer's address; it prints the link, show it as a QR code). The phone warns once ("This connection is not private": Show Details, then visit this website). To put it online for a test, copy the site files to the Desktop and Drephie drags the folder onto the Netlify test site:
   `rsync -a --exclude='.*' --exclude='specs' --exclude='tests' --exclude='*.md' ~/CLAUDE/open-music-tools/ ~/Desktop/open-music-tools-site/`
 - Claude can't hear, and the built-in browser has no microphone: check the engine with `tests/pitch.html`, and the tool by replacing `navigator.mediaDevices.getUserMedia` in the page (javascript_tool) with one that returns a `MediaStreamDestination`'s stream fed by an `OscillatorNode` (a `PeriodicWave` with a few harmonics sounds like a voice to the detector); change its frequency and gain to play in tune, off, silence, or a looped noise buffer.
@@ -79,6 +80,9 @@ Add every new file to `APP_SHELL` in `/sw.js` and bump `CACHE_NAME` whenever a c
 - Taking a screenshot blurs the page: a tool that lets go of held notes on `blur` (the Piano) shows them released. Read held state with JavaScript instead, or use a state that survives (the Piano's Drone).
 - A tool drawn turned sideways on upright phones (the Piano's `#stage`): measure in the stage's own frame (`DOMMatrix` inverse for pointers, `setSelectRoom` for dropdowns), size with px or container units (`cqw`/`cqh`) rather than vw/vh, and map the safe areas with the turn.
 - Don't overwrite Drephie's saved settings or the Patreon window's last-shown time (`open-music-tools.supportPrompt`) without putting them back.
+- Setting a native `<select>`'s value and firing `change` doesn't update its custom dropdown's label (only `setupCustomSelects` does): to check labels, click the custom list's items instead.
+- Test helpers (a stand-in microphone, the rAF patch) are lost on every reload: keep their code in `sessionStorage` and `eval` it after each reload.
+- The app runs at most 5 dev servers per folder, shared with other sessions: stop your own `hub` server when you need `hub-https`.
 
 ## 8. Drephie's test
 
