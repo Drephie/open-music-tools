@@ -47,6 +47,13 @@
 .listen-btn .stop-icon, .listen-btn.on .mic-icon, .pause-btn .play-icon, .pause-btn[aria-pressed="true"] .pause-icon { display: none; }
 .listen-btn.on .stop-icon, .pause-btn[aria-pressed="true"] .play-icon { display: block; }
 
+/* Settings: the microphone's level now, and the mark where the sensitivity starts (-70..-10 dBFS). */
+.level { position: relative; height: 8px; margin-top: 10px; border-radius: 4px; background: color-mix(in srgb, var(--color-text) 15%, transparent); overflow: hidden; }
+.level-fill { position: absolute; left: 0; top: 0; bottom: 0; width: var(--level, 0%); background: var(--color-tune); border-radius: 4px; }
+.level-mark { position: absolute; top: -2px; bottom: -2px; left: var(--mark, 0%); width: 2px; margin-left: -1px; background: var(--color-text); }
+.sens-hint { margin: 8px 0 0; font-size: 12px; line-height: 1.35; opacity: 0.8; }
+body[data-theme="retro"] .sens-hint { font-size: 16px; line-height: 1.15; }
+
 /* Settings: segmented choices. */
 .group-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
 .seg { display: flex; border: 1px solid var(--border-panel); border-radius: 12px; overflow: hidden; }
@@ -84,4 +91,8 @@ body[data-theme="bw"] :is(.seg, .listen-btn) { border-radius: 0; }
   body[data-theme="retro"] :is(.prompt, .cents) { font-size: 19px; line-height: 1.1; }
   body[data-theme="retro"] #about-modal .about-text { font-size: 17px; line-height: 1.35; }
   #about-modal .about-text { font-size: 14px; line-height: 1.4; }
+  /* Soft Pink's tall font: Settings still fits one screen. */
+  body[data-theme="pink"] #settings-modal .seg button { min-height: 40px; }
+  body[data-theme="pink"] .sens-hint { line-height: 1.12; }
+  .level { margin-top: 8px; }
 }

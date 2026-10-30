@@ -30,6 +30,16 @@
  *     .extent(t0, t1)           { min, max } pitch of the notes between t0 and t1, or null
  *     .clear()
  *
+ *   SENSITIVITY  { low, normal, high }: the quietest sound (dBFS: the loudness of a
+ *     frame's rms, 0 is full scale) that counts as singing. Low is for noisy
+ *     places (sing close to the phone); high draws whatever the pitch engine
+ *     hears (its own floor is -54 dBFS).
+ *   createLoudnessGate()
+ *     .next(freq, rms, minDb) -> freq, or 0 when the sound is quieter than minDb.
+ *     A note that has started keeps going down to KEEP_DB under minDb, so its
+ *     fading end isn't cut. .reset()
+ *   levelDb(rms)  the loudness in dBFS (-Infinity for silence)
+ *
  *   fitView(min, max, { minSpan = 7, lowest = 33, highest = 95 })
  *     -> { low, high }: the graph's bottom and top (MIDI) for notes from min to
  *     max (Drephie: the lowest and highest notes on screen, with a margin, set
@@ -155,6 +165,22 @@ export function createTrace({ seconds = 120, rate = 50 } = {}) {
     get newest() { return size ? times[at(size - 1)] : NaN; },
     get latest() { return size ? pitch[at(size - 1)] : NaN; },
     clear() { start = size = total = 0; pend = null; kept = NaN; recent = []; run = []; },
+  };
+}
+
+export const SENSITIVITY = { low: -38, normal: -48, high: -Infinity };
+const KEEP_DB = 6;
+export const levelDb = (rms) => (rms > 0 ? 20 * Math.log10(rms) : -Infinity);
+
+export function createLoudnessGate() {
+  let on = false;
+  return {
+    next(freq, rms, minDb) {
+      const db = levelDb(rms);
+      on = freq > 0 && rms > 0 && (db >= minDb || (on && db >= minDb - KEEP_DB));
+      return on ? freq : 0;
+    },
+    reset() { on = false; },
   };
 }
 

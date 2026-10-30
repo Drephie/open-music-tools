@@ -85,6 +85,16 @@
       <label for="key-select" data-i18n="keyLabel">Highlight a key</label>
       <div class="custom-select"><select id="key-select"></select></div>
     </div>
+    <div class="control-group">
+      <span id="sens-label" class="group-label" data-i18n="sens">Microphone sensitivity</span>
+      <div id="sens-seg" class="seg" role="group" aria-labelledby="sens-label">
+        <button type="button" data-sens="low" data-i18n="sensLow">Low</button>
+        <button type="button" data-sens="normal" data-i18n="sensNormal">Normal</button>
+        <button type="button" data-sens="high" data-i18n="sensHigh">High</button>
+      </div>
+      <div id="level" class="level" aria-hidden="true"><span id="level-fill" class="level-fill"></span><span id="level-mark" class="level-mark"></span></div>
+      <p class="sens-hint" data-i18n="sensHint">Lower it in noisy places. The bar is what the microphone hears now: sounds left of the mark are left out.</p>
+    </div>
   </div>
 
   <div id="about-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="about-title" tabindex="-1" style="display:none">

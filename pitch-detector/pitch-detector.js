@@ -15,7 +15,7 @@ import { createModalManager } from '../shared/ui/modal.js';
 import { accidentalHtml, prettyName } from '../shared/ui/accidentals.js';
 import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
-import { createTrace, laneNames, fitView, KEY_CHOICES, keyLabel } from './trace.js';
+import { createTrace, laneNames, fitView, KEY_CHOICES, keyLabel, SENSITIVITY, createLoudnessGate, levelDb } from './trace.js';
 import { createGraphView } from './graph-view.js';
 import { DETECTOR_STRINGS } from './strings.js';
 
@@ -35,6 +35,7 @@ function readSettings() {
   return {
     solfege: typeof s.solfege === 'boolean' ? s.solfege : null,   // null: follows the language
     key: KEY_CHOICES.includes(s.key) ? s.key : 'none',
+    sens: s.sens in SENSITIVITY ? s.sens : 'normal',
   };
 }
 const settings = readSettings();
@@ -54,7 +55,8 @@ const detectorEl = document.querySelector('.detector'), readoutEl = document.que
 const noteEl = $('note'), nameEl = $('note-name'), octEl = $('note-oct'), centsEl = $('cents'), promptEl = $('prompt'), statusEl = $('status');
 const listenBtn = $('listen-btn'), listenLabel = $('listen-label'), pauseBtn = $('pause-btn');
 const graphEl = $('graph'), canvas = $('graph-canvas');
-const themeSelect = $('theme-select'), langSelect = $('lang-select'), keySelect = $('key-select'), namesSeg = $('names-seg');
+const themeSelect = $('theme-select'), langSelect = $('lang-select'), keySelect = $('key-select'), namesSeg = $('names-seg'), sensSeg = $('sens-seg');
+const levelEl = $('level');
 const settingsModal = $('settings-modal'), aboutModal = $('about-modal'), supportModal = $('support-modal');
 
 // --- THE LINE ---
@@ -70,10 +72,16 @@ let offset = Infinity;
 let listener = null, wanted = false, errorKey = null;
 const smoother = createPitchSmoother({ speed: 'calm' });
 let shown = null;            // { freq } for the note at the top, or null
+// Microphone sensitivity (Settings): sounds quieter than it are not singing.
+const loudness = createLoudnessGate();
+let rms = 0;
 
 function onFrame(frame) {
   offset = Math.min(offset, nowS() - frame.time);
   const time = frame.time + offset;
+  rms = frame.rms;
+  const freq = loudness.next(frame.freq, frame.rms, SENSITIVITY[settings.sens]);
+  if (freq !== frame.freq) frame = { ...frame, freq };
   if (paused) return;
   if (time < quietUntil) { trace.break(time); shown = smoother.push({ ...frame, freq: 0 }); return; }
   trace.push(time, frame.freq > 0 ? toMidi(frame.freq) : NaN);
@@ -113,6 +121,7 @@ async function startListening() {
   listener = l;
   offset = Infinity;
   smoother.reset();
+  loudness.reset();
   shown = null;
   trace.break(nowS());
   keepScreenAwake(true);
@@ -129,6 +138,7 @@ function stopListening() {
   paused = false;
   shown = null;
   smoother.reset();
+  loudness.reset();
   keepScreenAwake(false);
   showButtons();
   render(true);
@@ -143,6 +153,7 @@ function setPaused(on) {
   if (on) frozenAt = viewEnd = nowS();
   trace.break(nowS());
   smoother.reset();
+  loudness.reset();
   shown = null;
   showButtons();
   render(true);
@@ -348,8 +359,9 @@ function tick(nowMs) {
   }
 
   view.draw({ trace, end, low, high, names, cName: laneNames('none', solfege())[0], keyPcs, refs, pressed, dot: live && !!shown });
-  // Keep drawing while the line moves, a key is lit, or the view is still fitting.
-  if (live || pressed !== null || moving || pianoMsg === 'loading') frameId = requestAnimationFrame(tick);
+  const metering = showLevel(dt);
+  // Keep drawing while the line moves, a key is lit, the view is still fitting, or the level bar moves.
+  if (live || pressed !== null || moving || metering || pianoMsg === 'loading') frameId = requestAnimationFrame(tick);
 }
 
 // Taps on the graph: a piano key plays; elsewhere, before listening, starts it;
@@ -390,7 +402,7 @@ document.querySelectorAll('.modal-header .close-btn').forEach((b) => b.addEventL
 // After 30 s untouched, coming back opens the Patreon window (at most every 40 min).
 // Listening counts as use, so it never interrupts singing.
 const support = createSupportPrompt({ dialog: supportModal, modals, t, isBusy: () => !!listener });
-$('settings-btn').addEventListener('click', (e) => modals.open(settingsModal, e.currentTarget));
+$('settings-btn').addEventListener('click', (e) => { modals.open(settingsModal, e.currentTarget); run(); });
 $('about-btn').addEventListener('click', (e) => modals.open(aboutModal, e.currentTarget));
 listenBtn.addEventListener('click', toggle);
 pauseBtn.addEventListener('click', () => setPaused(!paused));
@@ -423,6 +435,23 @@ watchLook((look) => {
 
 function showChoices() {
   [...namesSeg.children].forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.names === 'solfege') === solfege())));
+  [...sensSeg.children].forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.sens === settings.sens)));
+  levelEl.style.setProperty('--mark', `${levelPercent(SENSITIVITY[settings.sens])}%`);
+}
+[...sensSeg.children].forEach((b) => b.addEventListener('click', () => {
+  settings.sens = b.dataset.sens;
+  save();
+  showChoices();
+}));
+// The level bar in Settings: -70..-10 dBFS across.
+const levelPercent = (db) => Math.max(0, Math.min(100, (db + 70) / 60 * 100));
+let shownLevel = 0;
+function showLevel(dt) {
+  if (modals.current() !== settingsModal) return false;
+  const target = listener ? levelPercent(levelDb(rms)) : 0;
+  shownLevel += (target - shownLevel) * Math.min(1, dt * (target > shownLevel ? 20 : 6));
+  levelEl.style.setProperty('--level', `${shownLevel.toFixed(1)}%`);
+  return listener || shownLevel > 0.5;
 }
 [...namesSeg.children].forEach((b) => b.addEventListener('click', () => {
   settings.solfege = b.dataset.names === 'solfege';

@@ -150,6 +150,26 @@ export function checkDetector(T, core = null) {
     if (Math.abs(tr.latest - 57) > 0.01) fail(r, `latest during a slip: ${fmt(tr.latest)}, expected 57`);
   }
 
+  // 3c. Microphone sensitivity (Drephie, on a train).
+  {
+    const r = row('Microphone sensitivity: low keeps out sounds quieter than -38 dBFS, normal than -48, high nothing more; a note that started keeps its fading end down to 6 dB under; silence and no pitch are never a note');
+    const rms = (db) => Math.pow(10, db / 20);
+    const g = T.createLoudnessGate();
+    const cases = [
+      // [freq, dB, sensitivity, expected on]
+      [220, -30, 'low', true], [220, -42, 'low', true], [220, -45, 'low', false], [220, -40, 'low', false],
+      [220, -50, 'normal', false], [220, -46, 'normal', true], [220, -40, 'normal', true], [220, -52, 'normal', true], [220, -55, 'normal', false],
+      [220, -60, 'high', true], [0, -20, 'high', false], [220, -10, 'low', true], [220, -Infinity, 'high', false],
+    ];
+    for (const [f, db, sens, want] of cases) {
+      const got = g.next(f, db === -Infinity ? 0 : rms(db), T.SENSITIVITY[sens]) > 0;
+      r.checked++;
+      if (got !== want) fail(r, `${f} Hz at ${db} dBFS, ${sens}: ${got ? 'drawn' : 'left out'}, expected ${want ? 'drawn' : 'left out'}`);
+    }
+    r.checked++;
+    if (!(T.SENSITIVITY.low > T.SENSITIVITY.normal && T.SENSITIVITY.normal > T.SENSITIVITY.high)) fail(r, 'low must need the loudest sound, high the quietest');
+  }
+
   // 3b. The view fits the notes on screen (Drephie).
   {
     const r = row('The view fits the notes on screen: lowest and highest with a margin, a two-octave jump whole, a single note at least 7 half steps tall, kept within the tool\'s range');
