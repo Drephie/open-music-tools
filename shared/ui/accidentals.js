@@ -5,7 +5,7 @@
  *   accidentalHtml(name)  'F#' / 'Mib' -> the name with its trailing # or b as
  *                         <svg class="acc">; other names unchanged. Size it
  *                         with CSS (e.g. .note .acc { width: 0.36em; height: 0.58em });
- *                         page.css gives .acc its stroke and colour.
+ *                         page.css gives svg.acc its stroke and colour.
  *   prettyName(name)      'F#' -> 'F♯', 'Mib' -> 'Mi♭' (plain text: screen
  *                         readers, titles)
  *
