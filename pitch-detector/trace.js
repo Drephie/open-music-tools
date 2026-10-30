@@ -20,7 +20,16 @@
  *                               first, with one point either side so a line
  *                               can be drawn to the edges
  *     .average(t0, t1)          the mean pitch of the notes between t0 and t1, or NaN
+ *     .extent(t0, t1)           { min, max } pitch of the notes between t0 and t1, or null
  *     .clear()
+ *
+ *   fitView(min, max, { minSpan = 7, lowest = 33, highest = 95 })
+ *     -> { low, high }: the graph's bottom and top (MIDI) for notes from min to
+ *     max (Drephie: the lowest and highest notes on screen, with a margin, set
+ *     the view, so a two-octave jump still fits whole and a narrow phrase gets
+ *     the most detail). The margin is 1.5 half steps or a tenth of the range,
+ *     whichever is more; the view is at least minSpan half steps and stays
+ *     within lowest..highest (plus the margin) where it can.
  *
  *   laneNames(key, solfege)  -> 12 names by pitch class (0 = C), null where a lane
  *     has no name. key: 'none' (the white keys: C D E F G A B or Do Re Mi) or a
@@ -82,16 +91,38 @@ export function createTrace({ seconds = 120, rate = 50 } = {}) {
     return n ? sum / n : NaN;
   }
 
+  function extent(t0, t1) {
+    let min = Infinity, max = -Infinity;
+    forEach(t0, t1, (t, m) => { if (t >= t0 && t <= t1 && !Number.isNaN(m)) { if (m < min) min = m; if (m > max) max = m; } });
+    return min <= max ? { min, max } : null;
+  }
+
   return {
     push,
     break: (t) => push(t, NaN),
     forEach,
     average,
+    extent,
     get size() { return size; },
     get oldest() { return size ? times[start] : NaN; },
     get newest() { return size ? times[at(size - 1)] : NaN; },
     clear() { start = size = 0; pend = null; kept = NaN; },
   };
+}
+
+export function fitView(min, max, { minSpan = 7, lowest = 33, highest = 95 } = {}) {
+  const margin = Math.max(1.5, (max - min) * 0.1);
+  let low = min - margin, high = max + margin;
+  if (high - low < minSpan) {
+    const mid = (low + high) / 2;
+    low = mid - minSpan / 2;
+    high = mid + minSpan / 2;
+  }
+  // Slide back inside the range of notes the tool shows, keeping the span.
+  const floor = lowest - 1.5, ceil = highest + 1.5;
+  if (low < floor) { high += floor - low; low = floor; }
+  if (high > ceil) { low -= high - ceil; high = ceil; }
+  return { low: Math.max(low, floor), high };
 }
 
 export const KEY_CHOICES = ['none', ...Array.from({ length: 12 }, (_, r) => `${r}_maj`), ...Array.from({ length: 12 }, (_, r) => `${r}_min`)];

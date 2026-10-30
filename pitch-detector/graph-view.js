@@ -7,13 +7,16 @@
  *   const view = createGraphView(canvas)
  *   view.setLook({ text, accent, page, font })   CSS colours and the label font
  *   view.resize()            after the canvas changed size
- *   view.layout -> { keysWidth, lane, span, seconds, pxPerSecond }
- *     lane: px per half step; span: half steps that fit; seconds: time that fits
- *   view.draw({ trace, end, center, names, keyPcs, refs, pressed, dot })
+ *   view.layout -> { keysWidth, lane, seconds, pxPerSecond }
+ *     lane: px per half step (at the last draw); seconds: time that fits
+ *   view.draw({ trace, end, low, high, names, cName, keyPcs, refs, pressed, dot })
  *     trace    pitch-detector/trace.js createTrace
  *     end      the time at the right edge (the trace's clock)
- *     center   the pitch (MIDI with a fraction) at the middle
+ *     low, high  the pitches (MIDI with a fraction) at the bottom and top edges
+ *              (trace.js fitView). Keys are named while lanes are at least
+ *              14 px tall; thinner, only the C's (Do's) keep their names.
  *     names    12 names by pitch class or null (trace.js laneNames), '#'/'b' ASCII
+ *     cName    the name of C (C or Do), for the thin-lane labels
  *     keyPcs   pitch classes of the highlighted key, or null
  *     refs     [{ midi, t0, t1 }] notes heard from the piano: faint bars
  *     pressed  the MIDI of a key that sounds now (lit), or null
@@ -41,18 +44,16 @@ export function createGraphView(canvas) {
   const ctx = canvas.getContext('2d');
   let w = 0, h = 0, dpr = 1;
   let text = [255, 255, 255], accent = [138, 212, 255], page = [15, 20, 25], font = 'sans-serif';
-  let center = 64;
-  const layout = { keysWidth: 34, lane: 24, span: 16, seconds: 6, pxPerSecond: 50 };
+  let low = 55, high = 69;
+  const layout = { keysWidth: 44, lane: 24, seconds: 6, pxPerSecond: 50 };
 
   function resize() {
     dpr = Math.min(2, window.devicePixelRatio || 1);
     w = canvas.clientWidth; h = canvas.clientHeight;
     canvas.width = Math.max(1, Math.round(w * dpr));
     canvas.height = Math.max(1, Math.round(h * dpr));
-    // About 16 half steps on a phone, lanes no thinner than 18 px; 50 px a second.
+    // 50 px a second: about 6 seconds on a phone, more on a computer.
     layout.keysWidth = w > 600 ? 52 : 44;
-    layout.lane = Math.max(18, Math.min(30, h / 16));
-    layout.span = h / layout.lane;
     layout.pxPerSecond = 50;
     layout.seconds = Math.max(1, (w - layout.keysWidth - 4) / layout.pxPerSecond);
   }
@@ -62,16 +63,18 @@ export function createGraphView(canvas) {
     font = look.font || font;
   }
 
-  const yOf = (m) => h / 2 - (m - center) * layout.lane;
+  const yOf = (m) => (high - m) * layout.lane;
 
-  function draw({ trace, end, center: c, names, keyPcs = null, refs = [], pressed = null, dot = false }) {
-    center = c;
+  function draw({ trace, end, low: l, high: hh, names, cName = 'C', keyPcs = null, refs = [], pressed = null, dot = false }) {
+    low = l; high = hh;
+    layout.lane = h / Math.max(1, high - low);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
     const { keysWidth: kw, lane } = layout;
     const gx = kw + 4, gr = w;
     const xOf = (t) => gr - (end - t) * layout.pxPerSecond;
-    const lo = Math.floor(center - layout.span / 2) - 1, hi = Math.ceil(center + layout.span / 2) + 1;
+    const lo = Math.floor(low) - 1, hi = Math.ceil(high) + 1;
+    const allNames = lane >= 14;
     const labelSize = Math.max(9, Math.min(12, lane * 0.45));
 
     // Lanes, the line under every C, and the piano keys with their names.
@@ -88,10 +91,12 @@ export function createGraphView(canvas) {
       ctx.fillStyle = n === pressed ? rgba(accent, 1) : black ? rgba(dark, 1) : rgba(light, 0.7);
       ctx.fillRect(0, y - lane / 2 + 0.5, kWidth, lane - 1);
       // An outline, so keys stand out on a light page too.
-      if (n !== pressed) { ctx.strokeStyle = black ? rgba(light, 0.45) : rgba(dark, 0.2); ctx.lineWidth = 1; ctx.strokeRect(0.5, y - lane / 2 + 1, kWidth - 1, lane - 2); }
-      if (names && names[pc]) {
+      if (n !== pressed && lane > 4) { ctx.strokeStyle = black ? rgba(light, 0.45) : rgba(dark, 0.2); ctx.lineWidth = 1; ctx.strokeRect(0.5, y - lane / 2 + 1, kWidth - 1, lane - 2); }
+      // Thin lanes: only the C's, named even when the key has no C (B♯ is still a C key).
+      const name = allNames ? names && names[pc] : pc === 0 ? cName : null;
+      if (name) {
         // The name fits on its key: smaller when it is long (Sol♯ on a black key).
-        const label = pretty(names[pc]) + (pc === 0 ? String(Math.floor(n / 12) - 1) : '');
+        const label = pretty(name) + (pc === 0 ? String(Math.floor(n / 12) - 1) : '');
         let size = labelSize;
         ctx.font = `700 ${size}px ${font}`;
         while (size > 7 && ctx.measureText(label).width > kWidth - 5) ctx.font = `700 ${(size -= 0.5)}px ${font}`;
@@ -141,7 +146,7 @@ export function createGraphView(canvas) {
   resize();
   return {
     resize, setLook, draw, layout,
-    midiAt: (y) => center + (h / 2 - y) / layout.lane,
+    midiAt: (y) => high - y / layout.lane,
     onKeys: (x) => x <= layout.keysWidth + 2,
   };
 }

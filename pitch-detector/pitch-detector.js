@@ -2,7 +2,7 @@
  * specs/pitch-detector.md). The microphone and the pitch come from
  * shared/pitch.js; the line and the keys' names are ./trace.js; the graph is
  * drawn by ./graph-view.js; the piano is shared/sound.js. This file is the
- * screen: the note at the top, following the voice, pause and looking back,
+ * screen: the note at the top, fitting the view to the notes on screen, pause and looking back,
  * tapping a key to hear it, the settings, windows and keyboard.
  */
 import { startPitch, createPitchSmoother, nearestNote } from '../shared/pitch.js';
@@ -15,7 +15,7 @@ import { createModalManager } from '../shared/ui/modal.js';
 import { accidentalHtml, prettyName } from '../shared/ui/accidentals.js';
 import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
-import { createTrace, laneNames, KEY_CHOICES, keyLabel } from './trace.js';
+import { createTrace, laneNames, fitView, KEY_CHOICES, keyLabel } from './trace.js';
 import { createGraphView } from './graph-view.js';
 import { DETECTOR_STRINGS } from './strings.js';
 
@@ -267,7 +267,8 @@ function render(force = false) {
 
 // --- THE GRAPH ---
 const view = createGraphView(canvas);
-let center = 62, names = laneNames(settings.key, solfege()), keyPcs = null;
+// The graph's bottom and top (MIDI), eased toward fitView of the notes on screen.
+let low = 55, high = 69, names = laneNames(settings.key, solfege()), keyPcs = null;
 
 function readLook() {
   const cs = getComputedStyle(document.body);
@@ -326,19 +327,25 @@ function tick(nowMs) {
   const live = listener && !paused;
   const end = graphEnd();
 
-  // Follow the voice: toward the last 2.5 s (live), or what is on screen (looking back);
-  // quickly when the voice is off the screen.
-  const target = live ? trace.average(end - 2.5, end) : trace.average(end - view.layout.seconds, end);
-  if (!Number.isNaN(target)) {
-    const off = Math.abs(target - center) > view.layout.span / 2 - 1;
-    center += (target - center) * Math.min(1, dt * (off ? 6 : 1.2));
-  }
-  center = Math.max(LOWEST + view.layout.span / 2 - 1, Math.min(HIGHEST - view.layout.span / 2 + 1, center));
+  // The view fits the notes on screen (the line, and the notes heard from the
+  // piano) with a margin (Drephie): it opens up at once for a jump, and
+  // closes in slowly, so it never jitters.
+  const t0 = end - view.layout.seconds;
   refs = refs.filter((r) => r.t1 > trace.oldest || Number.isNaN(trace.oldest));
+  const ext = trace.extent(t0, end);
+  let min = ext ? ext.min : Infinity, max = ext ? ext.max : -Infinity;
+  for (const r of refs) if (r.t1 > t0 && r.t0 < end) { min = Math.min(min, r.midi); max = Math.max(max, r.midi); }
+  let moving = false;
+  if (min <= max) {
+    const fit = fitView(min, max, { lowest: LOWEST, highest: HIGHEST });
+    low += (fit.low - low) * Math.min(1, dt * (fit.low < low ? 12 : 1.5));
+    high += (fit.high - high) * Math.min(1, dt * (fit.high > high ? 12 : 1.5));
+    moving = Math.abs(fit.low - low) > 0.01 || Math.abs(fit.high - high) > 0.01;
+  }
 
-  view.draw({ trace, end, center, names, keyPcs, refs, pressed, dot: live && !!shown });
-  // Keep drawing while the line moves, a key is lit, or the view is still gliding.
-  if (live || pressed !== null || (!Number.isNaN(target) && Math.abs(target - center) > 0.01) || pianoMsg === 'loading') frameId = requestAnimationFrame(tick);
+  view.draw({ trace, end, low, high, names, cName: laneNames('none', solfege())[0], keyPcs, refs, pressed, dot: live && !!shown });
+  // Keep drawing while the line moves, a key is lit, or the view is still fitting.
+  if (live || pressed !== null || moving || pianoMsg === 'loading') frameId = requestAnimationFrame(tick);
 }
 
 // Taps on the graph: a piano key plays; elsewhere, before listening, starts it;

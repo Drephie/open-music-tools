@@ -106,6 +106,34 @@ export function checkDetector(T, core = null) {
     r.stats = `${pts.length} points for 5 s; then 150 s pushed, the last 120 s kept`;
   }
 
+  // 3b. The view fits the notes on screen (Drephie).
+  {
+    const r = row('The view fits the notes on screen: lowest and highest with a margin, a two-octave jump whole, a single note at least 7 half steps tall, kept within the tool\'s range');
+    const cases = [
+      // [min, max, expected low, expected high]
+      [60, 64, 58.5, 65.5],          // a third: 1.5 margin each side
+      [57, 81, 54.6, 83.4],          // two octaves: a tenth (2.4) each side
+      [69, 69.4, 65.7, 72.7],        // one note with vibrato: 7 half steps around it
+      [33, 36, 31.5, 38.5],          // the very bottom
+      [94, 95, 89.5, 96.5],          // the very top: slides down to stay within range
+    ];
+    for (const [mn, mx, lo, hi] of cases) {
+      const v = T.fitView(mn, mx);
+      r.checked++;
+      if (Math.abs(v.low - lo) > 1e-6 || Math.abs(v.high - hi) > 1e-6) fail(r, `fitView(${mn}, ${mx}) = ${fmt(v.low)}..${fmt(v.high)}, expected ${lo}..${hi}`);
+    }
+    // extent: the notes between two times, breaks ignored.
+    const tr = T.createTrace();
+    let t = 0;
+    const feed = (seconds, m) => { for (const end = t + seconds; t < end - 1e-9; t += 0.02) tr.push(t, m); };
+    feed(1, 57); feed(0.3, NaN); feed(1, 69); feed(1, 81); feed(0.02, NaN);
+    const all = tr.extent(0, 10), late = tr.extent(1.4, 2.2), none = tr.extent(1.05, 1.25);
+    r.checked += 3;
+    if (!all || all.min !== 57 || all.max !== 81) fail(r, `extent of everything: ${all && `${all.min}..${all.max}`}, expected 57..81`);
+    if (!late || late.min !== 69 || late.max !== 69) fail(r, `extent 1.4..2.2 s: ${late && `${late.min}..${late.max}`}, expected 69..69`);
+    if (none !== null) fail(r, 'extent over a break should be null');
+  }
+
   // 4. End to end: voice-like tones through the pitch engine into the line.
   if (core) {
     const r = row('Voice-like tones through the pitch engine into the line: a held note within 1 cent, vibrato kept (not smoothed away), a slide followed, sudden note changes with nothing in between, silence and noise draw nothing');
