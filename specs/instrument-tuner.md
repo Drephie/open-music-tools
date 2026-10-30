@@ -1,6 +1,6 @@
 # Instrument Tuner: spec
 
-**Status:** approved by Drephie, 2026-10-30. Drephie's choices from the questions and two animated prototypes: the vibrating strings look, all four instrument groups, automatic string finding with tap to stay, in tune within 5 cents (Hard mode 2), no sound, and "tighten / loosen" in the words. **Built 2026-10-30**; Drephie's phone test is still to do.
+**Status:** approved by Drephie, 2026-10-30. Drephie's choices from the questions and two animated prototypes: the vibrating strings look, all four instrument groups, automatic string finding with tap to stay, in tune within 5 cents (Hard mode 2), no sound, and "tighten / loosen" in the words. **Built 2026-10-30. Drephie's phone test (2026-10-30, home Wi-Fi https): all good**, no changes.
 Items marked *(Claude's pick)* weren't asked: say if you want them changed. *(At build time)* marks details settled while building.
 
 ## What it is for
