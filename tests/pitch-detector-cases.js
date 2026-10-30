@@ -106,6 +106,50 @@ export function checkDetector(T, core = null) {
     r.stats = `${pts.length} points for 5 s; then 150 s pushed, the last 120 s kept`;
   }
 
+  // 3a. Octave slips (Drephie's phone test: the line swung between octaves on a held note).
+  {
+    const r = row('Octave slips: a held note misread an octave up or down, for one frame or many (up to half a second, even flipping back and forth), stays in its octave; a real leap that stays is redrawn where it was sung; a phrase whose start was misread is moved; a slide between octaves is drawn as it happens');
+    const run = (steps) => {
+      const tr = T.createTrace();
+      let t = 0;
+      for (const [seconds, m] of steps) for (const end = t + seconds; t < end - 1e-9; t += 0.02) tr.push(t, typeof m === 'function' ? m(t) : m);
+      tr.push(t, NaN); tr.push(t + 0.02, NaN);
+      const pts = [];
+      tr.forEach(-1, 1e9, (time, m) => { if (!Number.isNaN(m)) pts.push([time, m]); });
+      return { tr, pts };
+    };
+    // A held A3 with slips: 1, 3, 10 and 24 frames, up and down, and a stretch flipping every frame.
+    const flip = (t) => 57 + (Math.round(t / 0.02) % 2 ? 12 : 0);
+    const held = run([[0.5, 57], [0.02, 69], [0.4, 57], [0.06, 45], [0.4, 57], [0.2, 69], [0.4, 57], [0.48, 69], [0.4, 57], [0.3, flip], [0.4, 57], [0.3, (t) => 57 + 0.3 * Math.sin(t * 35)], [0.2, (t) => 69 + 0.3 * Math.sin(t * 35)], [0.3, 57]]);
+    const off = held.pts.filter(([, m]) => Math.abs(m - 57) > 0.5);
+    r.checked++;
+    if (off.length) fail(r, `held A3 with slips: ${off.length} points left the octave, e.g. ${fmt(off[0][1])} at ${fmt(off[0][0])} s`);
+    // A real leap: A3 for a second, then A4 for a second, with no slide.
+    const leap = run([[1, 57], [1, 69]]);
+    const wrong = leap.pts.filter(([time, m]) => (time < 0.99 ? Math.abs(m - 57) > 0.01 : time > 1.01 && Math.abs(m - 69) > 0.01));
+    r.checked++;
+    if (wrong.length) fail(r, `real leap A3 to A4: ${wrong.length} points in the wrong octave, e.g. ${fmt(wrong[0][1])} at ${fmt(wrong[0][0])} s`);
+    // The phrase starts with 4 misread frames an octave up, then a second of the real note.
+    const start = run([[0.08, 69], [1, 57]]);
+    r.checked++;
+    if (start.pts.some(([, m]) => Math.abs(m - 57) > 0.01)) fail(r, `misread start: ${start.pts.filter(([, m]) => Math.abs(m - 57) > 0.01).length} points left at the wrong octave`);
+    // A quick slide up an octave (0.15 s), then held: drawn at once, no waiting.
+    const slide = run([[0.5, 57], [0.15, (t) => 57 + 12 * (t - 0.5) / 0.15], [0.5, 69]]);
+    const lateTop = slide.pts.filter(([time, m]) => time > 0.68 && time < 0.9 && Math.abs(m - 69) > 0.3);
+    r.checked++;
+    if (lateTop.length) fail(r, `slide up an octave: ${lateTop.length} points after it held back, e.g. ${fmt(lateTop[0][1])}`);
+    // A melody with a major seventh and a minor ninth (one half step from an octave): never folded.
+    const mel = run([[0.4, 57], [0.4, 68], [0.4, 57], [0.4, 70]]);
+    r.checked++;
+    if (!mel.pts.some(([, m]) => Math.abs(m - 68) < 0.01) || !mel.pts.some(([, m]) => Math.abs(m - 70) < 0.01)) fail(r, 'a major seventh or a minor ninth was folded');
+    // latest follows the line's octave.
+    const tr = T.createTrace();
+    for (let t = 0; t < 0.5; t += 0.02) tr.push(t, 57);
+    for (let t = 0.5; t < 0.6; t += 0.02) tr.push(t, 69);
+    r.checked++;
+    if (Math.abs(tr.latest - 57) > 0.01) fail(r, `latest during a slip: ${fmt(tr.latest)}, expected 57`);
+  }
+
   // 3b. The view fits the notes on screen (Drephie).
   {
     const r = row('The view fits the notes on screen: lowest and highest with a margin, a two-octave jump whole, a single note at least 7 half steps tall, kept within the tool\'s range');

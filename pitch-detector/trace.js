@@ -7,15 +7,22 @@
  *     .push(time, midi)  time in seconds on any steady clock, rising; midi with a
  *                        fraction (69.12 = A4 + 12 cents), or NaN for no note
  *                        (silence, paused, a piano note playing). A point
- *                        more than 1.5 half steps from both the last point
+ *                        more than 2.5 half steps from both the last point
  *                        kept and the next one is a stray (a frame or two at
  *                        a sudden note change, a lone octave glitch): it
  *                        becomes the last point kept, so a note change draws
  *                        as a clean step. Slides, scoops and vibrato move less
  *                        than that between frames. Each point appears one
  *                        frame late.
+ *                        Octave slips: within a phrase, a point within 3/4 of a
+ *                        half step of an octave (or two) from the recent line is
+ *                        drawn in the line's octave; if it stays more than half
+ *                        a second it was a real leap, and those points are
+ *                        redrawn where they were sung (and the phrase's start
+ *                        too, when it was shorter: then the start was the slip).
  *     .break(time)       a break in the line (same as push(time, NaN))
  *     .size, .oldest, .newest   point count and the first and last times (NaN when empty)
+ *     .latest            the newest point's pitch (NaN in a break): the octave the line is in
  *     .forEach(t0, t1, fn)      fn(time, midi) for the points from t0 to t1, oldest
  *                               first, with one point either side so a line
  *                               can be drawn to the edges
@@ -41,7 +48,9 @@
  */
 import { parseKey, keyRootName, tonicLetterIdx, spellOnLetter, MAJOR_SCALE_STEPS, MINOR_SCALE_STEPS, LETTER_PC, LETTERS, SOLFEGE_OF } from '../shared/theory.js';
 
-const JUMP = 1.5;   // half steps between neighbouring points that still count as one movement
+const JUMP = 2.5;          // half steps between neighbouring points that still count as one movement
+const OCTAVE_NEAR = 0.75;  // half steps: a point this near an octave from the line is an octave slip...
+const OCTAVE_HOLD = 0.5;   // ...unless it stays this many seconds (then it was a real leap)
 
 export function createTrace({ seconds = 120, rate = 50 } = {}) {
   const cap = Math.ceil(seconds * rate * 1.25) + 8;
@@ -49,13 +58,51 @@ export function createTrace({ seconds = 120, rate = 50 } = {}) {
   let start = 0, size = 0;
   let pend = null, kept = NaN;   // the point waiting one frame, and the last point kept
 
+  let total = 0;                 // points stored so far: point n sits at ring index posOf(n)
   function store(t, m) {
     if (size === cap) { start = (start + 1) % cap; size--; }
     const i = (start + size) % cap;
     times[i] = t; pitch[i] = m;
     size++;
+    total++;
     // Forget what is older than `seconds`.
     while (size > 1 && times[start] < t - seconds) { start = (start + 1) % cap; size--; }
+  }
+  const posOf = (n) => (n < total - size ? -1 : (start + n - (total - size)) % cap);
+
+  // The octave guard. A voice can't jump exactly an octave in one frame and
+  // stay there by accident, but a detector can read a held note an octave off
+  // for a moment. Within a phrase, a point within OCTAVE_NEAR of an octave (or
+  // two) from the recent line is read as that slip and drawn in the line's
+  // octave. If it stays more than OCTAVE_HOLD seconds, it was a real leap: those
+  // points are redrawn where they were sung, and if the phrase so far was
+  // shorter than the leap, its start is moved too (the start was the slip).
+  // Slides and scoops between octaves pass through other pitches, so they are
+  // drawn as they happen.
+  let recent = [], run = [], runK = 0, phraseStart = 0;
+  const median = (a) => { const s = a.slice().sort((x, y) => x - y); return s[s.length >> 1]; };
+  function keep(t, m) {
+    if (Number.isNaN(m)) { recent = []; run = []; store(t, m); phraseStart = total; return; }
+    if (!recent.length) phraseStart = total;
+    const d = m - (recent.length ? median(recent) : m), k = Math.round(d / 12);
+    let out = m;
+    if (k !== 0 && Math.abs(d - 12 * k) < OCTAVE_NEAR) {
+      if (run.length && k !== runK) run = [];
+      runK = k;
+      out = m - 12 * k;
+      run.push({ n: total, t, raw: m });
+    } else run = [];
+    store(t, out);
+    recent.push(out);
+    if (recent.length > 9) recent.shift();
+    if (run.length && t - run[0].t >= OCTAVE_HOLD) {
+      for (const p of run) { const i = posOf(p.n); if (i >= 0) pitch[i] = p.raw; }
+      if (run[0].n - phraseStart < run.length) {
+        for (let n = phraseStart; n < run[0].n; n++) { const i = posOf(n); if (i >= 0 && !Number.isNaN(pitch[i])) pitch[i] += 12 * runK; }
+      }
+      recent = run.slice(-9).map((p) => p.raw);
+      run = [];
+    }
   }
 
   // A point is kept when it is near the last point kept or the next one: a
@@ -67,7 +114,7 @@ export function createTrace({ seconds = 120, rate = 50 } = {}) {
     if (pend) {
       const v = pend.m;
       const out = Number.isNaN(v) || near(kept, v) || near(m, v) ? v : kept;
-      store(pend.t, out);
+      keep(pend.t, out);
       kept = out;
     }
     pend = { t, m };
@@ -106,7 +153,8 @@ export function createTrace({ seconds = 120, rate = 50 } = {}) {
     get size() { return size; },
     get oldest() { return size ? times[start] : NaN; },
     get newest() { return size ? times[at(size - 1)] : NaN; },
-    clear() { start = size = 0; pend = null; kept = NaN; },
+    get latest() { return size ? pitch[at(size - 1)] : NaN; },
+    clear() { start = size = total = 0; pend = null; kept = NaN; recent = []; run = []; },
   };
 }
 

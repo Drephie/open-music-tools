@@ -238,7 +238,11 @@ function render(force = false) {
   else if (!listener) prompt = t('waiting');
   else if (!shown) prompt = t('sing');
   else {
-    const n = nearestNote(shown.freq, 440, midi);
+    // The note at the top keeps the line's octave (the line corrects octave slips).
+    let f = shown.freq;
+    const line = trace.latest;
+    if (!Number.isNaN(line)) f *= Math.pow(2, Math.round((line - toMidi(f)) / 12));
+    const n = nearestNote(f, 440, midi);
     midi = n.midi;
     const c = Math.round(n.cents);
     const nn = commonNoteName(midi, solfege());
