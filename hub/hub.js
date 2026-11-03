@@ -28,9 +28,10 @@ const settingsModal = $('settings-modal'), aboutModal = $('about-modal');
 // --- CARDS: every name fits its card, every card the same size ---
 // Names share one size: the largest at which no word sticks out of its card.
 // Then every card gets the height of the tallest, if any needs more than a square.
+// The flagship (li.featured) is sized by the grid, so it isn't measured.
 function fitCards() {
   const names = [...main.querySelectorAll('.tool-name')];
-  const cards = [...main.querySelectorAll('.tool-card')];
+  const cards = [...main.querySelectorAll('li:not(.featured) > .tool-card')];
   main.style.removeProperty('--name-size');
   main.style.setProperty('--card-h', '0px');
   let size = parseFloat(getComputedStyle(names[0]).fontSize);

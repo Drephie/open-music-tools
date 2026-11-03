@@ -2,6 +2,8 @@
  * Theme variables only. Every tool is a square card of the same size; hub.js
  * shrinks the names until every word fits (--name-size) and makes all cards as
  * tall as the tallest one when a description needs more than a square (--card-h).
+ * The flagship (li.featured, Choordination) is first and bigger: two columns by
+ * two rows, the whole width on phones. .beta-badge: a "Beta" tag in a card's corner.
  */
 .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
@@ -35,6 +37,22 @@ body[data-theme="liquid"] .hub-logo, body:not([data-theme]) .hub-logo { color: v
 .tool-name { font-size: var(--name-size, 18px); font-weight: 900; text-transform: uppercase; letter-spacing: 1px; line-height: 1.15; color: var(--color-left); overflow-wrap: normal; hyphens: none; }
 .tool-desc { font-size: 14px; line-height: 1.45; }
 
+/* The flagship: two columns by two rows, bigger drawing and name, accent border. */
+.tool-grid > li.featured { grid-column: span 2; grid-row: span 2; }
+.featured .tool-card { aspect-ratio: auto; min-height: 0; justify-content: center; gap: 12px; padding: 28px; border-color: var(--color-right); }
+.featured .tool-icon { width: 72px; height: 72px; }
+.featured .tool-name { font-size: calc(1.7 * var(--name-size, 18px)); }
+.featured .tool-desc { font-size: 17px; max-width: 22em; }
+
+/* "Beta": a tool still being tried out. */
+.tool-card { position: relative; }
+.beta-badge {
+  position: absolute; top: 12px; right: 12px;
+  padding: 2px 9px; border: 1px solid var(--color-right); border-radius: 999px;
+  font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; line-height: 1.4;
+  color: var(--color-right);
+}
+
 a.tool-card:active { transform: scale(0.97); }
 @media (hover: hover) {
   a.tool-card:hover { border-color: var(--color-right); background: color-mix(in srgb, var(--color-right) 14%, var(--color-panel)); transform: translateY(-2px); }
@@ -59,6 +77,10 @@ body[data-theme="retro"] .hub-privacy { font-size: 17px; }
 body[data-theme="retro"] .hub-section-title { font-size: 19px; }
 body[data-theme="retro"] .tool-name { font-size: var(--name-size, 24px); }
 body[data-theme="retro"] .tool-desc { font-size: 19px; line-height: 1.2; }
+body[data-theme="retro"] .featured .tool-name { font-size: calc(1.7 * var(--name-size, 24px)); }
+body[data-theme="retro"] .featured .tool-desc { font-size: 22px; }
+body[data-theme="retro"] .beta-badge { font-size: 16px; padding: 0 8px; }
+body[data-theme="bw"] .beta-badge { border-radius: 0; }
 
 @media (max-width: 860px) {
   .tool-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -84,6 +106,16 @@ body[data-theme="retro"] .tool-desc { font-size: 19px; line-height: 1.2; }
   body[data-theme="retro"] .hub-section-title { font-size: 16px; }
   body[data-theme="retro"] .tool-name { font-size: var(--name-size, 20px); }
   body[data-theme="retro"] .tool-desc { font-size: 15px; line-height: 1.1; }
+  /* The flagship takes the whole width, one row, as tall as the other cards or more. */
+  .tool-grid > li.featured { grid-row: auto; }
+  .featured .tool-card { min-height: var(--card-h, auto); justify-content: flex-start; gap: 6px; padding: 14px 16px; }
+  .featured .tool-icon { width: 40px; height: 40px; }
+  .featured .tool-name { font-size: calc(1.5 * var(--name-size, 15px)); }
+  .featured .tool-desc { font-size: 13px; }
+  .beta-badge { top: 9px; right: 9px; padding: 1px 7px; font-size: 10px; }
+  body[data-theme="retro"] .featured .tool-name { font-size: calc(1.5 * var(--name-size, 20px)); }
+  body[data-theme="retro"] .featured .tool-desc { font-size: 16px; }
+  body[data-theme="retro"] .beta-badge { font-size: 14px; padding: 0 6px; }
   /* The page scrolls here, so the footer may wrap instead of shrinking. */
   .tool-footer { padding-top: 4px; }
 }

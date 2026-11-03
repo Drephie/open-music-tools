@@ -83,3 +83,5 @@ Nothing is recorded or uploaded; the page makes no sound and uses no camera. The
 **Drephie, on the phone:** the logo; the cards and scrolling; each card opens its tool and the house brings you back; change the theme and language in one tool and see the others follow; the wording in all three languages.
 
 **Drephie's phone test (2026-10-24):** all good: the logo, the cards, the house buttons, the shared theme and language, and the wording. Two things found outside the home page, recorded in the roadmap: the Piano's first sound comes about 10 s late with the silent switch on, and Choordination's camera can't start on the plain-http test link (phones need https for the camera).
+
+**Change before the launch (Drephie, 2026-11-03):** Choordination is the flagship: the first card and the biggest (two columns by two rows on a computer, the whole width on a phone), with a "Beta" tag in its corner. Pitch Training has a "Beta" tag too.
