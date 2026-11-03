@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Release check: every page</title>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { margin: 0 auto; padding: 16px; max-width: 1100px; background: Canvas; color: CanvasText; }
+    h1 { font-size: 1.4rem; }
+    #summary { font-size: 1.2rem; font-weight: 700; }
+    .pass { color: green; } .fail { color: #d22; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    td, th { text-align: left; padding: 4px 8px; border-bottom: 1px solid GrayText; vertical-align: top; font-size: 13px; }
+    #stage { position: fixed; right: 8px; bottom: 8px; border: 2px solid GrayText; background: #000; }
+    #stage iframe { display: block; border: 0; }
+  </style>
+</head>
+<body>
+  <h1>Every page in every theme, language and phone size</h1>
+  <p>Loads the home page and each tool in an iframe at 375 × 667 and 390 × 664, in the 5 themes and 3 languages (the hub-wide choice, saved under <code>open-music-tools.look.v1</code>), and checks: no sideways scrolling; no button, label or text sticking out of the screen (or below it, on a page that can't scroll); no text cut off inside its box; no string missing (an empty label or its key showing); the theme and language applied; no script errors. Everything saved in this browser is put back at the end. Narrow it down with <code>?pages=piano/,metronome/&amp;themes=retro&amp;langs=it&amp;sizes=375x667</code> (the home page is <code>home</code>).</p>
+  <p>The iframe reports what the tab reports. With a mouse, text only shown on computers is shown too (the worst case for most tools); Choordination picks its phone layout only on a touch screen, so check it again with the tab emulating a phone (<code>resize_window</code> preset <code>mobile</code>, then <code>?pages=choordination/</code>).</p>
+  <p id="summary">Running…</p>
+  <table>
+    <thead><tr><th>Page</th><th>Checked</th><th>Problems</th><th>Most vertical scroll</th></tr></thead>
+    <tbody id="pages"></tbody>
+  </table>
+  <table>
+    <thead><tr><th>Page</th><th>Size</th><th>Theme</th><th>Language</th><th>Problem</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div id="stage"></div>
+
+<script type="module">
+  const ALL_PAGES = ['home', 'choordination/', 'piano/', 'ear-trainer/', 'metronome/', 'vocal-tuner/', 'instrument-tuner/', 'pitch-detector/', 'pitch-training/'];
+  const ALL_THEMES = ['liquid', 'y2k', 'pink', 'bw', 'retro'];
+  const ALL_LANGS = ['en', 'es', 'it'];
+  const ALL_SIZES = ['375x667', '390x664'];
+  const LOOK_KEY = 'open-music-tools.look.v1';
+  const SETTLE_MS = 700;   // theme transitions take about 0.5 s
+
+  const params = new URLSearchParams(location.search);
+  const pick = (name, all) => (params.get(name) ? params.get(name).split(',') : all);
+  const pages = pick('pages', ALL_PAGES), themes = pick('themes', ALL_THEMES);
+  const langs = pick('langs', ALL_LANGS), sizes = pick('sizes', ALL_SIZES).map((s) => s.split('x').map(Number));
+
+  const stage = document.getElementById('stage');
+  const rowsEl = document.getElementById('rows'), pagesEl = document.getElementById('pages');
+  const summary = document.getElementById('summary');
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // Everything this browser has saved for the site, to put back at the end.
+  const savedStorage = Object.fromEntries(Object.keys(localStorage).map((k) => [k, localStorage.getItem(k)]));
+  function restoreStorage() {
+    localStorage.clear();
+    for (const [k, v] of Object.entries(savedStorage)) localStorage.setItem(k, v);
+  }
+
+  // Loads a page in a fresh iframe. Error listeners and a timer-based
+  // requestAnimationFrame (frames may not come while the window is out of view)
+  // go in as soon as the page's window exists, before its module scripts run.
+  async function load(page, [w, h]) {
+    stage.textContent = '';
+    const frame = document.createElement('iframe');
+    frame.width = w; frame.height = h;
+    const url = new URL('../' + (page === 'home' ? '' : page), location.href).href;
+    const errors = [];
+    stage.append(frame);
+    const loaded = new Promise((r) => frame.addEventListener('load', r, { once: true }));
+    frame.src = url;
+    const hooked = new Promise((resolve) => {
+      const tick = () => {
+        try {
+          const win = frame.contentWindow;
+          if (win && win.location.href.startsWith(url) && !win.__releaseCheck) {
+            win.__releaseCheck = true;
+            win.addEventListener('error', (e) => errors.push(e.message || String(e)));
+            win.addEventListener('unhandledrejection', (e) => errors.push('unhandled: ' + (e.reason && e.reason.message || e.reason)));
+            const consoleError = win.console.error.bind(win.console);
+            win.console.error = (...a) => { errors.push(a.map(String).join(' ')); consoleError(...a); };
+            win.requestAnimationFrame = (cb) => win.setTimeout(() => cb(win.performance.now()), 16);
+            return resolve();
+          }
+        } catch { /* not ours yet */ }
+        setTimeout(tick, 0);
+      };
+      tick();
+    });
+    await Promise.race([Promise.all([hooked, loaded]), sleep(15000)]);
+    const win = frame.contentWindow;
+    if (win.document.fonts) await Promise.race([win.document.fonts.ready, sleep(3000)]);
+    await sleep(SETTLE_MS);
+    return { win, errors };
+  }
+
+  const describe = (el) => {
+    const id = el.id ? '#' + el.id : '';
+    const cls = typeof el.className === 'string' && el.className.trim() ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.') : '';
+    const text = (el.getAttribute('data-i18n') ? `[${el.getAttribute('data-i18n')}] ` : '') + (el.textContent || el.value || '').trim().replace(/\s+/g, ' ').slice(0, 40);
+    return `${el.tagName.toLowerCase()}${id}${cls} "${text}"`;
+  };
+
+  function measure(win, [w, h], theme, lang) {
+    const doc = win.document, problems = [];
+    const se = doc.scrollingElement;
+    if (se.scrollWidth > w + 1) problems.push(`scrolls sideways by ${se.scrollWidth - w}px`);
+    const vScroll = Math.max(0, se.scrollHeight - h);
+    const pageScrolls = vScroll > 1 && win.getComputedStyle(doc.body).overflowY !== 'hidden' && win.getComputedStyle(doc.documentElement).overflowY !== 'hidden';
+
+    if (doc.body.getAttribute('data-theme') !== theme && !(theme === 'liquid' && !doc.body.getAttribute('data-theme'))) problems.push(`theme is ${doc.body.getAttribute('data-theme')}`);
+    if (doc.documentElement.lang !== lang) problems.push(`language is ${doc.documentElement.lang}`);
+
+    const shown = (el) => {
+      for (let e = el; e && e !== doc.documentElement; e = e.parentElement) {
+        const cs = win.getComputedStyle(e);
+        if (cs.display === 'none' || cs.visibility === 'hidden' || Number(cs.opacity) === 0) return false;
+      }
+      return true;
+    };
+    // A box that scrolls or clips its contents (a list, the Piano's sliding
+    // keyboard): what's inside may be out of view on purpose; the box itself
+    // must fit the screen.
+    const clips = (e) => /(auto|scroll|hidden|clip)/.test(win.getComputedStyle(e).overflowX + win.getComputedStyle(e).overflowY);
+    const scrollBox = (el) => {
+      for (let e = el.parentElement; e && e !== doc.body && e !== doc.documentElement; e = e.parentElement) {
+        if (clips(e)) return e;
+      }
+      return null;
+    };
+    for (const box of doc.body.querySelectorAll('*')) {
+      if (!clips(box) || !shown(box)) continue;
+      const r = box.getBoundingClientRect();
+      if (r.width <= 1 || r.height <= 1 || scrollBox(box)) continue;
+      if (r.left < -1 || r.right > w + 1) problems.push(`box sticks out sideways (${Math.round(r.left)}..${Math.round(r.right)}): ${describe(box)}`);
+      else if (!pageScrolls && (r.bottom > h + 1 || r.top < -1)) problems.push(`box off the screen (${Math.round(r.top)}..${Math.round(r.bottom)}): ${describe(box)}`);
+    }
+    const ownText = (el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+
+    // Strings: every [data-i18n] element filled, never showing its key.
+    for (const el of doc.querySelectorAll('[data-i18n]')) {
+      const key = el.getAttribute('data-i18n');
+      const txt = el.textContent.trim();
+      if (txt === key || (!txt && !el.children.length && shown(el))) problems.push(`string missing: ${key}`);
+    }
+
+    // Controls and text outside any such box: inside the screen. Any text: not cut off in its own box.
+    const items = [...doc.body.querySelectorAll('button, a, input, select, label, h1, h2, h3, p, span, li, td, th, div, strong, small')]
+      .filter((el) => (ownText(el) || /^(BUTTON|INPUT|SELECT|A)$/.test(el.tagName)) && shown(el));
+    for (const el of items) {
+      const r = el.getBoundingClientRect();
+      if (r.width <= 1 || r.height <= 1) continue;   // visually hidden
+      if (!scrollBox(el)) {
+        if (r.left < -1 || r.right > w + 1) {
+          problems.push(`sticks out sideways (${Math.round(r.left)}..${Math.round(r.right)}): ${describe(el)}`);
+        } else if (!pageScrolls && (r.bottom > h + 1 || r.top < -1)) {
+          problems.push(`off the screen (${Math.round(r.top)}..${Math.round(r.bottom)}): ${describe(el)}`);
+        }
+      }
+      const cs = win.getComputedStyle(el);
+      if (ownText(el) && /(hidden|clip)/.test(cs.overflowX) && el.scrollWidth > el.clientWidth + 1) {
+        problems.push(`text cut off (${el.scrollWidth} in ${el.clientWidth}): ${describe(el)}`);
+      }
+    }
+    return { problems: [...new Set(problems)], vScroll: pageScrolls ? vScroll : 0 };
+  }
+
+  const all = [];
+  const perPage = {};
+  const total = pages.length * sizes.length * themes.length * langs.length;
+  let n = 0;
+  try {
+    for (const page of pages) {
+      perPage[page] = { checked: 0, problems: 0, vScroll: 0 };
+      for (const size of sizes) for (const theme of themes) for (const lang of langs) {
+        n++;
+        summary.textContent = `Running ${n} of ${total}: ${page} ${size.join('×')} ${theme} ${lang}…`;
+        localStorage.setItem(LOOK_KEY, JSON.stringify({ theme, lang }));
+        let result;
+        try {
+          const { win, errors } = await load(page, size);
+          result = measure(win, size, theme, lang);
+          for (const e of errors) result.problems.push('error: ' + e);
+        } catch (e) {
+          result = { problems: ['could not check: ' + e.message], vScroll: 0 };
+        }
+        const p = perPage[page];
+        p.checked++; p.problems += result.problems.length; p.vScroll = Math.max(p.vScroll, result.vScroll);
+        for (const problem of result.problems) {
+          all.push({ page, size: size.join('×'), theme, lang, problem });
+          const tr = document.createElement('tr');
+          for (const v of [page, size.join('×'), theme, lang, problem]) tr.insertCell().textContent = v;
+          rowsEl.append(tr);
+        }
+      }
+      const p = perPage[page];
+      const tr = document.createElement('tr');
+      tr.insertCell().textContent = page;
+      tr.insertCell().textContent = p.checked;
+      const c = tr.insertCell(); c.textContent = p.problems; c.className = p.problems ? 'fail' : 'pass';
+      tr.insertCell().textContent = p.vScroll ? `${p.vScroll}px` : 'none';
+      pagesEl.append(tr);
+    }
+  } finally {
+    stage.textContent = '';
+    restoreStorage();
+  }
+  summary.textContent = all.length ? `${all.length} problem(s) in ${total} page loads` : `All ${total} page loads pass`;
+  summary.className = all.length ? 'fail' : 'pass';
+  window.RELEASE_CHECK = { done: true, total, problems: all, perPage };
+</script>
+</body>
+</html>
