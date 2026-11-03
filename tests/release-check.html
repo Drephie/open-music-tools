@@ -19,7 +19,7 @@
 <body>
   <h1>Every page in every theme, language and phone size</h1>
   <p>Loads the home page and each tool in an iframe at 375 × 667 and 390 × 664, in the 5 themes and 3 languages (the hub-wide choice, saved under <code>open-music-tools.look.v1</code>), and checks: no sideways scrolling; no button, label or text sticking out of the screen (or below it, on a page that can't scroll); no text cut off inside its box; no string missing (an empty label or its key showing); the theme and language applied; no script errors. Everything saved in this browser is put back at the end. Narrow it down with <code>?pages=piano/,metronome/&amp;themes=retro&amp;langs=it&amp;sizes=375x667</code> (the home page is <code>home</code>).</p>
-  <p>The iframe reports what the tab reports. With a mouse, text only shown on computers is shown too (the worst case for most tools); Choordination picks its phone layout only on a touch screen, so check it again with the tab emulating a phone (<code>resize_window</code> preset <code>mobile</code>, then <code>?pages=choordination/</code>).</p>
+  <p>The iframe reports a mouse, so text only shown on computers is shown too (the worst case for most tools). Choordination picks its phone layout only on a real touch screen (<code>navigator.maxTouchPoints</code>, which the built-in browser's phone emulation leaves at 0), so here it shows its computer layout in a narrow window; its phone layout is checked on Drephie's phone.</p>
   <p id="summary">Running…</p>
   <table>
     <thead><tr><th>Page</th><th>Checked</th><th>Problems</th><th>Most vertical scroll</th></tr></thead>
