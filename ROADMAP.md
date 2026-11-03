@@ -140,6 +140,15 @@ Silent bars practice (the click drops out for a bar), a speed trainer that slowl
   - Fixed: **Pitch Training** in Monochrome with Spanish or Italian no longer scrolls sideways on phones (the exercise name wraps onto a second line).
   - Fixed: **Choordination**'s watermark fits narrow computer windows in every theme (it scales with the window instead of a fixed 28 px × 1.2). Choordination also gets the new fonts, an instant-photo border in Retrosnap, a red vignette in Rouge, and in Soft Pink and Retrosnap the camera picture sits on the page colour so their dark text stays readable. In narrow computer windows its two footer links no longer run into each other.
   - Checks: `bash tests/tools/release-check.sh` passes; `tests/release-check.html` passes for every page in 7 themes × 3 languages × 2 phone sizes (378 loads). Choordination's real phone layout still needs Drephie's phone (the built-in browser can't fake a touch screen).
+- **Impeccable grade, 2026-11-03** (design review plus measurements; Impeccable's own helper program not run, it would download and run a program): design 26/40 (Acceptable), technical audit 14/20 (Good). Fixed after it, in Drephie's order (readability first, everything in scope; Liquid Glass stays the default):
+  - Choordination's start and error screens fit an upright phone and use the theme's colours (they were cut off, and white on light in Soft Pink and Retrosnap).
+  - Faint text made readable: the Patreon button (large-text size), the Piano's resting chord name and key letters, Soft Pink's hints, Choordination's left-hand label.
+  - The main buttons (Listen, Start, Continue) are filled in every tool, and above the graph on computers.
+  - The saved theme is applied before the first paint (no Liquid Glass flash); the browser bar follows the theme; reduce-motion versions keep every state; the tuning dropdown and Choordination's page have names for screen readers.
+  - Every button at least 44 px (Piano sideways, Choordination's menus and windows); footer links with a 44 px touch area; window headers stay in view while scrolling.
+  - Drawn icons instead of text glyphs (×, −, +, record, gear); Choordination's logo and recording red follow the theme.
+  - Beginner wording, approved by Drephie: a Piano hint line for the chosen mode and a "C D E" / "Do Re Mi" button, what a cent is in both tuners, "Scale steps", "Sfida a filotto", "Theme", and Choordination's plainer words ("Start the camera", "Left hand", "Picks the chord's main note (the root)"…) with no emoji in its menus.
+  - Not changed: the Piano keys stay plain shapes for screen readers (the computer letters play them and the chord is announced); "Coming soon" keeps its cards.
 
 ## Found in the hub phone test (2026-10-24), not yet looked at
 
