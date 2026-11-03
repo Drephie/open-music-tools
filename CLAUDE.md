@@ -1,4 +1,4 @@
-# Open Music Tools (working name)
+# Open Music Tools
 
 Free, open-source music tools that build musical literacy and help people make their own music. Tools only, never AI-made music. Owner: Drephie, singer and vocal coach (@drephie).
 
@@ -8,7 +8,7 @@ Free, open-source music tools that build musical literacy and help people make t
 
 - **Everything runs on the user's device.** Never upload audio, video or files, and never process them on a server.
 - **No AI-generated music, lyrics or melodies.** Algorithms that suggest (e.g. Jam Machine's chord progressions) are fine; the person makes the music.
-- **No trackers and no third-party ad networks.** Choordination's welcome screen promises "No ads, no trackers, ever". How the hub is funded is an open decision in ROADMAP.md, so don't add any ads or analytics without asking.
+- **No ads, no trackers, ever** (Drephie, 2026-11-03: the hub is funded by Patreon only). Never add ads, analytics or a new outside service (another CDN, a font service, an embed) without asking; the fonts are our own files (`shared/fonts/`).
 - **Don't store people's creative work on the site** (data-loss liability). Settings in `localStorage` are fine, and so are files the user downloads.
 - **For everyone.** Beginner-friendly wording, no assumed theory knowledge.
 - **Touch-first**, but everything also works with mouse and keyboard.
@@ -26,6 +26,7 @@ Free, open-source music tools that build musical literacy and help people make t
 
 ## Tech
 
+- **Published** from `main` with GitHub Pages at https://openmusictools.org (`CNAME`); the code is public at https://github.com/Drephie/open-music-tools under AGPL-3.0 (`LICENSE`). Commits use Drephie's private GitHub address (repo-local `user.email`). Run the `release-check` skill before every release; Drephie publishes by pushing with GitHub Desktop.
 - **No build step and no npm** (Node isn't installed). Plain HTML, CSS and JavaScript; ES modules for shared code.
 - Libraries come from CDNs with pinned versions: Tone.js 14.8.49 (cdnjs, with SRI) and MediaPipe tasks-vision 0.10.3 (jsDelivr).
 - Run locally from the repo root with `python3 -m http.server 8000`, then open http://localhost:8000/ (the home page) or a tool, e.g. http://localhost:8000/choordination/. ES modules, camera, microphone and service workers don't work from `file://`.
