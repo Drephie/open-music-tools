@@ -1,7 +1,8 @@
 # Pitch Training: spec
 
 **Status:** approved by Drephie, 2026-11-03, with Claude's picks as written. Drephie's choices from the questions and an animated prototype: both views (the whole exercise, or scrolling), both ways of hearing (listen then sing, or sing along with headphones), all four kinds of exercise, each one played over a beat and then repeated by the singer, rounds that go up a half step at a time and come back down, a count-in before you sing, a voice type with a starting note to fine-tune, two levels of scoring, and teacher-made exercises later.
-Items marked *(Claude's pick)* weren't asked or weren't answered: say if you want them changed.
+**Built 2026-11-03.** Drephie's phone test: waiting.
+Items marked *(Claude's pick)* weren't asked or weren't answered: say if you want them changed. *(At build time)* marks details settled while building.
 
 ## What it is for
 
@@ -27,7 +28,7 @@ Warm-ups and pitch practice: the piano plays a short pattern over a beat, you si
 - **Your voice's line** is the Pitch Detector's (its stray and octave guards included), in the theme's line colour; the notes fill in the theme's accent colour.
 - **Starting note:** pick a **voice type**, which sets a comfortable starting note *(Claude's pick of the notes: Soprano Do4, Mezzo La3, Alto Sol3, Tenor Do3, Baritone La2, Bass Fa2)*; then move it a half step at a time with − and +, and tap the note to hear it. It stops where an exercise would go beyond the notes the tool hears.
 - **Speed:** Slow, Medium (the start) or Fast: 60, 80 or 100 beats a minute *(Claude's pick)*.
-- **Scoring:** only the pitch is scored, not the timing. A note counts as **in tune** when most of it (60%) is within **25 cents** (a cent is a hundredth of a half step), or **10 cents in Precise** (Settings). The first moment of each note (the time it takes to land on it) is left out, and singing up to a quarter of a second late still counts. A slide counts in parts (the start, the way up, the top, the way down, the end); being a little early or late on a glide is fine. A note sung in tune fills; a note close to it (within 50 cents) gets an outline; the others stay as they were. **Nothing is ever red or called wrong.**
+- **Scoring:** only the pitch is scored, not the timing. A vibrato counts by its middle (the pitch is averaged over a fifth of a second) *(at build time)*. A note counts as **in tune** when most of it (60%) is within **25 cents** (a cent is a hundredth of a half step), or **10 cents in Precise** (Settings). The first moment of each note (the time it takes to land on it) is left out, and singing up to a quarter of a second late still counts. A slide counts in parts (the start, the way up, the top, the way down, the end); being a little early or late on a glide is fine. A note sung in tune fills; a note close to it (within 50 cents) gets an outline; the others stay as they were. **Nothing is ever red or called wrong.**
 - **Any octave counts** *(Claude's pick)*: a tenor following a soprano's notes an octave lower is in tune, and the line is drawn over the bars, with a small note "an octave lower".
 - **Tips** after each round, one at a time: "All in tune!"; "Sol was a little low"; "Most notes were a little high"; "Nothing heard: sing a little louder, or closer to the phone".
 - **Microphone sensitivity** (Settings), with the level bar, as in the Pitch Detector.
@@ -59,11 +60,15 @@ Teacher-made exercises and sharing them by link (Drephie: later); clicks while y
  Support on Patreon   Designed by @drephie
 ```
 
-**Computer:** the same, wider. **Settings (⚙):** Theme, Language, Note names (Do Re Mi / C D E), Hearing (Listen, then sing / Sing along with headphones), View (Whole exercise / Scrolling), In tune within (25 cents / 10 cents, Precise), How far up (3 / 5 / 7 / 12 half steps), Microphone sensitivity. **About (i):** the short hub text, how a round goes in one sentence, the privacy line, the piano's credit, the Patreon button, the keyboard tips on computers only.
+**Computer:** the same, wider; the controls keep a comfortable width above the wide graph *(at build time)*. Before you start, the line under the prompt says how many rounds there are ("11 rounds: 5 half steps up, then back down") *(at build time)*. **Settings (⚙):** Theme and Language side by side, Note names (Do Re Mi / C D E) beside View (Whole / Scroll), Hearing (Listen, then sing / Sing along with headphones), In tune within (25 cents / 10 cents) beside How far up (3 / 5 / 7 / 12 half steps), Microphone sensitivity with the level bar; set in pairs so the window fits a phone screen in every theme and language *(at build time)*. **About (i):** the short hub text, how a round goes in one sentence, the privacy line, the piano's credit, the Patreon button, the keyboard tips on computers only.
 
 ## Wording (English)
 
 Pitch Training (Spanish "Ejercicios de afinación", Italian "Esercizi di intonazione", as on the home page); Start, Stop; Listen…; Your turn; Sing; Round {n} of {total}; {n} of {total} in tune; an octave lower; Well done: {n} of {total} notes in tune. Spanish and Italian come at build time.
+
+## How well it scores (measured with made-up singing, since Claude can't hear)
+
+Made-up singing whose pitch and timing are known: in tune: every note; the top note 30 cents low: that note only, with the tip "Sol was a little low"; every note 30 cents low: none, "Most notes were a little low"; 20 cents low: in tune, but not in Precise; late by a fifth of a second, and even by half a second on a three-quarter-second note: in tune; a whole beat late: not; early by 0.08 s: in tune; an octave lower or higher: in tune; a scoop from 60 cents below into every note: in tune; a vibrato of ±50 cents: in tune, and the same vibrato 30 cents low: not; a slide followed a little late, or slowly at both ends and fast in the middle as people sing it: in tune; a slide not followed: its glides not; silence: "Nothing heard". Through the pitch engine and the voice's line: a five-note scale with vibrato a little late, 9 of 9; its top note 35 cents low measured −35.0 cents; an octave lower, 9 of 9; a slide, 5 of 5; room noise, nothing heard. In the browser with a stand-in microphone: whole warm-ups in both views and both ways of hearing scored as sung, the piano's notes and clicks on the beat. Real voices and phone microphones still need your ears (see the checklist).
 
 ## Remembered
 
@@ -72,8 +77,8 @@ In this browser only: the exercise, voice type, starting note, speed, hearing, v
 ## Built on
 
 - `shared/pitch.js`: the microphone to a note.
-- The Pitch Detector's line and graph, moved to `shared/` so both tools use them: the line (strays, octave slips, the loudness gate and sensitivity, fitting the view, the keys' names) and the graph (gaining the notes to sing, the sweeping line and the scrolling view). The Pitch Detector keeps working as it is.
-- New in the tool, pure and tested with made-up voices whose pitch is known (`tests/pitch-training.html`, also from the terminal): the exercises and rounds, and the scoring and tips.
+- The Pitch Detector's line and graph, moved to `shared/` so both tools use them: `shared/pitch-line.js` (strays, octave slips, the loudness gate and sensitivity, fitting the view, the keys' names) and `shared/ui/pitch-graph.js` (gaining the notes to sing, the sweeping line and a fixed time range). The Pitch Detector keeps working as it is.
+- New in the tool, pure and tested with made-up voices whose pitch is known (`tests/pitch-training.html`, also from the terminal): `pitch-training/exercises.js` (the exercises, voice types, rounds and what each round plays) and `pitch-training/score.js` (the scoring and tips).
 - `shared/sound.js` (the piano) and Tone.js 14.8.49; `shared/transport.js` for the clicks; `shared/theory.js` for spelling; `shared/ui/` for the page, windows, dropdowns, themes and translations.
 - **Home page:** the greyed "Pitch Training" card becomes live, after the Pitch Detector. The hub service worker (`/sw.js`).
 
