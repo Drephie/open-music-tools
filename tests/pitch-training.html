@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pitch Training tests</title>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { margin: 0 auto; padding: 16px; max-width: 900px; background: Canvas; color: CanvasText; }
+    h1 { font-size: 1.4rem; }
+    #summary { font-size: 1.2rem; font-weight: 700; }
+    .pass { color: green; } .fail { color: #d22; }
+    table { border-collapse: collapse; width: 100%; }
+    td, th { text-align: left; padding: 4px 8px; border-bottom: 1px solid GrayText; vertical-align: top; }
+    .stats { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+    pre { white-space: pre-wrap; word-break: break-word; font-size: 12px; margin: 4px 0 0; }
+  </style>
+</head>
+<body>
+  <h1>Pitch Training tests (pitch-training/exercises.js and score.js)</h1>
+  <p id="summary">Running…</p>
+  <table>
+    <thead><tr><th>Check</th><th>Checked</th><th>Result</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <p>The exercises, voice types, rounds and what each round plays; the scoring of made-up singing whose pitch and timing are known (in tune, low, late, early, an octave lower, scoops, vibrato, slides, silence); and voice-like tones made here through the pitch engine and the voice's line into the score, as the tool does it. The same checks run from the terminal: <code>tools/run-pitch-training-test.js</code>.</p>
+
+<script type="module">
+  import * as ex from '../pitch-training/exercises.js';
+  import * as score from '../pitch-training/score.js';
+  import * as line from '../shared/pitch-line.js';
+  import * as core from '../shared/pitch-worklet.js';
+  import { checkTraining } from './pitch-training-cases.js';
+
+  const rows = document.getElementById('rows');
+  const summary = document.getElementById('summary');
+  let failed = 0, total = 0;
+  try {
+    for (const row of checkTraining(ex, score, line, core)) {
+      total++;
+      if (row.failed) failed++;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td></td><td>${row.checked}</td><td class="${row.failed ? 'fail' : 'pass'}">${row.failed ? `FAIL (${row.failed})` : 'pass'}</td>`;
+      tr.children[0].textContent = row.section;
+      if (row.stats) {
+        const s = document.createElement('div');
+        s.className = 'stats';
+        s.textContent = row.stats;
+        tr.children[0].appendChild(s);
+      }
+      if (row.examples.length) {
+        const pre = document.createElement('pre');
+        pre.textContent = row.examples.join('\n');
+        tr.children[0].appendChild(pre);
+      }
+      rows.appendChild(tr);
+    }
+  } catch (err) {
+    failed++;
+    rows.innerHTML += `<tr><td colspan="3" class="fail"><pre></pre></td></tr>`;
+    rows.querySelector('tr:last-child pre').textContent = String(err && err.stack || err);
+  }
+  summary.className = failed ? 'fail' : 'pass';
+  summary.textContent = failed ? `FAIL: ${failed} of ${total} checks failed` : `PASS: all ${total} checks passed`;
+</script>
+</body>
+</html>
