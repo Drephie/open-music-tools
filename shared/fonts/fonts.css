@@ -30,5 +30,5 @@
 @font-face { font-family: 'Epilogue'; font-style: normal; font-weight: 100 900; font-display: swap; src: url(epilogue.woff2) format('woff2'); }
 
 /* Retrosnap: titles, text */
-@font-face { font-family: 'Kalam'; font-style: normal; font-weight: 300 700; font-display: swap; src: url(kalam.woff2) format('woff2'); }
+@font-face { font-family: 'Red Hat Display'; font-style: normal; font-weight: 300 900; font-display: swap; src: url(red-hat-display.woff2) format('woff2'); }
 @font-face { font-family: 'Asap'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(asap.woff2) format('woff2'); }

@@ -22,7 +22,7 @@ Drephie finds the fonts sterile, the palettes boring and the layout sloppy. This
 | Monochrome (refined) | Archivo | Archivo, numbers Azeret Mono | black and white |
 | Retro CRT (refined) | JetBrains Mono | JetBrains Mono | green phosphor, amber |
 | **Rouge** (new, spooky) | Literata | Epilogue | Drephie's palette: C52233, A51C30, A7333F, 74121D, 580C1F, bone-white text |
-| **Retrosnap** (new, instant photo) | Kalam | Asap | Drephie's palette: 004777, A30000, FF7700, EFD28D, 00AFB5 |
+| **Retrosnap** (new, instant photo) | Red Hat Display (Kalam until Drephie found it dated, 2026-11-03) | Asap | Drephie's palette: 004777, A30000, FF7700, EFD28D, 00AFB5 |
 
 Retrosnap is our own name; no camera brand is named or imitated. Every text colour is checked for contrast (4.5:1 for text, 3:1 for big text and controls).
 

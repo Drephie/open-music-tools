@@ -76,7 +76,7 @@
 @media (max-width: 600px) {
   .met { gap: 8px; }
   .met-main { gap: clamp(5px, 1dvh, 12px); }
-  /* Line heights are pinned: theme fonts differ a lot in height (Kalam, Literata). */
+  /* Line heights are pinned: theme fonts differ a lot in height (Literata, Nunito). */
   .hint { margin: -2px 0 0; font-size: 12px; line-height: 1.25; }
   .tempo-number { flex-direction: row; align-items: baseline; gap: 6px; }
   .bpm-input { font-size: clamp(50px, 9.5dvh, 112px); height: 1.05em; }

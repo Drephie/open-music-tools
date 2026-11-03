@@ -81,7 +81,6 @@ body[data-theme="y2k"] .hub-logo { filter: drop-shadow(0 0 8px color-mix(in srgb
 body[data-theme="retro"] .hub-logo { filter: drop-shadow(0 0 var(--shadow-blur) color-mix(in srgb, var(--color-left) 60%, transparent)); }
 body[data-theme="snap"] .tool-card:not(.soon) { border-color: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: 0 1px 0 rgba(75, 48, 0, 0.08), 0 10px 22px -12px rgba(75, 48, 0, 0.5); }
 body[data-theme="snap"] .featured .tool-card { border-color: transparent; }
-body[data-theme="snap"] .hub-name { transform: rotate(-1.5deg); transform-origin: left center; }
 body[data-theme="rouge"] .tool-card:not(.soon) { box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.25); }
 
 @media (max-width: 860px) {

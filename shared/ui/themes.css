@@ -330,13 +330,12 @@ body[data-theme="rouge"] {
 }
 
 /* Retrosnap: 1970s instant photos. Drephie's palette (004777, A30000, FF7700,
-   EFD28D, 00AFB5): a peach page, photo-paper panels, marker-pen titles. */
+   EFD28D, 00AFB5): a peach page, photo-paper panels, round 1970s-style titles. */
 body[data-theme="snap"] {
   --font-main: 'Asap', system-ui, sans-serif;
-  --font-display: 'Kalam', 'Asap', cursive;
-  --font-num: 'Asap', system-ui, sans-serif;
+  --font-display: 'Red Hat Display', 'Asap', sans-serif;
   --color-title: #004777;
-  --title-spacing: 0;
+  --title-spacing: -0.02em; --title-weight: 800;
   --radius-panel: 4px; --radius-control: 8px;
 
   --color-tune-line: #004777;
