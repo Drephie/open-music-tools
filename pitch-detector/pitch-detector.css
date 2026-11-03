@@ -8,6 +8,12 @@
 .tool-title.two-lines { white-space: normal; line-height: 1.2; }
 
 .detector { min-height: 0; display: grid; grid-template-rows: auto minmax(160px, 1fr) auto; gap: 8px; }
+/* Computers: the buttons above the graph, never at the window's bottom edge (phones keep them under the thumb). */
+@media (min-width: 700px) and (hover: hover) and (pointer: fine) {
+  .detector { grid-template-rows: auto auto minmax(160px, 1fr); }
+  .detector > .controls { grid-row: 2; }
+  .detector > .graph { grid-row: 3; }
+}
 
 /* The note you sing and a plain number: La4 · −12 cents. Nothing changes colour. */
 .readout {
@@ -35,8 +41,10 @@
 .listen-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   min-width: min(240px, 62vw); min-height: 48px; border-radius: var(--radius-control); font-size: 16px;
-  background: transparent; color: var(--color-text); border-color: color-mix(in srgb, var(--color-text) 55%, transparent);
 }
+/* The main action is filled; while it runs it turns into an outline. */
+.listen-btn.on { background: transparent; color: var(--color-text); border-color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+@media (hover: hover) { .listen-btn.on:hover { background: var(--color-hover); color: var(--color-hover-text); } }
 .pause-btn {
   width: 48px; height: 48px; min-height: 48px; padding: 0; border-radius: 50%; flex: none;
   display: inline-flex; align-items: center; justify-content: center;

@@ -8,6 +8,13 @@
 .tool-title.two-lines { white-space: normal; line-height: 1.2; }
 
 .trainer { min-height: 0; display: grid; grid-template-rows: auto auto minmax(150px, 1fr) auto; gap: 8px; }
+/* Computers: Start right under the exercise, never at the window's bottom edge (phones keep it under the thumb). */
+@media (min-width: 700px) and (hover: hover) and (pointer: fine) {
+  .trainer { grid-template-rows: auto auto auto minmax(150px, 1fr); }
+  .trainer > .controls { grid-row: 2; }
+  .trainer > .status { grid-row: 3; }
+  .trainer > .graph { grid-row: 4; }
+}
 
 /* The exercise, the voice type with the starting note, and the speed. */
 .setup { display: flex; flex-direction: column; gap: 6px; }
@@ -55,8 +62,10 @@
 .go-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   min-width: min(240px, 62vw); min-height: 48px; border-radius: var(--radius-control); font-size: 16px;
-  background: transparent; color: var(--color-text); border-color: color-mix(in srgb, var(--color-text) 55%, transparent);
 }
+/* The main action is filled; while it runs it turns into an outline. */
+.go-btn.on { background: transparent; color: var(--color-text); border-color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+@media (hover: hover) { .go-btn.on:hover { background: var(--color-hover); color: var(--color-hover-text); } }
 .go-btn svg { width: 20px; height: 20px; flex: none; }
 .go-btn .stop-icon, .go-btn.on .play-icon { display: none; }
 .go-btn.on .stop-icon { display: block; }

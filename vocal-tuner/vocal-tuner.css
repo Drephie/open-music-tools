@@ -53,12 +53,14 @@ body[data-theme="bw"] .tuner.has-note:not(.in-tune) :is(.note, .say) { color: va
 .tuner.has-note .dot { opacity: 1; }
 .tuner.in-tune .dot { background: var(--color-tune); box-shadow: 0 0 12px var(--color-tune); }
 
-/* A slim button at the bottom. */
+/* The main button, at the bottom. */
 .listen-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   min-width: min(260px, 70vw); min-height: 48px; border-radius: var(--radius-control); font-size: 16px;
-  background: transparent; color: var(--color-text); border-color: color-mix(in srgb, var(--color-text) 55%, transparent);
 }
+/* The main action is filled; while it runs it turns into an outline. */
+.listen-btn.on { background: transparent; color: var(--color-text); border-color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+@media (hover: hover) { .listen-btn.on:hover { background: var(--color-hover); color: var(--color-hover-text); } }
 .listen-btn svg { width: 20px; height: 20px; flex: none; }
 .listen-btn .stop-icon, .listen-btn.on .mic-icon { display: none; }
 .listen-btn.on .stop-icon { display: block; }
