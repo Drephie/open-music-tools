@@ -11,6 +11,12 @@
   position: relative; min-height: 0;
   display: grid; grid-template-rows: minmax(0, 1fr) auto auto auto; justify-items: center; align-items: center;
 }
+/* Computers: the tuner is centred in the window with a capped height, so Listen
+   is never at the window's bottom edge (phones keep it under the thumb). */
+@media (min-width: 900px) and (hover: hover) and (pointer: fine) {
+  .page > main.tuner { flex: 0 1 auto; height: min(580px, calc(100dvh - 180px)); margin-block: auto; }
+}
+
 .ball { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .stage, .readout, .listen-btn, .say { position: relative; }
 .stage { align-self: stretch; justify-self: stretch; display: flex; align-items: center; justify-content: center; min-height: 0; }

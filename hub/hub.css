@@ -28,7 +28,7 @@ body:is([data-theme="y2k"], [data-theme="retro"]) .hub-logo { color: var(--color
 
 .tool-card {
   /* min-width 0: otherwise min-height would widen the square past its column. */
-  box-sizing: border-box; flex: 1; aspect-ratio: 1; min-width: 0; min-height: var(--card-h, auto);
+  box-sizing: border-box; flex: 1; min-width: 0; min-height: max(170px, var(--card-h, 0px));
   display: flex; flex-direction: column; gap: var(--space-2); padding: 20px;
   background: var(--color-panel); border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-panel);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
@@ -51,6 +51,22 @@ body:is([data-theme="y2k"], [data-theme="retro"]) .hub-logo { color: var(--color
 .featured .tool-icon { width: 64px; height: 64px; margin-bottom: auto; }
 .featured .tool-name { font-size: calc(1.8 * var(--name-size, 21px)); line-height: 1; }
 .featured .tool-desc { font-size: 18px; max-width: 24em; }
+/* The flagship's two chord wheels, as in the tool (computers and tablets). */
+.featured-art { position: absolute; top: 56px; right: 32px; width: min(46%, 260px); height: auto; pointer-events: none; }
+.featured-art circle { fill: none; stroke-width: 22; }
+.featured-art .wheel { stroke: color-mix(in srgb, var(--color-text) 14%, transparent); }
+.featured-art .wheel-on.left { stroke: var(--color-left); }
+.featured-art .wheel-on.right { stroke: var(--color-right); }
+
+/* Name and description at the foot of each card, the drawing at the top. */
+.tool-grid > li:not(.featured) .tool-icon { margin-bottom: auto; }
+/* No hole after the last tool (7 tools beside the flagship): the last card is wider. */
+@media (min-width: 601px) { section:first-of-type .tool-grid > li:last-child { grid-column: span 2; } }
+/* Planned tools: compact rows, lighter than the real ones. */
+.tool-card.soon { min-height: 0; display: grid; grid-template-columns: 28px minmax(0, 1fr); column-gap: var(--space-3); row-gap: 2px; align-items: center; padding: 14px 16px; }
+.tool-card.soon .tool-icon { grid-row: span 2; width: 26px; height: 26px; margin: 0; }
+.tool-card.soon .tool-name { font-size: 17px; }
+.tool-card.soon .tool-desc { font-size: 13px; line-height: 1.35; }
 
 /* "Beta": a tool still being tried out. */
 .tool-card { position: relative; }
@@ -108,6 +124,13 @@ body[data-theme="rouge"] .tool-card:not(.soon) { box-shadow: inset 0 0 40px rgba
   .tool-grid > li:last-child > .tool-card { border-bottom-left-radius: var(--radius-panel); border-bottom-right-radius: var(--radius-panel); }
   .tool-grid > li:not(.featured) + li > .tool-card { border-top: 1px solid color-mix(in srgb, var(--border-panel) 55%, transparent); }
   .tool-grid > li:not(.featured) .tool-icon { grid-row: span 2; width: 30px; height: 30px; margin: 0; }
+  /* A small arrow says each row opens a tool. */
+  .tool-grid > li:not(.featured) > a.tool-card { grid-template-columns: 32px minmax(0, 1fr) 12px; }
+  .tool-grid > li:not(.featured) > a.tool-card::after {
+    content: ''; grid-column: 3; grid-row: 1 / span 2; width: 8px; height: 8px; justify-self: end;
+    border-right: 2px solid var(--color-text-inactive); border-bottom: 2px solid var(--color-text-inactive); transform: rotate(-45deg);
+  }
+  .featured-art { display: none; }
   .tool-grid > li:not(.featured) .tool-name { font-size: 19px; }
   .tool-grid > li:not(.featured) .tool-desc { font-size: 14px; line-height: 1.35; }
   .tool-grid > li:not(.featured) .beta-badge { position: static; grid-column: 2; justify-self: start; order: 3; margin-top: var(--space-1); padding: 1px 8px; font-size: 11px; }
