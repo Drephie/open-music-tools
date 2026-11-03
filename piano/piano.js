@@ -623,7 +623,8 @@ closeOnBackdrop(modals);
 document.querySelectorAll('.modal-header .close-btn').forEach((b) => b.addEventListener('click', () => modals.hideAll()));
 // After 30 s untouched, coming back opens the Patreon window (at most every 40 min).
 // A sounding note (held, ringing or a drone) counts as use, so it never interrupts.
-const support = createSupportPrompt({ dialog: supportModal, modals, t, isBusy: () => sounding.size > 0 || holds.size > 0 });
+// Players pause between phrases: 8 s without a touch before the window may come.
+const support = createSupportPrompt({ dialog: supportModal, modals, t, isBusy: () => sounding.size > 0 || holds.size > 0, quietMs: 8000 });
 document.querySelectorAll('.settings-btn').forEach((b) => b.addEventListener('click', (e) => modals.open(settingsModal, e.currentTarget)));
 document.querySelectorAll('.about-btn').forEach((b) => b.addEventListener('click', (e) => modals.open(aboutModal, e.currentTarget)));
 

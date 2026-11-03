@@ -27,17 +27,18 @@
  *   closeOnBackdrop(modals)     a tap outside the open window closes it, and only
  *                               that: the page under the finger doesn't get the tap
  *                               (modals: a shared/ui/modal.js manager)
- *   createSupportPrompt({ dialog, modals, t, isBusy, storageKey, idleMs, everyMs, waitSeconds })
- *     The Patreon window. When the page has been left untouched for idleMs
- *     (default 30 s) and the person comes back (a tap, click or key), it opens
- *     instead of that action. It opens at most once every everyMs (default
- *     40 min, remembered in localStorage under storageKey, shared by the hub's
- *     tools by default) and never over another open window. Its Continue button
- *     (.support-continue) counts down waitSeconds (default 5) before it works,
- *     and its × (.support-close) appears then. isBusy() true counts as use
- *     (e.g. a metronome playing). Markup: a .modal-overlay dialog managed by
- *     `modals` around a .centered-modal card. Strings: supportWait ({s}),
- *     supportContinue. Returns { locked() }: pass
+ *   createSupportPrompt({ dialog, modals, t, isBusy, storageKey, useMs, quietMs, everyMs })
+ *     The Patreon window, shown only at a natural pause: the tool has been in
+ *     use (isBusy() true, e.g. a metronome playing, a lesson running) for useMs
+ *     in all (default 45 s), something just ended (isBusy() turned false), and
+ *     nothing was touched for quietMs since (default 3 s). It never takes a tap
+ *     or a key, its × and Escape work at once, and its Continue button
+ *     (.support-continue) gets the focus. It opens at most once every everyMs
+ *     (default 40 min, remembered in localStorage under storageKey, shared by
+ *     the hub's tools by default) and never over another open window or on a
+ *     hidden page. Markup: a .modal-overlay dialog managed by `modals` around a
+ *     .centered-modal card. Strings: supportContinue. Returns { locked() }
+ *     (always false now; kept so callers can still pass
  *     escapeAction: (m) => (m === dialog && prompt.locked() ? 'ignore' : 'hide').
  *
  * Only settings go in localStorage, never people's work (see CLAUDE.md).
@@ -100,12 +101,10 @@ export function watchLook(apply) {
 
 export function createSupportPrompt({
   dialog, modals, t, isBusy = () => false, storageKey = 'open-music-tools.supportPrompt',
-  idleMs = 30 * 1000, everyMs = 40 * 60 * 1000, waitSeconds = 5,
+  useMs = 45 * 1000, quietMs = 3000, everyMs = 40 * 60 * 1000,
 }) {
   const continueBtn = dialog.querySelector('.support-continue');
   const closeBtn = dialog.querySelector('.support-close');
-  let lastActivity = Date.now();
-  let lockedNow = false, timer = null, swallowClickUntil = 0;
 
   const lastShown = () => { try { return Number(localStorage.getItem(storageKey)) || 0; } catch { return 0; } };
   const markShown = (now) => { try { localStorage.setItem(storageKey, String(now)); } catch { /* storage unavailable */ } };
@@ -113,50 +112,36 @@ export function createSupportPrompt({
   function show(now) {
     markShown(now);
     modals.open(dialog, null);
-    lockedNow = true;
-    closeBtn.hidden = true;
-    continueBtn.disabled = true;
-    let left = waitSeconds;
-    const paint = () => { continueBtn.textContent = t('supportWait').replace('{s}', left); };
-    paint();
-    clearInterval(timer);
-    timer = setInterval(() => {
-      if (--left > 0) return paint();
-      clearInterval(timer);
-      lockedNow = false;
-      continueBtn.disabled = false;
-      continueBtn.textContent = t('supportContinue');
-      closeBtn.hidden = false;
-    }, 1000);
+    continueBtn.disabled = false;
+    continueBtn.textContent = t('supportContinue');
+    closeBtn.hidden = false;
+    continueBtn.focus({ preventScroll: true });
   }
   const close = () => {
-    if (lockedNow) return;
     modals.hideAll();
     if (dialog.contains(document.activeElement)) document.activeElement.blur();   // it opened from no button
   };
   continueBtn.addEventListener('click', close);
   closeBtn.addEventListener('click', close);
 
-  // The tap, click or key that ends an idle stretch opens the window instead of acting.
-  function onUse(e) {
-    const now = Date.now();
-    const idle = now - lastActivity >= idleMs;
-    lastActivity = now;
-    if (!idle || isBusy() || modals.current()) return;
+  // A natural pause: the tool was really used (busy for useMs in all), something
+  // just ended (busy, then not), and nothing has been touched for quietMs since.
+  let used = 0, wasBusy = false, endedAt = 0, lastInput = Date.now(), lastTick = Date.now();
+  const touched = () => { lastInput = Date.now(); };
+  ['pointerdown', 'keydown', 'wheel'].forEach((ev) => window.addEventListener(ev, touched, { capture: true, passive: true }));
+  setInterval(() => {
+    const now = Date.now(), busy = isBusy();
+    if (busy) { used += now - lastTick; endedAt = 0; } else if (wasBusy) endedAt = now;
+    wasBusy = busy;
+    lastTick = now;
+    if (!endedAt || used < useMs || now - Math.max(endedAt, lastInput) < quietMs) return;
+    if (document.hidden || modals.current()) return;
     if (lastShown() && now - lastShown() < everyMs) return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    swallowClickUntil = now + 1500;   // and the click that follows a tap
+    endedAt = 0;
+    used = 0;
     show(now);
-  }
-  window.addEventListener('pointerdown', onUse, true);
-  window.addEventListener('keydown', onUse, true);
-  window.addEventListener('wheel', () => { lastActivity = Date.now(); }, { capture: true, passive: true });
-  window.addEventListener('click', (e) => {
-    if (Date.now() < swallowClickUntil && !dialog.contains(e.target)) { e.preventDefault(); e.stopImmediatePropagation(); }
-    swallowClickUntil = 0;
-  }, true);
-  return { locked: () => lockedNow };
+  }, 1000);
+  return { locked: () => false };
 }
 
 export function closeOnBackdrop(modals) {

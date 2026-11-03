@@ -1491,34 +1491,25 @@
     }
   }
 
-  // --- PATREON NAG (idle-only, >=10 min apart, instantly dismissible) ---
+  // --- PATREON NAG (a natural pause: 10 s with no chord after playing; at most
+  // every 40 min, shared with the hub's other tools; × and Escape work at once) ---
   const FIRST_NAG_MS = 3 * 60 * 1000;
-  const NAG_INTERVAL_MS = 10 * 60 * 1000;
+  const NAG_INTERVAL_MS = 40 * 60 * 1000;
+  const NAG_KEY = 'open-music-tools.supportPrompt';
+  const nagShownAt = () => { try { return Number(localStorage.getItem(NAG_KEY)) || 0; } catch { return 0; } };
   const NAG_IDLE_MS = 10 * 1000;
   let nagEligibleAt = null;
   let lastActivityTime = Date.now();
 
   let nagLocked = false, nagCountdownTimer = null;
   function startNagCountdown() {
-    nagLocked = true;
-    nagCloseBtn.style.display = 'none';
-    skipNagBtn.disabled = true;
-    let left = 5;
-    const paint = () => { skipNagBtn.textContent = t('nagSkip').replace('{s}', left); };
-    paint();
-    nagCountdownTimer = setInterval(() => {
-      left--;
-      if (left <= 0) {
-        clearInterval(nagCountdownTimer);
-        nagCountdownTimer = null;
-        nagLocked = false;
-        skipNagBtn.disabled = false;
-        skipNagBtn.textContent = t('nagContinue');
-        nagCloseBtn.style.display = '';
-      } else {
-        paint();
-      }
-    }, 1000);
+    // No countdown any more: Continue and × work at once.
+    nagLocked = false;
+    nagCloseBtn.style.display = '';
+    skipNagBtn.disabled = false;
+    skipNagBtn.textContent = t('nagContinue');
+    skipNagBtn.focus({ preventScroll: true });
+    try { localStorage.setItem(NAG_KEY, String(Date.now())); } catch { /* storage unavailable */ }
   }
   function nagDismissed() {
     nagEligibleAt = Date.now() + NAG_INTERVAL_MS;
@@ -1530,6 +1521,7 @@
     if (!engineStarted || nagEligibleAt === null) return;
     if (patreonNag.style.display === 'flex') return;
     if (Date.now() < nagEligibleAt) return;
+    if (nagShownAt() && Date.now() - nagShownAt() < NAG_INTERVAL_MS) return;
     if (currentDialog()) return;
     if (isRecording) return;
     if (currentlyPlayingKeys.length > 0) { lastActivityTime = Date.now(); return; }

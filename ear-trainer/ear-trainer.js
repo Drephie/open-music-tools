@@ -531,7 +531,8 @@ closeOnBackdrop(modals);
 document.querySelectorAll('.modal-header .close-btn').forEach((b) => b.addEventListener('click', () => modals.hideAll()));
 // After 30 s untouched, coming back opens the Patreon window (at most every 40 min).
 // A question playing counts as use.
-const support = createSupportPrompt({ dialog: supportModal, modals, t, isBusy: isPlaying });
+// In use while a question is on screen: the window may come when a lesson or game ends.
+const support = createSupportPrompt({ dialog: supportModal, modals, t, isBusy: () => isPlaying() || document.body.dataset.screen === 'quiz' });
 $('settings-btn').addEventListener('click', (e) => modals.open(settingsModal, e.currentTarget));
 $('about-btn').addEventListener('click', (e) => modals.open(aboutModal, e.currentTarget));
 
