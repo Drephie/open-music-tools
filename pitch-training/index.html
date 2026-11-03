@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Pitch Training</title>
+  <meta name="description" content="Free, open-source singing exercises: the piano plays a warm-up over a beat, you sing it back, and you see which notes you sang in tune. Runs in your browser; nothing is recorded or uploaded.">
+  <meta name="theme-color" content="#0f1419">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" integrity="sha384-c6Uo4N9c3SOEigMVzP6IshUG1wQ5uMp3xeoQFiHWAQ86joWdgyajkvopySyKy/Z6" crossorigin="anonymous"></script>
+  <!-- Google Fonts CSS is UA-dependent, so SRI cannot be applied to it. -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/ui/themes.css">
+  <link rel="stylesheet" href="../shared/ui/select.css">
+  <link rel="stylesheet" href="../shared/ui/page.css">
+  <link rel="stylesheet" href="pitch-training.css">
+</head>
+<body data-theme="liquid">
+  <div id="theme-frame" aria-hidden="true"></div>
+  <div class="page">
+    <header class="tool-header">
+      <a class="icon-btn home-btn" href="../" data-i18n-aria="home" aria-label="Home: all the tools">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>
+      </a>
+      <h1 class="tool-title" data-i18n="title">Pitch Training</h1>
+      <div class="header-actions">
+        <button id="about-btn" class="icon-btn" data-i18n-aria="about" aria-label="About">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
+        </button>
+        <button id="settings-btn" class="icon-btn" data-i18n-aria="settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="trainer">
+      <div class="setup">
+        <div class="control-group ex-group">
+          <label for="ex-select" class="visually-hidden" data-i18n="exLabel">Exercise</label>
+          <div class="custom-select"><select id="ex-select"></select></div>
+        </div>
+        <div class="setup-row">
+          <div class="control-group voice-group">
+            <label for="voice-select" class="visually-hidden" data-i18n="voiceLabel">Voice type</label>
+            <div class="custom-select"><select id="voice-select"></select></div>
+          </div>
+          <div class="stepper" role="group" data-i18n-aria="startLabel" aria-label="Starting note">
+            <button type="button" id="start-down" class="step-btn" data-i18n-aria="startDown" aria-label="Half a step lower">−</button>
+            <button type="button" id="start-note" class="start-note"><span id="start-name"></span><span id="start-oct" class="oct"></span></button>
+            <button type="button" id="start-up" class="step-btn" data-i18n-aria="startUp" aria-label="Half a step higher">+</button>
+          </div>
+        </div>
+        <div id="speed-seg" class="seg" role="group" data-i18n-aria="speedLabel" aria-label="Speed">
+          <button type="button" data-speed="slow" data-i18n="speedSlow">Slow</button>
+          <button type="button" data-speed="medium" data-i18n="speedMedium">Medium</button>
+          <button type="button" data-speed="fast" data-i18n="speedFast">Fast</button>
+        </div>
+      </div>
+      <p class="status" aria-hidden="true">
+        <span class="status-main"><span id="status-main"></span><span id="beat-dot" class="beat-dot" hidden></span></span>
+        <span id="status-sub" class="status-sub"></span>
+      </p>
+      <div id="graph" class="graph">
+        <canvas id="graph-canvas" role="img" data-i18n-aria="graphAria" aria-label="The notes to sing as bars, with the line of your voice over them"></canvas>
+      </div>
+      <p id="sr-status" class="visually-hidden" aria-live="polite"></p>
+      <div class="controls">
+        <button id="go-btn" class="btn go-btn" aria-pressed="false">
+          <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
+          <svg class="stop-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor"/></svg>
+          <span id="go-label" data-i18n="start">Start</span>
+        </button>
+      </div>
+    </main>
+
+    <footer class="tool-footer">
+      <a class="support-link" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+      <span class="designer-credit"><span data-i18n="designedBy">Designed by</span> <a href="https://instagram.com/drephie" target="_blank" rel="noopener noreferrer">@drephie</a></span>
+    </footer>
+  </div>
+
+  <div id="settings-modal" class="centered-modal has-dropdowns" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="settings-title" data-i18n="settings">Settings</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <div class="pair">
+      <div class="control-group">
+        <label for="theme-select" data-i18n="theme">Aesthetic Theme</label>
+        <div class="custom-select"><select id="theme-select"></select></div>
+      </div>
+      <div class="control-group">
+        <label for="lang-select" data-i18n="lang">Language</label>
+        <div class="custom-select"><select id="lang-select"></select></div>
+      </div>
+    </div>
+    <div class="control-group">
+      <span id="names-label" class="group-label" data-i18n="names">Note names</span>
+      <div id="names-seg" class="seg" role="group" aria-labelledby="names-label">
+        <button type="button" data-names="solfege" data-i18n="namesSolfege">Do Re Mi</button>
+        <button type="button" data-names="letters" data-i18n="namesLetters">C D E</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <span id="hear-label" class="group-label" data-i18n="hearing">Hearing</span>
+      <div id="hear-seg" class="seg" role="group" aria-labelledby="hear-label">
+        <button type="button" data-hear="listen" data-i18n="hearListen">Listen, then sing</button>
+        <button type="button" data-hear="along" data-i18n="hearAlong">Sing along (headphones)</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <span id="view-label" class="group-label" data-i18n="view">View</span>
+      <div id="view-seg" class="seg" role="group" aria-labelledby="view-label">
+        <button type="button" data-view="whole" data-i18n="viewWhole">Whole exercise</button>
+        <button type="button" data-view="scroll" data-i18n="viewScroll">Scrolling</button>
+      </div>
+    </div>
+    <div class="pair">
+      <div class="control-group">
+        <span id="tol-label" class="group-label" data-i18n="tol">In tune within</span>
+        <div id="tol-seg" class="seg" role="group" aria-labelledby="tol-label">
+          <button type="button" data-tol="normal" data-i18n="tolNormal">25 cents</button>
+          <button type="button" data-tol="precise" data-i18n="tolPrecise">10 (precise)</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <span id="far-label" class="group-label"><span data-i18n="far">How far up</span> <span class="unit" data-i18n="farHint">half steps</span></span>
+        <div id="far-seg" class="seg" role="group" aria-labelledby="far-label"></div>
+      </div>
+    </div>
+    <div class="control-group">
+      <span id="sens-label" class="group-label" data-i18n="sens">Microphone sensitivity</span>
+      <div id="sens-seg" class="seg" role="group" aria-labelledby="sens-label">
+        <button type="button" data-sens="low" data-i18n="sensLow">Low</button>
+        <button type="button" data-sens="normal" data-i18n="sensNormal">Normal</button>
+        <button type="button" data-sens="high" data-i18n="sensHigh">High</button>
+      </div>
+      <div id="level" class="level" aria-hidden="true"><span class="level-fill"></span><span class="level-mark"></span></div>
+      <p class="sens-hint" data-i18n="sensHint">Lower it in noisy places: sounds left of the mark are left out.</p>
+    </div>
+  </div>
+
+  <div id="about-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="about-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="about-title" data-i18n="aboutTitle">About Pitch Training</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <p class="about-text" data-i18n="aboutBody"></p>
+    <p class="about-small" data-i18n="aboutCredits"></p>
+    <a class="btn patreon-btn" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+    <p class="about-small computer-only" data-i18n="aboutKeys"></p>
+  </div>
+
+  <div id="support-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="support-title" aria-describedby="support-body" style="display:none">
+    <div class="centered-modal support-card">
+      <button class="close-btn support-close" data-i18n-aria="closeAria" aria-label="Close" hidden>×</button>
+      <h2 id="support-title" data-i18n="supportTitle">Support Pitch Training</h2>
+      <p id="support-body" data-i18n="supportBody"></p>
+      <a class="btn patreon-btn" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+      <button class="btn support-continue" disabled></button>
+    </div>
+  </div>
+
+  <script type="module" src="pitch-training.js"></script>
+</body>
+</html>
