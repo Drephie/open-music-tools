@@ -5,13 +5,19 @@
  * (Tone.js, MediaPipe WASM + .task models, Salamander piano samples) so
  * repeat visits load instantly and work offline once primed. The fonts are
  * our own files (shared/fonts/).
- * Same-origin files are network-first, so updates land on the next online
- * visit; CDN files are pinned versions, so they are cache-first.
+ * Same-origin files are network-first (past the browser's own short-lived
+ * copies), so updates land on the next online visit; they are stored without
+ * their ?query, so a shared link with tracking bits still opens offline.
+ * CDN files are pinned versions, so they are cache-first, in their own cache
+ * (CDN_CACHE) that survives CACHE_NAME bumps: about 20 MB not downloaded again
+ * at each release. If the app shell can't be fully cached, the new worker
+ * doesn't install and the old one keeps working.
  *
  * Bump CACHE_NAME whenever a cached file changes. Add each new tool's files
- * to APP_SHELL.
+ * to APP_SHELL. Bump CDN_CACHE only when a pinned CDN version changes.
  */
 const CACHE_NAME = 'open-music-tools-v15';
+const CDN_CACHE = 'open-music-tools-cdn-v1';
 const APP_SHELL = [
   './',
   'index.html',
@@ -115,8 +121,8 @@ const RUNTIME_HOSTS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
-      .catch(() => { /* shell caching is best-effort (e.g. odd hosting paths) */ })
+      // 'reload': the files themselves, not the browser's copies from the last visit.
+      .then((cache) => cache.addAll(APP_SHELL.map((u) => new Request(u, { cache: 'reload' }))))
       .then(() => self.skipWaiting())
   );
 });
@@ -124,7 +130,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => OWN_CACHE(k) && k !== CACHE_NAME).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => OWN_CACHE(k) && k !== CACHE_NAME && k !== CDN_CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -138,16 +144,20 @@ self.addEventListener('fetch', (event) => {
 
   if (sameOrigin || req.mode === 'navigate') {
     // App shell: network-first so updates land, cache fallback for offline.
+    // A page is a navigation request, which can't be copied with other options.
+    const fresh = req.mode === 'navigate' ? req : new Request(req, { cache: 'no-cache' });
+    const key = sameOrigin ? url.origin + url.pathname : req;   // without ?utm=… and the like
+    const keep = !sameOrigin || !url.pathname.includes('/tests/');
     event.respondWith(
-      fetch(req)
+      fetch(fresh)
         .then((res) => {
-          if (res && res.ok) {
+          if (res && res.ok && keep) {
             const copy = res.clone();
-            caches.open(CACHE_NAME).then((c) => c.put(req, copy));
+            caches.open(CACHE_NAME).then((c) => c.put(key, copy));
           }
           return res;
         })
-        .catch(() => caches.match(req))
+        .catch(() => caches.match(key, { ignoreSearch: true }))
     );
     return;
   }
@@ -159,7 +169,7 @@ self.addEventListener('fetch', (event) => {
       return fetch(req).then((res) => {
         if (res && (res.ok || res.type === 'opaque')) {
           const copy = res.clone();
-          caches.open(CACHE_NAME).then((c) => c.put(req, copy));
+          caches.open(CDN_CACHE).then((c) => c.put(req, copy));
         }
         return res;
       });
