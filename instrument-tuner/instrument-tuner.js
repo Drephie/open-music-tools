@@ -306,7 +306,8 @@ function fitTitle() {
   titleEl.classList.remove('two-lines');
   titleEl.style.removeProperty('font-size');
   let size = parseFloat(getComputedStyle(titleEl).fontSize);
-  while (size > 13 && titleEl.scrollWidth > titleEl.clientWidth) titleEl.style.fontSize = `${(size -= 0.5)}px`;
+  // Never below 18 px on one line: a long title wraps onto two lines instead.
+  while (size > 18 && titleEl.scrollWidth > titleEl.clientWidth) titleEl.style.fontSize = `${(size -= 0.5)}px`;
   if (titleEl.scrollWidth <= titleEl.clientWidth) return;
   titleEl.classList.add('two-lines');
   titleEl.style.removeProperty('font-size');

@@ -29,7 +29,10 @@
   border: 0; background: transparent; color: var(--color-select-text); cursor: pointer; touch-action: manipulation;
   font: 700 18px/1 var(--font-num);
 }
-.step-btn { width: 44px; min-height: 44px; font-size: 22px !important; }
+.step-btn { position: relative; width: 44px; min-height: 44px; font-size: 0 !important; }
+/* A drawn − and + (no text glyphs); the names come from aria-label. */
+.step-btn::before, #start-up::after { content: ''; position: absolute; left: 50%; top: 50%; width: 14px; height: 2px; margin: -1px 0 0 -7px; border-radius: 1px; background: currentColor; }
+#start-up::after { transform: rotate(90deg); }
 .step-btn:disabled { opacity: 0.35; cursor: default; }
 .start-note { min-width: 62px; padding: 0 4px; display: inline-flex; align-items: center; justify-content: center; border-left: 1px solid var(--border-panel) !important; border-right: 1px solid var(--border-panel) !important; }
 .start-note .acc { width: 0.36em; height: 0.58em; margin: -0.3em 0 0 0.04em; }

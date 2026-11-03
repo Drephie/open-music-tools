@@ -205,12 +205,20 @@ function measure() {
   fitNote();
 }
 
-// The title on one line: smaller in a long language and a wide font.
+// The title on one line, a little smaller in a long language and a wide font,
+// but never below 18 px: then it wraps onto two lines instead.
 const titleEl = document.querySelector('.tool-title');
 function fitTitle() {
+  titleEl.classList.remove('two-lines');
   titleEl.style.removeProperty('font-size');
   let size = parseFloat(getComputedStyle(titleEl).fontSize);
-  while (size > 11 && titleEl.scrollWidth > titleEl.clientWidth) titleEl.style.fontSize = `${(size -= 0.5)}px`;
+  while (size > 18 && titleEl.scrollWidth > titleEl.clientWidth) titleEl.style.fontSize = `${(size -= 0.5)}px`;
+  if (titleEl.scrollWidth <= titleEl.clientWidth) return;
+  titleEl.classList.add('two-lines');
+  titleEl.style.removeProperty('font-size');
+  size = parseFloat(getComputedStyle(titleEl).fontSize);
+  const tooBig = () => titleEl.scrollWidth > titleEl.clientWidth || titleEl.getBoundingClientRect().height > 2.5 * size * 1.2;
+  while (size > 11 && tooBig()) titleEl.style.fontSize = `${(size -= 0.5)}px`;
 }
 
 function readColors() {

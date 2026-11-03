@@ -176,7 +176,7 @@
     .ui-col-label.left { color: var(--color-left); }
     .ui-col-label.right { color: var(--color-right); }
     /* Light themes: the left accent is too light for small text on their panels. */
-    body:is([data-theme="pink"], [data-theme="snap"]) .ui-col-label.left { color: color-mix(in srgb, var(--color-left) 50%, var(--color-text)); }
+    body:is([data-theme="pink"], [data-theme="snap"], [data-theme="rouge"]) .ui-col-label.left { color: color-mix(in srgb, var(--color-left) 50%, var(--color-text)); }
     .slider-row { display: flex; align-items: center; gap: 5px; }
     .slider-tag { font-size: 10px; width: 15px; }
 
@@ -236,7 +236,7 @@
     #touch-record-btn.recording { color: var(--color-warn-end); border-color: var(--color-warn-end); animation: recblink 1.2s infinite; }
 
     #rotate-overlay { position: fixed; inset: 0; z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: var(--bg-overlay); backdrop-filter: blur(12px); text-align: center; font-family: var(--font-main); padding: 30px; box-sizing: border-box; }
-    #rotate-overlay .rotate-emoji { font-size: 56px; }
+    #rotate-overlay .rotate-emoji { width: 108px; height: 72px; color: var(--color-left); }
     #rotate-overlay h2 { margin: 0; color: var(--color-left); }
     #rotate-overlay p { margin: 0; max-width: 420px; line-height: 1.6; }
 
@@ -621,7 +621,7 @@
   </div>
 
   <div id="rotate-overlay">
-    <div class="rotate-emoji" aria-hidden="true">📱➡️</div>
+    <svg class="rotate-emoji" viewBox="0 0 72 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="9" width="18" height="30" rx="3"/><rect x="40" y="18" width="28" height="18" rx="3"/><path d="M24 7c7-4 15-3 20 3"/><path d="M45 4v6h-6"/></svg>
     <h2 data-i18n="rotateTitle">Rotate your device</h2>
     <p data-i18n="rotateBody">Choordination plays in landscape. Turn your device sideways to continue.</p>
   </div>
