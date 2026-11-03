@@ -110,7 +110,7 @@
     body[data-theme="pink"] #ui-edit-bar { border-radius: 26px; border: 2px solid var(--border-panel); }
     body[data-theme="pink"] .tutorial-content li { border-radius: 14px; }
 
-    #record-btn.recording { color: #ff4d4d; border-color: #ff4d4d; animation: recblink 1.2s infinite; }
+    #record-btn.recording { color: var(--color-warn-end); border-color: var(--color-warn-end); animation: recblink 1.2s infinite; }
     @keyframes recblink { 50% { opacity: 0.55; } }
     /* Reduce motion: the logo stays still; recording still shows in red. */
     @media (prefers-reduced-motion: reduce) {
@@ -136,6 +136,14 @@
     .modal-header h3, .modal-header h2 { margin: 0; font-family: var(--font-display); font-weight: var(--title-weight); color: var(--color-title); font-size: 21px; line-height: 1.15; text-transform: var(--title-transform); letter-spacing: var(--title-spacing); }
     .close-btn { background: transparent; border: none; color: var(--color-text); font-size: 26px; font-weight: 400; cursor: pointer; transition: 0.2s; padding: 0 5px; min-width: 44px; min-height: 44px; border-radius: var(--radius-round); }
     .close-btn:hover { color: var(--color-right); }
+    /* Drawn icons instead of text glyphs: the × and the record dot (a square while recording). */
+    .close-btn { position: relative; font-size: 0 !important; }
+    .close-btn::before, .close-btn::after { content: ''; position: absolute; left: 50%; top: 50%; width: 20px; height: 2px; margin: -1px 0 0 -10px; border-radius: 1px; background: currentColor; transform: rotate(45deg); }
+    .close-btn::after { transform: rotate(-45deg); }
+    #record-btn::before, #touch-record-btn::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 7px; border-radius: 50%; background: var(--color-warn-end); vertical-align: -1px; }
+    :is(#record-btn, #touch-record-btn).recording::before { border-radius: 2px; }
+    #touch-record-btn:empty::before { margin-right: 0; width: 14px; height: 14px; }
+    #touch-settings-btn svg { width: 22px; height: 22px; vertical-align: middle; }
 
     /* Keep the scrollbar inside the modal's rounded corners so the thumb never pokes out the top/bottom. */
     .centered-modal { scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: var(--color-left) transparent; }
@@ -224,7 +232,7 @@
     #sustain-latch { flex: 1; min-height: 52px; border-radius: 12px; border: 1px solid var(--color-left); background: transparent; color: var(--color-left); font-family: var(--font-main); font-weight: 700; font-size: 16px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     #sustain-latch.latched { background: var(--color-left); color: var(--color-text-pinched); box-shadow: 0 0 var(--shadow-blur) var(--color-left); }
     #touch-record-btn, #touch-settings-btn { min-width: 56px; min-height: 52px; border-radius: 12px; border: 1px solid var(--border-panel); background: var(--color-panel); color: var(--color-text); font-size: 20px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
-    #touch-record-btn.recording { color: #ff4d4d; border-color: #ff4d4d; animation: recblink 1.2s infinite; }
+    #touch-record-btn.recording { color: var(--color-warn-end); border-color: var(--color-warn-end); animation: recblink 1.2s infinite; }
 
     #rotate-overlay { position: fixed; inset: 0; z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: var(--bg-overlay); backdrop-filter: blur(12px); text-align: center; font-family: var(--font-main); padding: 30px; box-sizing: border-box; }
     #rotate-overlay .rotate-emoji { font-size: 56px; }
@@ -305,7 +313,7 @@
   <div id="chord-live" class="visually-hidden" role="status" aria-live="polite"></div>
 
   <div id="top-right-menu">
-    <button id="record-btn" class="menu-btn" data-i18n-aria="recordAria" aria-label="Record audio">⏺ REC</button>
+    <button id="record-btn" class="menu-btn" data-i18n-aria="recordAria" aria-label="Record audio">REC</button>
     <button id="tutorial-toggle" class="menu-btn icon-btn" data-i18n-aria="helpAria" aria-label="How to play">
       <span class="circled-question" aria-hidden="true">?</span>
     </button>
@@ -606,8 +614,8 @@
     </div>
     <div id="touch-bottom">
       <button id="sustain-latch" data-i18n="sustainLatch" aria-pressed="false">SUSTAIN</button>
-      <button id="touch-record-btn" data-i18n-aria="recordAria" aria-label="Record audio">⏺</button>
-      <button id="touch-settings-btn" data-i18n-aria="touchSettingsAria" aria-label="Settings">⚙</button>
+      <button id="touch-record-btn" data-i18n-aria="recordAria" aria-label="Record audio"></button>
+      <button id="touch-settings-btn" data-i18n-aria="touchSettingsAria" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
   </div>
 
@@ -1021,6 +1029,7 @@
     const look = loadLook();
     themeSelector.value = look.theme;
     document.body.setAttribute('data-theme', look.theme);
+    syncThemeBar();
     languageSelector.value = look.lang;
   }
 
@@ -1328,10 +1337,10 @@
     return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
   };
   function updateRecordButtons() {
-    recordBtn.textContent = isRecording ? '⏹ ' + fmtTime(Date.now() - recStartTime) : '⏺ REC';
+    recordBtn.textContent = isRecording ? fmtTime(Date.now() - recStartTime) : 'REC';
     recordBtn.classList.toggle('recording', isRecording);
     recordBtn.setAttribute('aria-label', t(isRecording ? 'recStopAria' : 'recordAria'));
-    touchRecordBtn.textContent = isRecording ? fmtTime(Date.now() - recStartTime) : '⏺';
+    touchRecordBtn.textContent = isRecording ? fmtTime(Date.now() - recStartTime) : '';
     touchRecordBtn.classList.toggle('recording', isRecording);
     touchRecordBtn.setAttribute('aria-label', t(isRecording ? 'recStopAria' : 'recordAria'));
   }
@@ -1521,16 +1530,22 @@
   setInterval(checkNag, 1000);
 
   // --- LOADING / ERROR SCREENS ---
+  // The browser's bar follows the theme's page colour.
+  function syncThemeBar() {
+    const bar = document.querySelector('meta[name="theme-color"]');
+    const page = getComputedStyle(document.body).getPropertyValue('--bg-page').trim();
+    if (bar && page) bar.setAttribute('content', page);
+  }
   const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" aria-hidden="true">
     <defs>
       <linearGradient id="ringLeft" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/><stop offset="100%" stop-color="#ffffff" stop-opacity="0.1"/>
+        <stop offset="0%" style="stop-color:var(--color-left)" stop-opacity="1"/><stop offset="100%" style="stop-color:var(--color-left)" stop-opacity="0.1"/>
       </linearGradient>
       <linearGradient id="ringRight" x1="100%" y1="100%" x2="0%" y2="0%">
-        <stop offset="0%" stop-color="#8ad4ff" stop-opacity="1"/><stop offset="100%" stop-color="#8ad4ff" stop-opacity="0.1"/>
+        <stop offset="0%" style="stop-color:var(--color-right)" stop-opacity="1"/><stop offset="100%" style="stop-color:var(--color-right)" stop-opacity="0.1"/>
       </linearGradient>
       <linearGradient id="diamondGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#8ad4ff"/>
+        <stop offset="0%" style="stop-color:var(--color-left)"/><stop offset="100%" style="stop-color:var(--color-right)"/>
       </linearGradient>
       <filter id="glass-glow" x="-30%" y="-30%" width="160%" height="160%">
         <feGaussianBlur stdDeviation="12" result="blur" /><feComposite in="SourceGraphic" in2="blur" operator="over" />
@@ -1540,21 +1555,21 @@
         <feMerge><feMergeNode in="blur2" /><feMergeNode in="blur1" /><feMergeNode in="SourceGraphic" /></feMerge>
       </filter>
     </defs>
-    <circle cx="190" cy="256" r="140" fill="#ffffff" opacity="0.04" filter="url(#glass-glow)" />
-    <circle cx="322" cy="256" r="140" fill="#8ad4ff" opacity="0.06" filter="url(#glass-glow)" />
+    <circle cx="190" cy="256" r="140" style="fill:var(--color-left)" opacity="0.04" filter="url(#glass-glow)" />
+    <circle cx="322" cy="256" r="140" style="fill:var(--color-right)" opacity="0.06" filter="url(#glass-glow)" />
     <g filter="url(#glass-glow)">
       <circle cx="190" cy="256" r="140" fill="none" stroke="url(#ringLeft)" stroke-width="14" />
-      <circle cx="190" cy="256" r="60" fill="none" stroke="#ffffff" stroke-width="4" stroke-dasharray="6 12" opacity="0.4" />
-      <circle cx="190" cy="256" r="10" fill="#ffffff" opacity="0.9" />
+      <circle cx="190" cy="256" r="60" fill="none" style="stroke:var(--color-left)" stroke-width="4" stroke-dasharray="6 12" opacity="0.4" />
+      <circle cx="190" cy="256" r="10" style="fill:var(--color-left)" opacity="0.9" />
     </g>
     <g filter="url(#glass-glow)">
       <circle cx="322" cy="256" r="140" fill="none" stroke="url(#ringRight)" stroke-width="14" />
-      <circle cx="322" cy="256" r="60" fill="none" stroke="#8ad4ff" stroke-width="4" stroke-dasharray="6 12" opacity="0.5" />
-      <circle cx="322" cy="256" r="10" fill="#8ad4ff" opacity="0.9" />
+      <circle cx="322" cy="256" r="60" fill="none" style="stroke:var(--color-right)" stroke-width="4" stroke-dasharray="6 12" opacity="0.5" />
+      <circle cx="322" cy="256" r="10" style="fill:var(--color-right)" opacity="0.9" />
     </g>
-    <line x1="190" y1="256" x2="322" y2="256" stroke="#ffffff" stroke-width="3" stroke-dasharray="4 8" opacity="0.3" />
+    <line x1="190" y1="256" x2="322" y2="256" style="stroke:var(--color-left)" stroke-width="3" stroke-dasharray="4 8" opacity="0.3" />
     <g filter="url(#intense-glow)">
-      <path d="M 256 210 L 302 256 L 256 302 L 210 256 Z" fill="none" stroke="#8ad4ff" stroke-width="4" opacity="0.8" />
+      <path d="M 256 210 L 302 256 L 256 302 L 210 256 Z" fill="none" style="stroke:var(--color-right)" stroke-width="4" opacity="0.8" />
       <path d="M 256 228 L 284 256 L 256 284 L 228 256 Z" fill="url(#diamondGrad)" />
     </g>
   </svg>`;
@@ -2481,6 +2496,7 @@
 
   themeSelector.addEventListener('change', (e) => {
     document.body.setAttribute('data-theme', e.target.value);
+    syncThemeBar();
     refreshThemeCache();
     saveLook({ theme: e.target.value });
   });
@@ -2505,6 +2521,7 @@
     if (look.theme !== themeSelector.value) {
       themeSelector.value = look.theme;
       document.body.setAttribute('data-theme', look.theme);
+      syncThemeBar();
       refreshThemeCache();
       setupCustomSelects();
     }
