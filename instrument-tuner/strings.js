@@ -1,7 +1,7 @@
 /* instrument-tuner/strings.js: the Instrument Tuner's own strings in en, es, it.
  * Merged over HUB_STRINGS (shared/ui/strings.js), which has the themes,
- * footer, Patreon window buttons and common controls. {patreon} and
- * {instagram} are interpolated; {n} and {note} are filled in by
+ * footer, Patreon window buttons and common controls. {patreon},
+ * {instagram} and {repo} are interpolated; {n} and {note} are filled in by
  * instrument-tuner.js. Instrument and tuning names are the keys in
  * tunings.js (inst_*, tun_*). inTune is said of a string, inTuneNote of a note
  * (Any note). err*: why the microphone couldn't start
@@ -12,7 +12,7 @@ export const TUNER_STRINGS = {
   en: {
     title: "Instrument Tuner",
     aboutTitle: "About the Instrument Tuner",
-    aboutBody: 'Free, open-source music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers.<br><br>Pick your instrument, play a string and turn its peg until it says In tune: within 5 cents (hundredths of a half step), 2 in Hard mode. Wrong string? Tap the right one. A = 440 Hz.<br><br>The microphone\'s sound is analysed on your device and thrown away: nothing is recorded or uploaded.',
+    aboutBody: 'Free, <a href="{repo}" target="_blank" rel="noopener noreferrer">open-source</a> music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers.<br><br>Pick your instrument, play a string and turn its peg until it says In tune: within 5 cents (hundredths of a half step), 2 in Hard mode. Wrong string? Tap the right one. A = 440 Hz.<br><br>The microphone\'s sound is analysed on your device and thrown away: nothing is recorded or uploaded.',
     aboutKeys: "On a computer: Space starts and stops listening.",
     supportTitle: "Support the Instrument Tuner",
     supportBody: "Enjoying being in tune? Help keep these music tools free, ad-free and growing!",
@@ -44,7 +44,7 @@ export const TUNER_STRINGS = {
   es: {
     title: "Afinador de instrumentos",
     aboutTitle: "Sobre el afinador de instrumentos",
-    aboutBody: 'Herramientas musicales gratuitas y de código abierto de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios ni rastreadores.<br><br>Elige el instrumento, toca una cuerda y gira la clavija hasta ver Afinada: 5 cents o menos (centésimas de semitono), 2 en modo difícil. ¿Cuerda equivocada? Pulsa la correcta. La = 440 Hz.<br><br>El sonido del micrófono se analiza en tu dispositivo y se descarta: no se graba ni se sube nada.',
+    aboutBody: 'Herramientas musicales gratuitas y <a href="{repo}" target="_blank" rel="noopener noreferrer">de código abierto</a> de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios ni rastreadores.<br><br>Elige el instrumento, toca una cuerda y gira la clavija hasta ver Afinada: 5 cents o menos (centésimas de semitono), 2 en modo difícil. ¿Cuerda equivocada? Pulsa la correcta. La = 440 Hz.<br><br>El sonido del micrófono se analiza en tu dispositivo y se descarta: no se graba ni se sube nada.',
     aboutKeys: "En el ordenador: Espacio empieza y deja de escuchar.",
     supportTitle: "Apoya el afinador de instrumentos",
     supportBody: "¿Te gusta tocar afinado? ¡Ayuda a que estas herramientas musicales sigan gratis, sin anuncios y creciendo!",
@@ -76,7 +76,7 @@ export const TUNER_STRINGS = {
   it: {
     title: "Accordatore per strumenti",
     aboutTitle: "Informazioni sull'accordatore per strumenti",
-    aboutBody: 'Strumenti musicali gratuiti e open source di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità né tracker.<br><br>Scegli lo strumento, suona una corda e gira la chiavetta fino a leggere Accordata: entro 5 cent (centesimi di semitono), 2 in modalità difficile. Corda sbagliata? Tocca quella giusta. La = 440 Hz.<br><br>Il suono del microfono è analizzato sul tuo dispositivo e scartato: niente viene registrato né caricato online.',
+    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità né tracker.<br><br>Scegli lo strumento, suona una corda e gira la chiavetta fino a leggere Accordata: entro 5 cent (centesimi di semitono), 2 in modalità difficile. Corda sbagliata? Tocca quella giusta. La = 440 Hz.<br><br>Il suono del microfono è analizzato sul tuo dispositivo e scartato: niente viene registrato né caricato online.',
     aboutKeys: "Al computer: Spazio avvia e ferma l'ascolto.",
     supportTitle: "Sostieni l'accordatore per strumenti",
     supportBody: "Ti piace suonare accordato? Aiutaci a mantenere questi strumenti musicali gratuiti, senza pubblicità e in crescita!",

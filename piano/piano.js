@@ -10,7 +10,7 @@ import { LANGUAGES, mergeStrings, createI18n } from '../shared/ui/i18n.js';
 import { HUB_STRINGS } from '../shared/ui/strings.js';
 import { setupCustomSelects, setSelectRoom } from '../shared/ui/select.js';
 import { createModalManager } from '../shared/ui/modal.js';
-import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
+import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
 import { PIANO_STRINGS } from './strings.js';
 
@@ -55,7 +55,7 @@ const solfege = () => (settings.solfege === null ? settings.lang !== 'en' : sett
 const i18n = createI18n({
   strings: mergeStrings(HUB_STRINGS, PIANO_STRINGS),
   getLang: () => settings.lang,
-  vars: { patreon: PATREON_URL, instagram: DESIGNER_URL },
+  vars: { patreon: PATREON_URL, instagram: DESIGNER_URL, repo: REPO_URL },
 });
 const { t } = i18n;
 

@@ -1,7 +1,7 @@
 /* vocal-tuner/strings.js: the Vocal Tuner's own strings in en, es, it.
  * Merged over HUB_STRINGS (shared/ui/strings.js), which has the themes,
- * footer, Patreon window buttons and common controls. {patreon} and
- * {instagram} are interpolated; {n} is filled in by vocal-tuner.js.
+ * footer, Patreon window buttons and common controls. {patreon},
+ * {instagram} and {repo} are interpolated; {n} is filled in by vocal-tuner.js.
  * err*: why the microphone couldn't start (shared/pitch.js PITCH_ERRORS).
  */
 
@@ -9,7 +9,7 @@ export const TUNER_STRINGS = {
   en: {
     title: "Vocal Tuner",
     aboutTitle: "About the Vocal Tuner",
-    aboutBody: 'Free, open-source music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers.<br><br>Sing a note: see its name and how far off you are, in cents (hundredths of a half step). Within 10 cents you are in tune (5 in Hard mode). A = 440 Hz.<br><br>The microphone\'s sound is analysed on your device and thrown away: nothing is recorded or uploaded.',
+    aboutBody: 'Free, <a href="{repo}" target="_blank" rel="noopener noreferrer">open-source</a> music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers.<br><br>Sing a note: see its name and how far off you are, in cents (hundredths of a half step). Within 10 cents you are in tune (5 in Hard mode). A = 440 Hz.<br><br>The microphone\'s sound is analysed on your device and thrown away: nothing is recorded or uploaded.',
     aboutKeys: "On a computer: Space starts and stops listening.",
     supportTitle: "Support the Vocal Tuner",
     supportBody: "Enjoying singing in tune? Help keep these music tools free, ad-free and growing!",
@@ -32,7 +32,7 @@ export const TUNER_STRINGS = {
   es: {
     title: "Afinador vocal",
     aboutTitle: "Sobre el afinador vocal",
-    aboutBody: 'Herramientas musicales gratuitas y de código abierto de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios ni rastreadores.<br><br>Canta una nota: mira cuál es y cuánto te desvías, en cents (centésimas de semitono). A 10 cents o menos estás afinado (5 en modo difícil). La = 440 Hz.<br><br>El sonido del micrófono se analiza en tu dispositivo y se descarta: no se graba ni se sube nada.',
+    aboutBody: 'Herramientas musicales gratuitas y <a href="{repo}" target="_blank" rel="noopener noreferrer">de código abierto</a> de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios ni rastreadores.<br><br>Canta una nota: mira cuál es y cuánto te desvías, en cents (centésimas de semitono). A 10 cents o menos estás afinado (5 en modo difícil). La = 440 Hz.<br><br>El sonido del micrófono se analiza en tu dispositivo y se descarta: no se graba ni se sube nada.',
     aboutKeys: "En el ordenador: Espacio empieza y deja de escuchar.",
     supportTitle: "Apoya el afinador vocal",
     supportBody: "¿Te gusta cantar afinado? ¡Ayuda a que estas herramientas musicales sigan gratis, sin anuncios y creciendo!",
@@ -55,7 +55,7 @@ export const TUNER_STRINGS = {
   it: {
     title: "Accordatore vocale",
     aboutTitle: "Informazioni sull'accordatore vocale",
-    aboutBody: 'Strumenti musicali gratuiti e open source di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità né tracker.<br><br>Canta una nota: vedi qual è e quanto sei calante o crescente, in cent (centesimi di semitono). Entro 10 cent sei intonato (5 in modalità difficile). La = 440 Hz.<br><br>Il suono del microfono viene analizzato sul tuo dispositivo e scartato: niente viene registrato o caricato online.',
+    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità né tracker.<br><br>Canta una nota: vedi qual è e quanto sei calante o crescente, in cent (centesimi di semitono). Entro 10 cent sei intonato (5 in modalità difficile). La = 440 Hz.<br><br>Il suono del microfono viene analizzato sul tuo dispositivo e scartato: niente viene registrato o caricato online.',
     aboutKeys: "Al computer: Spazio avvia e ferma l'ascolto.",
     supportTitle: "Sostieni l'accordatore vocale",
     supportBody: "Ti piace cantare intonato? Aiutaci a mantenere questi strumenti musicali gratuiti, senza pubblicità e in crescita!",

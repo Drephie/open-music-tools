@@ -13,7 +13,7 @@ import { HUB_STRINGS } from '../shared/ui/strings.js';
 import { setupCustomSelects } from '../shared/ui/select.js';
 import { createModalManager } from '../shared/ui/modal.js';
 import { accidentalHtml, prettyName } from '../shared/ui/accidentals.js';
-import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
+import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
 import { TUNINGS, tuningById, stringsOf, stringName, rangeOf, matchString, createTunedMarks } from './tunings.js';
 import { createStringsView } from './strings-view.js';
@@ -44,7 +44,7 @@ const solfege = () => (settings.solfege === null ? settings.lang !== 'en' : sett
 const i18n = createI18n({
   strings: mergeStrings(HUB_STRINGS, TUNER_STRINGS),
   getLang: () => settings.lang,
-  vars: { patreon: PATREON_URL, instagram: DESIGNER_URL },
+  vars: { patreon: PATREON_URL, instagram: DESIGNER_URL, repo: REPO_URL },
 });
 const { t } = i18n;
 

@@ -16,7 +16,7 @@ import { HUB_STRINGS } from '../shared/ui/strings.js';
 import { setupCustomSelects } from '../shared/ui/select.js';
 import { createModalManager } from '../shared/ui/modal.js';
 import { accidentalHtml, prettyName } from '../shared/ui/accidentals.js';
-import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
+import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
 import { createTrace, fitView, SENSITIVITY, createLoudnessGate, levelDb } from '../shared/pitch-line.js';
 import { createGraphView } from '../shared/ui/pitch-graph.js';
@@ -62,7 +62,7 @@ const tol = () => (settings.precise ? TOLERANCE.precise : TOLERANCE.normal);
 const i18n = createI18n({
   strings: mergeStrings(HUB_STRINGS, TRAINING_STRINGS),
   getLang: () => settings.lang,
-  vars: { patreon: PATREON_URL, instagram: DESIGNER_URL },
+  vars: { patreon: PATREON_URL, instagram: DESIGNER_URL, repo: REPO_URL },
 });
 const { t } = i18n;
 const fill = (key, vars) => Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), t(key));

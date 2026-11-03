@@ -4,6 +4,7 @@
  *   LANGUAGE_NAMES  { en: 'English', es: 'Español', it: 'Italiano' } (always
  *                   shown in their own language)
  *   PATREON_URL, DESIGNER_URL   for {patreon} in strings and the footer links
+ *   REPO_URL                    the public code, for {repo} in strings
  *   browserLanguage()           'es' or 'it' when the browser prefers it, else 'en'
  *   loadSettings(key)           the object saved under key in localStorage, or {}
  *   saveSettings(key, data)     saves it; silently does nothing when storage is
@@ -46,6 +47,7 @@ export const THEMES = [
 export const LANGUAGE_NAMES = { en: 'English', es: 'Español', it: 'Italiano' };
 export const PATREON_URL = 'https://patreon.com/drephie';
 export const DESIGNER_URL = 'https://instagram.com/drephie';
+export const REPO_URL = 'https://github.com/Drephie/open-music-tools';
 
 export function browserLanguage() {
   for (const tag of navigator.languages || [navigator.language || 'en']) {

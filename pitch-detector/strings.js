@@ -1,7 +1,7 @@
 /* pitch-detector/strings.js: the Pitch Detector's own strings in en, es, it.
  * Merged over HUB_STRINGS (shared/ui/strings.js), which has the themes,
- * footer, Patreon window buttons and common controls. {patreon} and
- * {instagram} are interpolated; {n} and {root} are filled in by
+ * footer, Patreon window buttons and common controls. {patreon},
+ * {instagram} and {repo} are interpolated; {n} and {root} are filled in by
  * pitch-detector.js. err*: why the microphone couldn't start
  * (shared/pitch.js PITCH_ERRORS).
  */
@@ -10,7 +10,7 @@ export const DETECTOR_STRINGS = {
   en: {
     title: "Pitch Detector",
     aboutTitle: "About the Pitch Detector",
-    aboutBody: 'Free, open-source music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers.<br><br>Sing and watch the line your voice draws: high notes up, the newest sound on the right. Tap a piano key to hear its note; pause, then drag the line to look back.<br><br>The microphone\'s sound is analysed on your device and thrown away: nothing is recorded or uploaded.',
+    aboutBody: 'Free, <a href="{repo}" target="_blank" rel="noopener noreferrer">open-source</a> music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers.<br><br>Sing and watch the line your voice draws: high notes up, the newest sound on the right. Tap a piano key to hear its note; pause, then drag the line to look back.<br><br>The microphone\'s sound is analysed on your device and thrown away: nothing is recorded or uploaded.',
     aboutCredits: 'Piano sound: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> by Alexander Holm, licensed under <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "On a computer: Space starts and stops listening, P pauses, and the arrow keys look back while paused.",
     supportTitle: "Support the Pitch Detector",
@@ -39,7 +39,7 @@ export const DETECTOR_STRINGS = {
   es: {
     title: "Detector de tono",
     aboutTitle: "Sobre el detector de tono",
-    aboutBody: 'Herramientas musicales gratuitas y de código abierto de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios ni rastreadores.<br><br>Canta y mira la línea de tu voz: las agudas arriba, lo más reciente a la derecha. Pulsa una tecla para oír su nota; en pausa, arrastra la línea para mirar atrás.<br><br>El sonido del micrófono se analiza en tu dispositivo y se descarta: no se graba ni se sube nada.',
+    aboutBody: 'Herramientas musicales gratuitas y <a href="{repo}" target="_blank" rel="noopener noreferrer">de código abierto</a> de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios ni rastreadores.<br><br>Canta y mira la línea de tu voz: las agudas arriba, lo más reciente a la derecha. Pulsa una tecla para oír su nota; en pausa, arrastra la línea para mirar atrás.<br><br>El sonido del micrófono se analiza en tu dispositivo y se descarta: no se graba ni se sube nada.',
     aboutCredits: 'Sonido de piano: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> de Alexander Holm, con licencia <a href="https://creativecommons.org/licenses/by/3.0/deed.es" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "En el ordenador: Espacio empieza y deja de escuchar, P pausa, y las flechas miran atrás en pausa.",
     supportTitle: "Apoya el detector de tono",
@@ -68,7 +68,7 @@ export const DETECTOR_STRINGS = {
   it: {
     title: "Rilevatore di intonazione",
     aboutTitle: "Informazioni sul rilevatore di intonazione",
-    aboutBody: 'Strumenti musicali gratuiti e open source di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità né tracker.<br><br>Canta e guarda la linea della tua voce: le acute in alto, il suono più recente a destra. Tocca un tasto per sentirne la nota; in pausa, trascina la linea per guardare indietro.<br><br>Il suono del microfono è analizzato sul tuo dispositivo e scartato: niente è registrato né caricato.',
+    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità né tracker.<br><br>Canta e guarda la linea della tua voce: le acute in alto, il suono più recente a destra. Tocca un tasto per sentirne la nota; in pausa, trascina la linea per guardare indietro.<br><br>Il suono del microfono è analizzato sul tuo dispositivo e scartato: niente è registrato né caricato.',
     aboutCredits: 'Suono di pianoforte: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> di Alexander Holm, con licenza <a href="https://creativecommons.org/licenses/by/3.0/deed.it" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "Al computer: Spazio avvia e ferma l'ascolto, P mette in pausa e le frecce guardano indietro in pausa.",
     supportTitle: "Sostieni il rilevatore di intonazione",

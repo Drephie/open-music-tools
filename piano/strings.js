@@ -1,7 +1,7 @@
 /* piano/strings.js: the Piano's own strings in en, es, it.
  * Merged over HUB_STRINGS (shared/ui/strings.js), which has the themes,
- * footer, Patreon window buttons and common controls. {patreon} and
- * {instagram} are interpolated. The interval names (iv0..iv12) are hub strings.
+ * footer, Patreon window buttons and common controls. {patreon},
+ * {instagram} and {repo} are interpolated. The interval names (iv0..iv12) are hub strings.
  * q_<id>: plain words for each chord shape in shared/theory.js CHORD_FORMS,
  * shown as "{root} {words}" ("C major seventh").
  */
@@ -10,7 +10,7 @@ export const PIANO_STRINGS = {
   en: {
     title: "Piano",
     aboutTitle: "About the Piano",
-    aboutBody: 'Free, open-source music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers, nothing uploaded: everything runs in your browser.<br><br><strong>Hold</strong>: a key sounds while you hold it. <strong>Ring</strong>: it rings out and fades away by itself. <strong>Drone</strong>: tap a key to start it, tap again to stop.',
+    aboutBody: 'Free, <a href="{repo}" target="_blank" rel="noopener noreferrer">open-source</a> music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers, nothing uploaded: everything runs in your browser.<br><br><strong>Hold</strong>: a key sounds while you hold it. <strong>Ring</strong>: it rings out and fades away by itself. <strong>Drone</strong>: tap a key to start it, tap again to stop.',
     aboutCredits: 'Piano sound: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> by Alexander Holm, licensed under <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "On a computer: A W S E D F T G Y H U J K play the keys from C (the small letters on the keys), Z and X move them an octave down or up, and holding Space lets the notes ring.",
     supportTitle: "Support the Piano",
@@ -41,7 +41,7 @@ export const PIANO_STRINGS = {
   es: {
     title: "Piano",
     aboutTitle: "Acerca del Piano",
-    aboutBody: 'Herramientas musicales gratuitas y de código abierto de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios, sin rastreadores y sin subir nada: todo funciona en tu navegador.<br><br><strong>Mantener</strong>: la tecla suena mientras la mantienes. <strong>Resonar</strong>: suena y se apaga poco a poco por sí sola. <strong>Bordón</strong>: toca una tecla para que suene y otra vez para pararla.',
+    aboutBody: 'Herramientas musicales gratuitas y <a href="{repo}" target="_blank" rel="noopener noreferrer">de código abierto</a> de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios, sin rastreadores y sin subir nada: todo funciona en tu navegador.<br><br><strong>Mantener</strong>: la tecla suena mientras la mantienes. <strong>Resonar</strong>: suena y se apaga poco a poco por sí sola. <strong>Bordón</strong>: toca una tecla para que suene y otra vez para pararla.',
     aboutCredits: 'Sonido de piano: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> de Alexander Holm, con licencia <a href="https://creativecommons.org/licenses/by/3.0/deed.es" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "En el ordenador: A W S E D F T G Y H U J K tocan las teclas desde Do (las letras pequeñas en las teclas), Z y X las mueven una octava abajo o arriba, y mantener Espacio deja sonar las notas.",
     supportTitle: "Apoya el Piano",
@@ -72,7 +72,7 @@ export const PIANO_STRINGS = {
   it: {
     title: "Piano",
     aboutTitle: "Informazioni sul Piano",
-    aboutBody: 'Strumenti musicali gratuiti e open source di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, niente caricato online: tutto funziona nel tuo browser.<br><br><strong>Tieni</strong>: il tasto suona finché lo tieni premuto. <strong>Risuona</strong>: suona e si spegne piano piano da solo. <strong>Bordone</strong>: tocca un tasto per farlo suonare, toccalo di nuovo per fermarlo.',
+    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, niente caricato online: tutto funziona nel tuo browser.<br><br><strong>Tieni</strong>: il tasto suona finché lo tieni premuto. <strong>Risuona</strong>: suona e si spegne piano piano da solo. <strong>Bordone</strong>: tocca un tasto per farlo suonare, toccalo di nuovo per fermarlo.',
     aboutCredits: 'Suono di pianoforte: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> di Alexander Holm, con licenza <a href="https://creativecommons.org/licenses/by/3.0/deed.it" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "Al computer: A W S E D F T G Y H U J K suonano i tasti da Do (le letterine sui tasti), Z e X li spostano di un'ottava in giù o in su, e tenendo premuto Spazio le note continuano a suonare.",
     supportTitle: "Sostieni il Piano",

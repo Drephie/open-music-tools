@@ -1,7 +1,7 @@
 /* pitch-training/strings.js: Pitch Training's own strings in en, es, it.
  * Merged over HUB_STRINGS (shared/ui/strings.js), which has the themes,
- * footer, Patreon window buttons and common controls. {patreon} and
- * {instagram} are interpolated; {n}, {total}, {note} and {digits} are filled
+ * footer, Patreon window buttons and common controls. {patreon},
+ * {instagram} and {repo} are interpolated; {n}, {total}, {note} and {digits} are filled
  * in by pitch-training.js. ex_*: the exercises (exercises.js EXERCISES);
  * voice_*: the voice types (VOICES); tip*: the tip after each round
  * (score.js judgeRound); err*: why the microphone couldn't start
@@ -12,7 +12,7 @@ export const TRAINING_STRINGS = {
   en: {
     title: "Pitch Training",
     aboutTitle: "About Pitch Training",
-    aboutBody: 'Free, open-source music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers.<br><br>Pick an exercise and tap Start: the piano plays it over a beat, four clicks count you in, then you sing it back. The notes you sing in tune fill in. Each round starts a half step higher, then they come back down.<br><br>The microphone\'s sound is analysed on your device and thrown away: nothing is recorded or uploaded.',
+    aboutBody: 'Free, <a href="{repo}" target="_blank" rel="noopener noreferrer">open-source</a> music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers.<br><br>Pick an exercise and tap Start: the piano plays it over a beat, four clicks count you in, then you sing it back. The notes you sing in tune fill in. Each round starts a half step higher, then they come back down.<br><br>The microphone\'s sound is analysed on your device and thrown away: nothing is recorded or uploaded.',
     aboutCredits: 'Piano sound: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> by Alexander Holm, licensed under <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "On a computer: Space starts and stops, and the up and down arrows move the starting note.",
     supportTitle: "Support Pitch Training",
@@ -63,7 +63,7 @@ export const TRAINING_STRINGS = {
   es: {
     title: "Ejercicios de afinación",
     aboutTitle: "Sobre los ejercicios de afinación",
-    aboutBody: 'Herramientas musicales gratuitas y de código abierto de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios ni rastreadores.<br><br>Elige un ejercicio y pulsa Empezar: el piano lo toca con un pulso, cuatro clics te dan la entrada y lo repites cantando. Las notas afinadas se rellenan. Cada ronda sube medio tono y luego vuelven a bajar.<br><br>El sonido del micrófono se analiza en tu dispositivo y se descarta: no se graba ni se sube nada.',
+    aboutBody: 'Herramientas musicales gratuitas y <a href="{repo}" target="_blank" rel="noopener noreferrer">de código abierto</a> de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios ni rastreadores.<br><br>Elige un ejercicio y pulsa Empezar: el piano lo toca con un pulso, cuatro clics te dan la entrada y lo repites cantando. Las notas afinadas se rellenan. Cada ronda sube medio tono y luego vuelven a bajar.<br><br>El sonido del micrófono se analiza en tu dispositivo y se descarta: no se graba ni se sube nada.',
     aboutCredits: 'Sonido de piano: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> de Alexander Holm, con licencia <a href="https://creativecommons.org/licenses/by/3.0/deed.es" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "En el ordenador: Espacio empieza y para, y las flechas arriba y abajo mueven la nota inicial.",
     supportTitle: "Apoya los ejercicios de afinación",
@@ -114,7 +114,7 @@ export const TRAINING_STRINGS = {
   it: {
     title: "Esercizi di intonazione",
     aboutTitle: "Informazioni sugli esercizi di intonazione",
-    aboutBody: 'Strumenti musicali gratuiti e open source di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità né tracker.<br><br>Scegli un esercizio e tocca Inizia: il pianoforte lo suona a tempo, quattro clic ti danno l\'attacco, poi lo ricanti. Le note intonate si riempiono. Ogni giro sale di un semitono, poi si torna giù.<br><br>Il suono del microfono è analizzato sul tuo dispositivo e scartato: niente è registrato né caricato.',
+    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità né tracker.<br><br>Scegli un esercizio e tocca Inizia: il pianoforte lo suona a tempo, quattro clic ti danno l\'attacco, poi lo ricanti. Le note intonate si riempiono. Ogni giro sale di un semitono, poi si torna giù.<br><br>Il suono del microfono è analizzato sul tuo dispositivo e scartato: niente è registrato né caricato.',
     aboutCredits: 'Suono di pianoforte: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> di Alexander Holm, con licenza <a href="https://creativecommons.org/licenses/by/3.0/deed.it" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "Al computer: Spazio avvia e ferma, e le frecce su e giù spostano la nota di partenza.",
     supportTitle: "Sostieni gli esercizi di intonazione",

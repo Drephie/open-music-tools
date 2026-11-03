@@ -1,7 +1,7 @@
 /* metronome/strings.js: the Metronome's own strings in en, es, it.
  * Merged over HUB_STRINGS (shared/ui/strings.js), which has the sound names,
- * themes, footer, Patreon window buttons and common controls. {patreon} and
- * {instagram} are interpolated.
+ * themes, footer, Patreon window buttons and common controls. {patreon},
+ * {instagram} and {repo} are interpolated.
  * The Italian tempo words (Andante…) come from shared/transport.js and are the
  * same in every language; t<Name> is the meaning shown after them.
  */
@@ -10,7 +10,7 @@ export const METRONOME_STRINGS = {
   en: {
     title: "Metronome",
     aboutTitle: "About the Metronome",
-    aboutBody: 'Free, open-source music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers, nothing uploaded: everything runs in your browser.',
+    aboutBody: 'Free, <a href="{repo}" target="_blank" rel="noopener noreferrer">open-source</a> music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers, nothing uploaded: everything runs in your browser.',
     supportTitle: "Support the Metronome",
     supportBody: "Enjoying practising with it? Help keep these music tools free, ad-free and growing!",
     aboutKeys: "On a computer: Space starts and stops, T taps the tempo, the arrow keys make it slower or faster (hold Shift for steps of 10).",
@@ -32,7 +32,7 @@ export const METRONOME_STRINGS = {
   es: {
     title: "Metrónomo",
     aboutTitle: "Acerca del Metrónomo",
-    aboutBody: 'Herramientas musicales gratuitas y de código abierto de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios, sin rastreadores y sin subir nada: todo funciona en tu navegador.',
+    aboutBody: 'Herramientas musicales gratuitas y <a href="{repo}" target="_blank" rel="noopener noreferrer">de código abierto</a> de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios, sin rastreadores y sin subir nada: todo funciona en tu navegador.',
     supportTitle: "Apoya el Metrónomo",
     supportBody: "¿Te gusta practicar con él? ¡Ayuda a que estas herramientas musicales sigan gratis, sin anuncios y creciendo!",
     aboutKeys: "En el ordenador: Espacio empieza y para, T marca el tempo, las flechas lo hacen más lento o más rápido (con Mayús, de 10 en 10).",
@@ -54,7 +54,7 @@ export const METRONOME_STRINGS = {
   it: {
     title: "Metronomo",
     aboutTitle: "Informazioni sul Metronomo",
-    aboutBody: 'Strumenti musicali gratuiti e open source di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, niente caricato online: tutto funziona nel tuo browser.',
+    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, niente caricato online: tutto funziona nel tuo browser.',
     supportTitle: "Sostieni il Metronomo",
     supportBody: "Ti piace esercitarti con il Metronomo? Aiutaci a mantenere questi strumenti musicali gratuiti, senza pubblicità e in crescita!",
     aboutKeys: "Al computer: Spazio avvia e ferma, T batte il tempo, le frecce lo rendono più lento o più veloce (con Maiusc, di 10 in 10).",
