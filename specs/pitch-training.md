@@ -1,7 +1,7 @@
 # Pitch Training: spec
 
 **Status:** approved by Drephie, 2026-11-03, with Claude's picks as written. Drephie's choices from the questions and an animated prototype: both views (the whole exercise, or scrolling), both ways of hearing (listen then sing, or sing along with headphones), all four kinds of exercise, each one played over a beat and then repeated by the singer, rounds that go up a half step at a time and come back down, a count-in before you sing, a voice type with a starting note to fine-tune, two levels of scoring, and teacher-made exercises later.
-**Built 2026-11-03.** Drephie's phone test: waiting.
+**Built 2026-11-03.** **Drephie's phone test (2026-11-03, home Wi-Fi https): all good**, no changes. The server log shows the phone loading this version and starting three warm-ups; it was a short test (about two and a half minutes), so sing along with headphones and the Spanish and Italian wording weren't reported on separately.
 Items marked *(Claude's pick)* weren't asked or weren't answered: say if you want them changed. *(At build time)* marks details settled while building.
 
 ## What it is for
