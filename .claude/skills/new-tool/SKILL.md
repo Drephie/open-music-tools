@@ -68,7 +68,7 @@ Add every new file to `APP_SHELL` in `/sw.js` and bump `CACHE_NAME` whenever a c
 ## 7. Checks in the built-in browser
 
 - Start the `hub` server from `.claude/launch.json` (`hub-8001` when port 8000 is taken by another session). The pane caches files: `fetch(url, { cache: 'reload' })` each changed file, then reload.
-- All 5 themes, all 3 languages, phone sizes (`resize_window` 375 × 667 and 390 × 664) and desktop, keyboard only, every window and dropdown, settings remembered after reload. Wait for theme transitions (about 0.5 s) before judging colors.
+- All 7 themes, all 3 languages, phone sizes (`resize_window` 375 × 667 and 390 × 664) and desktop, keyboard only, every window and dropdown, settings remembered after reload. Wait for theme transitions (about 0.5 s) before judging colors.
 - `tests/theory.html` and `tests/transport.html` pass. If a shared file changed, Choordination still loads and its dropdowns work.
 - The built-in browser slows its audio clock while its pane is hidden and reports a mouse and no touch, so phone-only and timing behaviour need the methods above, or Drephie's phone. With `resize_window` below 768 px wide it emulates touch (`pointer: coarse`).
 - While the pane is hidden the page gets about 3 frames a second, so `Tone.Draw` callbacks arrive more than 0.25 s late and Tone drops them: lights that follow the sound look missing there, not on a phone.

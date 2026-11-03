@@ -1,9 +1,8 @@
-Copyright 2011, The VT323 Project Authors (peter.hull@oikoi.com)
+Copyright © 2026 Omnibus-Type https://github.com/Omnibus-Type/Asap (from Fontshare, fontshare.com, Open Source license)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
 http://scripts.sil.org/OFL
-
 
 -----------------------------------------------------------
 SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007

@@ -19,7 +19,7 @@ export const HUB_STRINGS = {
     // Patreon window (shared/ui/page.js createSupportPrompt)
     supportContinue: "Continue", supportWait: "Continue in {s} s…",
     // Themes (shared/ui/themes.css)
-    theme: "Aesthetic Theme", themeLiquid: "Liquid Glass", themeY2k: "Y2K Cyber", themePink: "Soft Pink", themeBw: "Monochrome", themeRetro: "Retro CRT",
+    theme: "Aesthetic Theme", themeLiquid: "Liquid Glass", themeY2k: "Y2K Cyber", themePink: "Soft Pink", themeBw: "Monochrome", themeRetro: "Retro CRT", themeRouge: "Rouge", themeSnap: "Retrosnap",
     // Instrument rack (shared/sound.js INSTRUMENTS)
     inst: "Instrument Rack", instPiano: "Grand Piano", instEpiano: "Classic Electric Piano", instEsynth: "Electric Synth", instPad: "Smooth Analog Pad", instOrgan: "Warm Organ", instHarp: "Dream Harp",
     // Metronome sounds (shared/transport.js CLICK_SOUNDS)
@@ -37,7 +37,7 @@ export const HUB_STRINGS = {
     // Patreon window (shared/ui/page.js createSupportPrompt)
     supportContinue: "Continuar", supportWait: "Continuar en {s} s…",
     // Themes (shared/ui/themes.css)
-    theme: "Tema Estético", themeLiquid: "Cristal Líquido", themeY2k: "Cyber Y2K", themePink: "Rosa Suave", themeBw: "Monocromo", themeRetro: "CRT Retro",
+    theme: "Tema Estético", themeLiquid: "Cristal Líquido", themeY2k: "Cyber Y2K", themePink: "Rosa Suave", themeBw: "Monocromo", themeRetro: "CRT Retro", themeRouge: "Rouge", themeSnap: "Retrosnap",
     // Instrument rack (shared/sound.js INSTRUMENTS)
     inst: "Instrumento", instPiano: "Piano de Cola", instEpiano: "Piano Eléctrico Clásico", instEsynth: "Sinte Eléctrico", instPad: "Pad Analógico Suave", instOrgan: "Órgano Cálido", instHarp: "Arpa de Ensueño",
     // Metronome sounds (shared/transport.js CLICK_SOUNDS)
@@ -55,7 +55,7 @@ export const HUB_STRINGS = {
     // Patreon window (shared/ui/page.js createSupportPrompt)
     supportContinue: "Continua", supportWait: "Continua tra {s} s…",
     // Themes (shared/ui/themes.css)
-    theme: "Tema Estetico", themeLiquid: "Vetro Liquido", themeY2k: "Cyber Y2K", themePink: "Rosa Tenue", themeBw: "Monocromatico", themeRetro: "CRT Retrò",
+    theme: "Tema Estetico", themeLiquid: "Vetro Liquido", themeY2k: "Cyber Y2K", themePink: "Rosa Tenue", themeBw: "Monocromatico", themeRetro: "CRT Retrò", themeRouge: "Rouge", themeSnap: "Retrosnap",
     // Instrument rack (shared/sound.js INSTRUMENTS)
     inst: "Strumento", instPiano: "Pianoforte a Coda", instEpiano: "Piano Elettrico Classico", instEsynth: "Synth Elettrico", instPad: "Pad Analogico Morbido", instOrgan: "Organo Caldo", instHarp: "Arpa da Sogno",
     // Metronome sounds (shared/transport.js CLICK_SOUNDS)

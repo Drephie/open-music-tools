@@ -1,15 +1,29 @@
-/* shared/ui/themes.css: the five hub themes as CSS variables.
+/* shared/ui/themes.css: the seven hub themes as CSS variables.
  *
- * <body data-theme="liquid|y2k|pink|bw|retro">; no attribute (or "liquid")
- * is Liquid Glass, the :root default. Tools use colors and fonts ONLY through
- * these variables, so every theme works everywhere:
- *   --font-main, --color-text, --color-left / --color-right (the two accents),
- *   --color-text-pinched (text on an accent), --color-btn-text,
- *   --color-text-inactive, --bg-overlay, --color-panel, --border-panel,
+ * <body data-theme="liquid|y2k|pink|bw|retro|rouge|snap">; no attribute (or
+ * "liquid") is Liquid Glass, the :root default. Tools use colors and fonts ONLY
+ * through these variables, so every theme works everywhere:
+ *   Fonts: --font-main (reading text), --font-display (titles, big numbers and
+ *     note names), --font-num (numbers that should line up; the display font
+ *     unless a theme sets one).
+ *   Title look: --color-title, --title-transform / --title-spacing / --title-weight.
+ *   Shapes: --radius-panel (panels, windows), --radius-control (buttons,
+ *     dropdowns, segments), --radius-round (icon and − / + buttons: 50%, or
+ *     square), --border-width (panels and controls).
+ *   --color-text, --color-left / --color-right (the two accents: left fills
+ *     selected segments, slider fills, beat dots; right is for links, arrows,
+ *     focus rings and small accented words),
+ *   --color-text-pinched (text on a --color-left fill),
+ *   --color-primary / --color-primary-text (the main button: Start, Listen),
+ *   --color-hover / --color-hover-text (a control under the mouse; a tint of
+ *     the left accent, set below for every theme),
+ *   --color-btn-text, --color-text-inactive (hints and unearned things; still
+ *     readable), --bg-overlay, --color-panel, --border-panel,
  *   --shadow-blur, --credit-shadow, --crt-scanline, --bg-select,
  *   --color-select-text, --color-select-hover,
  *   --frame-top / --frame-bottom / --frame-sides / --frame-radius (theme frame insets),
- *   --bg-page (solid page color for tools with no camera behind them),
+ *   --bg-page (solid page color for tools with no camera behind them) and
+ *   --bg-image (its glow, or none),
  *   --color-warn-start / --color-warn-end (a warning that grows, e.g. volume
  *   above 100%: yellow to red; tools mix between them),
  *   --color-patreon / --color-patreon-text (the Patreon button: the one
@@ -23,15 +37,26 @@
  *   --color-tune-line / --color-tune: the Vocal Tuner's wave ball and note:
  *   its lines, and the accent it lights up in when a note is in tune (not
  *   green: green vanishes in Retro CRT).
- * Theme-specific decoration (frames, button shapes) stays in each tool.
+ * Every text color passes contrast on its background (4.5:1 for text, 3:1 for
+ * big text and controls). Theme-specific decoration (frames, shadows) stays in
+ * page.css and each tool.
  * Load it before the tool's own styles, after the fonts it names, which are served
  *   from our own site (no font service sees the visitors):
  *   <link rel="stylesheet" href="../shared/fonts/fonts.css">
  */
+
+/* Liquid Glass: calm night glass, one ice-blue accent. */
 :root {
+  --font-main: 'Familjen Grotesk', system-ui, sans-serif;
+  --font-display: 'Familjen Grotesk', system-ui, sans-serif;
+  --color-title: #f1f5f9;
+  --title-transform: none; --title-spacing: -0.01em; --title-weight: 700;
+  --radius-panel: 20px; --radius-control: 14px; --radius-round: 50%; --border-width: 1px;
+
   --color-tune-line: #e6eef5;
   --color-tune: #8ad4ff;
-  --bg-page: #0f1419;
+  --bg-page: #0c131b;
+  --bg-image: radial-gradient(120% 70% at 10% 0%, #1d3346 0%, transparent 60%), radial-gradient(90% 60% at 100% 100%, #13314a 0%, transparent 60%);
   --color-good: #30d158;
   --color-good-text: #04210d;
   --color-bad: #ff453a;
@@ -47,22 +72,23 @@
   --color-warn-end: #ff3b30;
   --color-patreon: #ff424d;
   --color-patreon-text: #ffffff;
-  --bg-overlay: rgba(15, 20, 25, 0.65);
-  --font-main: 'Orbitron', sans-serif;
+  --bg-overlay: rgba(12, 19, 27, 0.7);
   --color-left: #ffffff;
   --color-right: #8ad4ff;
-  --color-text: #ffffff;
-  --color-text-pinched: #0f172a;
-  --color-btn-text: #ffffff;
-  --color-text-inactive: rgba(255, 255, 255, 0.4);
-  --color-panel: rgba(255, 255, 255, 0.1);
-  --border-panel: rgba(255, 255, 255, 0.25);
-  --shadow-blur: 12px;
+  --color-text: #f1f5f9;
+  --color-text-pinched: #0b1a26;
+  --color-primary: #8ad4ff;
+  --color-primary-text: #08202f;
+  --color-btn-text: #f1f5f9;
+  --color-text-inactive: rgba(241, 245, 249, 0.58);
+  --color-panel: rgba(255, 255, 255, 0.07);
+  --border-panel: rgba(255, 255, 255, 0.18);
+  --shadow-blur: 14px;
   --crt-scanline: transparent;
   --credit-shadow: 0 1px 3px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.85);
-  --bg-select: rgba(20, 25, 30, 0.95);
-  --color-select-text: #ffffff;
-  --color-select-hover: rgba(255, 255, 255, 0.1);
+  --bg-select: rgba(18, 27, 37, 0.97);
+  --color-select-text: #f1f5f9;
+  --color-select-hover: rgba(138, 212, 255, 0.16);
 
   --frame-top: 0px;
   --frame-bottom: 0px;
@@ -70,10 +96,25 @@
   --frame-radius: 0px;
 }
 
+/* Worked out on body, so they follow the theme set there. */
+body {
+  --font-num: var(--font-display);
+  --color-hover: color-mix(in srgb, var(--color-left) 18%, transparent);
+  --color-hover-text: var(--color-text);
+}
+
+/* Y2K: midnight, cyan and bubblegum pink, a chrome title. */
 body[data-theme="y2k"] {
-  --color-tune-line: #00ffff;
-  --color-tune: #ff69b4;
-  --bg-page: #0a0a16;
+  --font-main: 'Sora', system-ui, sans-serif;
+  --font-display: 'Rajdhani', 'Sora', sans-serif;
+  --color-title: #eaf6ff;
+  --title-transform: uppercase; --title-spacing: 0.06em; --title-weight: 700;
+  --radius-panel: 16px; --radius-control: 12px;
+
+  --color-tune-line: #00f0ff;
+  --color-tune: #ff5fb0;
+  --bg-page: #0a0a1a;
+  --bg-image: radial-gradient(80% 50% at 50% 0%, #241a52 0%, transparent 70%), radial-gradient(60% 40% at 100% 100%, rgba(255, 95, 176, 0.14), transparent 70%);
   --color-good: #39ff14;
   --color-good-text: #001a00;
   --color-bad: #ff3366;
@@ -84,66 +125,88 @@ body[data-theme="y2k"] {
   --key-black: #12122e;
   --key-black-text: #7fefff;
   --key-edge: rgba(0, 120, 160, 0.45);
-  --key-black-edge: rgba(0, 255, 255, 0.55);
-  --bg-overlay: rgba(10, 10, 22, 0.85);
-  --color-left: #00ffff;
-  --color-right: #ff69b4;
-  --color-text-pinched: #000000;
-  --color-btn-text: #ffffff;
-  --color-text-inactive: #888888;
-  --color-panel: rgba(255, 255, 255, 0.05);
-  --border-panel: rgba(0, 255, 255, 0.3);
+  --key-black-edge: rgba(0, 240, 255, 0.55);
+  --bg-overlay: rgba(10, 10, 26, 0.85);
+  --color-left: #00f0ff;
+  --color-right: #ff5fb0;
+  --color-text: #eaf6ff;
+  --color-text-pinched: #0a0a1a;
+  --color-primary: #ff5fb0;
+  --color-primary-text: #1a0010;
+  --color-btn-text: #eaf6ff;
+  --color-text-inactive: #8b93b8;
+  --color-panel: rgba(0, 240, 255, 0.05);
+  --border-panel: rgba(0, 240, 255, 0.35);
   --shadow-blur: 20px;
-  --bg-select: rgba(10, 10, 22, 0.95);
-  --color-select-hover: rgba(0, 255, 255, 0.2);
+  --bg-select: rgba(12, 12, 30, 0.97);
+  --color-select-text: #eaf6ff;
+  --color-select-hover: rgba(0, 240, 255, 0.18);
   --frame-radius: 14px;
 }
 
-/* Soft Pink — "barbie ultra pop lollipop": bubbly rounded font, hot pink +
-   candy purple accents, pill-shaped everything. */
+/* Soft Pink: Drephie's fuchsia palette (F7D7EC, E987CF, D83BA8, 8E1F6A,
+   461132); D83BA8 is a touch deeper as an accent (C42F97) so white text on
+   it stays readable. Rounded fonts, pill buttons. */
 body[data-theme="pink"] {
-  --color-tune-line: #b743ff;
-  --color-tune: #ff2d9c;
-  --bg-page: #ffe3f3;
-  --color-good: #12a150;
+  --font-main: 'Nunito', system-ui, sans-serif;
+  --font-display: 'Roundo', 'Nunito', sans-serif;
+  --color-title: #8e1f6a;
+  --title-spacing: -0.01em;
+  --radius-panel: 26px; --radius-control: 999px; --border-width: 2px;
+
+  --color-tune-line: #8e1f6a;
+  --color-tune: #d83ba8;
+  --bg-page: #f7d7ec;
+  --bg-image: radial-gradient(90% 60% at 0% 0%, #fbe9f5 0%, transparent 60%), radial-gradient(70% 50% at 100% 100%, rgba(216, 59, 168, 0.14), transparent 70%);
+  --color-good: #0b7d3b;
   --color-good-text: #ffffff;
-  --color-bad: #e0002b;
+  --color-bad: #c8102e;
   --color-bad-text: #ffffff;
   --color-star: #ffb300;
   --key-white: #ffffff;
-  --key-white-text: #c2187a;
-  --key-black: #83104f;
-  --key-black-text: #ffd1ea;
-  --key-edge: #ff9ad5;
-  --key-black-edge: rgba(255, 255, 255, 0.35);
+  --key-white-text: #8e1f6a;
+  --key-black: #461132;
+  --key-black-text: #f7d7ec;
+  --key-edge: #e987cf;
+  --key-black-edge: rgba(255, 255, 255, 0.3);
   --color-warn-start: #e0a100;
-  --color-warn-end: #e0002b;
-  --bg-overlay: rgba(255, 219, 240, 0.92);
-  --font-main: 'Baloo 2', 'Quicksand', sans-serif;
-  --color-left: #ff2d9c;
-  --color-right: #b743ff;
-  --color-text: #83104f;
+  --color-warn-end: #c8102e;
+  --bg-overlay: rgba(247, 215, 236, 0.92);
+  --color-left: #c42f97;
+  --color-right: #8e1f6a;
+  --color-text: #461132;
   --color-text-pinched: #ffffff;
-  --color-btn-text: #ffffff;
-  --color-text-inactive: #eba3cc;
-  --color-panel: rgba(255, 255, 255, 0.93);
-  --border-panel: #ff9ad5;
+  --color-primary: #8e1f6a;
+  --color-primary-text: #ffffff;
+  --color-btn-text: #461132;
+  --color-text-inactive: #9a3c7d;
+  --color-panel: rgba(255, 246, 251, 0.94);
+  --border-panel: #e987cf;
   --shadow-blur: 18px;
   --credit-shadow: 0 1px 2px rgba(255,255,255,0.55);
-  --bg-select: #fff0fa;
-  --color-select-text: #d61f84;
-  --color-select-hover: rgba(255, 105, 180, 0.25);
+  --bg-select: #fff6fb;
+  --color-select-text: #8e1f6a;
+  --color-select-hover: rgba(216, 59, 168, 0.16);
 
-  --frame-top: 18px;
-  --frame-bottom: 18px;
-  --frame-sides: 18px;
+  --frame-top: 12px;
+  --frame-bottom: 12px;
+  --frame-sides: 12px;
   --frame-radius: 26px;
 }
 
+/* Monochrome: a black poster, a wide grotesk and typewriter numbers. */
 body[data-theme="bw"] {
+  --font-main: 'Archivo', system-ui, sans-serif;
+  --font-display: 'Archivo', system-ui, sans-serif;
+  --font-num: 'Azeret Mono', ui-monospace, monospace;
+  --color-title: #ffffff;
+  --title-spacing: -0.02em; --title-weight: 800;
+  --radius-panel: 0px; --radius-control: 0px; --radius-round: 0px;
+
   --color-tune-line: #8a8a8a;
   --color-tune: #ffffff;
   --bg-page: #000000;
+  --bg-image: none;
   --color-good: #ffffff;
   --color-good-text: #000000;
   --color-bad: #9a9a9a;
@@ -155,63 +218,158 @@ body[data-theme="bw"] {
   --key-black-text: #ffffff;
   --key-edge: #000000;
   --key-black-edge: #ffffff;
-  --bg-overlay: rgba(0, 0, 0, 0.9);
-  --font-main: 'Courier Prime', monospace;
+  --bg-overlay: rgba(0, 0, 0, 0.92);
   --color-left: #ffffff;
-  --color-right: #dddddd;
+  --color-right: #d9d9d9;
   --color-text: #ffffff;
   --color-text-pinched: #000000;
+  --color-primary: #ffffff;
+  --color-primary-text: #000000;
   --color-btn-text: #ffffff;
-  --color-text-inactive: #666666;
+  --color-text-inactive: #8a8a8a;
   --color-panel: rgba(0, 0, 0, 0.9);
   --border-panel: #ffffff;
   --shadow-blur: 0px;
   --credit-shadow: 0 2px 4px rgba(0,0,0,0.8);
-  --bg-select: rgba(0, 0, 0, 0.95);
-  --color-select-hover: rgba(255, 255, 255, 0.2);
-
-  --frame-top: 60px;
-  --frame-bottom: 60px;
-  --frame-sides: 0px;
-  --frame-radius: 0px;
+  --bg-select: #000000;
+  --color-select-text: #ffffff;
+  --color-select-hover: rgba(255, 255, 255, 0.18);
 }
 
+/* Retro CRT: green phosphor terminal with an amber second colour. */
 body[data-theme="retro"] {
-  --color-tune-line: #00ff00;
+  --font-main: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'JetBrains Mono', ui-monospace, monospace;
+  --color-title: #5dff86;
+  --title-transform: uppercase; --title-spacing: 0.04em;
+  --radius-panel: 6px; --radius-control: 4px;
+
+  --color-tune-line: #5dff86;
   --color-tune: #ffb000;
   --bg-page: #020a02;
-  --color-good: #00ff00;
+  --bg-image: radial-gradient(100% 80% at 50% 40%, #062206 0%, transparent 75%);
+  --color-good: #5dff86;
   --color-good-text: #021002;
   --color-bad: #ffb000;
   --color-bad-text: #1a0f00;
   --color-star: #b3ff66;
-  --key-white: #a6ffa6;
+  --key-white: #a6ffb8;
   --key-white-text: #053205;
   --key-black: #031503;
-  --key-black-text: #33ff33;
+  --key-black-text: #5dff86;
   --key-edge: #063806;
-  --key-black-edge: #00aa00;
+  --key-black-edge: #1fbf4a;
   --color-warn-start: #ffb000;
   --color-warn-end: #ff3b30;
-  --bg-overlay: rgba(0, 15, 0, 0.9);
-  --font-main: 'VT323', monospace;
-  --color-left: #00ff00;
-  --color-right: #33cc33;
-  --color-text: #00ff00;
-  --color-text-pinched: #0a110a;
-  --color-btn-text: #00ff00;
-  --color-text-inactive: #006600;
-  --color-panel: rgba(0, 20, 0, 0.9);
-  --border-panel: #00ff00;
-  --shadow-blur: 10px;
+  --bg-overlay: rgba(0, 12, 0, 0.9);
+  --color-left: #5dff86;
+  --color-right: #ffb000;
+  --color-text: #5dff86;
+  --color-text-pinched: #021002;
+  --color-primary: #5dff86;
+  --color-primary-text: #021002;
+  --color-btn-text: #5dff86;
+  --color-text-inactive: #2fa552;
+  --color-panel: rgba(0, 30, 0, 0.6);
+  --border-panel: #1fbf4a;
+  --shadow-blur: 8px;
   --crt-scanline: repeating-linear-gradient(0deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px);
   --credit-shadow: 0 2px 4px rgba(0,0,0,0.8);
-  --bg-select: rgba(10, 17, 10, 0.95);
-  --color-select-text: #00ff00;
-  --color-select-hover: rgba(0, 255, 0, 0.2);
+  --bg-select: rgba(4, 18, 6, 0.97);
+  --color-select-text: #5dff86;
+  --color-select-hover: rgba(93, 255, 134, 0.16);
 
-  --frame-top: 24px;
-  --frame-bottom: 24px;
-  --frame-sides: 24px;
+  --frame-top: 16px;
+  --frame-bottom: 16px;
+  --frame-sides: 16px;
   --frame-radius: 16px;
+}
+
+/* Rouge: spooky. Drephie's palette (C52233, A51C30, A7333F, 74121D, 580C1F):
+   a bordeaux night, cherry fills, bone-white text, blade-shaped corners. */
+body[data-theme="rouge"] {
+  --font-main: 'Epilogue', system-ui, sans-serif;
+  --font-display: 'Literata', Georgia, serif;
+  --color-title: #f6e7e3;
+  --title-spacing: -0.015em; --title-weight: 800;
+  --radius-panel: 4px 22px; --radius-control: 3px 14px;
+
+  --color-tune-line: #f2c6c2;
+  --color-tune: #ff5468;
+  --bg-page: #580c1f;
+  --bg-image: radial-gradient(110% 70% at 50% -10%, #74121d 0%, transparent 65%), radial-gradient(80% 50% at 50% 115%, #2a0610 0%, transparent 70%);
+  --color-good: #7ad69a;
+  --color-good-text: #062312;
+  --color-bad: #ff8a80;
+  --color-bad-text: #3b0710;
+  --color-star: #f5c451;
+  --key-white: #f6e7e3;
+  --key-white-text: #74121d;
+  --key-black: #2a0610;
+  --key-black-text: #f2c6c2;
+  --key-edge: rgba(88, 12, 31, 0.45);
+  --key-black-edge: rgba(242, 198, 194, 0.3);
+  --color-warn-start: #f5c451;
+  --color-warn-end: #ff4d5e;
+  --bg-overlay: rgba(42, 6, 16, 0.88);
+  --color-left: #c52233;
+  --color-right: #f2c6c2;
+  --color-text: #f6e7e3;
+  --color-text-pinched: #fff4f1;
+  --color-primary: #c52233;
+  --color-primary-text: #fff4f1;
+  --color-btn-text: #f6e7e3;
+  --color-text-inactive: #d9a9ae;
+  --color-panel: rgba(42, 6, 16, 0.55);
+  --border-panel: #a7333f;
+  --shadow-blur: 16px;
+  --credit-shadow: 0 1px 3px rgba(0,0,0,0.9);
+  --bg-select: #3d0815;
+  --color-select-text: #f6e7e3;
+  --color-select-hover: rgba(197, 34, 51, 0.3);
+}
+
+/* Retrosnap: 1970s instant photos. Drephie's palette (004777, A30000, FF7700,
+   EFD28D, 00AFB5): a peach page, photo-paper panels, marker-pen titles. */
+body[data-theme="snap"] {
+  --font-main: 'Asap', system-ui, sans-serif;
+  --font-display: 'Kalam', 'Asap', cursive;
+  --font-num: 'Asap', system-ui, sans-serif;
+  --color-title: #004777;
+  --title-spacing: 0;
+  --radius-panel: 4px; --radius-control: 8px;
+
+  --color-tune-line: #004777;
+  --color-tune: #007a80;
+  --bg-page: #efd28d;
+  --bg-image: radial-gradient(90% 60% at 0% 0%, rgba(255, 252, 242, 0.45), transparent 60%);
+  --color-good: #00afb5;
+  --color-good-text: #002a2c;
+  --color-bad: #a30000;
+  --color-bad-text: #fffcf2;
+  --color-star: #ff7700;
+  --key-white: #fffcf2;
+  --key-white-text: #004777;
+  --key-black: #003a62;
+  --key-black-text: #efd28d;
+  --key-edge: #d9b56a;
+  --key-black-edge: rgba(255, 252, 242, 0.25);
+  --color-warn-start: #ff7700;
+  --color-warn-end: #a30000;
+  --bg-overlay: rgba(239, 210, 141, 0.92);
+  --color-left: #ff7700;
+  --color-right: #a30000;
+  --color-text: #003a62;
+  --color-text-pinched: #2b1600;
+  --color-primary: #004777;
+  --color-primary-text: #fffcf2;
+  --color-btn-text: #003a62;
+  --color-text-inactive: #4a5d6b;
+  --color-panel: #fffcf2;
+  --border-panel: #d9b56a;
+  --shadow-blur: 10px;
+  --credit-shadow: 0 1px 2px rgba(255,252,242,0.6);
+  --bg-select: #fffcf2;
+  --color-select-text: #003a62;
+  --color-select-hover: rgba(255, 119, 0, 0.16);
 }

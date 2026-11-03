@@ -70,7 +70,7 @@ check "CNAME is openmusictools.org, .nojekyll is there" "$( [ "$(cat CNAME 2>/de
 # Every page that plays the Salamander piano (it imports shared/sound.js) credits it, CC BY 3.0.
 PIANO_PAGES=$(for f in $(echo "$TEXT" | grep -E '/[a-z-]+\.js$|^choordination/index\.html$'); do grep -l -E "from ['\"]\.\./shared/sound\.js['\"]|shared/sound\.js" "$f"; done | grep -v '^shared/' | cut -d/ -f1 | sort -u)
 check "Salamander piano credited where it plays ($(echo $PIANO_PAGES))" "$(for d in $PIANO_PAGES; do grep -q -s 'Salamander' "$d/strings.js" "$d/index.html" || echo "$d"; done)"
-check "every font has its OFL license" "$(for w in shared/fonts/*.woff2; do n=$(basename "$w" | sed -E 's/-(400|700)?-?latin(-ext)?\.woff2$//; s/-(400|700)$//; s/-//g'); [ -f "shared/fonts/OFL-$n.txt" ] || echo "$w"; done)"
+check "every font has its OFL license" "$(for w in shared/fonts/*.woff2; do n=$(basename "$w" | sed -E 's/\.woff2$//; s/-//g'); [ -f "shared/fonts/OFL-$n.txt" ] || echo "$w"; done)"
 check "README credits Salamander, Tone.js, MediaPipe and the fonts" "$(for w in Salamander Tone.js MediaPipe 'Open Font License'; do grep -q "$w" README.md || echo "$w"; done)"
 
 echo "== Links between pages"

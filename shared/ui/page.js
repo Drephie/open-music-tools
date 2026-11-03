@@ -1,6 +1,6 @@
 /* shared/ui/page.js: helpers for the page of a hub tool (see page.css).
  *
- *   THEMES          [[value, HUB_STRINGS key], …] for the five themes in themes.css
+ *   THEMES          [[value, HUB_STRINGS key], …] for the seven themes in themes.css
  *   LANGUAGE_NAMES  { en: 'English', es: 'Español', it: 'Italiano' } (always
  *                   shown in their own language)
  *   PATREON_URL, DESIGNER_URL   for {patreon} in strings and the footer links
@@ -43,6 +43,7 @@
 
 export const THEMES = [
   ['liquid', 'themeLiquid'], ['y2k', 'themeY2k'], ['pink', 'themePink'], ['bw', 'themeBw'], ['retro', 'themeRetro'],
+  ['rouge', 'themeRouge'], ['snap', 'themeSnap'],
 ];
 export const LANGUAGE_NAMES = { en: 'English', es: 'Español', it: 'Italiano' };
 export const PATREON_URL = 'https://patreon.com/drephie';
