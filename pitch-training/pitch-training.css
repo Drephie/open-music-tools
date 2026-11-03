@@ -11,18 +11,18 @@
 
 /* The exercise, the voice type with the starting note, and the speed. */
 .setup { display: flex; flex-direction: column; gap: 6px; }
-.setup .select-selected { min-height: 42px; box-sizing: border-box; border-radius: 10px; }
-.setup .select-selected > span, .setup .select-selected { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.setup .select-selected { min-height: 44px; box-sizing: border-box; }
+/* A long exercise name takes a second line (never cut off); the graph gives up the room. */
 .setup-row { display: flex; gap: 6px; align-items: stretch; }
 /* Computers: the controls keep a comfortable width, centred above the wide graph. */
 @media (min-width: 700px) { .setup { width: min(100%, 560px); justify-self: center; } }
 .voice-group { flex: 1 1 auto; min-width: 0; }
-.stepper { flex: none; display: flex; align-items: stretch; border: 1px solid var(--border-panel); border-radius: 10px; overflow: hidden; background: var(--bg-select); }
+.stepper { flex: none; display: flex; align-items: stretch; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); overflow: hidden; background: var(--bg-select); }
 .stepper button {
   border: 0; background: transparent; color: var(--color-select-text); cursor: pointer; touch-action: manipulation;
-  font: 700 18px/1 var(--font-main);
+  font: 700 18px/1 var(--font-num);
 }
-.step-btn { width: 42px; min-height: 42px; font-size: 22px !important; }
+.step-btn { width: 44px; min-height: 44px; font-size: 22px !important; }
 .step-btn:disabled { opacity: 0.35; cursor: default; }
 .start-note { min-width: 62px; padding: 0 4px; display: inline-flex; align-items: center; justify-content: center; border-left: 1px solid var(--border-panel) !important; border-right: 1px solid var(--border-panel) !important; }
 .start-note .acc { width: 0.36em; height: 0.58em; margin: -0.3em 0 0 0.04em; }
@@ -54,7 +54,7 @@
 .controls { display: flex; justify-content: center; align-items: center; padding: 4px 0 2px; }
 .go-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  min-width: min(240px, 62vw); min-height: 48px; border-radius: 999px; font-size: 15px;
+  min-width: min(240px, 62vw); min-height: 48px; border-radius: var(--radius-control); font-size: 16px;
   background: transparent; color: var(--color-text); border-color: color-mix(in srgb, var(--color-text) 55%, transparent);
 }
 .go-btn svg { width: 20px; height: 20px; flex: none; }
@@ -64,7 +64,6 @@
 /* Settings: two choices side by side where they are short. */
 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
 .pair .control-group { min-width: 0; }
-.pair .seg button { letter-spacing: 0.2px; }
 .unit { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: 0.75; }
 
 /* The microphone's level now, and the mark where the sensitivity starts (-70..-10 dBFS). */
@@ -74,54 +73,37 @@
 .sens-hint { margin: 6px 0 0; font-size: 12px; line-height: 1.3; opacity: 0.8; }
 
 /* Segmented choices (the speed, and in Settings). */
-.group-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-.seg { display: flex; border: 1px solid var(--border-panel); border-radius: 12px; overflow: hidden; }
+.group-label { font-size: 15px; font-weight: 600; }
+.seg { display: flex; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); overflow: hidden; }
 .seg button {
   flex: 1 1 0; min-width: 0; min-height: 42px; padding: 4px 6px; border: 0; background: var(--color-panel); color: var(--color-btn-text); cursor: pointer;
-  font: 700 13px/1.15 var(--font-main); letter-spacing: 0.5px; text-transform: uppercase; touch-action: manipulation; transition: background 0.15s, color 0.15s;
+  font: 600 14px/1.15 var(--font-main); touch-action: manipulation; transition: background 0.15s ease-out, color 0.15s ease-out;
 }
 .seg button + button { border-left: 1px solid var(--border-panel); }
 .seg button[aria-pressed="true"] { background: var(--color-left); color: var(--color-text-pinched); }
 .seg button:focus-visible { outline: 2px solid var(--color-right); outline-offset: -3px; }
-.setup .seg { border-radius: 10px; }
 .setup .seg button { min-height: 40px; }
 @media (hover: hover) and (pointer: fine) {
-  .seg button:hover:not([aria-pressed="true"]) { background: var(--border-panel); color: var(--color-text-pinched); }
+  .seg button:hover:not([aria-pressed="true"]) { background: var(--color-hover); color: var(--color-hover-text); }
   .go-btn:hover { background: color-mix(in srgb, var(--color-text) 12%, transparent); color: var(--color-text); }
   .stepper button:hover:not(:disabled) { background: var(--color-select-hover); }
 }
 
 /* Themes */
-body[data-theme="retro"] .status-sub { font-size: 19px; }
-body[data-theme="retro"] .status-main { font-size: 24px; }
-body[data-theme="retro"] .go-btn { font-size: 22px; }
-body[data-theme="retro"] .seg button { font-size: 17px; }
-body[data-theme="retro"] .sens-hint { font-size: 16px; line-height: 1.15; }
-body[data-theme="retro"] .status-main { text-shadow: 0 0 var(--shadow-blur) currentColor; }
-body[data-theme="pink"] .trainer .btn.go-btn { background: transparent; color: var(--color-text); border-color: var(--border-panel); }
-body[data-theme="pink"] .seg { border-radius: 999px; }
-body[data-theme="pink"] .setup .seg { border-radius: 12px; }
-/* Soft Pink's button text is white for its pink buttons: on white it is pink. */
-body[data-theme="pink"] .seg button:not([aria-pressed="true"]) { color: var(--color-left); }
+body[data-theme="retro"] .status-main { text-shadow: 0 0 var(--shadow-blur) color-mix(in srgb, currentColor 55%, transparent); }
 body[data-theme="bw"] :is(.seg, .go-btn, .stepper, .setup .select-selected) { border-radius: 0; }
 
-/* Phones: everything on one screen; line heights pinned (Baloo 2 has tall ones). */
+/* Phones: everything on one screen; line heights pinned (theme fonts differ a lot in height). */
 @media (max-width: 600px) {
-  .tool-title { letter-spacing: 1px; }
   .trainer { gap: 6px; }
   .setup { gap: 5px; }
   .status-main { font-size: 17px; }
   .status-sub { font-size: 13px; }
   .go-btn { min-height: 46px; }
-  body[data-theme="retro"] .status-main { font-size: 21px; line-height: 1.05; }
-  body[data-theme="retro"] .status-sub { font-size: 17px; line-height: 1.05; }
-  body[data-theme="retro"] .status { height: 60px; }
   #about-modal .about-text { font-size: 14px; line-height: 1.4; }
-  body[data-theme="retro"] #about-modal .about-text { font-size: 17px; line-height: 1.3; }
   /* Settings fit one screen. */
   #settings-modal { gap: 9px; padding: 18px 18px 16px; }
   #settings-modal .seg button { min-height: 38px; font-size: 12px; padding: 3px 4px; }
-  body[data-theme="retro"] #settings-modal .seg button { font-size: 16px; }
   #settings-modal .group-label, #settings-modal .control-group > label { font-size: 12px; }
   #settings-modal .control-group { gap: 4px; }
 }
