@@ -128,7 +128,7 @@ body.phone, body.compact { --fx: min(var(--frame-sides), 8px); --fy-top: min(var
 }
 .tick { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; transform: translateX(-50%); font-size: 12px; font-weight: 700; color: var(--color-text-inactive); pointer-events: none; }
 .tick.here { color: var(--color-text); }
-.scrub-link { display: none; font-size: 11px; font-weight: 700; text-decoration: none; white-space: nowrap; line-height: 1.2; }
+.scrub-link { display: none; padding-block: 15px; margin-block: -15px; font-size: 11px; font-weight: 700; text-decoration: none; white-space: nowrap; line-height: 1.2; }
 .designer-link { color: var(--color-right); }
 
 /* Settings: one row per setting, the label on the left. */
@@ -136,7 +136,7 @@ body.phone, body.compact { --fx: min(var(--frame-sides), 8px); --fy-top: min(var
 #settings-modal .setting-row .custom-select { width: 190px; min-width: 0; }
 .stepper { display: flex; align-items: center; gap: 8px; }
 .stepper output { min-width: 2ch; text-align: center; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 700; }
-.round-btn.small { width: 40px; height: 40px; font-size: 22px; }
+.round-btn.small { width: 44px; height: 44px; font-size: 22px; }
 .round-btn:disabled { opacity: 0.4; cursor: default; }
 .volume-row .range { flex: 1 1 auto; min-width: 80px; }
 #volume-out { min-width: 3.2em; text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 700; }
@@ -169,18 +169,18 @@ body.compact .chord-also { font-size: 12px; }
 body.compact .controls { gap: 6px; }
 body.compact .ctrl-row { gap: 6px; }
 body.compact .sound-group .custom-select { font-size: 12px; }
-body.compact .sound-group .select-selected { padding: 0 10px; min-height: 32px; box-sizing: border-box; line-height: 1.2; }
-body.compact .icon-btn { width: 34px; height: 34px; }
+body.compact .sound-group .select-selected { padding: 0 30px 0 10px; min-height: 44px; box-sizing: border-box; line-height: 1.2; }
+body.compact .icon-btn { width: 44px; height: 44px; }
 body.compact .icon-btn svg { width: 18px; height: 18px; }
-body.compact .seg button, body.compact .toggle { min-height: 34px; padding: 0 9px; font-size: 12px; }
-body.compact .toggle { min-width: 38px; }
+body.compact .seg button, body.compact .toggle { min-height: 44px; padding: 0 10px; font-size: 13px; }
+body.compact .toggle { min-width: 44px; }
 body.compact .keys-wrap { max-height: none; min-height: 90px; }
-body.compact .scrub-row { height: 30px; gap: 8px; }
+body.compact .scrub-row { height: 36px; gap: 8px; }
 body.compact .tick { font-size: 10px; }
 body.compact #settings-modal { padding: 12px 18px; gap: 2px; }
 body.compact #settings-modal .modal-header { padding-bottom: 6px; }
 body.compact #settings-modal .setting-row { min-height: 44px; }
-body.compact #settings-modal .round-btn.small { width: 36px; height: 36px; }
+body.compact #settings-modal .round-btn.small { width: 44px; height: 44px; }
 
 /* Theme shapes and sizes */
 body[data-theme="pink"] .seg button:not([aria-pressed="true"]), body[data-theme="pink"] .toggle:not([aria-pressed="true"]) { background: var(--color-panel); color: var(--color-left); }

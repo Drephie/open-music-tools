@@ -91,7 +91,7 @@
 .seg button + button { border-left: 1px solid var(--border-panel); }
 .seg button[aria-pressed="true"] { background: var(--color-left); color: var(--color-text-pinched); }
 .seg button:focus-visible { outline: 2px solid var(--color-right); outline-offset: -3px; }
-.setup .seg button { min-height: 40px; }
+.setup .seg button { min-height: 44px; }
 @media (hover: hover) and (pointer: fine) {
   .seg button:hover:not([aria-pressed="true"]) { background: var(--color-hover); color: var(--color-hover-text); }
   .go-btn:hover { background: color-mix(in srgb, var(--color-text) 12%, transparent); color: var(--color-text); }
@@ -112,7 +112,7 @@ body[data-theme="bw"] :is(.seg, .go-btn, .stepper, .setup .select-selected) { bo
   #about-modal .about-text { font-size: 14px; line-height: 1.4; }
   /* Settings fit one screen. */
   #settings-modal { gap: 9px; padding: 18px 18px 16px; }
-  #settings-modal .seg button { min-height: 38px; font-size: 12px; padding: 3px 4px; }
+  #settings-modal .seg button { min-height: 44px; font-size: 13px; padding: 3px 4px; }
   #settings-modal .group-label, #settings-modal .control-group > label { font-size: 12px; }
   #settings-modal .control-group { gap: 4px; }
 }

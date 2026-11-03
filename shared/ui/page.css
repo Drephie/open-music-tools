@@ -145,6 +145,8 @@ body[data-theme="retro"] #theme-frame { border: var(--fy-top) solid rgb(14, 16, 
 .support-close { position: absolute; top: 6px; right: 6px; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); border-bottom: 1px solid color-mix(in srgb, var(--border-panel) 60%, transparent); padding-bottom: var(--space-3); }
 .modal-header h2 { margin: 0; min-width: 0; font-family: var(--font-display); color: var(--color-title); font-size: 21px; line-height: 1.15; font-weight: var(--title-weight); text-transform: var(--title-transform); letter-spacing: var(--title-spacing); text-wrap: balance; }
+/* In a window that scrolls, the header (and its ×) stays in view. */
+.centered-modal:not(.has-dropdowns) > .modal-header { position: sticky; top: calc(-1 * var(--space-5)); z-index: 2; margin-top: calc(-1 * var(--space-5)); padding-top: var(--space-5); background: var(--bg-select); }
 .close-btn { flex: none; background: transparent; border: none; border-radius: var(--radius-round); color: var(--color-text); font-size: 28px; font-weight: 400; line-height: 1; cursor: pointer; padding: 4px 8px; min-width: 44px; min-height: 44px; }
 @media (hover: hover) { .close-btn:hover { background: var(--color-hover); } }
 .centered-modal .control-group { display: flex; flex-direction: column; gap: var(--space-2); }
@@ -154,7 +156,8 @@ body[data-theme="retro"] #theme-frame { border: var(--fy-top) solid rgb(14, 16, 
 .about-small { font-size: 14px; line-height: 1.5; margin: 0; color: var(--color-text-inactive); }
 
 .tool-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font-size: 13px; font-weight: 600; line-height: 1.3; color: var(--color-text-inactive); }
-.tool-footer a { text-decoration: none; font-weight: 700; text-underline-offset: 3px; }
+/* The links' touch area is 44 px tall without making the footer taller. */
+.tool-footer a { display: inline-block; padding-block: 14px; margin-block: -14px; text-decoration: none; font-weight: 700; text-underline-offset: 3px; }
 .tool-footer a:hover { text-decoration: underline; }
 .support-link { color: var(--color-right); }
 .designer-credit a { color: var(--color-right); }

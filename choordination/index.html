@@ -117,7 +117,7 @@
       .boot-logo, #record-btn.recording, #touch-record-btn.recording { animation: none; }
     }
 
-    .icon-btn { padding: 0; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .icon-btn { padding: 0; width: 44px; height: 44px; border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; }
     .circled-question { display: inline-block; border: 2px solid currentColor; border-radius: 50%; width: 20px; height: 20px; line-height: 17px; text-align: center; font-weight: bold; font-size: 14px; box-sizing: border-box; }
 
     /* --- MODALS & SCROLLING --- */
@@ -134,7 +134,7 @@
 
     .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-panel); padding-bottom: 10px; margin-bottom: 5px; }
     .modal-header h3, .modal-header h2 { margin: 0; font-family: var(--font-display); font-weight: var(--title-weight); color: var(--color-title); font-size: 21px; line-height: 1.15; text-transform: var(--title-transform); letter-spacing: var(--title-spacing); }
-    .close-btn { background: transparent; border: none; color: var(--color-text); font-size: 24px; font-weight: bold; cursor: pointer; transition: 0.2s; padding: 0 5px; }
+    .close-btn { background: transparent; border: none; color: var(--color-text); font-size: 26px; font-weight: 400; cursor: pointer; transition: 0.2s; padding: 0 5px; min-width: 44px; min-height: 44px; border-radius: var(--radius-round); }
     .close-btn:hover { color: var(--color-right); }
 
     /* Keep the scrollbar inside the modal's rounded corners so the thumb never pokes out the top/bottom. */
@@ -152,7 +152,7 @@
 
     .highlight-label { color: var(--color-right); }
 
-    .settings-action-btn { width: 100%; padding: 10px; margin-top: 5px; font-family: var(--font-main); font-size: 14px; font-weight: 600; cursor: pointer; background: transparent; color: var(--color-right); border: var(--border-width) solid var(--color-right); border-radius: var(--radius-control); transition: 0.2s; text-align: center; display: inline-block; text-decoration: none; box-sizing: border-box; }
+    .settings-action-btn { width: 100%; min-height: 44px; padding: 10px; margin-top: 5px; font-family: var(--font-main); font-size: 14px; font-weight: 600; cursor: pointer; background: transparent; color: var(--color-right); border: var(--border-width) solid var(--color-right); border-radius: var(--radius-control); transition: 0.2s; text-align: center; display: inline-block; text-decoration: none; box-sizing: border-box; }
     .settings-action-btn:hover:not(:disabled) { background: var(--color-left); color: var(--color-text-pinched); }
     .settings-action-btn:disabled { border-color: var(--color-text-inactive); color: var(--color-text-inactive); cursor: not-allowed; }
     .settings-action-btn:focus-visible, .menu-btn:focus-visible, .close-btn:focus-visible, button.start-btn:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
@@ -203,7 +203,7 @@
     .patreon-glow-btn:hover { transform: scale(1.05); box-shadow: 0 4px 30px rgba(255, 66, 77, 0.6) !important; }
 
     .modifier-list { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border: 1px solid var(--border-panel); }
-    .modifier-list label { font-size: 12px; text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .modifier-list label { min-height: 40px; font-size: 14px; text-transform: none; display: flex; align-items: center; gap: 10px; cursor: pointer; }
     .rec-voice { font-size: 13px; text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
     .rec-voice input { cursor: pointer; transform: scale(1.2); accent-color: var(--color-left); }
     .modifier-list input { cursor: pointer; transform: scale(1.2); }
@@ -262,15 +262,15 @@
     @media (max-height: 520px) {
       #choordination-watermark { font-size: 13px !important; transform: scale(1) !important; letter-spacing: 2px; top: calc(10px + var(--frame-top)); left: calc(12px + var(--frame-sides)); }
       #top-right-menu { top: calc(10px + var(--frame-top)); right: calc(10px + var(--frame-sides)); gap: 6px; }
-      .menu-btn { padding: 6px 10px; font-size: 11px; letter-spacing: 0.5px; }
-      .icon-btn { width: 30px; height: 30px; }
+      .menu-btn { padding: 6px 10px; font-size: 13px; }
+      .icon-btn { width: 44px; height: 44px; }
       .centered-modal { padding: 14px 16px; gap: 8px; max-height: 92vh; width: min(440px, 92vw); font-size: 13px; }
       .modal-header h2, .modal-header h3 { font-size: 15px; }
       .modal-header { padding-bottom: 6px; }
-      label { font-size: 10px; }
-      .select-selected { padding: 6px 10px; font-size: 12px; }
-      .select-items div { padding: 6px 10px; font-size: 12px; }
-      .settings-action-btn { padding: 7px; font-size: 11px; }
+      label { font-size: 12px; }
+      .select-selected { padding: 6px 30px 6px 10px; font-size: 13px; }
+      .select-items div { padding: 10px; font-size: 13px; }
+      .settings-action-btn { padding: 7px; min-height: 44px; font-size: 13px; }
       .menu-divider { margin: 8px 0 7px; }
       .tutorial-content h2 { font-size: 16px; padding-bottom: 8px; }
       .tutorial-content h3 { font-size: 14px; margin: 8px 0 4px; }

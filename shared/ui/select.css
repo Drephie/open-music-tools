@@ -23,7 +23,7 @@
 .select-items {
   position: absolute; background-color: var(--bg-select); border: var(--border-width, 1px) solid var(--border-panel);
   top: 100%; left: 0; right: 0; z-index: 99; border-radius: min(var(--radius-control, 10px), 18px); margin-top: 6px; padding: 4px;
-  max-height: 260px; overflow-y: auto; box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.55);
+  max-height: 340px; overflow-y: auto; box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.55);
 }
 .select-items div { color: var(--color-select-text); padding: 11px 12px; min-height: 22px; line-height: 1.25; cursor: pointer; border-radius: min(var(--radius-control, 10px), 12px); overflow-wrap: break-word; }
 .select-items div:hover, .same-as-selected { background-color: var(--color-select-hover); color: var(--color-select-text); }
