@@ -42,8 +42,10 @@ body { -webkit-user-select: none; user-select: none; }
 }
 .step.done .step-circle { background: var(--color-left); border-color: var(--color-left); color: var(--color-text-pinched); }
 .step.next .step-circle { border-color: var(--color-right); color: var(--color-right); animation: glow 1.8s ease-in-out infinite; }
-.step.locked .step-circle { border-style: dashed; color: var(--color-text-inactive); }
-.step.locked .step-circle svg { width: 16px; height: 16px; }
+/* Lessons not reached yet: quiet, faint circles; the padlock shows only on the one tapped. */
+.step.locked .step-circle { border-color: color-mix(in srgb, var(--border-panel) 45%, transparent); background: transparent; color: var(--color-text-inactive); }
+.step.locked .step-circle svg { width: 16px; height: 16px; opacity: 0; transition: opacity 0.15s ease-out; }
+.step.locked[aria-pressed="true"] .step-circle svg { opacity: 1; }
 .step[aria-pressed="true"] .step-circle { outline: 3px solid var(--color-right); outline-offset: 2px; transform: scale(1.06); }
 /* Stars sit on the circle's lower edge, like a badge. */
 .step-stars { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); display: flex; filter: drop-shadow(0 0 1.5px var(--bg-page)) drop-shadow(0 0 1px var(--bg-page)); }
@@ -212,7 +214,7 @@ body[data-theme="bw"] :is(.flame, .heart:not(.lost)) { color: var(--color-text);
   body[data-screen="quiz"] .tool-header { display: none; }
   .screen { gap: 10px; }
   .home-panel, .quiz-panel { gap: 8px; }
-  .tab { font-size: 13px; line-height: 1.1; }
+  .tab { font-size: 14px; line-height: 1.1; }
   .prompt { font-size: 18px; line-height: 1.2; }
   .hear-btn { min-height: clamp(50px, 8dvh, 68px); }
   .answer { min-height: 46px; font-size: 14px; line-height: 1.1; }

@@ -18,6 +18,8 @@
   transition: background 0.12s, border-color 0.12s, box-shadow 0.12s, width 0.12s, height 0.12s;
 }
 .beat-dot[data-level="strong"]::before { width: 34px; height: 34px; background: var(--color-left); }
+/* The strong beat sounding: a ring around it, so the bar's start is seen at a glance. */
+.beat-dot[data-level="strong"].lit::before { box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-right) 45%, transparent), 0 0 16px color-mix(in srgb, var(--color-right) 70%, transparent); }
 .beat-dot[data-level="silent"]::before { border: 2px dashed var(--color-text-inactive); }
 .beat-dot.lit::before { background: var(--color-right); border-color: var(--color-right); box-shadow: 0 0 14px color-mix(in srgb, var(--color-right) 70%, transparent); animation: beat-pop 0.16s ease-out; }
 .beat-dot[data-level="silent"].lit::before { background: transparent; border: 2px dashed var(--color-right); box-shadow: none; }
@@ -74,10 +76,10 @@
 /* Phones: the whole Metronome fits on one screen (about 375 × 667 and up).
    The number and the big buttons grow with the screen's height. */
 @media (max-width: 600px) {
-  .met { gap: 8px; }
+  .met { gap: 6px; }
   .met-main { gap: clamp(5px, 1dvh, 12px); }
   /* Line heights are pinned: theme fonts differ a lot in height (Literata, Nunito). */
-  .hint { margin: -2px 0 0; font-size: 12px; line-height: 1.25; }
+  .hint { margin: -2px 0 0; font-size: 13px; line-height: 1.25; }
   .tempo-number { flex-direction: row; align-items: baseline; gap: 6px; }
   .bpm-input { font-size: clamp(50px, 9.5dvh, 112px); height: 1.05em; }
   .bpm-unit { font-size: 13px; letter-spacing: 2px; }
@@ -97,10 +99,10 @@
   .volume { padding-top: 6px; }
   .volume-head { margin-bottom: 8px; }
   .volume-track { padding-bottom: 14px; }
-  .volume-mark-label { top: 14px; font-size: 10px; }
+  .volume-mark-label { top: 14px; font-size: 12px; line-height: 1; }
 }
 
-body[data-theme="pink"] .beat-dot[data-level="strong"]::before { box-shadow: 0 2px 8px color-mix(in srgb, var(--color-left) 50%, transparent); }
+body[data-theme="pink"] .beat-dot[data-level="strong"]:not(.lit)::before { box-shadow: 0 2px 8px color-mix(in srgb, var(--color-left) 50%, transparent); }
 
 /* Reduce motion: the beat still lights up, without the pop. */
 @media (prefers-reduced-motion: reduce) {
