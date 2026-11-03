@@ -15,7 +15,7 @@
 /* The note: its name big, the octave small beside it. Colour eases into the accent in tune. */
 .note {
   margin: 0; display: flex; align-items: flex-start; line-height: 1; white-space: nowrap;
-  font-weight: 900; font-size: var(--note-size, clamp(64px, min(26vw, 15dvh), 150px));
+  font-family: var(--font-display); font-weight: 800; font-size: var(--note-size, clamp(64px, min(26vw, 15dvh), 150px));
   color: var(--color-text); transition: color 0.25s;
   text-shadow: 0 0 18px var(--bg-page), 0 0 6px var(--bg-page);
 }
@@ -56,7 +56,7 @@ body[data-theme="bw"] .tuner.has-note:not(.in-tune) :is(.note, .say) { color: va
 /* A slim button at the bottom. */
 .listen-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  min-width: min(260px, 70vw); min-height: 48px; border-radius: 999px; font-size: 15px;
+  min-width: min(260px, 70vw); min-height: 48px; border-radius: var(--radius-control); font-size: 16px;
   background: transparent; color: var(--color-text); border-color: color-mix(in srgb, var(--color-text) 55%, transparent);
 }
 .listen-btn svg { width: 20px; height: 20px; flex: none; }
@@ -65,39 +65,29 @@ body[data-theme="bw"] .tuner.has-note:not(.in-tune) :is(.note, .say) { color: va
 .mic-msg { max-width: 30em; text-align: center; }
 
 /* Settings: segmented choices. */
-.group-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-.seg { display: flex; border: 1px solid var(--border-panel); border-radius: 12px; overflow: hidden; }
+.group-label { font-size: 15px; font-weight: 600; }
+.seg { display: flex; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); overflow: hidden; }
 .seg button {
   flex: 1 1 0; min-width: 0; min-height: 44px; padding: 4px 8px; border: 0; background: var(--color-panel); color: var(--color-btn-text); cursor: pointer;
-  font: 700 13px/1.15 var(--font-main); letter-spacing: 0.5px; text-transform: uppercase; touch-action: manipulation; transition: background 0.15s, color 0.15s;
+  font: 600 14px/1.15 var(--font-main); touch-action: manipulation; transition: background 0.15s ease-out, color 0.15s ease-out;
 }
 .seg button + button { border-left: 1px solid var(--border-panel); }
 .seg button[aria-pressed="true"] { background: var(--color-left); color: var(--color-text-pinched); }
 .seg button:focus-visible { outline: 2px solid var(--color-right); outline-offset: -3px; }
 @media (hover: hover) and (pointer: fine) {
-  .seg button:hover:not([aria-pressed="true"]) { background: var(--border-panel); color: var(--color-text-pinched); }
+  .seg button:hover:not([aria-pressed="true"]) { background: var(--color-hover); color: var(--color-hover-text); }
   .listen-btn:hover { background: color-mix(in srgb, var(--color-text) 12%, transparent); color: var(--color-text); }
 }
 
 /* Themes */
-body[data-theme="retro"] :is(.say, .prompt) { font-size: 22px; }
-body[data-theme="retro"] .listen-btn { font-size: 22px; }
-body[data-theme="retro"] .seg button { font-size: 17px; }
-body[data-theme="retro"] .note { text-shadow: 0 0 var(--shadow-blur) currentColor; }
-body[data-theme="y2k"] .note { text-shadow: 0 0 14px currentColor; }
-body[data-theme="pink"] .tuner .btn.listen-btn { background: transparent; color: var(--color-text); border-color: var(--border-panel); }
-body[data-theme="pink"] .seg { border-radius: 999px; }
-/* Soft Pink's button text is white for its pink buttons: on white windows it is pink. */
-body[data-theme="pink"] .seg button:not([aria-pressed="true"]) { color: var(--color-left); }
+body[data-theme="retro"] .note { text-shadow: 0 0 var(--shadow-blur) color-mix(in srgb, currentColor 55%, transparent); }
+body[data-theme="y2k"] .note { text-shadow: 0 0 14px color-mix(in srgb, currentColor 55%, transparent); }
 body[data-theme="bw"] :is(.seg, .listen-btn, .zone) { border-radius: 0; }
 
-/* Phones: everything on one screen; line heights pinned (Baloo 2 has tall ones). */
+/* Phones: everything on one screen; line heights pinned (theme fonts differ a lot in height). */
 @media (max-width: 600px) {
-  .tool-title { letter-spacing: 1px; }
   .readout { gap: 16px; padding-bottom: 14px; }
   .say { font-size: 15px; line-height: 1.25; }
   .prompt { font-size: 16px; line-height: 1.25; }
   .listen-btn { min-height: 46px; margin-bottom: 4px; }
-  body[data-theme="retro"] :is(.say, .prompt) { font-size: 20px; line-height: 1.1; }
-  body[data-theme="retro"] #about-modal .about-text { font-size: 17px; line-height: 1.35; }
 }
