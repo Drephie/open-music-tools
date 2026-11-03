@@ -9,7 +9,8 @@
  *   loadSettings(key)           the object saved under key in localStorage, or {}
  *   saveSettings(key, data)     saves it; silently does nothing when storage is
  *                               unavailable (private mode, blocked storage)
- *   applyTheme(theme)           sets <body data-theme>
+ *   applyTheme(theme)           sets <body data-theme>, and the browser bar's colour
+ *                               (meta theme-color) to the theme's page colour
  *
  * The theme and language are one choice for the whole hub (the home page and
  * every tool), saved in localStorage under LOOK_KEY:
@@ -68,6 +69,9 @@ export function saveSettings(key, data) {
 
 export function applyTheme(theme) {
   document.body.setAttribute('data-theme', theme);
+  const bar = document.querySelector('meta[name="theme-color"]');
+  const page = getComputedStyle(document.body).getPropertyValue('--bg-page').trim();
+  if (bar && page) bar.setAttribute('content', page);
 }
 
 export const LOOK_KEY = 'open-music-tools.look.v1';

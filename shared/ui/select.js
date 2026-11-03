@@ -57,7 +57,8 @@ export function buildCustomSelect(container) {
   trigger.setAttribute('aria-haspopup', 'listbox');
   trigger.setAttribute('aria-expanded', 'false');
   trigger.setAttribute('aria-controls', listId);
-  if (labelEl) trigger.setAttribute('aria-label', labelEl.textContent);
+  const name = labelEl ? labelEl.textContent : sel.getAttribute('aria-label');
+  if (name) trigger.setAttribute('aria-label', name);
 
   const list = document.createElement('div');
   list.className = 'select-items select-hide';

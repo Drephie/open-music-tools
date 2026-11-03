@@ -112,6 +112,10 @@
 
     #record-btn.recording { color: #ff4d4d; border-color: #ff4d4d; animation: recblink 1.2s infinite; }
     @keyframes recblink { 50% { opacity: 0.55; } }
+    /* Reduce motion: the logo stays still; recording still shows in red. */
+    @media (prefers-reduced-motion: reduce) {
+      .boot-logo, #record-btn.recording, #touch-record-btn.recording { animation: none; }
+    }
 
     .icon-btn { padding: 0; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
     .circled-question { display: inline-block; border: 2px solid currentColor; border-radius: 50%; width: 20px; height: 20px; line-height: 17px; text-align: center; font-weight: bold; font-size: 14px; box-sizing: border-box; }
@@ -285,8 +289,10 @@
   </style>
 </head>
 <body data-theme="liquid">
+<script>/* The saved theme before the first paint, so pages never flash Liquid Glass (page.js checks it afterwards). */try{var l=JSON.parse(localStorage.getItem('open-music-tools.look.v1'));if(l&&/^[a-z0-9]+$/.test(l.theme))document.body.dataset.theme=l.theme}catch(e){}</script>
 
-<div id="container">
+<div id="container" role="main">
+  <h1 class="visually-hidden">Choordination</h1>
   <div id="media-wrapper">
     <video id="webcam" autoplay playsinline muted></video>
     <canvas id="overlay"></canvas>

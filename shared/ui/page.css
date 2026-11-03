@@ -182,5 +182,10 @@ body[data-theme="snap"] .tool-title { font-size: 28px; line-height: 1; transform
   .tool-footer { font-size: 12px; }
 }
 
+/* Reduce motion (a phone or computer setting): no pressing bounce. */
+@media (prefers-reduced-motion: reduce) {
+  .btn:active, .icon-btn:active, .round-btn:active { transform: none; }
+}
+
 /* A drawn sharp or flat (shared/ui/accidentals.js): strokes in the text colour. */
 svg.acc { flex: none; fill: none; stroke: currentColor; stroke-linecap: round; overflow: visible; }

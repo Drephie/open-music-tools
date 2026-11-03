@@ -101,3 +101,8 @@
 }
 
 body[data-theme="pink"] .beat-dot[data-level="strong"]::before { box-shadow: 0 2px 8px color-mix(in srgb, var(--color-left) 50%, transparent); }
+
+/* Reduce motion: the beat still lights up, without the pop. */
+@media (prefers-reduced-motion: reduce) {
+  .beat-dot.lit::before { animation: none; }
+}

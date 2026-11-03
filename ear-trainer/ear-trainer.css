@@ -227,3 +227,10 @@ body[data-theme="bw"] :is(.flame, .heart:not(.lost)) { color: var(--color-text);
   .lesson-name { font-size: 15px; line-height: 1.25; }
   .start-btn { min-height: 48px; }
 }
+
+/* Reduce motion: the next lesson keeps a still ring, stars and answers appear without moving. */
+@media (prefers-reduced-motion: reduce) {
+  .step.next .step-circle { animation: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-right) 30%, transparent); }
+  .done-stars .star, .pop, .shake, .burst span { animation: none; }
+  .answer:active:not(.after), .card-btn:active, .step[aria-pressed="true"] .step-circle { transform: none; }
+}
