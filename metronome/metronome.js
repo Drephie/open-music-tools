@@ -113,10 +113,15 @@ async function preview(level) {
 
 // Keep the phone screen on while playing (where the browser allows it).
 let wakeLock = null;
+let wakeWanted = false;
 async function keepScreenAwake(on) {
+  wakeWanted = on;
   try {
     if (on && !wakeLock && 'wakeLock' in navigator) {
-      wakeLock = await navigator.wakeLock.request('screen');
+      const lock = await navigator.wakeLock.request('screen');
+      // Stopped while the browser was granting it: let the screen sleep after all.
+      if (!wakeWanted) { lock.release(); return; }
+      wakeLock = lock;
       wakeLock.addEventListener('release', () => { wakeLock = null; });
     } else if (!on && wakeLock) {
       const lock = wakeLock;

@@ -234,9 +234,13 @@ function tick() {
   if (now >= run.end) stopRun(true);
 }
 
+// Each start has a number: a microphone that arrives for an older start (Start,
+// Stop, Start again while the browser is asking) is stopped, never left running.
+let startId = 0;
 async function startRun() {
   if (wanted) return;
   wanted = true;
+  const id = ++startId;
   errorKey = null;
   lastRun = null;
   startAudio();                 // inside the tap: the sound system may start
@@ -251,6 +255,7 @@ async function startRun() {
       onEnd: () => { stopRun(); errorKey = 'errEnded'; render(true); },
     });
   } catch (err) {
+    if (id !== startId) return;
     wanted = false;
     errorKey = ERROR_KEYS[err.reason] || 'errFailed';
     setAudioSession('playback');
@@ -258,7 +263,7 @@ async function startRun() {
     render(true);
     return;
   }
-  if (!wanted) { l.stop(); return; }   // Stop was tapped while the browser was asking
+  if (!wanted || id !== startId) { l.stop(); return; }   // Stop (or Stop and Start) was tapped while the browser was asking
   listener = l;
   offset = Infinity;
   loudness.reset();
@@ -268,7 +273,7 @@ async function startRun() {
     render(true);
     try { await loadRack(); } catch { stopRun(); return; }
     pianoMsg = null;
-    if (!wanted) return;
+    if (!wanted || id !== startId) return;
   }
   trace.break(nowS());
   run = makeRun(nowS() + LEAD);
@@ -320,10 +325,15 @@ window.addEventListener('pagehide', () => { if (wanted) stopRun(); });
 
 // Keep the phone screen on while running (where the browser allows it).
 let wakeLock = null;
+let wakeWanted = false;
 async function keepScreenAwake(on) {
+  wakeWanted = on;
   try {
     if (on && !wakeLock && 'wakeLock' in navigator) {
-      wakeLock = await navigator.wakeLock.request('screen');
+      const lock = await navigator.wakeLock.request('screen');
+      // Stopped while the browser was granting it: let the screen sleep after all.
+      if (!wakeWanted) { lock.release(); return; }
+      wakeLock = lock;
       wakeLock.addEventListener('release', () => { wakeLock = null; });
     } else if (!on && wakeLock) {
       const lock = wakeLock;
