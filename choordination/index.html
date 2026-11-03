@@ -193,7 +193,9 @@
     /* The welcome windows' Continue and Start: the main action, filled. */
     .boot-cta { width: auto; min-height: 44px; align-self: flex-end; font-size: 16px; padding: 12px 25px; background: var(--color-primary); color: var(--color-primary-text); border-color: var(--color-primary); }
     .boot-cta:hover:not(:disabled) { background: color-mix(in srgb, var(--color-primary) 86%, var(--color-text)); color: var(--color-primary-text); }
-    #boot-step-1, #boot-step-2 { display: flex; flex-direction: column; gap: 15px; }
+    #boot-step-2 { display: flex; flex-direction: column; gap: 15px; }
+    .boot-project { margin: 0; font-size: 14px; line-height: 1.5; color: var(--color-text-inactive); }
+    .boot-project a { color: var(--color-right); }
     .about-text { font-size: 15px; line-height: 1.6; padding: 10px; margin: 0; }
     .about-text a { color: var(--color-right); font-weight: bold; }
     .about-credits { font-size: 13px; line-height: 1.5; padding: 0 10px 10px; margin: 0; color: var(--color-text-inactive); }
@@ -551,17 +553,12 @@
   <!-- Boot Up Modal: Step 1 (About / trust page) then Step 2 (How to play + Start) -->
   <div id="boot-modal" class="centered-modal tutorial-content" style="display:flex;" role="dialog" aria-modal="true" aria-labelledby="boot-title" tabindex="-1">
     <h2 id="boot-title" class="boot-title" data-i18n="bootWelcome">Welcome to Choordination</h2>
-    <div id="boot-step-1">
-      <div id="boot-about-text">
-        <!-- Injected via JS (i18n) -->
-      </div>
-      <button id="boot-continue-btn" class="settings-action-btn boot-cta" data-i18n="continueBtn">Continue</button>
-    </div>
-    <div id="boot-step-2" style="display:none;">
+    <div id="boot-step-2">
       <div id="boot-tutorial-text">
         <!-- Injected via JS (i18n) -->
       </div>
       <p id="boot-calib-note" class="modal-note" data-i18n="calibNote"></p>
+      <p id="boot-project" class="boot-project"></p>
       <button id="start-btn" class="settings-action-btn boot-cta" data-i18n="startBtn">Start the camera</button>
     </div>
   </div>
@@ -732,13 +729,9 @@
   const octaveSelector = $("octave-selector");
   const chordStyleSelector = $("chord-style");
 
-  const bootTitle = $("boot-title");
-  const bootStep1 = $("boot-step-1");
-  const bootStep2 = $("boot-step-2");
-  const bootAboutText = $("boot-about-text");
   const bootTutorialText = $("boot-tutorial-text");
   const bootCalibNote = $("boot-calib-note");
-  const bootContinueBtn = $("boot-continue-btn");
+  const bootProject = $("boot-project");
   const startBtn = $("start-btn");
   const menuTutorialText = $("menu-tutorial-text");
   const chordLive = $("chord-live");
@@ -789,11 +782,9 @@
       accNone: "Two-Handed Mode", accLeft: "Left Hand + Head Tilt", accRight: "Right Hand + Head Tilt",
       accKeyboard: "Keyboard Only (camera optional)", accTouch: "Touch Pads (no camera)", accHandsfree: "Hands-Free Mode (Coming Soon)",
       browSustain: "Eyebrow Sustain", onLabel: "On", offLabel: "Off",
-      bootWelcome: "Welcome to Choordination", boot1Title: "About this project",
-      boot1Open: '<strong>Open source.</strong> Choordination is free and open source — every line of code is public in the <a href="{repo}" target="_blank" rel="noopener noreferrer">repository</a>.',
-      boot1Privacy: '<strong>100% private.</strong> Your camera and microphone are processed entirely on this device, inside your browser. Nothing is ever uploaded or stored — the mic is only mixed into recordings you choose to make.',
-      boot1Free: '<strong>Ad-free & user-supported.</strong> No ads, no trackers, ever. If you enjoy Choordination you can support it on <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>.',
-      continueBtn: "Continue", howToPlay: "How to Play", startBtn: "Start the camera",
+      bootWelcome: "Welcome to Choordination",
+      bootProject: 'Free and <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a>. The camera and microphone stay on this device: nothing is uploaded. No ads, no trackers.',
+      howToPlay: "How to Play", startBtn: "Start the camera",
       calibNote: "When the camera starts, keep a relaxed, neutral face for 2 seconds — Choordination calibrates the eyebrow sustain to you.",
       leftHand: "Left Hand", rightHand: "Right Hand",
       tutRoot: "Picks the chord's main note (the root).", tutMod: "Picks the kind of chord: major, minor, 7th…",
@@ -866,11 +857,9 @@
       accNone: "Modo a Dos Manos", accLeft: "Mano Izquierda + Inclinación de Cabeza", accRight: "Mano Derecha + Inclinación de Cabeza",
       accKeyboard: "Solo Teclado (cámara opcional)", accTouch: "Pads Táctiles (sin cámara)", accHandsfree: "Manos Libres (Próximamente)",
       browSustain: "Sustain con Cejas", onLabel: "Activado", offLabel: "Desactivado",
-      bootWelcome: "Bienvenido a Choordination", boot1Title: "Sobre este proyecto",
-      boot1Open: '<strong>Código abierto.</strong> Choordination es gratuito y de código abierto: cada línea de código es pública en el <a href="{repo}" target="_blank" rel="noopener noreferrer">repositorio</a>.',
-      boot1Privacy: '<strong>100% privado.</strong> La cámara y el micrófono se procesan por completo en este dispositivo, dentro de tu navegador. Nada se sube ni se almacena: el micrófono solo se mezcla en las grabaciones que tú decidas hacer.',
-      boot1Free: '<strong>Sin anuncios y financiado por la comunidad.</strong> Nunca habrá anuncios ni rastreadores. Si disfrutas de Choordination, puedes apoyarlo en <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>.',
-      continueBtn: "Continuar", howToPlay: "Cómo Tocar", startBtn: "Encender la cámara",
+      bootWelcome: "Bienvenido a Choordination",
+      bootProject: 'Gratis y de <a href="{repo}" target="_blank" rel="noopener noreferrer">código abierto</a>. La cámara y el micrófono se quedan en este dispositivo: no se sube nada. Sin anuncios ni rastreadores.',
+      howToPlay: "Cómo Tocar", startBtn: "Encender la cámara",
       calibNote: "Cuando la cámara se active, mantén el rostro relajado y neutro durante 2 segundos: Choordination calibra el sustain de cejas a tu medida.",
       leftHand: "Mano Izquierda", rightHand: "Mano Derecha",
       tutRoot: "Elige la nota principal del acorde (la fundamental).", tutMod: "Elige el tipo de acorde: mayor, menor, séptima…",
@@ -943,11 +932,9 @@
       accNone: "Modalità a Due Mani", accLeft: "Mano Sinistra + Inclinazione della Testa", accRight: "Mano Destra + Inclinazione della Testa",
       accKeyboard: "Solo Tastiera (fotocamera opzionale)", accTouch: "Pad Touch (senza fotocamera)", accHandsfree: "Senza Mani (Prossimamente)",
       browSustain: "Sustain con Sopracciglia", onLabel: "Attivo", offLabel: "Disattivato",
-      bootWelcome: "Benvenuto in Choordination", boot1Title: "Su questo progetto",
-      boot1Open: '<strong>Open source.</strong> Choordination è gratuito e open source: ogni riga di codice è pubblica nel <a href="{repo}" target="_blank" rel="noopener noreferrer">repository</a>.',
-      boot1Privacy: '<strong>100% privato.</strong> Fotocamera e microfono vengono elaborati interamente su questo dispositivo, nel tuo browser. Nulla viene caricato o salvato: il microfono viene mixato solo nelle registrazioni che scegli di fare.',
-      boot1Free: '<strong>Senza pubblicità, sostenuto dagli utenti.</strong> Mai pubblicità né tracker. Se Choordination ti piace, puoi sostenerlo su <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>.',
-      continueBtn: "Continua", howToPlay: "Come si Suona", startBtn: "Accendi la fotocamera",
+      bootWelcome: "Benvenuto in Choordination",
+      bootProject: 'Gratis e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a>. Fotocamera e microfono restano su questo dispositivo: non viene caricato nulla. Niente pubblicità né tracker.',
+      howToPlay: "Come si Suona", startBtn: "Accendi la fotocamera",
       calibNote: "Quando la fotocamera si attiva, mantieni il viso rilassato e neutro per 2 secondi: Choordination calibra il sustain delle sopracciglia su di te.",
       leftHand: "Mano Sinistra", rightHand: "Mano Destra",
       tutRoot: "Sceglie la nota principale dell'accordo (la fondamentale).", tutMod: "Sceglie il tipo di accordo: maggiore, minore, settima…",
@@ -1081,23 +1068,9 @@
     buildTouchPads();
   }
 
-  // --- BOOT FLOW (two steps) ---
+  // --- BOOT FLOW: how to play first; the project in one closing line ---
   function buildBootAbout() {
-    bootAboutText.innerHTML = `<h3>${t('boot1Title')}</h3><ul>
-      <li>${interp(t('boot1Open'))}</li>
-      <li>${interp(t('boot1Privacy'))}</li>
-      <li>${interp(t('boot1Free'))}</li>
-    </ul>`;
-  }
-  function showBootStep(step, focus = true) {
-    bootStep1.style.display = step === 1 ? 'flex' : 'none';
-    bootStep2.style.display = step === 2 ? 'flex' : 'none';
-    bootTitle.innerHTML = step === 1 ? t('bootWelcome') : t('howToPlay');
-    // Never steal focus on initial page load; only on user-driven step changes.
-    // Either way the window opens at its top (focus would scroll it to the button).
-    if (focus) (step === 1 ? bootContinueBtn : startBtn).focus({ preventScroll: true });
-    bootModal.scrollTop = 0;
-    requestAnimationFrame(() => { bootModal.scrollTop = 0; });
+    bootProject.innerHTML = interp(t('bootProject'));
   }
 
   // --- TUTORIAL TEXT ---
@@ -2550,7 +2523,6 @@
   $("rec-audio-btn").addEventListener('click', startAudioRecording);
   $("rec-screen-btn").addEventListener('click', startScreenRecording);
 
-  bootContinueBtn.addEventListener('click', () => showBootStep(2));
   startBtn.addEventListener('click', startEngine);
   window.addEventListener('resize', sizeCanvas);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(refreshThemeCache);
@@ -2563,7 +2535,7 @@
   updateLanguage();       // localizes labels/options, rebuilds custom selects, boot + tutorials
   refreshThemeCache();
   sizeCanvas();
-  showBootStep(1);
+  bootModal.scrollTop = 0;   // the welcome window opens at its top
 
   // --- SERVICE WORKER (the hub's one worker caches assets for instant repeat visits) ---
   registerHubWorker('../');
