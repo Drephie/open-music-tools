@@ -159,6 +159,8 @@ function playNote(midi) {
 const trace = createTrace({ seconds: 120 });
 const loudness = createLoudnessGate();
 let listener = null, wanted = false, errorKey = null, offset = Infinity, rms = 0;
+// No microphone (refused, missing, busy): the exercise still plays to sing along, unscored.
+let noMic = false, micErr = null;
 
 function onFrame(frame) {
   offset = Math.min(offset, nowS() - frame.time);
@@ -217,6 +219,7 @@ function pointsOf(r) {
 }
 
 function judge(r) {
+  if (noMic) { r.result = { good: 0, total: 0, octave: 0, results: [], unscored: true }; return; }
   r.result = judgeRound(r.plan.parts, pointsOf(r), tol());
   r.octave = r.result.octave;
   run.good += r.result.good;
@@ -242,6 +245,8 @@ async function startRun() {
   wanted = true;
   const id = ++startId;
   errorKey = null;
+  noMic = false;
+  micErr = null;
   lastRun = null;
   startAudio();                 // inside the tap: the sound system may start
   setAudioSession('play-and-record');
@@ -256,17 +261,18 @@ async function startRun() {
     });
   } catch (err) {
     if (id !== startId) return;
-    wanted = false;
-    errorKey = ERROR_KEYS[err.reason] || 'errFailed';
+    // The exercise plays anyway, to sing along; why there is no microphone shows at the end.
+    noMic = true;
+    micErr = ERROR_KEYS[err.reason] || 'errFailed';
     setAudioSession('playback');
-    showButtons();
-    render(true);
-    return;
   }
-  if (!wanted || id !== startId) { l.stop(); return; }   // Stop (or Stop and Start) was tapped while the browser was asking
-  listener = l;
-  offset = Infinity;
-  loudness.reset();
+  if (!noMic) {
+    if (!wanted || id !== startId) { l.stop(); return; }   // Stop (or Stop and Start) was tapped while the browser was asking
+    listener = l;
+    offset = Infinity;
+    loudness.reset();
+  }
+  if (!wanted || id !== startId) return;
   keepScreenAwake(true);
   if (!rack) {
     pianoMsg = 'loading';
@@ -291,6 +297,7 @@ function stopRun(finished = false) {
   if (run) {
     if (finished) for (const r of run.rounds) if (!r.result) judge(r);
     run.stopped = !finished;
+    run.noMic = noMic;
     lastRun = run;
     run = null;
   }
@@ -300,9 +307,10 @@ function stopRun(finished = false) {
   setAudioSession('playback');
   keepScreenAwake(false);
   if (pianoMsg === 'loading') pianoMsg = null;
+  if (noMic) errorKey = micErr;   // now say why there was no microphone, and how to allow it
   showButtons();
   render(true);
-  if (lastRun && finished) announce(fill('done', { n: lastRun.good, total: lastRun.total }));
+  if (lastRun && finished && !lastRun.noMic) announce(fill('done', { n: lastRun.good, total: lastRun.total }));
   requestDraw();
 }
 
@@ -377,9 +385,9 @@ function render(force = false) {
   const now = nowS();
   let main = '', sub = '', dot = null, msg = false, spoken = '';
   const ph = phaseAt(now);
-  if (errorKey) { main = t(errorKey); msg = true; }
+  if (errorKey) { main = t(errorKey); msg = true; if (lastRun && lastRun.noMic) sub = t('noMicDone'); }
   else if (pianoMsg === 'loadFailed') { main = t('loadFailed'); msg = true; }
-  else if (wanted && !listener) main = t('waiting');
+  else if (wanted && !listener && !noMic) main = t('waiting');
   else if (pianoMsg === 'loading') main = t('loading');
   else if (ph) {
     const { r, k, phase } = ph, total = run.rounds.length, round = fill('roundOf', { n: r.i + 1, total });
@@ -396,6 +404,9 @@ function render(force = false) {
       const oct = octaveText(r.octave);
       sub = oct ? `${round} · ${oct}` : round;
       dot = k < r.plan.result ? 1 - 0.75 * Math.min(1, (((k - r.plan.sing) / beat) % 1) * 2.5) : 0.25;
+    } else if (r.result.unscored) {
+      main = t('noMicRound');
+      sub = round;
     } else {
       main = fill('inTune', { n: r.result.good, total: r.result.total });
       const oct = octaveText(r.result.octave);
