@@ -14,7 +14,7 @@
   margin: 0; height: clamp(46px, 8dvh, 64px); display: flex; align-items: center; justify-content: center; gap: 0.5em;
   white-space: nowrap; color: var(--color-text);
 }
-.note { display: flex; align-items: flex-start; font-weight: 900; font-size: clamp(34px, 6.5dvh, 52px); line-height: 1; }
+.note { display: flex; align-items: flex-start; font-family: var(--font-display); font-weight: 800; font-size: clamp(34px, 6.5dvh, 52px); line-height: 1; }
 .note .acc { width: 0.36em; height: 0.58em; margin: 0.06em 0 0 0.05em; }
 .note .oct { font-size: 0.34em; margin: 0.1em 0 0 0.1em; opacity: 0.6; }
 .cents { font-size: 16px; opacity: 0.85; font-variant-numeric: tabular-nums; }
@@ -34,7 +34,7 @@
 .controls { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 6px 0 4px; }
 .listen-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-  min-width: min(240px, 62vw); min-height: 48px; border-radius: 999px; font-size: 15px;
+  min-width: min(240px, 62vw); min-height: 48px; border-radius: var(--radius-control); font-size: 16px;
   background: transparent; color: var(--color-text); border-color: color-mix(in srgb, var(--color-text) 55%, transparent);
 }
 .pause-btn {
@@ -52,44 +52,33 @@
 .level-fill { position: absolute; left: 0; top: 0; bottom: 0; width: var(--level, 0%); background: var(--color-tune); border-radius: 4px; }
 .level-mark { position: absolute; top: -2px; bottom: -2px; left: var(--mark, 0%); width: 2px; margin-left: -1px; background: var(--color-text); }
 .sens-hint { margin: 8px 0 0; font-size: 12px; line-height: 1.35; opacity: 0.8; }
-body[data-theme="retro"] .sens-hint { font-size: 16px; line-height: 1.15; }
 
 /* Settings: segmented choices. */
-.group-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-.seg { display: flex; border: 1px solid var(--border-panel); border-radius: 12px; overflow: hidden; }
+.group-label { font-size: 15px; font-weight: 600; }
+.seg { display: flex; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); overflow: hidden; }
 .seg button {
   flex: 1 1 0; min-width: 0; min-height: 44px; padding: 4px 8px; border: 0; background: var(--color-panel); color: var(--color-btn-text); cursor: pointer;
-  font: 700 13px/1.15 var(--font-main); letter-spacing: 0.5px; text-transform: uppercase; touch-action: manipulation; transition: background 0.15s, color 0.15s;
+  font: 600 14px/1.15 var(--font-main); touch-action: manipulation; transition: background 0.15s ease-out, color 0.15s ease-out;
 }
 .seg button + button { border-left: 1px solid var(--border-panel); }
 .seg button[aria-pressed="true"] { background: var(--color-left); color: var(--color-text-pinched); }
 .seg button:focus-visible { outline: 2px solid var(--color-right); outline-offset: -3px; }
 @media (hover: hover) and (pointer: fine) {
-  .seg button:hover:not([aria-pressed="true"]) { background: var(--border-panel); color: var(--color-text-pinched); }
+  .seg button:hover:not([aria-pressed="true"]) { background: var(--color-hover); color: var(--color-hover-text); }
   .listen-btn:hover, .pause-btn:hover { background: color-mix(in srgb, var(--color-text) 12%, transparent); color: var(--color-text); }
 }
 
 /* Themes */
-body[data-theme="retro"] :is(.prompt, .cents) { font-size: 21px; }
-body[data-theme="retro"] .listen-btn { font-size: 22px; }
-body[data-theme="retro"] .seg button { font-size: 17px; }
-body[data-theme="retro"] .note { text-shadow: 0 0 var(--shadow-blur) currentColor; }
-body[data-theme="y2k"] .note { text-shadow: 0 0 14px currentColor; }
-body[data-theme="pink"] .detector .btn:is(.listen-btn, .pause-btn) { background: transparent; color: var(--color-text); border-color: var(--border-panel); }
-body[data-theme="pink"] .seg { border-radius: 999px; }
-/* Soft Pink's button text is white for its pink buttons: on white windows it is pink. */
-body[data-theme="pink"] .seg button:not([aria-pressed="true"]) { color: var(--color-left); }
+body[data-theme="retro"] .note { text-shadow: 0 0 var(--shadow-blur) color-mix(in srgb, currentColor 55%, transparent); }
+body[data-theme="y2k"] .note { text-shadow: 0 0 14px color-mix(in srgb, currentColor 55%, transparent); }
 body[data-theme="bw"] :is(.seg, .listen-btn) { border-radius: 0; }
 
-/* Phones: everything on one screen; line heights pinned (Baloo 2 has tall ones). */
+/* Phones: everything on one screen; line heights pinned (theme fonts differ a lot in height). */
 @media (max-width: 600px) {
-  .tool-title { letter-spacing: 1px; }
   .detector { gap: 6px; }
   .prompt { font-size: 15px; }
   .cents { font-size: 15px; }
   .listen-btn { min-height: 46px; }
-  body[data-theme="retro"] :is(.prompt, .cents) { font-size: 19px; line-height: 1.1; }
-  body[data-theme="retro"] #about-modal .about-text { font-size: 17px; line-height: 1.35; }
   #about-modal .about-text { font-size: 14px; line-height: 1.4; }
   /* Soft Pink's tall font: Settings still fits one screen. */
   body[data-theme="pink"] #settings-modal .seg button { min-height: 40px; }
