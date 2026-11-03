@@ -55,7 +55,7 @@ body {
 ::selection { background: color-mix(in srgb, var(--color-left) 40%, transparent); color: var(--color-text); }
 /* Phones: thinner theme frames and 16 px margins, so nothing eats the screen. */
 @media (max-width: 600px) {
-  body { --gutter: var(--space-4); --fx: min(var(--frame-sides), 6px); --fy-top: min(var(--frame-top), 6px); --fy-bottom: min(var(--frame-bottom), 6px); }
+  body { --gutter: var(--space-4); --fx: min(var(--frame-sides), 4px); --fy-top: min(var(--frame-top), 4px); --fy-bottom: min(var(--frame-bottom), 4px); }
 }
 @media not ((hover: hover) and (pointer: fine)) {
   .computer-only { display: none !important; }
@@ -168,8 +168,9 @@ body[data-theme="retro"] #theme-frame { border: var(--fy-top) solid rgb(14, 16, 
 .about-small { font-size: 14px; line-height: 1.5; margin: 0; color: var(--color-text-inactive); }
 
 .tool-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-1) var(--space-4); font-size: 13px; font-weight: 600; line-height: 1.3; color: var(--color-text-inactive); }
-/* The links' touch area is 44 px tall without making the footer taller. */
-.tool-footer a { display: inline-block; padding-block: 14px; margin-block: -14px; text-decoration: none; font-weight: 700; text-underline-offset: 3px; }
+/* The links' touch area is 44 px tall (an invisible layer), without making the footer taller. */
+.tool-footer a { position: relative; text-decoration: none; font-weight: 700; text-underline-offset: 3px; }
+.tool-footer a::after { content: ''; position: absolute; inset: -14px -4px -10px; }
 .tool-footer a:hover { text-decoration: underline; }
 .support-link { color: var(--color-right); }
 .designer-credit a { color: var(--color-right); }
@@ -192,7 +193,7 @@ body[data-theme="snap"] .tool-title { font-size: 28px; line-height: 1; transform
   .tool-title { font-size: 21px; }
   body[data-theme="snap"] .tool-title { font-size: 25px; }
   .panel { padding: var(--space-4); }
-  .setting-row { min-height: 48px; }
+  .setting-row { min-height: 44px; }
   .btn { min-height: 46px; font-size: 16px; }
   .tool-footer { font-size: 12px; }
 }

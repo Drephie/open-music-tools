@@ -79,14 +79,14 @@
   /* Line heights are pinned: theme fonts differ a lot in height (Kalam, Literata). */
   .hint { margin: -2px 0 0; font-size: 12px; line-height: 1.25; }
   .tempo-number { flex-direction: row; align-items: baseline; gap: 6px; }
-  .bpm-input { font-size: clamp(50px, 10dvh, 112px); height: 1.05em; }
+  .bpm-input { font-size: clamp(50px, 9.5dvh, 112px); height: 1.05em; }
   .bpm-unit { font-size: 13px; letter-spacing: 2px; }
   .tempo-name { margin-top: 2px; font-size: 14px; line-height: 1.3; }
   .round-btn { width: 44px; height: 44px; }
-  .big-btn { min-height: clamp(48px, 7.5dvh, 68px); font-size: 18px; }
+  .big-btn { min-height: clamp(46px, 7dvh, 68px); font-size: 18px; }
   .beat-dots.two-rows { max-width: calc(var(--cols) * 42px - 4px); }
   .beat-dots.two-rows .beat-dot { max-width: 38px; }
-  .met-settings { padding-top: 2px; padding-bottom: 10px; }
+  .met-settings { padding-top: 2px; padding-bottom: 6px; }
   .select-pair { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); column-gap: 10px; }
   .select-pair > .setting-row + .setting-row { border-top: none; }
   .setting-row.stacked { padding: 8px 0; gap: 5px; }
@@ -94,8 +94,8 @@
   .setting-label, .stepper output, #volume-out { line-height: 1.2; }
   .select-pair .select-selected { padding: 10px 30px 10px 12px; font-size: 14px; line-height: 1.2; }
   .select-pair .select-selected:after { right: 12px; }
-  .volume { padding-top: 8px; }
-  .volume-head { margin-bottom: 10px; }
+  .volume { padding-top: 6px; }
+  .volume-head { margin-bottom: 8px; }
   .volume-track { padding-bottom: 14px; }
   .volume-mark-label { top: 14px; font-size: 10px; }
 }
