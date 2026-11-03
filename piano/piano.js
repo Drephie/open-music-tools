@@ -563,7 +563,17 @@ function setMode(mode) {
   stopAll();
   settings.mode = mode;
   for (const b of modeSeg.children) b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
+  showModeHint();
   save();
+}
+// One line under the switch says what the chosen mode does (the About window's sentences).
+function showModeHint() {
+  const key = { hold: 'modeHold', ring: 'modeRing', drone: 'modeDrone' }[settings.mode] || 'modeHold';
+  const hint = $('mode-hint');
+  hint.replaceChildren();
+  const name = document.createElement('strong');
+  name.textContent = t(key);
+  hint.append(name, ': ' + t(key + 'Hint'));
 }
 modeSeg.addEventListener('click', (e) => {
   const b = e.target.closest('button');
@@ -581,7 +591,7 @@ solfegeBtn.addEventListener('click', () => {
   showNotation();
 });
 function showNotation() {
-  solfegeBtn.textContent = solfege() ? 'Do' : 'C';
+  solfegeBtn.textContent = solfege() ? 'Do Re Mi' : 'C D E';
   solfegeBtn.setAttribute('aria-pressed', String(solfege()));
   labelTicks();
   drawThumb();
@@ -628,6 +638,7 @@ function applyLanguage() {
   document.title = t('title');
   if (!loadingEl.hidden) loadingEl.textContent = t(rackLoading ? 'loading' : 'loadFailed');
   showNotation();   // Do/C may follow the language
+  showModeHint();
   setupCustomSelects();   // labels and option texts changed
   fitBig();
 }

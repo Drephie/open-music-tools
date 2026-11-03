@@ -70,10 +70,11 @@
                 <button data-mode="drone" aria-pressed="false" data-i18n="modeDrone">Drone</button>
               </div>
               <button id="names-btn" class="toggle" aria-pressed="true" data-i18n="names">Names</button>
-              <button id="solfege-btn" class="toggle" aria-pressed="false" data-i18n-aria="solfegeAria" aria-label="Note names: Do Re Mi or C D E">C</button>
+              <button id="solfege-btn" class="toggle" aria-pressed="false" data-i18n-aria="solfegeAria" aria-label="Note names: Do Re Mi or C D E">C D E</button>
             </div>
           </div>
         </section>
+        <p id="mode-hint" class="mode-hint" aria-live="polite"></p>
 
         <div id="keys-wrap" class="keys-wrap" role="group" data-i18n-aria="keysAria" aria-label="Piano keys">
           <div id="kb" class="kb"></div>
@@ -101,7 +102,7 @@
         <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
       </div>
       <div class="setting-row control-group">
-        <label for="theme-select" data-i18n="theme">Aesthetic Theme</label>
+        <label for="theme-select" data-i18n="theme">Theme</label>
         <div class="custom-select"><select id="theme-select"></select></div>
       </div>
       <div class="setting-row control-group">
