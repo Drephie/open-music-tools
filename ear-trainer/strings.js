@@ -12,7 +12,7 @@ export const EAR_STRINGS = {
   en: {
     title: "Ear Trainer",
     aboutTitle: "About the Ear Trainer",
-    aboutBody: 'Free, <a href="{repo}" target="_blank" rel="noopener noreferrer">open-source</a> music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers, nothing uploaded: everything runs in your browser.<br><br><strong>Intervals</strong>: the distance between two notes, in half steps (from one piano key to the very next). <strong>Chords</strong>: major, minor and more. <strong>Scale degrees</strong>: you hear the key, then one note: which step is it? 1 is home.',
+    aboutBody: 'Free, <a href="{repo}" target="_blank" rel="noopener noreferrer">open-source</a> music tools by <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. No ads, no trackers, nothing uploaded: everything runs in your browser.<br><br><strong>Intervals</strong>: the distance between two notes, in half steps (from one piano key to the very next). <strong>Chords</strong>: major, minor and more. <strong>Scale steps</strong>: you hear the key, then one note: which step is it? 1 is home.',
     aboutCredits: 'Piano sound: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> by Alexander Holm, licensed under <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "On a computer: Space plays the question again, the number keys answer (1 to 9, 0, - and =, as shown on the buttons), Enter goes to the next question, and Escape goes back to the lessons.",
     supportTitle: "Support the Ear Trainer",
@@ -63,7 +63,7 @@ export const EAR_STRINGS = {
   es: {
     title: "Oído musical",
     aboutTitle: "Acerca de Oído musical",
-    aboutBody: 'Herramientas musicales gratuitas y <a href="{repo}" target="_blank" rel="noopener noreferrer">de código abierto</a> de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios, sin rastreadores y sin subir nada: todo funciona en tu navegador.<br><br><strong>Intervalos</strong>: la distancia entre dos notas, en semitonos (de una tecla del piano a la siguiente). <strong>Acordes</strong>: mayor, menor y más. <strong>Grados</strong>: oyes la tonalidad y luego una nota: ¿qué grado es? El 1 es casa.',
+    aboutBody: 'Herramientas musicales gratuitas y <a href="{repo}" target="_blank" rel="noopener noreferrer">de código abierto</a> de <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Sin anuncios, sin rastreadores y sin subir nada: todo funciona en tu navegador.<br><br><strong>Intervalos</strong>: la distancia entre dos notas, en semitonos (de una tecla del piano a la siguiente). <strong>Acordes</strong>: mayor, menor y más. <strong>Grados de la escala</strong>: oyes la tonalidad y luego una nota: ¿qué grado es? El 1 es casa.',
     aboutCredits: 'Sonido de piano: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> de Alexander Holm, con licencia <a href="https://creativecommons.org/licenses/by/3.0/deed.es" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "En el ordenador: Espacio repite la pregunta, las teclas de números responden (1 a 9, 0, - e =, como en los botones), Intro pasa a la siguiente pregunta y Escape vuelve a las lecciones.",
     supportTitle: "Apoya Oído musical",
@@ -114,7 +114,7 @@ export const EAR_STRINGS = {
   it: {
     title: "Orecchio musicale",
     aboutTitle: "Informazioni su Orecchio musicale",
-    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, niente caricato online: tutto funziona nel tuo browser.<br><br><strong>Intervalli</strong>: la distanza tra due note, in semitoni (da un tasto del pianoforte a quello subito dopo). <strong>Accordi</strong>: maggiore, minore e altro. <strong>Gradi</strong>: senti la tonalità, poi una nota: che grado è? L\'1 è casa.',
+    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, niente caricato online: tutto funziona nel tuo browser.<br><br><strong>Intervalli</strong>: la distanza tra due note, in semitoni (da un tasto del pianoforte a quello subito dopo). <strong>Accordi</strong>: maggiore, minore e altro. <strong>Gradi della scala</strong>: senti la tonalità, poi una nota: che grado è? L\'1 è casa.',
     aboutCredits: 'Suono di pianoforte: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> di Alexander Holm, con licenza <a href="https://creativecommons.org/licenses/by/3.0/deed.it" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "Al computer: Spazio fa risentire la domanda, i tasti dei numeri rispondono (da 1 a 9, 0, - e =, come sui pulsanti), Invio passa alla domanda successiva ed Esc torna alle lezioni.",
     supportTitle: "Sostieni Orecchio musicale",
