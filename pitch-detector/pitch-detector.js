@@ -252,7 +252,8 @@ function render(force = false) {
   let name = '', oct = '', cents = '', prompt = '', msg = false;
   const live = listener && !paused;
   if (errorKey) { prompt = t(errorKey); msg = true; }
-  else if (pianoMsg) prompt = t(pianoMsg);
+  // The piano's own message (loading, couldn't load) never hides a note being sung.
+  else if (pianoMsg && !(live && shown)) prompt = t(pianoMsg);
   else if (live && now < quietUntil) prompt = t('listen');
   else if (paused) prompt = t('paused');
   else if (!wanted) prompt = trace.size > 1 ? t('stopped') : t('idle');

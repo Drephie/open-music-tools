@@ -114,6 +114,12 @@ body[data-theme="y2k"] .note { text-shadow: 0 0 14px color-mix(in srgb, currentC
 body[data-theme="bw"] :is(.seg, .listen-btn, .zone, .tuning-select .select-selected) { border-radius: 0; }
 
 /* Phones: everything on one screen; line heights pinned (theme fonts differ a lot in height). */
+/* Very small phones (320 px): six strings still fit without sideways scrolling. */
+@media (max-width: 360px) {
+  .string-btns { gap: 5px; }
+  .string-btn { width: 40px; height: 40px; }
+}
+
 @media (max-width: 600px) {
   .readout { gap: 16px; padding-bottom: 14px; }
   .say { font-size: 15px; line-height: 1.25; }

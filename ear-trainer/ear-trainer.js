@@ -221,10 +221,17 @@ $('home').querySelector('.tabs').addEventListener('keydown', (e) => {
 
 // --- SCREENS ---
 function showScreen(name) {
+  const active = document.activeElement;
+  const hadFocus = active && active !== document.body && (homeEl.contains(active) || quizEl.contains(active) || doneEl.contains(active));
   homeEl.hidden = name !== 'home';
   quizEl.hidden = name !== 'quiz';
   doneEl.hidden = name !== 'done';
   document.body.dataset.screen = name;
+  // Keyboard and screen-reader users land on the new screen, not on a hidden button.
+  if (hadFocus && !active.checkVisibility?.()) {
+    if (name === 'quiz') hearBtn.focus();
+    else if (name === 'home') document.querySelector('.tab[aria-selected="true"]')?.focus();
+  }
 }
 function goHome() {
   stopSound();
