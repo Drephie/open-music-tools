@@ -1,26 +1,43 @@
 /* shared/ui/select.css: looks for the custom selects built by shared/ui/select.js.
  * Uses the theme variables from themes.css. Add class "compact-grid" next to
  * "custom-select" to lay a long list out as a 3-column grid.
+ * A long name wraps onto a second line instead of being cut off or pushing
+ * the page wider; the arrow stays on the right.
  */
-.custom-select { position: relative; font-family: var(--font-main); font-size: 14px; font-weight: 700; user-select: none; }
+.custom-select { position: relative; min-width: 0; font-family: var(--font-main); font-size: 15px; font-weight: 600; user-select: none; }
 .custom-select select { display: none; }
-.select-selected { background-color: var(--bg-select); color: var(--color-select-text); padding: 8px 12px; border: 1px solid var(--border-panel); border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
-.select-selected:after { content: '▼'; font-size: 10px; color: var(--color-right); margin-left: 8px; }
-.select-selected.select-arrow-active:after { content: '▲'; }
+.select-selected {
+  position: relative; box-sizing: border-box; min-height: 44px; padding: 10px 36px 10px 14px; line-height: 1.25;
+  background-color: var(--bg-select); color: var(--color-select-text);
+  border: var(--border-width, 1px) solid var(--border-panel); border-radius: var(--radius-control, 10px);
+  cursor: pointer; overflow-wrap: break-word; transition: border-color 0.15s ease-out, background-color 0.15s ease-out;
+}
+.select-selected:after {
+  content: ''; position: absolute; right: 15px; top: 50%; width: 7px; height: 7px; margin-top: -6px;
+  border-right: 2px solid var(--color-right); border-bottom: 2px solid var(--color-right); transform: rotate(45deg);
+  transition: transform 0.15s ease-out, margin-top 0.15s ease-out;
+}
+.select-selected.select-arrow-active:after { transform: rotate(-135deg); margin-top: -2px; }
+@media (hover: hover) { .select-selected:hover { border-color: var(--color-right); } }
 .select-selected:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
-.select-items { position: absolute; background-color: var(--bg-select); border: 1px solid var(--border-panel); top: 100%; left: 0; right: 0; z-index: 99; border-radius: 6px; margin-top: 4px; max-height: 250px; overflow-y: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-.select-items div { color: var(--color-select-text); padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.select-items div:hover, .same-as-selected { background-color: var(--color-select-hover); color: var(--color-left); }
+.select-items {
+  position: absolute; background-color: var(--bg-select); border: var(--border-width, 1px) solid var(--border-panel);
+  top: 100%; left: 0; right: 0; z-index: 99; border-radius: min(var(--radius-control, 10px), 18px); margin-top: 6px; padding: 4px;
+  max-height: 260px; overflow-y: auto; box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.55);
+}
+.select-items div { color: var(--color-select-text); padding: 11px 12px; min-height: 22px; line-height: 1.25; cursor: pointer; border-radius: min(var(--radius-control, 10px), 12px); overflow-wrap: break-word; }
+.select-items div:hover, .same-as-selected { background-color: var(--color-select-hover); color: var(--color-select-text); }
+.same-as-selected { font-weight: 800; }
 .option-highlight { outline: 2px solid var(--color-right); outline-offset: -2px; }
 .option-disabled { opacity: 0.45; cursor: not-allowed; }
 /* Must out-specify `.compact-grid .select-items { display: grid }` (0,2,0)
    or the Musical Key list can never collapse. */
 .custom-select .select-items.select-hide { display: none; }
 /* Opens upward when there is more room above (set by select.js). */
-.select-items.select-up { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 4px; }
+.select-items.select-up { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 6px; }
 .select-items::-webkit-scrollbar { width: 6px; }
 .select-items::-webkit-scrollbar-thumb { background: var(--color-right); border-radius: 3px; }
 
 /* Compact Grid specifically for Musical Key dropdown */
 .compact-grid .select-items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 5px; }
-.compact-grid .select-items div { padding: 8px 2px; text-align: center; font-size: 12px; border-bottom: none; border-radius: 4px; }
+.compact-grid .select-items div { padding: 10px 2px; text-align: center; font-size: 13px; }
