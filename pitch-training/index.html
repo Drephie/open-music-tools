@@ -95,11 +95,20 @@
         <div class="custom-select"><select id="lang-select"></select></div>
       </div>
     </div>
-    <div class="control-group">
-      <span id="names-label" class="group-label" data-i18n="names">Note names</span>
-      <div id="names-seg" class="seg" role="group" aria-labelledby="names-label">
-        <button type="button" data-names="solfege" data-i18n="namesSolfege">Do Re Mi</button>
-        <button type="button" data-names="letters" data-i18n="namesLetters">C D E</button>
+    <div class="pair">
+      <div class="control-group">
+        <span id="names-label" class="group-label" data-i18n="names">Note names</span>
+        <div id="names-seg" class="seg" role="group" aria-labelledby="names-label">
+          <button type="button" data-names="solfege" data-i18n="namesSolfege">Do Re Mi</button>
+          <button type="button" data-names="letters" data-i18n="namesLetters">C D E</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <span id="view-label" class="group-label" data-i18n="view">View</span>
+        <div id="view-seg" class="seg" role="group" aria-labelledby="view-label">
+          <button type="button" data-view="whole" data-i18n="viewWhole">Whole</button>
+          <button type="button" data-view="scroll" data-i18n="viewScroll">Scroll</button>
+        </div>
       </div>
     </div>
     <div class="control-group">
@@ -109,19 +118,12 @@
         <button type="button" data-hear="along" data-i18n="hearAlong">Sing along (headphones)</button>
       </div>
     </div>
-    <div class="control-group">
-      <span id="view-label" class="group-label" data-i18n="view">View</span>
-      <div id="view-seg" class="seg" role="group" aria-labelledby="view-label">
-        <button type="button" data-view="whole" data-i18n="viewWhole">Whole exercise</button>
-        <button type="button" data-view="scroll" data-i18n="viewScroll">Scrolling</button>
-      </div>
-    </div>
     <div class="pair">
       <div class="control-group">
         <span id="tol-label" class="group-label" data-i18n="tol">In tune within</span>
         <div id="tol-seg" class="seg" role="group" aria-labelledby="tol-label">
           <button type="button" data-tol="normal" data-i18n="tolNormal">25 cents</button>
-          <button type="button" data-tol="precise" data-i18n="tolPrecise">10 (precise)</button>
+          <button type="button" data-tol="precise" data-i18n="tolPrecise">10 cents</button>
         </div>
       </div>
       <div class="control-group">
