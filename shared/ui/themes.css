@@ -24,8 +24,9 @@
  *   its lines, and the accent it lights up in when a note is in tune (not
  *   green: green vanishes in Retro CRT).
  * Theme-specific decoration (frames, button shapes) stays in each tool.
- * Load it before the tool's own styles, plus the fonts it names:
- *   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=VT323&family=Courier+Prime:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+ * Load it before the tool's own styles, after the fonts it names, which are served
+ *   from our own site (no font service sees the visitors):
+ *   <link rel="stylesheet" href="../shared/fonts/fonts.css">
  */
 :root {
   --color-tune-line: #e6eef5;

@@ -2,15 +2,16 @@
  * folder this file is in). Tools register it with shared/offline.js.
  *
  * Caches the app shells (shared/ and each tool) plus heavyweight CDN assets
- * (Tone.js, MediaPipe WASM + .task models, Google Fonts, Salamander piano
- * samples) so repeat visits load instantly and work offline once primed.
+ * (Tone.js, MediaPipe WASM + .task models, Salamander piano samples) so
+ * repeat visits load instantly and work offline once primed. The fonts are
+ * our own files (shared/fonts/).
  * Same-origin files are network-first, so updates land on the next online
  * visit; CDN files are pinned versions, so they are cache-first.
  *
  * Bump CACHE_NAME whenever a cached file changes. Add each new tool's files
  * to APP_SHELL.
  */
-const CACHE_NAME = 'open-music-tools-v14';
+const CACHE_NAME = 'open-music-tools-v15';
 const APP_SHELL = [
   './',
   'index.html',
@@ -34,6 +35,18 @@ const APP_SHELL = [
   'shared/ui/page.css',
   'shared/ui/page.js',
   'shared/ui/accidentals.js',
+  'shared/fonts/fonts.css',
+  'shared/fonts/baloo2-latin-ext.woff2',
+  'shared/fonts/baloo2-latin.woff2',
+  'shared/fonts/courier-prime-400-latin-ext.woff2',
+  'shared/fonts/courier-prime-400-latin.woff2',
+  'shared/fonts/courier-prime-700-latin-ext.woff2',
+  'shared/fonts/courier-prime-700-latin.woff2',
+  'shared/fonts/orbitron-latin.woff2',
+  'shared/fonts/quicksand-latin-ext.woff2',
+  'shared/fonts/quicksand-latin.woff2',
+  'shared/fonts/vt323-latin-ext.woff2',
+  'shared/fonts/vt323-latin.woff2',
   'choordination/',
   'choordination/index.html',
   'choordination/manifest.json',
@@ -95,9 +108,7 @@ const RUNTIME_HOSTS = [
   'cdnjs.cloudflare.com',   // Tone.js
   'cdn.jsdelivr.net',       // MediaPipe tasks-vision bundle + WASM
   'storage.googleapis.com', // hand_landmarker.task, face_landmarker.task
-  'tonejs.github.io',       // Salamander piano samples
-  'fonts.googleapis.com',
-  'fonts.gstatic.com'
+  'tonejs.github.io'        // Salamander piano samples
 ];
 
 self.addEventListener('install', (event) => {

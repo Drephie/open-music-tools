@@ -16,7 +16,7 @@ The Metronome (`metronome/`) is the working example: copy its structure, not its
 
 `<tool>/index.html`, `<tool>.css`, `<tool>.js` (ES module), `strings.js` (en/es/it), `favicon.svg`. Start from the Metronome's files:
 
-- **Head:** Tone.js 14.8.49 from cdnjs with its SRI hash (only if the tool makes sound), the Google Fonts link from `shared/ui/themes.css`, then `themes.css`, `select.css`, `page.css`, then the tool's CSS.
+- **Head:** Tone.js 14.8.49 from cdnjs with its SRI hash (only if the tool makes sound), the fonts (`../shared/fonts/fonts.css`, our own copies: never a font service), then `themes.css`, `select.css`, `page.css`, then the tool's CSS.
 - **Body:** `<body data-theme="liquid">`, `#theme-frame`, `.page` with `.tool-header` (the house button `<a class="icon-btn home-btn" href="../" data-i18n-aria="home">` to the home page, title, About and Settings icon buttons), `<main>` with `.panel`s, `.tool-footer` (Support on Patreon, Designed by @drephie).
 - **Windows** (all from `shared/ui/page.css`/`page.js`; see the Metronome's markup):
   - Settings: `.centered-modal.has-dropdowns` with Theme and Language. Their lists must show on top of the window.
