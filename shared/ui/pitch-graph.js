@@ -6,8 +6,11 @@
  * (newer), in one colour, with breaks.
  *
  *   const view = createGraphView(canvas)
- *   view.setLook({ text, accent, page, font, line })   CSS colours and the label
- *                            font; line: the voice's colour (default: accent)
+ *   view.setLook({ text, accent, page, font, line, keys })   CSS colours and the
+ *                            label font; line: the voice's colour (default: accent);
+ *                            keys: { white, whiteText, black, blackText }, the theme's
+ *                            piano-key colours (--key-*), as on the Piano (default:
+ *                            the lighter and darker of text and page)
  *   view.resize()            after the canvas changed size
  *   view.layout -> { keysWidth, lane, seconds, pxPerSecond, left, right }
  *     lane: px per half step and pxPerSecond (at the last draw); seconds: the
@@ -58,7 +61,7 @@ const luma = (c) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
 export function createGraphView(canvas) {
   const ctx = canvas.getContext('2d');
   let w = 0, h = 0, dpr = 1;
-  let text = [255, 255, 255], accent = [138, 212, 255], line = null, page = [15, 20, 25], font = 'sans-serif';
+  let text = [255, 255, 255], accent = [138, 212, 255], line = null, page = [15, 20, 25], font = 'sans-serif', keys = null;
   let low = 55, high = 69;
   const layout = { keysWidth: 44, lane: 24, seconds: 6, pxPerSecond: 50, left: 48, right: 300 };
 
@@ -79,6 +82,7 @@ export function createGraphView(canvas) {
     text = parseColor(look.text); accent = parseColor(look.accent); page = parseColor(look.page);
     line = look.line ? parseColor(look.line) : null;
     font = look.font || font;
+    keys = look.keys && look.keys.white ? Object.fromEntries(Object.entries(look.keys).map(([k, v]) => [k, parseColor(v)])) : null;
   }
 
   const yOf = (m) => (high - m) * layout.lane;
@@ -151,11 +155,11 @@ export function createGraphView(canvas) {
       if (inKey) { ctx.fillStyle = rgba(accent, 0.11); ctx.fillRect(gx, y - lane / 2, gr - gx, lane); }
       else if (BLACK[pc]) { ctx.fillStyle = rgba(text, 0.045); ctx.fillRect(gx, y - lane / 2, gr - gx, lane); }
       if (pc === 0) { ctx.fillStyle = rgba(text, 0.22); ctx.fillRect(gx, y + lane / 2 - 0.5, gr - gx, 1); }
-      // Like a real keyboard in every theme: white keys in the lighter of the
-      // text and page colours, black keys in the darker one.
+      // Like a real keyboard in every theme: the theme's piano-key colours (or, without
+      // them, white keys in the lighter of the text and page colours, black in the darker).
       const black = BLACK[pc], kWidth = black ? kw * 0.72 : kw;
-      const [light, dark] = luma(text) > luma(page) ? [text, page] : [page, text];
-      ctx.fillStyle = n === pressed ? rgba(accent, 1) : black ? rgba(dark, 1) : rgba(light, 0.7);
+      const [light, dark] = keys ? [keys.white, keys.black] : luma(text) > luma(page) ? [text, page] : [page, text];
+      ctx.fillStyle = n === pressed ? rgba(accent, 1) : black ? rgba(dark, 1) : rgba(light, keys ? 1 : 0.7);
       ctx.fillRect(0, y - lane / 2 + 0.5, kWidth, lane - 1);
       // An outline, so keys stand out on a light page too.
       if (n !== pressed && lane > 4) { ctx.strokeStyle = black ? rgba(light, 0.45) : rgba(dark, 0.2); ctx.lineWidth = 1; ctx.strokeRect(0.5, y - lane / 2 + 1, kWidth - 1, lane - 2); }
@@ -169,7 +173,7 @@ export function createGraphView(canvas) {
         while (size > 7 && ctx.measureText(label).width > kWidth - 5) ctx.font = `700 ${(size -= 0.5)}px ${font}`;
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = n === pressed ? rgba(page, 1) : black ? rgba(light, 0.95) : rgba(dark, 0.95);
+        ctx.fillStyle = n === pressed ? rgba(page, 1) : keys ? rgba(black ? keys.blackText : keys.whiteText, 1) : black ? rgba(light, 0.95) : rgba(dark, 0.95);
         ctx.fillText(label, kWidth - 3, y + 0.5);
       }
     }

@@ -425,6 +425,7 @@ function readLook() {
   view.setLook({
     text: cs.getPropertyValue('--color-text'), accent: cs.getPropertyValue('--color-tune'), line: cs.getPropertyValue('--color-tune-line'),
     page: cs.getPropertyValue('--bg-page'), font: cs.getPropertyValue('--font-main'),
+    keys: { white: cs.getPropertyValue('--key-white'), whiteText: cs.getPropertyValue('--key-white-text'), black: cs.getPropertyValue('--key-black'), blackText: cs.getPropertyValue('--key-black-text') },
   });
 }
 
