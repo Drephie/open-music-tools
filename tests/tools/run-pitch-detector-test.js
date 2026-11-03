@@ -5,7 +5,7 @@
  *
  * Prints one line per check and exits non-zero on failure.
  */
-import * as trace from '../../pitch-detector/trace.js';
+import * as trace from '../../shared/pitch-line.js';
 import * as core from '../../shared/pitch-worklet.js';
 import { checkDetector } from '../pitch-detector-cases.js';
 

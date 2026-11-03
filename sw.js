@@ -76,8 +76,8 @@ const APP_SHELL = [
   'pitch-detector/index.html',
   'pitch-detector/pitch-detector.css',
   'pitch-detector/pitch-detector.js',
-  'pitch-detector/trace.js',
-  'pitch-detector/graph-view.js',
+  'shared/pitch-line.js',
+  'shared/ui/pitch-graph.js',
   'pitch-detector/strings.js',
   'pitch-detector/favicon.svg',
 ];

@@ -1,7 +1,7 @@
 /* pitch-detector/pitch-detector.js: the Pitch Detector (spec:
  * specs/pitch-detector.md). The microphone and the pitch come from
- * shared/pitch.js; the line and the keys' names are ./trace.js; the graph is
- * drawn by ./graph-view.js; the piano is shared/sound.js. This file is the
+ * shared/pitch.js; the line and the keys' names are shared/pitch-line.js; the graph is
+ * drawn by shared/ui/pitch-graph.js; the piano is shared/sound.js. This file is the
  * screen: the note at the top, fitting the view to the notes on screen, pause and looking back,
  * tapping a key to hear it, the settings, windows and keyboard.
  */
@@ -15,8 +15,8 @@ import { createModalManager } from '../shared/ui/modal.js';
 import { accidentalHtml, prettyName } from '../shared/ui/accidentals.js';
 import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
-import { createTrace, laneNames, fitView, KEY_CHOICES, keyLabel, SENSITIVITY, createLoudnessGate, levelDb } from './trace.js';
-import { createGraphView } from './graph-view.js';
+import { createTrace, laneNames, fitView, KEY_CHOICES, keyLabel, SENSITIVITY, createLoudnessGate, levelDb } from '../shared/pitch-line.js';
+import { createGraphView } from '../shared/ui/pitch-graph.js';
 import { DETECTOR_STRINGS } from './strings.js';
 
 const $ = (id) => document.getElementById(id);

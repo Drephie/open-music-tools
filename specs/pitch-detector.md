@@ -69,7 +69,7 @@ In this browser only: note names, the highlighted key, the microphone sensitivit
 
 ## Built on
 
-- `shared/pitch.js`: the microphone to a note (`startPitch`, the calm smoother for the note at the top; the line uses every frame, with only strays left out, so vibrato shows). The line and the keys' names are `pitch-detector/trace.js`, tested by `tests/pitch-detector.html` (also from the terminal) *(at build time)*.
+- `shared/pitch.js`: the microphone to a note (`startPitch`, the calm smoother for the note at the top; the line uses every frame, with only strays left out, so vibrato shows). The line and the keys' names are `pitch-detector/trace.js` (moved to `shared/pitch-line.js` for Pitch Training, with the graph as `shared/ui/pitch-graph.js`), tested by `tests/pitch-detector.html` (also from the terminal) *(at build time)*.
 - `shared/theory.js`: note names and the keys' spelling (`commonNoteName`, `spellOnLetter`, the keys).
 - `shared/sound.js` and Tone.js 14.8.49: the piano for the notes you tap (the first Phase 3 tool that makes sound).
 - `shared/ui/` for the page, windows, dropdowns, themes and translations; the drawn ♯ and ♭ (`accidentals.js`).

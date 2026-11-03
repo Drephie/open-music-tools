@@ -1,5 +1,7 @@
-/* pitch-detector/trace.js: the line of the voice over time, and the names on
- * the piano keys (spec: specs/pitch-detector.md). Pure: no DOM, no Web Audio.
+/* shared/pitch-line.js: the line of the voice over time, and the names on
+ * the piano keys, for the tools that draw a voice on a graph (the Pitch
+ * Detector, Pitch Training; specs/pitch-detector.md). Moved from
+ * pitch-detector/trace.js for Pitch Training. Pure: no DOM, no Web Audio.
  * Tested by tests/pitch-detector.html and tests/tools/run-pitch-detector-test.js.
  *
  *   createTrace({ seconds = 120, rate = 50 })
@@ -56,7 +58,7 @@
  *   KEY_CHOICES  ['none', '0_maj', ..., '11_maj', '0_min', ..., '11_min']
  *   keyLabel(value, solfege) -> { root, type } ('Bb', 'maj') for the list, or null for 'none'
  */
-import { parseKey, keyRootName, tonicLetterIdx, spellOnLetter, MAJOR_SCALE_STEPS, MINOR_SCALE_STEPS, LETTER_PC, LETTERS, SOLFEGE_OF } from '../shared/theory.js';
+import { parseKey, keyRootName, tonicLetterIdx, spellOnLetter, MAJOR_SCALE_STEPS, MINOR_SCALE_STEPS, LETTER_PC, LETTERS, SOLFEGE_OF } from './theory.js';
 
 const JUMP = 2.5;          // half steps between neighbouring points that still count as one movement
 const OCTAVE_NEAR = 0.75;  // half steps: a point this near an octave from the line is an octave slip...

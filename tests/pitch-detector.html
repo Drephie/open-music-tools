@@ -17,7 +17,7 @@
   </style>
 </head>
 <body>
-  <h1>pitch-detector/trace.js tests</h1>
+  <h1>Pitch Detector tests (shared/pitch-line.js)</h1>
   <p id="summary">Running…</p>
   <table>
     <thead><tr><th>Check</th><th>Checked</th><th>Result</th></tr></thead>
@@ -26,7 +26,7 @@
   <p>The names on the piano keys for every key, the key list, the line (glitches, breaks, the last 2 minutes), and voice-like tones made here (so their pitch is known) through the pitch engine into the line, as the tool does it. The same checks run from the terminal: <code>tools/run-pitch-detector-test.js</code>.</p>
 
 <script type="module">
-  import * as trace from '../pitch-detector/trace.js';
+  import * as trace from '../shared/pitch-line.js';
   import * as core from '../shared/pitch-worklet.js';
   import { checkDetector } from './pitch-detector-cases.js';
 

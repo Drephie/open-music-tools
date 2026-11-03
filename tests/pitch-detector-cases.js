@@ -1,10 +1,10 @@
 /* tests/pitch-detector-cases.js: known-answer checks for the Pitch Detector's
- * line and key names (pitch-detector/trace.js), and an end-to-end check:
+ * line and key names (shared/pitch-line.js), and an end-to-end check:
  * voice-like tones made here (so their pitch is known) through the pitch
  * engine into the line, as the tool does it.
  *
  *   checkDetector(trace, core) -> rows [{ section, checked, failed, stats, examples }]
- *     trace = pitch-detector/trace.js, core = shared/pitch-worklet.js (without
+ *     trace = shared/pitch-line.js, core = shared/pitch-worklet.js (without
  *     it, the end-to-end check is left out)
  *
  * Used by tests/pitch-detector.html and tests/tools/run-pitch-detector-test.js.
