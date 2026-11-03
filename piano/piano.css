@@ -42,7 +42,7 @@ body.phone, body.compact { --fx: min(var(--frame-sides), 8px); --fy-top: min(var
 
 /* --- The bar: chord name and controls --- */
 .pbar { position: relative; z-index: 5; display: flex; align-items: center; gap: 12px 20px; }
-.readout { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 16px; opacity: 0.55; transition: opacity 1.5s ease-out; }
+.readout { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 16px; opacity: 0.8; transition: opacity 1.5s ease-out; }
 .readout.lit { opacity: 1; transition: none; }
 .chord-big { flex: none; font-family: var(--font-display); font-size: clamp(56px, 7vw, 96px); font-weight: 800; letter-spacing: -0.02em; line-height: 1; white-space: nowrap; color: var(--color-title); }
 .chord-big .acc { font-size: 0.6em; position: relative; top: -0.55em; }
@@ -109,7 +109,7 @@ body.phone, body.compact { --fx: min(var(--frame-sides), 8px); --fy-top: min(var
   background: var(--color-right); box-shadow: 0 0 0 2px var(--key-black-text), 0 0 10px var(--color-right);
 }
 .kname { white-space: nowrap; }
-.kletter { position: absolute; top: 22px; font-size: 11px; opacity: 0.55; }
+.kletter { position: absolute; top: 22px; font-size: 11px; opacity: 0.9; }
 .key.black .kletter { top: 20px; font-size: 10px; }
 .loading {
   position: absolute; top: 0; left: 0; right: 0; z-index: 4; margin: 0; padding: 8px 12px; text-align: center; pointer-events: none;

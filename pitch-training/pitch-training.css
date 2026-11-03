@@ -26,7 +26,7 @@
 .step-btn:disabled { opacity: 0.35; cursor: default; }
 .start-note { min-width: 62px; padding: 0 4px; display: inline-flex; align-items: center; justify-content: center; border-left: 1px solid var(--border-panel) !important; border-right: 1px solid var(--border-panel) !important; }
 .start-note .acc { width: 0.36em; height: 0.58em; margin: -0.3em 0 0 0.04em; }
-.start-note .oct { font-size: 0.62em; margin: 0.35em 0 0 0.08em; opacity: 0.7; }
+.start-note .oct { font-size: 0.62em; margin: 0.35em 0 0 0.08em; opacity: 0.85; }
 .stepper button:focus-visible { outline: 2px solid var(--color-right); outline-offset: -3px; }
 .stepper button:active:not(:disabled) { background: var(--color-select-hover); }
 

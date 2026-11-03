@@ -162,6 +162,8 @@
     .ui-col-label { font-size: 11px; font-weight: bold; }
     .ui-col-label.left { color: var(--color-left); }
     .ui-col-label.right { color: var(--color-right); }
+    /* Light themes: the left accent is too light for small text on their panels. */
+    body:is([data-theme="pink"], [data-theme="snap"]) .ui-col-label.left { color: color-mix(in srgb, var(--color-left) 50%, var(--color-text)); }
     .slider-row { display: flex; align-items: center; gap: 5px; }
     .slider-tag { font-size: 10px; width: 15px; }
 
@@ -179,7 +181,7 @@
     #boot-step-1, #boot-step-2 { display: flex; flex-direction: column; gap: 15px; }
     .about-text { font-size: 15px; line-height: 1.6; padding: 10px; margin: 0; }
     .about-text a { color: var(--color-right); font-weight: bold; }
-    .about-credits { font-size: 12px; line-height: 1.5; padding: 0 10px 10px; margin: 0; opacity: 0.75; }
+    .about-credits { font-size: 13px; line-height: 1.5; padding: 0 10px 10px; margin: 0; color: var(--color-text-inactive); }
     .about-credits a { color: var(--color-right); }
 
     button.start-btn { padding: 15px 40px; font-size: 20px; font-weight: 700; cursor: pointer; background: transparent; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); color: var(--color-text); transition: all 0.3s ease; font-family: var(--font-main); backdrop-filter: blur(5px); }
@@ -191,7 +193,7 @@
     #patreon-nag h2 { border: none; font-family: var(--font-display); font-size: 28px; padding-bottom: 5px; color: var(--color-title); }
     #patreon-nag .nag-body { font-size: 16px; margin-top: 0; color: var(--color-text); }
     #nag-close { position: absolute; top: 10px; right: 14px; z-index: 2; }
-    .patreon-glow-btn { background: #ff424d !important; color: white !important; border: none !important; font-weight: bold !important; padding: 15px !important; margin: 15px 0 !important; box-shadow: 0 4px 20px rgba(255, 66, 77, 0.4) !important; font-size: 16px !important; transition: transform 0.2s !important; text-decoration: none; }
+    .patreon-glow-btn { background: var(--color-patreon) !important; color: var(--color-patreon-text) !important; border: none !important; font-weight: bold !important; padding: 15px !important; margin: 15px 0 !important; box-shadow: 0 4px 20px rgba(255, 66, 77, 0.4) !important; font-size: 19px !important; transition: transform 0.2s !important; text-decoration: none; }
     .patreon-glow-btn:hover { transform: scale(1.05); box-shadow: 0 4px 30px rgba(255, 66, 77, 0.6) !important; }
 
     .modifier-list { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border: 1px solid var(--border-panel); }
