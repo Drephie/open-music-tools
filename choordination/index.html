@@ -107,7 +107,7 @@
     body[data-theme="pink"] .select-items { border-radius: 18px; }
     body[data-theme="pink"] .pad, body[data-theme="pink"] #sustain-latch,
     body[data-theme="pink"] #touch-record-btn,
-    body[data-theme="pink"] #touch-settings-btn { border-radius: 24px; }
+    body[data-theme="pink"] :is(#touch-settings-btn, #touch-home-btn) { border-radius: 24px; }
     body[data-theme="pink"] #ui-edit-bar { border-radius: 26px; border: 2px solid var(--border-panel); }
     body[data-theme="pink"] .tutorial-content li { border-radius: 14px; }
 
@@ -184,7 +184,7 @@
     .tutorial-content h3 { margin: 15px 0 5px 0; color: var(--color-right); font-size: 18px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); }
     /* Modal titles must stay solid — the tutorial-content gradient above otherwise fades them to transparent. */
     .tutorial-content .modal-header h3 { color: var(--color-title); margin: 0; padding-bottom: 0; border-bottom: none; }
-    .tutorial-content ul { padding-left: 20px; margin: 5px 0; }
+    .tutorial-content ul { list-style: none; padding-left: 0; margin: 5px 0; }
     .tutorial-content li { font-size: 15px; line-height: 1.5; margin-bottom: 8px; background: color-mix(in srgb, var(--color-text) 6%, transparent); padding: 10px 12px; border-radius: var(--radius-control); }
     .tutorial-content a { color: var(--color-right); font-weight: bold; }
     .tutorial-tip { font-size: 12px; margin-top: 15px; color: var(--color-right); }
@@ -220,6 +220,10 @@
     /* --- TOUCH-PADS MODE (accessibility: "Touch Pads (no camera)") --- */
     #touch-ui { position: absolute; inset: 0; z-index: 8; display: none; flex-direction: column; padding-top: calc(8px + var(--frame-top)); box-sizing: border-box; }
     body.touch-mode.engine-on #touch-ui { display: flex; }
+    body.touch-mode.engine-on :is(#patreon-link, #designer-credit) { display: none; }
+    .home-link { text-decoration: none; }
+    .home-link svg { width: 22px; height: 22px; }
+    #touch-home-btn { display: inline-flex; align-items: center; justify-content: center; }
     #chord-banner { text-align: center; min-height: 58px; padding: 4px 90px 2px; transition: opacity 0.5s ease; }
     #chord-banner .cb-name { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--color-title); text-shadow: 0 0 14px color-mix(in srgb, var(--color-left) 60%, transparent); letter-spacing: 0.02em; }
     #chord-banner .cb-notes { font-family: var(--font-main); font-size: 14px; color: var(--color-text); opacity: 0.8; letter-spacing: 0.06em; margin-top: 2px; }
@@ -232,7 +236,7 @@
     #touch-bottom { display: flex; gap: 10px; padding: 8px 12px calc(10px + env(safe-area-inset-bottom) + var(--frame-bottom)); }
     #sustain-latch { flex: 1; min-height: 52px; border-radius: 12px; border: 1px solid var(--color-left); background: transparent; color: var(--color-left); font-family: var(--font-main); font-weight: 700; font-size: 16px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     #sustain-latch.latched { background: var(--color-left); color: var(--color-text-pinched); box-shadow: 0 0 var(--shadow-blur) var(--color-left); }
-    #touch-record-btn, #touch-settings-btn { min-width: 56px; min-height: 52px; border-radius: 12px; border: 1px solid var(--border-panel); background: var(--color-panel); color: var(--color-text); font-size: 20px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    #touch-record-btn, #touch-settings-btn, #touch-home-btn { min-width: 56px; min-height: 52px; border-radius: 12px; border: 1px solid var(--border-panel); background: var(--color-panel); color: var(--color-text); font-size: 20px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     #touch-record-btn.recording { color: var(--color-warn-end); border-color: var(--color-warn-end); animation: recblink 1.2s infinite; }
 
     #rotate-overlay { position: fixed; inset: 0; z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: var(--bg-overlay); backdrop-filter: blur(12px); text-align: center; font-family: var(--font-main); padding: 30px; box-sizing: border-box; }
@@ -293,7 +297,7 @@
       .pad { min-height: 40px; font-size: 14px; border-radius: 10px; }
       #touch-bottom { padding: 6px 10px calc(6px + env(safe-area-inset-bottom) + var(--frame-bottom)); }
       #sustain-latch { min-height: 42px; font-size: 13px; }
-      #touch-record-btn, #touch-settings-btn { min-width: 46px; min-height: 42px; font-size: 16px; }
+      #touch-record-btn, #touch-settings-btn, #touch-home-btn { min-width: 46px; min-height: 42px; font-size: 16px; }
     }
   </style>
 </head>
@@ -314,6 +318,7 @@
   <div id="chord-live" class="visually-hidden" role="status" aria-live="polite"></div>
 
   <div id="top-right-menu">
+    <a class="menu-btn icon-btn home-link" href="../" data-i18n-aria="home" aria-label="Home: all the tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg></a>
     <button id="record-btn" class="menu-btn" data-i18n-aria="recordAria" aria-label="Record audio">REC</button>
     <button id="tutorial-toggle" class="menu-btn icon-btn" data-i18n-aria="helpAria" aria-label="How to play">
       <span class="circled-question" aria-hidden="true">?</span>
@@ -616,6 +621,7 @@
     <div id="touch-bottom">
       <button id="sustain-latch" data-i18n="sustainLatch" aria-pressed="false">SUSTAIN</button>
       <button id="touch-record-btn" data-i18n-aria="recordAria" aria-label="Record audio"></button>
+      <a id="touch-home-btn" class="home-link" href="../" data-i18n-aria="home" aria-label="Home: all the tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg></a>
       <button id="touch-settings-btn" data-i18n-aria="touchSettingsAria" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
   </div>
@@ -1088,7 +1094,10 @@
     bootStep2.style.display = step === 2 ? 'flex' : 'none';
     bootTitle.innerHTML = step === 1 ? t('bootWelcome') : t('howToPlay');
     // Never steal focus on initial page load; only on user-driven step changes.
-    if (focus) (step === 1 ? bootContinueBtn : startBtn).focus();
+    // Either way the window opens at its top (focus would scroll it to the button).
+    if (focus) (step === 1 ? bootContinueBtn : startBtn).focus({ preventScroll: true });
+    bootModal.scrollTop = 0;
+    requestAnimationFrame(() => { bootModal.scrollTop = 0; });
   }
 
   // --- TUTORIAL TEXT ---
@@ -1584,7 +1593,6 @@
       <h1 class="brand-title">CHOORDINATION</h1>
       <h2 class="error-title">${t(titleKey)}</h2>
       <p class="error-body">${t(bodyKey)}</p>
-      ${err ? `<p class="error-detail">${escapeHtml(err.message || err)}</p>` : ''}
       <div class="error-actions"></div>
     </div>`;
     const actions = uiLayer.querySelector('.error-actions');
@@ -1596,11 +1604,16 @@
       actions.appendChild(b);
       return b;
     };
+    if (err) console.warn('Choordination:', err);
     const retryBtn = mk(t('retry'), retryFn);
-    // On camera trouble, offer the fitting no-camera fallback: touch pads on
-    // touchscreens, keyboard mode elsewhere.
-    if (offerKeyboard) mk(IS_MOBILE ? t('useTouch') : t('useKeyboard'), IS_MOBILE ? switchToTouchMode : switchToKeyboardMode);
-    retryBtn.focus();
+    // On camera trouble, offer the fitting no-camera fallback (touch pads on
+    // touchscreens, keyboard mode elsewhere) as the main button: Retry rarely
+    // helps once the camera was refused.
+    if (offerKeyboard) {
+      const way = mk(IS_MOBILE ? t('useTouch') : t('useKeyboard'), IS_MOBILE ? switchToTouchMode : switchToKeyboardMode);
+      way.classList.add('boot-cta');
+      way.focus();
+    } else retryBtn.focus();
   }
   function switchToNoCameraMode(value) {
     accMode.value = value;
