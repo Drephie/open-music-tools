@@ -71,8 +71,6 @@
 .go-btn.on .stop-icon { display: block; }
 
 /* Settings: two choices side by side where they are short. */
-.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
-.pair .control-group { min-width: 0; }
 .unit { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: 0.75; }
 
 /* The microphone's level now, and the mark where the sensitivity starts (-70..-10 dBFS). */
