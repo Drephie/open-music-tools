@@ -19,26 +19,26 @@
 }
 .beat-dot[data-level="strong"]::before { width: 34px; height: 34px; background: var(--color-left); }
 .beat-dot[data-level="silent"]::before { border: 2px dashed var(--color-text-inactive); }
-.beat-dot.lit::before { background: var(--color-right); border-color: var(--color-right); box-shadow: 0 0 18px var(--color-right); animation: beat-pop 0.16s ease-out; }
-.beat-dot[data-level="silent"].lit::before { background: transparent; border: 2px dashed var(--color-right); box-shadow: 0 0 12px var(--color-right); }
+.beat-dot.lit::before { background: var(--color-right); border-color: var(--color-right); box-shadow: 0 0 14px color-mix(in srgb, var(--color-right) 70%, transparent); animation: beat-pop 0.16s ease-out; }
+.beat-dot[data-level="silent"].lit::before { background: transparent; border: 2px dashed var(--color-right); box-shadow: none; }
 @keyframes beat-pop { from { transform: translate(-50%, -50%) scale(1.45); } to { transform: translate(-50%, -50%) scale(1); } }
 .beat-dot:focus-visible { outline: 2px solid var(--color-right); outline-offset: -2px; }
-.hint { margin: -6px 0 0; font-size: 12px; color: color-mix(in srgb, var(--color-text) 65%, transparent); }
+.hint { margin: -6px 0 0; font-size: 13px; color: var(--color-text-inactive); }
 
 /* The tempo number is an input you can type into (its width follows the digits, set in JS). */
 .tempo { display: flex; flex-direction: column; align-items: center; }
 .tempo-number { display: flex; flex-direction: column; align-items: center; }
 .bpm-input {
   width: 3.3ch; padding: 0; margin: 0; border: none; border-bottom: 2px solid transparent; border-radius: 0;
-  background: transparent; color: var(--color-text); font-family: var(--font-main); font-weight: 900;
-  font-size: clamp(76px, 24vw, 128px); line-height: 1; text-align: center;
+  background: transparent; color: var(--color-text); font-family: var(--font-num); font-weight: 800; letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums; font-size: clamp(76px, 24vw, 128px); line-height: 1; text-align: center;
   -moz-appearance: textfield; appearance: textfield;
 }
 .bpm-input::-webkit-outer-spin-button, .bpm-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .bpm-input:focus { outline: none; border-bottom-color: var(--color-right); }
-.bpm-unit { font-size: 14px; font-weight: 700; letter-spacing: 3px; color: var(--color-text-inactive); }
-.tempo-name { margin: 8px 0 0; font-size: 15px; min-height: 1.4em; }
-.tempo-word { color: var(--color-right); }
+.bpm-unit { font-size: 14px; font-weight: 700; letter-spacing: 0.12em; color: var(--color-text-inactive); }
+.tempo-name { margin: 8px 0 0; font-size: 16px; min-height: 1.4em; }
+.tempo-word { color: var(--color-right); font-weight: 700; }
 
 .tempo-row { display: flex; align-items: center; gap: 14px; width: 100%; max-width: 460px; }
 .big-row { display: flex; gap: 12px; width: 100%; max-width: 460px; }
@@ -46,9 +46,9 @@
 .big-btn svg { width: 22px; height: 22px; }
 #start-btn .stop-icon, #start-btn.playing .play-icon { display: none; }
 #start-btn.playing .stop-icon { display: block; }
-#start-btn.playing { box-shadow: 0 0 22px color-mix(in srgb, var(--color-right) 60%, transparent); }
+#start-btn.playing { box-shadow: 0 8px 22px -8px color-mix(in srgb, var(--color-primary) 80%, transparent); }
 #tap-btn.tapped { animation: tap-flash 0.18s ease-out; }
-@keyframes tap-flash { from { background: var(--color-right); color: var(--color-text-pinched); } }
+@keyframes tap-flash { from { background: var(--color-left); color: var(--color-text-pinched); } }
 
 .met-settings { padding-top: 6px; padding-bottom: 14px; }
 /* Dropdowns sit under their label; on phones the two share one row. */
@@ -57,30 +57,27 @@
 .setting-row.stacked .custom-select { min-width: 0; }
 .stepper { display: flex; align-items: center; gap: 10px; }
 .round-btn.small { width: 40px; height: 40px; font-size: 22px; }
-.stepper output { min-width: 2ch; text-align: center; font-size: 22px; font-weight: 900; }
+.stepper output { min-width: 2ch; text-align: center; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 24px; font-weight: 700; }
 
 /* Volume: 0–200%. Above 100% the track, thumb, number and note go from
    --color-warn-start to --color-warn-end (set in JS). */
 .volume { padding-top: 12px; border-top: 1px solid color-mix(in srgb, var(--border-panel) 50%, transparent); }
 .volume-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 14px; }
 .volume-head > label { margin-right: auto; }
-#volume-out { font-size: 18px; font-weight: 900; color: var(--vol-color, var(--color-text)); }
+#volume-out { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 19px; font-weight: 700; color: var(--vol-color, var(--color-text)); }
 .volume-track { position: relative; padding-bottom: 18px; }
 .volume-track .range { display: block; position: relative; z-index: 1; }
 .volume-mark { position: absolute; left: 50%; top: -6px; width: 2px; height: 20px; margin-left: -1px; background: var(--color-text-inactive); }
-.volume-mark-label { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); font-size: 11px; color: var(--color-text-inactive); }
+.volume-mark-label { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); font-size: 12px; color: var(--color-text-inactive); }
 .volume-note { font-size: 13px; font-weight: 700; color: var(--vol-color); }
 
-body[data-theme="retro"] .hint, body[data-theme="retro"] .tempo-name { font-size: 20px; }
-body[data-theme="retro"] .bpm-unit, body[data-theme="retro"] .volume-note, body[data-theme="retro"] .volume-mark-label { font-size: 17px; }
-body[data-theme="retro"] .big-btn { font-size: 26px; }
 /* Phones: the whole Metronome fits on one screen (about 375 × 667 and up).
    The number and the big buttons grow with the screen's height. */
 @media (max-width: 600px) {
   .met { gap: 8px; }
   .met-main { gap: clamp(5px, 1dvh, 12px); }
-  /* Line heights are pinned: some theme fonts (Baloo 2) have very tall ones. */
-  .hint { margin: -2px 0 0; font-size: 11px; line-height: 1.2; }
+  /* Line heights are pinned: theme fonts differ a lot in height (Kalam, Literata). */
+  .hint { margin: -2px 0 0; font-size: 12px; line-height: 1.25; }
   .tempo-number { flex-direction: row; align-items: baseline; gap: 6px; }
   .bpm-input { font-size: clamp(50px, 10dvh, 112px); height: 1.05em; }
   .bpm-unit { font-size: 13px; letter-spacing: 2px; }
@@ -93,18 +90,14 @@ body[data-theme="retro"] .big-btn { font-size: 26px; }
   .select-pair { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); column-gap: 10px; }
   .select-pair > .setting-row + .setting-row { border-top: none; }
   .setting-row.stacked { padding: 8px 0; gap: 5px; }
-  .setting-row.stacked > label { font-size: 11px; line-height: 1.2; }
+  .setting-row.stacked > label { font-size: 13px; line-height: 1.2; }
   .setting-label, .stepper output, #volume-out { line-height: 1.2; }
-  .select-pair .select-selected { padding: 7px 10px; font-size: 13px; line-height: 1.2; }
+  .select-pair .select-selected { padding: 10px 30px 10px 12px; font-size: 14px; line-height: 1.2; }
+  .select-pair .select-selected:after { right: 12px; }
   .volume { padding-top: 8px; }
   .volume-head { margin-bottom: 10px; }
   .volume-track { padding-bottom: 14px; }
   .volume-mark-label { top: 14px; font-size: 10px; }
-  body[data-theme="retro"] .hint { font-size: 15px; line-height: 1.1; }
-  body[data-theme="retro"] .tempo-name { font-size: 17px; line-height: 1.2; }
-  body[data-theme="retro"] .setting-row.stacked > label { font-size: 15px; line-height: 1.1; }
-  body[data-theme="retro"] .select-pair .select-selected { font-size: 17px; line-height: 1.1; }
-  body[data-theme="retro"] .big-btn { font-size: 24px; }
 }
 
 body[data-theme="pink"] .beat-dot[data-level="strong"]::before { box-shadow: 0 2px 8px color-mix(in srgb, var(--color-left) 50%, transparent); }

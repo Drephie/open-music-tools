@@ -7,7 +7,7 @@
 .custom-select { position: relative; min-width: 0; font-family: var(--font-main); font-size: 15px; font-weight: 600; user-select: none; }
 .custom-select select { display: none; }
 .select-selected {
-  position: relative; box-sizing: border-box; min-height: 44px; padding: 10px 36px 10px 14px; line-height: 1.25;
+  position: relative; box-sizing: border-box; display: flex; align-items: center; min-height: 44px; padding: 10px 36px 10px 14px; line-height: 1.25;
   background-color: var(--bg-select); color: var(--color-select-text);
   border: var(--border-width, 1px) solid var(--border-panel); border-radius: var(--radius-control, 10px);
   cursor: pointer; overflow-wrap: break-word; transition: border-color 0.15s ease-out, background-color 0.15s ease-out;
