@@ -46,6 +46,8 @@ document.addEventListener('click', () => closeAllSelect(null));
 export function buildCustomSelect(container) {
   const sel = container.querySelector('select');
   if (!sel) return;
+  // Rebuilt while in use (e.g. a new language chosen in it): focus stays on it.
+  const hadFocus = container.contains(document.activeElement);
   container.querySelectorAll('.select-selected, .select-items').forEach(n => n.remove());
 
   const labelEl = container.closest('.control-group')?.querySelector('label');
@@ -158,6 +160,7 @@ export function buildCustomSelect(container) {
 
   container.appendChild(trigger);
   container.appendChild(list);
+  if (hadFocus) trigger.focus();
 }
 export function setupCustomSelects() {
   document.querySelectorAll('.custom-select').forEach(buildCustomSelect);

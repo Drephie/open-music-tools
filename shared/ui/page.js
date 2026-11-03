@@ -24,7 +24,8 @@
  *                     them, and when the browser's Back or Forward button
  *                     brings this page back from its memory (it may show an
  *                     older choice). apply must do nothing if nothing changed.
- *   closeOnBackdrop(modals)     a click outside the open window closes it
+ *   closeOnBackdrop(modals)     a tap outside the open window closes it, and only
+ *                               that: the page under the finger doesn't get the tap
  *                               (modals: a shared/ui/modal.js manager)
  *   createSupportPrompt({ dialog, modals, t, isBusy, storageKey, idleMs, everyMs, waitSeconds })
  *     The Patreon window. When the page has been left untouched for idleMs
@@ -159,8 +160,22 @@ export function createSupportPrompt({
 }
 
 export function closeOnBackdrop(modals) {
-  document.addEventListener('pointerdown', (e) => {
+  // Caught first (window, capture phase), so a piano key, a beat dot or Start
+  // under the finger isn't pressed too; the click that follows is dropped.
+  let dropClick = false;
+  window.addEventListener('pointerdown', (e) => {
+    dropClick = false;
     const open = modals.current();
-    if (open && open.style.display === 'flex' && !open.contains(e.target)) modals.hideAll();
-  });
+    if (!open || open.style.display !== 'flex' || open.contains(e.target)) return;
+    modals.hideAll();
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    dropClick = true;
+  }, true);
+  window.addEventListener('click', (e) => {
+    if (!dropClick) return;
+    dropClick = false;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+  }, true);
 }
