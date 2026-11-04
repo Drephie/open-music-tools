@@ -339,6 +339,49 @@ function tick(nowMs) {
   draw();
 }
 
+// --- THE CHORD'S WAVE across the screen ---
+// Drawn from the notes playing (the sum of their waves, slowed right down), so
+// every chord has its own shape; it glides to the next chord and settles into
+// a calm line when nothing plays. Still, not moving, with reduce motion on.
+const waveCanvas = $('wave'), wctx = waveCanvas.getContext('2d');
+const stillWave = matchMedia('(prefers-reduced-motion: reduce)');
+const waveNotes = []; // { f, a } shown now, low to high
+let waveLevel = 0, waveTime = 0, waveLast = 0;
+function sizeWave() { const r = devicePixelRatio || 1; waveCanvas.width = innerWidth * r; waveCanvas.height = innerHeight * r; }
+function drawWave(now) {
+  requestAnimationFrame(drawWave);
+  const dt = Math.min(0.05, Math.max(0, (now - waveLast) / 1000)); waveLast = now;
+  const target = sounding ? sounding.freqs : [];
+  waveLevel += ((sounding ? 1 : 0) - waveLevel) * Math.min(1, dt * (sounding ? 7 : 2.2));
+  for (let i = 0; i < Math.max(target.length, waveNotes.length); i++) {
+    const n = waveNotes[i] || (waveNotes[i] = { f: target[i] || 220, a: 0 });
+    if (target[i]) n.f += (target[i] - n.f) * Math.min(1, dt * 9); // glides like the Dreamy synth
+    n.a += ((target[i] ? 1 : 0) - n.a) * Math.min(1, dt * 7);
+  }
+  if (!stillWave.matches) waveTime += dt;
+  const W = waveCanvas.width, H = waveCanvas.height, r = devicePixelRatio || 1;
+  wctx.clearRect(0, 0, W, H);
+  const low = Math.min(...waveNotes.filter((n) => n.a > 0.05).map((n) => n.f), 110);
+  const span = 2.5 / low, drift = waveTime * 0.004; // 2.5 periods of the lowest note, drifting slowly
+  const sum = waveNotes.reduce((s, n) => s + n.a, 0) || 1;
+  const amp = H * (0.012 + 0.13 * waveLevel), mid = H * 0.5;
+  wctx.beginPath();
+  for (let x = 0; x <= W; x += 3 * r) {
+    const t = (x / W) * span + drift;
+    let y = 0;
+    for (const n of waveNotes) y += n.a * Math.sin(2 * Math.PI * n.f * t);
+    // a little movement even when quiet, so the line breathes
+    y = y / sum + (1 - waveLevel) * Math.sin(2 * Math.PI * (x / W * 2 + waveTime * 0.25));
+    x ? wctx.lineTo(x, mid + y * amp) : wctx.moveTo(x, mid + y * amp);
+  }
+  wctx.lineJoin = 'round'; wctx.lineCap = 'round';
+  wctx.strokeStyle = look.right; wctx.shadowColor = look.right;
+  wctx.globalAlpha = 0.25 + 0.65 * waveLevel;
+  wctx.lineWidth = 3 * r; wctx.shadowBlur = (look.blur + 10) * r;
+  wctx.stroke();
+  wctx.globalAlpha = 1; wctx.shadowBlur = 0;
+}
+
 // --- DRAWING THE HANDS AND WHAT THEY SHOW ---
 const BONES = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
 let look = {};
@@ -558,5 +601,8 @@ startCamera(); // the camera is the way to play: it starts at once (no-camera on
 if (!saved.seenHow) { openHow(); save(); } // How to play, on the first visit only
 sizeCanvas();
 addEventListener('resize', sizeCanvas);
+addEventListener('resize', sizeWave);
+sizeWave();
 requestAnimationFrame(tick);
+requestAnimationFrame(drawWave);
 registerHubWorker('../');

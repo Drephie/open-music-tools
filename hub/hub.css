@@ -57,9 +57,10 @@ body:is([data-theme="y2k"], [data-theme="retro"]) .hub-logo { color: var(--color
 .featured-art .wheel { stroke: color-mix(in srgb, var(--color-text) 14%, transparent); }
 .featured-art .wheel-on.left { stroke: var(--color-left); }
 .featured-art .wheel-on.right { stroke: var(--color-right); }
-/* Chordigits: its seven chord numbers, one lit. */
-.featured-art .tile { fill: color-mix(in srgb, var(--color-text) 14%, transparent); }
-.featured-art .tile-on { fill: var(--color-right); }
+/* Chordigits: the wave of a chord (C major), as it draws across the tool's screen. */
+.featured-art :is(.wave, .wave-glow) { fill: none; stroke: var(--color-right); stroke-linecap: round; stroke-linejoin: round; }
+.featured-art .wave { stroke-width: 4; }
+.featured-art .wave-glow { stroke-width: 12; opacity: 0.18; }
 
 /* Name and description at the foot of each card, the drawing at the top. */
 .tool-grid > li:not(.featured) .tool-icon { margin-bottom: auto; }
