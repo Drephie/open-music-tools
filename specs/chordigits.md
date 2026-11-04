@@ -1,6 +1,6 @@
 # Chordigits: spec
 
-**Status:** redesign approved by Drephie, 2026-11-04. Drephie's camera test (2026-11-04): the design works; the thumb misfired on I and II, so it now counts only with two or more other fingers. The first version (approved 2026-11-04) was Choordination with a new way to play; Drephie found it looked like Choordination and the donuts useless. This version takes ideas from Eric Wei's Gesture Synth (tilt for major or minor, hand height for the octave, a soft gliding synth) without copying it, and looks like the hub's other tools. Items marked *(Claude's pick)* weren't asked: say if you want them changed.
+**Status:** redesign approved by Drephie, 2026-11-04. Drephie's camera test (2026-11-04): the design works; the thumb misfired on I and II, so it now counts only with two or more other fingers; Drephie's re-test: it works. The first version (approved 2026-11-04) was Choordination with a new way to play; Drephie found it looked like Choordination and the donuts useless. This version takes ideas from Eric Wei's Gesture Synth (tilt for major or minor, hand height for the octave, a soft gliding synth) without copying it, and looks like the hub's other tools. Items marked *(Claude's pick)* weren't asked: say if you want them changed.
 
 ## What it is for
 
