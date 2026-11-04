@@ -1,0 +1,2473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Chordigits</title>
+  <meta name="description" content="Chordigits: count chords on your fingers, I to VII, and hear them — a free, open-source, on-device browser instrument for singers and music-theory learners.">
+  <meta property="og:title" content="Chordigits">
+  <meta property="og:description" content="Count chords on your fingers, right in your browser. Free, open source, 100% on-device.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Chordigits">
+  <meta name="twitter:description" content="Count chords on your fingers, right in your browser. Free, open source, 100% on-device.">
+  <meta name="theme-color" content="#0f1419">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" integrity="sha384-c6Uo4N9c3SOEigMVzP6IshUG1wQ5uMp3xeoQFiHWAQ86joWdgyajkvopySyKy/Z6" crossorigin="anonymous" defer></script>
+  <link rel="stylesheet" href="../shared/fonts/fonts.css">
+
+  <link rel="stylesheet" href="../shared/ui/themes.css">
+  <link rel="stylesheet" href="../shared/ui/select.css">
+  <style>
+    body { margin: 0; overflow: hidden; background: var(--bg-page); color: var(--color-text); font-family: var(--font-main); transition: all 0.5s ease; }
+    #container { position: relative; width: 100vw; height: 100vh; }
+
+    #media-wrapper {
+      position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 2; overflow: hidden; transition: all 0.5s ease;
+      clip-path: inset(var(--frame-top) var(--frame-sides) var(--frame-bottom) var(--frame-sides) round var(--frame-radius));
+    }
+
+    /* A frame's inner curve matches the picture's (clip-path above): outer radius = picture radius + frame width. */
+    #theme-frame { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 4; box-sizing: border-box; transition: all 0.5s ease; }
+    body[data-theme="y2k"] #theme-frame { border: 1px solid color-mix(in srgb, var(--color-left) 60%, transparent); border-radius: var(--frame-radius); box-shadow: inset 0 0 40px color-mix(in srgb, var(--color-left) 18%, transparent); }
+    body[data-theme="pink"] #theme-frame { border: var(--frame-top) solid var(--border-panel); border-radius: calc(var(--frame-radius) + var(--frame-top)); box-shadow: inset 0 0 26px color-mix(in srgb, var(--color-left) 35%, transparent); }
+    body[data-theme="bw"] #theme-frame { border-top: var(--frame-top) solid #000; border-bottom: var(--frame-bottom) solid #000; }
+    body[data-theme="retro"] #theme-frame { border: var(--frame-top) solid #111; border-radius: calc(var(--frame-radius) + var(--frame-top)); box-shadow: inset 0 0 50px color-mix(in srgb, var(--color-left) 40%, transparent); }
+    /* Rouge: a dark red vignette. Retrosnap: the picture is an instant photo,
+       a paper border with a deeper lip at the bottom, on a faded warm print. */
+    body[data-theme="rouge"] #theme-frame { box-shadow: inset 0 0 140px 30px rgba(42, 6, 16, 0.9); }
+    body[data-theme="snap"] { --frame-top: 12px; --frame-sides: 12px; --frame-bottom: 40px; --frame-radius: 2px; }
+    body[data-theme="snap"] #theme-frame { border-style: solid; border-color: var(--color-panel); border-radius: calc(var(--frame-radius) + var(--frame-top)); border-width: var(--frame-top) var(--frame-sides) var(--frame-bottom); box-shadow: inset 0 0 0 1px rgba(75, 48, 0, 0.18), inset 0 2px 10px rgba(75, 48, 0, 0.25); }
+    /* Light themes: the camera picture sits on the page colour, so their dark text stays readable on it. */
+    body:is([data-theme="pink"], [data-theme="snap"]) #media-wrapper { background: var(--bg-page); }
+
+    #scanlines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--crt-scanline); pointer-events: none; z-index: 5; }
+
+    video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.6; transition: filter 0.5s ease; }
+    body[data-theme="liquid"] video { filter: saturate(1.1) contrast(1.05); }
+    body[data-theme="y2k"] video { filter: saturate(1.5) contrast(1.1); }
+    body[data-theme="pink"] video { filter: saturate(1.45) contrast(1.02) brightness(1.15) hue-rotate(333deg); }
+    body[data-theme="bw"] video { filter: grayscale(1) contrast(1.4); }
+    body[data-theme="retro"] video { filter: sepia(0.8) hue-rotate(80deg) contrast(1.2) brightness(0.9); }
+    body[data-theme="rouge"] video { filter: sepia(0.45) saturate(1.6) hue-rotate(-25deg) contrast(1.15) brightness(0.8); }
+    body[data-theme="snap"] video { filter: sepia(0.35) saturate(1.25) contrast(0.95) brightness(1.1); }
+
+    canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
+
+    /* --- LAYOUT UTILITIES (replaces repeated inline styles) --- */
+    .row { display: flex; gap: 10px; }
+    .row-gap-b { margin-bottom: 10px; }
+    .row-gap-t { margin-top: 10px; }
+    .flex1 { flex: 1; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+    /* --- BRANDING / WATERMARK --- */
+    #chordigits-watermark {
+        position: absolute; top: calc(30px + var(--frame-top)); left: calc(30px + var(--frame-sides)); z-index: 5;
+        /* Never wider than a narrow computer window (it used to stick out below ~430 px). */
+        font-family: var(--font-display); font-size: clamp(16px, 4.5vw, 30px); font-weight: var(--title-weight); line-height: 1;
+        color: var(--color-text); opacity: 0.7; letter-spacing: 0.14em; white-space: nowrap;
+        text-shadow: var(--credit-shadow); transition: opacity 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
+        transform-origin: top left;
+        pointer-events: auto; cursor: pointer;
+    }
+    #chordigits-watermark:hover, #chordigits-watermark:focus-visible { opacity: 1; transform: scale(1.04); }
+    body:is([data-theme="pink"], [data-theme="snap"]) #chordigits-watermark { color: var(--color-title); opacity: 0.9; }
+
+    #patreon-link { position: absolute; bottom: calc(25px + var(--frame-bottom)); left: calc(30px + var(--frame-sides)); z-index: 6; font-size: 14px; font-weight: 600; color: var(--color-text); text-shadow: var(--credit-shadow); transition: all 0.5s ease; }
+    #patreon-link a { color: var(--color-right); text-decoration: none; font-weight: 700; transition: color 0.5s ease;} #patreon-link a:hover { text-decoration: underline; }
+
+    #designer-credit { position: absolute; bottom: calc(25px + var(--frame-bottom)); right: calc(30px + var(--frame-sides)); z-index: 6; font-size: 14px; font-weight: 600; color: var(--color-text); text-shadow: var(--credit-shadow); transition: all 0.5s ease; }
+    #designer-credit a { color: var(--color-right); text-decoration: none; font-weight: 700; transition: color 0.5s ease;} #designer-credit a:hover { text-decoration: underline; }
+
+    #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-overlay); z-index: 10; backdrop-filter: blur(10px); }
+    .loading-text { box-sizing: border-box; max-width: 100%; padding: 0 20px; text-align: center; line-height: 1.5; margin-bottom: 20px; }
+    .boot-logo { width: 190px; height: 190px; margin: 0 auto 6px; animation: logopulse 2.4s ease-in-out infinite; }
+    @keyframes logopulse { 50% { transform: scale(1.06); opacity: 0.82; } }
+    .brand-title { font-family: var(--font-display); font-weight: var(--title-weight); letter-spacing: var(--title-spacing); font-size: clamp(1.5rem, 8.5vw, 3.5rem); line-height: 1.05; margin: 0; color: var(--color-title); white-space: nowrap; }
+    .loading-sub { color: var(--color-text); margin: 0; }
+    .error-title { color: var(--color-right); margin: 20px 0 0; }
+    .error-body { max-width: 540px; line-height: 1.7; font-size: 15px; margin: 12px auto; }
+    .error-detail { font-size: 12px; opacity: 0.6; max-width: 540px; word-break: break-word; margin: 0 auto 10px; }
+    .error-actions { display: flex; gap: 12px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+    .error-actions .settings-action-btn { width: auto; padding: 12px 22px; }
+
+    #top-right-menu { position: absolute; top: calc(20px + var(--frame-top)); right: calc(20px + var(--frame-sides)); z-index: 6; gap: 10px; align-items: center; transition: all 0.5s ease; display: none; }
+
+    .menu-btn { background: var(--color-panel); border: 1px solid var(--border-panel); color: var(--color-btn-text); padding: 8px 16px; min-height: 44px; border-radius: var(--radius-control); cursor: pointer; font-family: var(--font-main); font-weight: 600; backdrop-filter: blur(12px); font-size: 15px; transition: 0.2s; }
+    .menu-btn:hover { background: var(--color-hover); color: var(--color-hover-text); }
+    /* Pink theme: solid candy-pink pill buttons with white text. */
+    body[data-theme="pink"] .menu-btn { background: var(--color-left); border-color: var(--border-panel); color: var(--color-text-pinched); box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--color-left) 60%, transparent); }
+    body[data-theme="pink"] .menu-btn:hover { background: var(--color-right); color: var(--color-text-pinched); }
+    body[data-theme="pink"] .centered-modal { border-radius: 28px; border: 2px solid var(--border-panel); }
+    body[data-theme="pink"] .select-selected, body[data-theme="pink"] .settings-action-btn,
+    body[data-theme="pink"] button.start-btn { border-radius: 999px; }
+    body[data-theme="pink"] .select-items { border-radius: 18px; }
+    body[data-theme="pink"] .pad, body[data-theme="pink"] #sustain-latch,
+    body[data-theme="pink"] #touch-record-btn,
+    body[data-theme="pink"] :is(#touch-settings-btn, #touch-home-btn) { border-radius: 24px; }
+    body[data-theme="pink"] #ui-edit-bar { border-radius: 26px; border: 2px solid var(--border-panel); }
+    body[data-theme="pink"] .tutorial-content li { border-radius: 14px; }
+
+    #record-btn.recording { color: var(--color-warn-end); border-color: var(--color-warn-end); animation: recblink 1.2s infinite; }
+    @keyframes recblink { 50% { opacity: 0.55; } }
+    /* Reduce motion: the logo stays still; recording still shows in red. */
+    @media (prefers-reduced-motion: reduce) {
+      .boot-logo, #record-btn.recording, #touch-record-btn.recording { animation: none; }
+    }
+
+    .icon-btn { padding: 0; width: 44px; height: 44px; border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; }
+    .circled-question { display: inline-block; border: 2px solid currentColor; border-radius: 50%; width: 20px; height: 20px; line-height: 17px; text-align: center; font-weight: bold; font-size: 14px; box-sizing: border-box; }
+
+    /* --- MODALS & SCROLLING --- */
+    .centered-modal {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20;
+        background: var(--color-panel); backdrop-filter: blur(25px); border: 1px solid var(--border-panel);
+        border-radius: 12px; display: none; flex-direction: column; gap: 12px; padding: 25px;
+        box-shadow: 0 10px 50px rgba(0,0,0,0.8); box-sizing: border-box; width: min(390px, calc(100vw - 24px));
+        max-height: 85vh; overflow-y: auto; /* Fixes zoom overflow issue */
+    }
+    body[data-theme="liquid"] .centered-modal { box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+
+    #tutorial-modal, #boot-modal, #patreon-nag, #logo-info-modal { width: 80%; max-width: 600px; gap: 15px; border-radius: 16px; }
+
+    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-panel); padding-bottom: 10px; margin-bottom: 5px; }
+    .modal-header h3, .modal-header h2 { margin: 0; font-family: var(--font-display); font-weight: var(--title-weight); color: var(--color-title); font-size: 21px; line-height: 1.15; text-transform: var(--title-transform); letter-spacing: var(--title-spacing); }
+    .close-btn { background: transparent; border: none; color: var(--color-text); font-size: 26px; font-weight: 400; cursor: pointer; transition: 0.2s; padding: 0 5px; min-width: 44px; min-height: 44px; border-radius: var(--radius-round); }
+    .close-btn:hover { color: var(--color-right); }
+    /* Drawn icons instead of text glyphs: the × and the record dot (a square while recording). */
+    .close-btn { position: relative; font-size: 0 !important; }
+    .close-btn::before, .close-btn::after { content: ''; position: absolute; left: 50%; top: 50%; width: 20px; height: 2px; margin: -1px 0 0 -10px; border-radius: 1px; background: currentColor; transform: rotate(45deg); }
+    .close-btn::after { transform: rotate(-45deg); }
+    #record-btn::before, #touch-record-btn::before { content: ''; display: inline-block; width: 10px; height: 10px; margin-right: 7px; border-radius: 50%; background: var(--color-warn-end); vertical-align: -1px; }
+    :is(#record-btn, #touch-record-btn).recording::before { border-radius: 2px; }
+    #touch-record-btn:empty::before { margin-right: 0; width: 14px; height: 14px; }
+    #touch-settings-btn svg { width: 22px; height: 22px; vertical-align: middle; }
+
+    /* Keep the scrollbar inside the modal's rounded corners so the thumb never pokes out the top/bottom. */
+    .centered-modal { scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: var(--color-left) transparent; }
+    .centered-modal::-webkit-scrollbar { width: 12px; }
+    .centered-modal::-webkit-scrollbar-track { background: transparent; margin: 16px 0; }
+    .centered-modal::-webkit-scrollbar-thumb { background: var(--color-left); border-radius: 6px; border: 3px solid transparent; background-clip: padding-box; }
+
+    .control-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 5px; position: relative; }
+    .menu-divider { border: none; border-top: 1px solid var(--border-panel); opacity: 0.6; margin: 14px 0 12px; }
+    label { font-size: 14px; font-weight: 600; color: var(--color-text); }
+
+    input[type=range] { width: 100%; cursor: pointer; opacity: 0.8; } input[type=range]:hover { opacity: 1; }
+    input[type=range]:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
+
+    .highlight-label { color: var(--color-right); }
+
+    .settings-action-btn { width: 100%; min-height: 44px; padding: 10px; margin-top: 5px; font-family: var(--font-main); font-size: 14px; font-weight: 600; cursor: pointer; background: transparent; color: var(--color-right); border: var(--border-width) solid var(--color-right); border-radius: var(--radius-control); transition: 0.2s; text-align: center; display: inline-block; text-decoration: none; box-sizing: border-box; }
+    .settings-action-btn:hover:not(:disabled) { background: var(--color-left); color: var(--color-text-pinched); }
+    .settings-action-btn:disabled { border-color: var(--color-text-inactive); color: var(--color-text-inactive); cursor: not-allowed; }
+    .settings-action-btn:focus-visible, .menu-btn:focus-visible, .close-btn:focus-visible, button.start-btn:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
+
+    .compact-btn { padding: 6px; font-size: 11px; margin-top: 8px; }
+    .spaced-btn { margin-top: 15px; }
+
+    /* UI-layout modal rows */
+    .ui-cols { display: flex; justify-content: space-between; gap: 15px; margin-top: 4px; }
+    .ui-col { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .ui-col-label { font-size: 11px; font-weight: bold; }
+    .ui-col-label.left { color: var(--color-left); }
+    .ui-col-label.right { color: var(--color-right); }
+    /* Light themes: the left accent is too light for small text on their panels. */
+    body:is([data-theme="pink"], [data-theme="snap"], [data-theme="rouge"]) .ui-col-label.left { color: color-mix(in srgb, var(--color-left) 50%, var(--color-text)); }
+    .slider-row { display: flex; align-items: center; gap: 5px; }
+    .slider-tag { font-size: 10px; width: 15px; }
+
+    .tutorial-content h2 { margin: 0; font-family: var(--font-display); font-weight: var(--title-weight); color: var(--color-title); text-transform: var(--title-transform); border-bottom: 1px solid var(--border-panel); padding-bottom: 15px; text-align: center; font-size: 24px; letter-spacing: var(--title-spacing); }
+    .tutorial-content h3 { margin: 15px 0 5px 0; color: var(--color-right); font-size: 18px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    /* Modal titles must stay solid — the tutorial-content gradient above otherwise fades them to transparent. */
+    .tutorial-content .modal-header h3 { color: var(--color-title); margin: 0; padding-bottom: 0; border-bottom: none; }
+    .tutorial-content ul { list-style: none; padding-left: 0; margin: 5px 0; }
+    .tutorial-content li { font-size: 15px; line-height: 1.5; margin-bottom: 8px; background: color-mix(in srgb, var(--color-text) 6%, transparent); padding: 10px 12px; border-radius: var(--radius-control); }
+    .tutorial-content a { color: var(--color-right); font-weight: bold; }
+    .tutorial-tip { font-size: 12px; margin-top: 15px; color: var(--color-right); }
+    .modal-note { font-size: 12px; color: var(--color-right); line-height: 1.5; margin: 5px 0 0; }
+    .boot-title { font-family: var(--font-display); }
+    /* The welcome windows' Continue and Start: the main action, filled. */
+    .boot-cta { width: auto; min-height: 44px; align-self: flex-end; font-size: 16px; padding: 12px 25px; background: var(--color-primary); color: var(--color-primary-text); border-color: var(--color-primary); }
+    .boot-cta:hover:not(:disabled) { background: color-mix(in srgb, var(--color-primary) 86%, var(--color-text)); color: var(--color-primary-text); }
+    #boot-step-2 { display: flex; flex-direction: column; gap: 15px; }
+    .boot-project { margin: 0; font-size: 14px; line-height: 1.5; color: var(--color-text-inactive); }
+    .boot-project a { color: var(--color-right); }
+    .about-text { font-size: 15px; line-height: 1.6; padding: 10px; margin: 0; }
+    .about-text a { color: var(--color-right); font-weight: bold; }
+    .about-credits { font-size: 13px; line-height: 1.5; padding: 0 10px 10px; margin: 0; color: var(--color-text-inactive); }
+    .about-credits a { color: var(--color-right); }
+
+    button.start-btn { padding: 15px 40px; font-size: 20px; font-weight: 700; cursor: pointer; background: transparent; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); color: var(--color-text); transition: all 0.3s ease; font-family: var(--font-main); backdrop-filter: blur(5px); }
+    button.start-btn:hover { transform: scale(1.03); background: var(--color-hover); border-color: var(--color-right); }
+
+    /* Patreon Overlay — follows the active theme; only the Patreon button keeps
+       its own warm color so it stays the inviting, actionable element. */
+    #patreon-nag { background: var(--color-panel); backdrop-filter: blur(25px); border: 2px solid var(--color-right); box-shadow: 0 0 50px rgba(0, 0, 0, 0.45); text-align: center; }
+    #patreon-nag h2 { border: none; font-family: var(--font-display); font-size: 28px; padding-bottom: 5px; color: var(--color-title); }
+    #patreon-nag .nag-body { font-size: 16px; margin-top: 0; color: var(--color-text); }
+    #nag-close { position: absolute; top: 10px; right: 14px; z-index: 2; }
+    .patreon-glow-btn { background: var(--color-patreon) !important; color: var(--color-patreon-text) !important; border: none !important; font-weight: bold !important; padding: 15px !important; margin: 15px 0 !important; box-shadow: 0 4px 20px rgba(255, 66, 77, 0.4) !important; font-size: 19px !important; transition: transform 0.2s !important; text-decoration: none; }
+    .patreon-glow-btn:hover { transform: scale(1.05); box-shadow: 0 4px 30px rgba(255, 66, 77, 0.6) !important; }
+
+    .modifier-list { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border: 1px solid var(--border-panel); }
+    .modifier-list label { min-height: 40px; font-size: 14px; text-transform: none; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .rec-voice { font-size: 13px; text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .rec-voice input { cursor: pointer; transform: scale(1.2); accent-color: var(--color-left); }
+    .modifier-list input { cursor: pointer; transform: scale(1.2); }
+
+    /* --- TOUCH-PADS MODE (accessibility: "Touch Pads (no camera)") --- */
+    #touch-ui { position: absolute; inset: 0; z-index: 8; display: none; flex-direction: column; padding-top: calc(8px + var(--frame-top)); box-sizing: border-box; }
+    body.touch-mode.engine-on #touch-ui { display: flex; }
+    body.touch-mode.engine-on :is(#patreon-link, #designer-credit) { display: none; }
+    .home-link { text-decoration: none; }
+    .home-link svg { width: 22px; height: 22px; }
+    #touch-home-btn { display: inline-flex; align-items: center; justify-content: center; }
+    #chord-banner { text-align: center; min-height: 58px; padding: 4px 90px 2px; transition: opacity 0.5s ease; }
+    #chord-banner .cb-name { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--color-title); text-shadow: 0 0 14px color-mix(in srgb, var(--color-left) 60%, transparent); letter-spacing: 0.02em; }
+    #chord-banner .cb-notes { font-family: var(--font-main); font-size: 14px; color: var(--color-text); opacity: 0.8; letter-spacing: 0.06em; margin-top: 2px; }
+    #chord-banner.idle { opacity: 0; }
+    #touch-pads { flex: 1; display: flex; gap: 12px; padding: 4px 12px; min-height: 0; }
+    .pad-col { flex: 1; display: grid; gap: 8px; grid-template-columns: repeat(2, 1fr); align-content: stretch; min-height: 0; }
+    .pad { min-height: 48px; min-width: 48px; border-radius: 12px; border: 1px solid var(--border-panel); background: var(--color-panel); color: var(--color-text); font-family: var(--font-main); font-weight: 700; font-size: 17px; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; cursor: pointer; }
+    .pad-root.held { background: var(--color-left); color: var(--color-text-pinched); box-shadow: 0 0 var(--shadow-blur) var(--color-left); }
+    .pad-mod.selected { background: var(--color-right); color: var(--color-text-pinched); box-shadow: 0 0 var(--shadow-blur) var(--color-right); }
+    #touch-bottom { display: flex; gap: 10px; padding: 8px 12px calc(10px + env(safe-area-inset-bottom) + var(--frame-bottom)); }
+    #sustain-latch { flex: 1; min-height: 52px; border-radius: 12px; border: 1px solid var(--color-left); background: transparent; color: var(--color-left); font-family: var(--font-main); font-weight: 700; font-size: 16px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    #sustain-latch.latched { background: var(--color-left); color: var(--color-text-pinched); box-shadow: 0 0 var(--shadow-blur) var(--color-left); }
+    #touch-record-btn, #touch-settings-btn, #touch-home-btn { min-width: 56px; min-height: 52px; border-radius: 12px; border: 1px solid var(--border-panel); background: var(--color-panel); color: var(--color-text); font-size: 20px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    #touch-record-btn.recording { color: var(--color-warn-end); border-color: var(--color-warn-end); animation: recblink 1.2s infinite; }
+
+    #rotate-overlay { position: fixed; inset: 0; z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: var(--bg-overlay); backdrop-filter: blur(12px); text-align: center; font-family: var(--font-main); padding: 30px; box-sizing: border-box; }
+    #rotate-overlay .rotate-emoji { width: 108px; height: 72px; color: var(--color-left); }
+    #rotate-overlay h2 { margin: 0; color: var(--color-left); }
+    #rotate-overlay p { margin: 0; max-width: 420px; line-height: 1.6; }
+
+    /* On-canvas widget edit toolbar */
+    #ui-edit-bar { position: absolute; top: calc(20px + var(--frame-top)); left: 50%; transform: translateX(-50%); z-index: 30; display: none; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 12px; width: max-content; max-width: min(92vw, 760px); padding: 10px 16px; background: var(--color-panel); border: 1px solid var(--border-panel); border-radius: 10px; backdrop-filter: blur(12px); box-shadow: 0 8px 30px rgba(0,0,0,0.5); text-align: center; }
+    body.ui-editing #ui-edit-bar { display: flex; }
+    body.ui-editing #top-right-menu, body.ui-editing #chordigits-watermark, body.ui-editing #patreon-link, body.ui-editing #designer-credit { opacity: 0.15; pointer-events: none; }
+    body.ui-editing #overlay { cursor: grab; }
+    #ui-edit-hint { flex: 1 1 260px; min-width: 200px; font-size: 13px; font-weight: 700; color: var(--color-text); letter-spacing: 0.5px; line-height: 1.4; }
+    #ui-edit-bar .menu-btn { flex: none; }
+
+    /* Touch-pads mode: the pads replace the camera stage, and the top menu is
+       replaced by the touch bottom bar. (Full settings stay available on
+       phones in every mode — they are ordinary touch-friendly modals.) */
+    body.touch-mode #webcam, body.touch-mode #overlay { display: none; }
+    body.touch-mode #top-right-menu { display: none !important; }
+
+    /* Phone niceties (any mode) */
+    body.mobile-mode #patreon-link, body.mobile-mode #designer-credit { display: none; }
+    /* Narrow computer windows: the two footer links would meet, so the Patreon one goes a line up. */
+    @media (max-width: 560px) { #patreon-link { bottom: calc(50px + var(--frame-bottom)); } }
+    body.mobile-mode #chordigits-watermark { font-size: 13px; transform: scale(1); letter-spacing: 2px; top: calc(14px + var(--frame-top)); left: calc(14px + var(--frame-sides)); }
+    body.mobile-mode .centered-modal { width: min(480px, 86vw); max-height: 88vh; }
+    @media (orientation: portrait) {
+      body.mobile-mode #rotate-overlay { display: flex; }
+      body.mobile-mode #touch-ui { display: none !important; }
+    }
+
+    /* --- AUTOMATIC SCALING for small screens (phone landscape ≈ ≤520px tall).
+       Shrinks chrome, modals and toolbars so the interface fits the phone;
+       canvas widget/text scaling is handled in JS via uiScale. --- */
+    @media (max-height: 520px) {
+      #chordigits-watermark { font-size: 13px !important; transform: scale(1) !important; letter-spacing: 2px; top: calc(10px + var(--frame-top)); left: calc(12px + var(--frame-sides)); }
+      #top-right-menu { top: calc(10px + var(--frame-top)); right: calc(10px + var(--frame-sides)); gap: 6px; }
+      .menu-btn { padding: 6px 10px; font-size: 13px; }
+      .icon-btn { width: 44px; height: 44px; }
+      .centered-modal { padding: 14px 16px; gap: 8px; max-height: 92vh; width: min(440px, 92vw); font-size: 13px; }
+      .modal-header h2, .modal-header h3 { font-size: 15px; }
+      .modal-header { padding-bottom: 6px; }
+      label { font-size: 12px; }
+      .select-selected { padding: 6px 30px 6px 10px; font-size: 13px; }
+      .select-items div { padding: 10px; font-size: 13px; }
+      .settings-action-btn { padding: 7px; min-height: 44px; font-size: 13px; }
+      .menu-divider { margin: 8px 0 7px; }
+      .tutorial-content h2 { font-size: 16px; padding-bottom: 8px; }
+      .tutorial-content h3 { font-size: 14px; margin: 8px 0 4px; }
+      .tutorial-content li { font-size: 13px; padding: 6px 8px; margin-bottom: 5px; }
+      .modal-note { font-size: 10px; }
+      .boot-cta { font-size: 14px; padding: 9px 18px; }
+      #ui-edit-bar { padding: 6px 10px; gap: 6px 8px; }
+      #ui-edit-hint { font-size: 10px; min-width: 140px; }
+      #patreon-link, #designer-credit { display: none; }
+      #chord-banner .cb-name { font-size: 20px; }
+      .pad { min-height: 40px; font-size: 14px; border-radius: 10px; }
+      #touch-bottom { padding: 6px 10px calc(6px + env(safe-area-inset-bottom) + var(--frame-bottom)); }
+      #sustain-latch { min-height: 42px; font-size: 13px; }
+      #touch-record-btn, #touch-settings-btn, #touch-home-btn { min-width: 46px; min-height: 42px; font-size: 16px; }
+    }
+  </style>
+</head>
+<body data-theme="liquid">
+<script>/* The saved theme before the first paint, so pages never flash Liquid Glass (page.js checks it afterwards). */try{var l=JSON.parse(localStorage.getItem('open-music-tools.look.v1'));if(l&&/^[a-z0-9]+$/.test(l.theme))document.body.dataset.theme=l.theme}catch(e){}</script>
+
+<div id="container" role="main">
+  <h1 class="visually-hidden">Chordigits</h1>
+  <div id="media-wrapper">
+    <video id="webcam" autoplay playsinline muted></video>
+    <canvas id="overlay"></canvas>
+  </div>
+
+  <div id="chordigits-watermark" role="button" tabindex="0" data-i18n-aria="aboutAria" aria-label="About Chordigits">CHORDIGITS</div>
+  <div id="theme-frame"></div>
+  <div id="scanlines"></div>
+
+  <div id="chord-live" class="visually-hidden" role="status" aria-live="polite"></div>
+
+  <div id="top-right-menu">
+    <a class="menu-btn icon-btn home-link" href="../" data-i18n-aria="home" aria-label="Home: all the tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg></a>
+    <button id="record-btn" class="menu-btn" data-i18n-aria="recordAria" aria-label="Record audio">REC</button>
+    <button id="tutorial-toggle" class="menu-btn icon-btn" data-i18n-aria="helpAria" aria-label="How to play">
+      <span class="circled-question" aria-hidden="true">?</span>
+    </button>
+    <button id="settings-toggle" class="menu-btn" data-i18n="menu">Menu</button>
+  </div>
+
+  <!-- MAIN MENU -->
+  <div id="controls-panel" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1">
+    <div class="modal-header">
+       <h3 id="settings-title" data-i18n="settingsTitle">Settings</h3>
+       <button class="close-btn modal-close" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+
+    <!-- LANGUAGE & NOTATION -->
+    <div class="row row-gap-b">
+        <div class="control-group flex1">
+          <label data-i18n="lang">Language</label>
+          <div class="custom-select">
+            <select id="language-selector">
+              <option value="en" selected>English</option>
+              <option value="es">Español</option>
+              <option value="it">Italiano</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group flex1 mob-hide">
+          <label data-i18n="not">Notation</label>
+          <div class="custom-select">
+            <select id="notation-selector">
+              <option value="letter" selected>C, D, E...</option>
+              <option value="solfeggio">Do, Re, Mi...</option>
+            </select>
+          </div>
+        </div>
+    </div>
+
+    <hr class="menu-divider">
+
+    <!-- HARMONY -->
+    <div class="control-group">
+      <label data-i18n="key" class="highlight-label">Musical Key</label>
+      <div class="custom-select compact-grid">
+        <select id="mode-selector">
+          <!-- Options generated by JS (localized + notation-aware) -->
+        </select>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label data-i18n="chordStyle">Chord Style</label>
+      <div class="custom-select">
+        <select id="chord-style">
+          <option value="smooth" selected data-i18n="styleSmooth">Smooth (root in the bass)</option>
+          <option value="stacked" data-i18n="styleStacked">Stacked (root position)</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="open-modifiers-btn" class="settings-action-btn mob-hide" data-i18n="mods">Chord Modifiers...</button>
+
+    <hr class="menu-divider">
+
+    <!-- SOUND: instrument, then volume + octave beneath it -->
+    <div class="control-group">
+      <label data-i18n="inst">Instrument Rack</label>
+      <div class="custom-select">
+        <select id="instrument-selector">
+          <option value="piano" data-i18n="instPiano">Grand Piano</option>
+          <option value="epiano" data-i18n="instEpiano">Classic Electric Piano</option>
+          <option value="esynth" data-i18n="instEsynth">Electric Synth</option>
+          <option value="pad" data-i18n="instPad">Smooth Analog Pad</option>
+          <option value="organ" data-i18n="instOrgan">Warm Organ</option>
+          <option value="harp" data-i18n="instHarp">Dream Harp</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row row-gap-t mob-hide">
+        <div class="control-group flex1">
+          <label data-i18n="vol">Volume</label>
+          <div class="custom-select">
+            <select id="volume-selector">
+              <option value="0">0%</option>
+              <option value="25">25%</option>
+              <option value="50">50%</option>
+              <option value="75">75%</option>
+              <option value="100" selected>100%</option>
+              <option value="125">125%</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group flex1">
+          <label data-i18n="oct">Octave</label>
+          <div class="custom-select">
+            <select id="octave-selector">
+              <option value="-1" data-i18n="octMellow">Mellow (-1)</option>
+              <option value="0" selected data-i18n="octNormal">Normal (0)</option>
+              <option value="1" data-i18n="octBright">Bright (+1)</option>
+            </select>
+          </div>
+        </div>
+    </div>
+
+    <hr class="menu-divider mob-hide">
+
+    <!-- INTERACTION: accessibility above the shapes -->
+    <div class="control-group mob-hide">
+      <label data-i18n="acc">Accessibility</label>
+      <div class="custom-select">
+        <select id="acc-mode">
+          <option value="none" data-i18n="accNone">Two-Handed Mode</option>
+          <option value="keyboard" data-i18n="accKeyboard">Keyboard Only (camera optional)</option>
+          <option value="touch" data-i18n="accTouch">Touch Pads (no camera)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control-group row-gap-t mob-hide">
+      <label data-i18n="sixSeven">Six and seven</label>
+      <div class="custom-select">
+        <select id="six-seven">
+          <option value="rock" selected data-i18n="sixRock">🤙 and 🤘</option>
+          <option value="asl" data-i18n="sixAsl">Sign language</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row row-gap-t mob-hide">
+        <div class="control-group flex1">
+          <label data-i18n="leftShape">Left Shape</label>
+          <div class="custom-select">
+            <select id="left-shape">
+              <option value="wheel" selected data-i18n="shapeWheel">Donut</option>
+              <option value="slider" data-i18n="shapeSlider">Pill</option>
+              <option value="columns" data-i18n="shapeGrid">Grid</option>
+            </select>
+          </div>
+        </div>
+        <div class="control-group flex1">
+          <label data-i18n="rightShape">Right Shape</label>
+          <div class="custom-select">
+            <select id="right-shape">
+              <option value="wheel" selected data-i18n="shapeWheel">Donut</option>
+              <option value="slider" data-i18n="shapeSlider">Pill</option>
+              <option value="columns" data-i18n="shapeGrid">Grid</option>
+            </select>
+          </div>
+        </div>
+    </div>
+
+    <div class="control-group row-gap-t mob-hide">
+      <label data-i18n="handLayout">Hand Layout</label>
+      <div class="custom-select">
+        <select id="handedness-mode">
+          <option value="right" selected data-i18n="handRight">Right-Handed</option>
+          <option value="left" data-i18n="handLeft">Left-Handed</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control-group row-gap-t mob-hide">
+      <label data-i18n="browSustain">Eyebrow Sustain</label>
+      <div class="custom-select">
+        <select id="brow-sustain">
+          <option value="on" selected data-i18n="onLabel">On</option>
+          <option value="off" data-i18n="offLabel">Off</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="menu-divider">
+
+    <!-- APPEARANCE -->
+    <div class="control-group">
+      <label data-i18n="theme">Theme</label>
+      <div class="custom-select">
+        <select id="theme-selector">
+          <option value="liquid" selected data-i18n="themeLiquid">Liquid Glass</option>
+          <option value="y2k" data-i18n="themeY2k">Y2K Cyber</option>
+          <option value="pink" data-i18n="themePink">Soft Pink</option>
+          <option value="bw" data-i18n="themeBw">Monochrome</option>
+          <option value="retro" data-i18n="themeRetro">Retro CRT</option>
+          <option value="rouge" data-i18n="themeRouge">Rouge</option>
+          <option value="snap" data-i18n="themeSnap">Retrosnap</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="menu-divider">
+
+    <a class="settings-action-btn" href="../" data-i18n="home">Home: all the tools</a>
+
+    <hr class="menu-divider mob-hide">
+
+    <button id="open-ui-layout-btn" class="settings-action-btn mob-hide" data-i18n="uiPos">Move and resize the controls…</button>
+  </div>
+
+  <!-- SUB-MENU: MODIFIERS -->
+  <div id="modifiers-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="modifiers-title" tabindex="-1">
+    <div class="modal-header">
+       <h3 id="modifiers-title" data-i18n="modsTitle">Chord Modifiers</h3>
+       <button class="close-btn modal-close" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <div class="modifier-list" id="modifier-checkboxes">
+      <!-- Generated by JS -->
+    </div>
+    <button class="settings-action-btn back-to-menu-btn" data-i18n="back">Back to menu</button>
+  </div>
+
+  <!-- SUB-MENU: UI POSITIONING -->
+  <div id="ui-layout-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="ui-layout-title" tabindex="-1">
+    <div class="modal-header">
+       <h3 id="ui-layout-title" data-i18n="uiPosTitle">UI Positioning</h3>
+       <button class="close-btn modal-close" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <button id="ui-drag-btn" class="settings-action-btn" style="margin-top:0;" data-i18n="uiEditBtn">Drag &amp; resize on screen</button>
+    <p class="modal-note" data-i18n="uiFineTune">Or fine-tune precisely:</p>
+    <div class="ui-cols">
+      <div class="ui-col">
+        <span class="ui-col-label left" data-i18n="lh">Left hand</span>
+        <div class="slider-row"><span class="slider-tag" aria-hidden="true">X</span><input type="range" id="lx" min="-40" max="40" value="0" data-i18n-aria="ariaLX" aria-label="Left UI horizontal position"></div>
+        <div class="slider-row"><span class="slider-tag" aria-hidden="true">Y</span><input type="range" id="ly" min="-40" max="40" value="0" data-i18n-aria="ariaLY" aria-label="Left UI vertical position"></div>
+        <div class="slider-row"><span class="slider-tag" aria-hidden="true">SZ</span><input type="range" id="ls" min="50" max="150" value="100" data-i18n-aria="ariaLS" aria-label="Left UI size"></div>
+      </div>
+      <div class="ui-col">
+        <span class="ui-col-label right" data-i18n="rh">Right hand</span>
+        <div class="slider-row"><span class="slider-tag" aria-hidden="true">X</span><input type="range" id="rx" min="-40" max="40" value="0" data-i18n-aria="ariaRX" aria-label="Right UI horizontal position"></div>
+        <div class="slider-row"><span class="slider-tag" aria-hidden="true">Y</span><input type="range" id="ry" min="-40" max="40" value="0" data-i18n-aria="ariaRY" aria-label="Right UI vertical position"></div>
+        <div class="slider-row"><span class="slider-tag" aria-hidden="true">SZ</span><input type="range" id="rs" min="50" max="150" value="100" data-i18n-aria="ariaRS" aria-label="Right UI size"></div>
+      </div>
+    </div>
+    <button id="reset-ui-btn" class="settings-action-btn compact-btn" data-i18n="reset">Reset Placements</button>
+    <button class="settings-action-btn back-to-menu-btn spaced-btn" data-i18n="back">Back to menu</button>
+  </div>
+
+  <!-- Boot Up Modal: Step 1 (About / trust page) then Step 2 (How to play + Start) -->
+  <div id="boot-modal" class="centered-modal tutorial-content" style="display:flex;" role="dialog" aria-modal="true" aria-labelledby="boot-title" tabindex="-1">
+    <h2 id="boot-title" class="boot-title" data-i18n="bootWelcome">Welcome to Chordigits</h2>
+    <div id="boot-step-2">
+      <div id="boot-tutorial-text">
+        <!-- Injected via JS (i18n) -->
+      </div>
+      <p id="boot-calib-note" class="modal-note" data-i18n="calibNote"></p>
+      <p id="boot-project" class="boot-project"></p>
+      <button id="start-btn" class="settings-action-btn boot-cta" data-i18n="startBtn">Start the camera</button>
+    </div>
+  </div>
+
+  <!-- Dynamic Tutorial Modal (Menu) -->
+  <div id="tutorial-modal" class="centered-modal tutorial-content" role="dialog" aria-modal="true" aria-labelledby="tutorial-title" tabindex="-1">
+    <div class="modal-header">
+       <h2 id="tutorial-title" data-i18n="howToPlay">How to Play</h2>
+       <button class="close-btn modal-close" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <div id="menu-tutorial-text">
+        <!-- Injected via JS -->
+    </div>
+  </div>
+
+  <!-- About / Logo Modal -->
+  <div id="logo-info-modal" class="centered-modal tutorial-content" role="dialog" aria-modal="true" aria-labelledby="about-title" tabindex="-1">
+    <div class="modal-header">
+       <h3 id="about-title" data-i18n="aboutTitle">About Chordigits</h3>
+       <button class="close-btn modal-close" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <p id="about-body" class="about-text" data-i18n="aboutBody">
+       <!-- Injected via i18n -->
+    </p>
+    <p class="about-credits" data-i18n="aboutCredits">
+       <!-- Injected via i18n -->
+    </p>
+  </div>
+
+  <!-- Patreon Nag Modal (idle-only, instantly dismissible) -->
+  <div id="patreon-nag" class="centered-modal tutorial-content" role="dialog" aria-modal="true" aria-labelledby="nag-title" tabindex="-1">
+    <button id="nag-close" class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    <h2 id="nag-title" data-i18n="nagTitle">Support Chordigits</h2>
+    <p class="nag-body" data-i18n="nagBody">Love creating with Chordigits? Help keep the studio alive, ad-free, and full of new features!</p>
+    <a href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" class="start-btn patreon-glow-btn" data-i18n="nagPatreon">Support on Patreon</a>
+    <button id="skip-nag" class="settings-action-btn" data-i18n="nagContinue">Continue playing</button>
+  </div>
+
+  <div id="patreon-link">
+    <a href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+  </div>
+
+  <div id="designer-credit">
+    <span data-i18n="designedBy">Designed by</span> <a href="https://instagram.com/drephie" target="_blank" rel="noopener noreferrer">@drephie</a>
+  </div>
+
+  <!-- MOBILE TOUCH UI -->
+  <div id="touch-ui">
+    <div id="chord-banner" class="idle" aria-hidden="true">
+      <div class="cb-name"></div>
+      <div class="cb-notes"></div>
+    </div>
+    <div id="touch-pads">
+      <div id="touch-roots" class="pad-col"></div>
+      <div id="touch-mods" class="pad-col"></div>
+    </div>
+    <div id="touch-bottom">
+      <button id="sustain-latch" data-i18n="sustainLatch" aria-pressed="false">SUSTAIN</button>
+      <button id="touch-record-btn" data-i18n-aria="recordAria" aria-label="Record audio"></button>
+      <a id="touch-home-btn" class="home-link" href="../" data-i18n-aria="home" aria-label="Home: all the tools"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg></a>
+      <button id="touch-settings-btn" data-i18n-aria="touchSettingsAria" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </div>
+  </div>
+
+  <div id="rotate-overlay">
+    <svg class="rotate-emoji" viewBox="0 0 72 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="9" width="18" height="30" rx="3"/><rect x="40" y="18" width="28" height="18" rx="3"/><path d="M24 7c7-4 15-3 20 3"/><path d="M45 4v6h-6"/></svg>
+    <h2 data-i18n="rotateTitle">Rotate your device</h2>
+    <p data-i18n="rotateBody">Chordigits plays in landscape. Turn your device sideways to continue.</p>
+  </div>
+
+  <!-- Recording chooser: audio only, or screen + audio -->
+  <div id="rec-choice-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="rec-choice-title" tabindex="-1">
+    <div class="modal-header">
+       <h3 id="rec-choice-title" data-i18n="recChoiceTitle">Record</h3>
+       <button class="close-btn modal-close" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <p class="modal-note" data-i18n="recChoiceBody">What would you like to capture?</p>
+    <label class="rec-voice"><input type="checkbox" id="rec-voice" checked> <span data-i18n="recVoice">Record my voice</span></label>
+    <p class="modal-note" data-i18n="recHeadphones">Recording your voice? Wear headphones. With the sound on speakers, the microphone picks up the instruments and your voice ends up very quiet in the recording.</p>
+    <button id="rec-audio-btn" class="settings-action-btn" data-i18n="recAudio">Audio only</button>
+    <button id="rec-screen-btn" class="settings-action-btn" data-i18n="recScreen">Screen + audio</button>
+  </div>
+
+  <!-- Floating toolbar shown while dragging/resizing the on-canvas widgets -->
+  <div id="ui-edit-bar">
+    <span id="ui-edit-hint" data-i18n="uiEditHint">Drag a widget to move it — drag the ⤢ handle to resize (kept to scale).</span>
+    <button id="ui-edit-reset" class="menu-btn" data-i18n="reset">Reset Placements</button>
+    <button id="ui-edit-done" class="menu-btn" data-i18n="uiEditDone">Done</button>
+  </div>
+
+  <div id="ui-layer" style="display: none;"></div>
+</div>
+
+<script type="module">
+  import { HandLandmarker, FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs";
+  // (SRI cannot be applied to ES-module imports without an import map; the file is
+  //  cached by the hub's service worker, ../sw.js, after first load.)
+  import { parseKey, keyRootName, keyChordNames, pickModifiers, getChordInfo as theoryChordInfo, voiceChord, keyTonicMidi, chordNumeral } from '../shared/theory.js';
+  import { readFingers, countFingers, chordNumber, createSteady } from '../shared/hands.js';
+  import { startAudio, createRack } from '../shared/sound.js';
+  import { createI18n, mergeStrings } from '../shared/ui/i18n.js';
+  import { HUB_STRINGS } from '../shared/ui/strings.js';
+  import { setupCustomSelects } from '../shared/ui/select.js';
+  import { createModalManager } from '../shared/ui/modal.js';
+  import { registerHubWorker } from '../shared/offline.js';
+  import { loadLook, saveLook, watchLook } from '../shared/ui/page.js';
+
+  // --- roundRect polyfill (older Safari) ---
+  if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+      let radii = Array.isArray(r) ? r : [r, r, r, r];
+      while (radii.length < 4) radii.push(radii[radii.length - 1] ?? 0);
+      radii = radii.map(v => Math.max(0, Math.min(typeof v === 'number' ? v : 0, w / 2, h / 2)));
+      this.moveTo(x + radii[0], y);
+      this.arcTo(x + w, y, x + w, y + h, radii[1]);
+      this.arcTo(x + w, y + h, x, y + h, radii[2]);
+      this.arcTo(x, y + h, x, y, radii[3]);
+      this.arcTo(x, y, x + w, y, radii[0]);
+      this.closePath();
+      return this;
+    };
+  }
+
+  // TODO: point at the real public repository before release.
+  const REPO_URL = "https://github.com/Drephie/open-music-tools";
+  const PATREON_URL = "https://patreon.com/drephie";
+
+  const IS_MOBILE = (() => {
+    const coarse = window.matchMedia('(pointer: coarse)').matches;
+    const touch = (navigator.maxTouchPoints || 0) > 0;
+    const small = Math.min(screen.width, screen.height) <= 900;
+    return coarse && touch && small;
+  })();
+  if (IS_MOBILE) document.body.classList.add('mobile-mode');
+
+  // --- DOM REFS ---
+  const $ = id => document.getElementById(id);
+  const video = $("webcam");
+  const canvas = $("overlay");
+  const ctx = canvas.getContext("2d");
+  const uiLayer = $("ui-layer");
+
+  const settingsToggle = $("settings-toggle");
+  const tutorialToggle = $("tutorial-toggle");
+  const logoTrigger = $("chordigits-watermark");
+  const recordBtn = $("record-btn");
+
+  const controlsPanel = $("controls-panel");
+  const modifiersModal = $("modifiers-modal");
+  const uiLayoutModal = $("ui-layout-modal");
+  const tutorialModal = $("tutorial-modal");
+  const bootModal = $("boot-modal");
+  const logoInfoModal = $("logo-info-modal");
+  const patreonNag = $("patreon-nag");
+  const topRightMenu = $("top-right-menu");
+
+  const themeSelector = $("theme-selector");
+  const instrumentSelector = $("instrument-selector");
+  const modeSelector = $("mode-selector");
+  const leftShape = $("left-shape");
+  const rightShape = $("right-shape");
+  const accMode = $("acc-mode");
+  const sixSevenSel = $("six-seven");
+  const browSustainSel = $("brow-sustain");
+  const handednessMode = $("handedness-mode");
+  const modifierCheckboxes = $("modifier-checkboxes");
+  const languageSelector = $("language-selector");
+  const notationSelector = $("notation-selector");
+  const volumeSelector = $("volume-selector");
+  const octaveSelector = $("octave-selector");
+  const chordStyleSelector = $("chord-style");
+
+  const bootTutorialText = $("boot-tutorial-text");
+  const bootCalibNote = $("boot-calib-note");
+  const bootProject = $("boot-project");
+  const startBtn = $("start-btn");
+  const menuTutorialText = $("menu-tutorial-text");
+  const chordLive = $("chord-live");
+  const nagCloseBtn = $("nag-close");
+  const skipNagBtn = $("skip-nag");
+
+  const touchUi = $("touch-ui");
+  const chordBanner = $("chord-banner");
+  const chordBannerName = chordBanner.querySelector(".cb-name");
+  const chordBannerNotes = chordBanner.querySelector(".cb-notes");
+  const touchRoots = $("touch-roots");
+  const touchMods = $("touch-mods");
+  const sustainLatchBtn = $("sustain-latch");
+  const touchRecordBtn = $("touch-record-btn");
+  const touchSettingsBtn = $("touch-settings-btn");
+
+  const recChoiceModal = $("rec-choice-modal");
+  const recVoiceToggle = $("rec-voice");
+
+  const allModals = [controlsPanel, modifiersModal, uiLayoutModal, tutorialModal, logoInfoModal, patreonNag, recChoiceModal];
+
+  // --- I18N: Chordigits's own strings ({repo}/{patreon} are interpolated);
+  // hub-wide ones (themes, instruments, footer...) are in shared/ui/strings.js ---
+  const STRINGS = {
+    en: {
+      menu: "Menu", settingsTitle: "Settings",
+      not: "Notation", oct: "Octave shift",
+      key: "Musical key", mods: "Kinds of chord…", modsTitle: "Kinds of chord",
+      chordStyle: "Chord style", styleSmooth: "Smooth (root in the bass)", styleStacked: "Stacked (root position)",
+      acc: "Accessibility",
+      leftShape: "Left shape", rightShape: "Right shape", handLayout: "Hand layout",
+      uiPos: "Move and resize the controls…", uiPosTitle: "UI positioning",
+      uiEditBtn: "Drag & resize on screen", uiFineTune: "Or fine-tune precisely:",
+      uiEditHint: "Drag a widget to move it — drag the ⤢ handle to resize (always kept to scale). Esc or Done to finish.", uiEditDone: "Done",
+      reset: "Reset placements", back: "Back to menu", lh: "Left hand", rh: "Right hand",
+      helpAria: "How to play", recordAria: "Record audio", recStopAria: "Stop recording",
+      aboutAria: "About Chordigits", touchSettingsAria: "Settings",
+      recChoiceTitle: "Record", recChoiceBody: "What would you like to capture?",
+      recHeadphones: "Recording your voice? Wear headphones. With the sound on speakers, the microphone picks up the instruments and your voice ends up very quiet in the recording.",
+      recVoice: "Record my voice",
+      recAudio: "Audio only", recScreen: "Screen + audio",
+      ariaLX: "Left UI horizontal position", ariaLY: "Left UI vertical position", ariaLS: "Left UI size",
+      ariaRX: "Right UI horizontal position", ariaRY: "Right UI vertical position", ariaRS: "Right UI size",
+      octMellow: "Mellow (-1)", octNormal: "Normal (0)", octBright: "Bright (+1)",
+      chromatic: "Chromatic", major: "Major", minor: "Minor",
+      shapeWheel: "Donut", shapeSlider: "Pill", shapeGrid: "Grid",
+      handRight: "Right-handed", handLeft: "Left-handed",
+      accNone: "Two-handed mode",
+      accKeyboard: "Keyboard only (camera optional)", accTouch: "Touch pads (no camera)",
+      browSustain: "Eyebrow sustain", onLabel: "On", offLabel: "Off",
+      bootWelcome: "Welcome to Chordigits",
+      bootProject: 'Free and <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a>. The camera and microphone stay on this device: nothing is uploaded. No ads, no trackers.',
+      howToPlay: "How to play", startBtn: "Start the camera",
+      calibNote: "When the camera starts, keep a relaxed, neutral face for 2 seconds — Chordigits calibrates the eyebrow sustain to you.",
+      leftHand: "Left hand", rightHand: "Right hand",
+      sixSeven: "Six and seven", sixRock: "🤙 and 🤘", sixAsl: "Sign language",
+      tutNumber: "How many fingers you hold up is the chord's number in the key, I to VII. 🤙 (thumb and little finger) is VI, 🤘 (index and little finger) is VII. A fist stops.",
+      tutNumberAsl: "How many fingers you hold up is the chord's number in the key, I to VII. Thumb touching the little finger is VI, thumb touching the ring finger is VII (as in sign language). A fist stops.",
+      tutType: "Changes the kind of chord by how many fingers it shows.", tutFist: "Fist or out of view", tutFingers1: "1 finger", tutFingersN: "{n} fingers", keyChord: "the key's own chord",
+      tutPlay: "<strong>To play:</strong> hold your fingers still for a moment. To repeat a chord, close your hand and open it again.",
+      tutSustain: "<strong>Sustain:</strong> Raise your eyebrows (or hold Space) to let chords ring — your mouth stays free for singing.",
+      tutKbdTitle: "Keyboard mode",
+      tutKbd1: "<strong>1–7:</strong> pick the chord's number, I to VII (up to 0, - and = in Chromatic).",
+      tutKbd2: "<strong>Q–I:</strong> pick the kind of chord.",
+      tutKbd3: "<strong>Enter</strong> (or click the stage) plays the chord.",
+      tutKbd4: "<strong>Space:</strong> hold to sustain.",
+      tutTouchTitle: "Touch mode",
+      tutTouch1: "<strong>Left pads:</strong> tap a chord to play it.",
+      tutTouch2: "<strong>Right pads:</strong> choose the chord modifier — hold one with a second finger while tapping chords.",
+      tutTouch3: "<strong>SUSTAIN:</strong> latch the sustain button to let chords ring.",
+      loadingAudio: "Loading audio engine...", loadingSamples: "Loading instruments...",
+      loadingModels: "Loading hand & face tracking...", loadingCamera: "Please allow webcam access.",
+      finalizingVideo: "Finalizing your recording…",
+      errAudioTitle: "Audio engine failed to start",
+      errAudioBody: "Your browser blocked or failed to start the audio engine. Check that this tab is allowed to play sound, then try again.",
+      errModelsTitle: "Tracking models failed to load",
+      errModelsBody: "The hand & face tracking models could not be downloaded. Check your internet connection and try again.",
+      errCameraTitle: "Camera access needed",
+      errCameraBody: "Chordigits couldn't use your camera. Tap the icon next to the web address (on an iPhone: aA, then Website Settings), set the camera to Allow, then press Retry. All video stays on your device.",
+      useKeyboard: "Continue with keyboard mode", useTouch: "Continue with touch pads",
+      calibrating: "Calibrating… keep a neutral face",
+      sustainOn: "SUSTAIN ON", playingLabel: "Playing",
+      nagTitle: "Support Chordigits",
+      nagBody: "Love creating with Chordigits? Help keep the studio alive, ad-free, and full of new features!",
+      nagPatreon: "Support on Patreon", nagContinue: "Continue playing", nagSkip: "Skip in {s}s…",
+      aboutTitle: "About Chordigits",
+      aboutBody: 'Chordigits is an open source website designed and curated by Drephie, a singer and vocal coach. The idea behind the project is to make music tools available to everyone — every line of code is public in the <a href="{repo}" target="_blank" rel="noopener noreferrer">repository</a>.<br><br>It is <strong>100% private</strong>: all video is processed on your device, in your browser, and is never uploaded or stored. It is <strong>completely ad-free</strong> and user-supported.<br><br>To follow updates and other projects, or to <u><b>get rid of the watermark</b></u>, check out the <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>!',
+      aboutCredits: 'Piano sound: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> by Alexander Holm, licensed under <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
+      rotateTitle: "Rotate your device", rotateBody: "Chordigits plays in landscape. Turn your device sideways to continue.",
+      sustainLatch: "SUSTAIN",
+      modTriadShort: "Triad", mod7Short: "7th",
+      modName_Triad: "Triad (Auto)", modName_Maj: "Major", modName_Min: "Minor",
+      modName_Dim: "Diminished", modName_Aug: "Augmented", modName_7th: "7th (Auto)",
+      modName_Maj7: "Major 7th", modName_Min7: "Minor 7th", modName_Dom7: "Dominant 7th",
+      modName_Dim7: "Diminished 7th", modName_Sus2: "Sus 2", modName_Sus4: "Sus 4",
+      modName_6: "6th", modName_Add9: "Add 9", modName_Maj9: "Major 9th", modName_Min9: "Minor 9th",
+    },
+    es: {
+      menu: "Menú", settingsTitle: "Ajustes",
+      not: "Notación", oct: "Octava",
+      key: "Tonalidad", mods: "Tipos de acorde…", modsTitle: "Tipos de acorde",
+      chordStyle: "Estilo de acordes", styleSmooth: "Suave (fundamental en el bajo)", styleStacked: "Apilado (posición fundamental)",
+      acc: "Accesibilidad",
+      leftShape: "Forma izq.", rightShape: "Forma der.", handLayout: "Mano dominante",
+      uiPos: "Mover y cambiar el tamaño de los controles…", uiPosTitle: "Posición de la UI",
+      uiEditBtn: "Arrastrar y redimensionar en pantalla", uiFineTune: "O ajusta con precisión:",
+      uiEditHint: "Arrastra un elemento para moverlo — arrastra el tirador ⤢ para redimensionar (siempre a escala). Esc o Listo para terminar.", uiEditDone: "Listo",
+      reset: "Restablecer", back: "Volver al menú", lh: "Mano izquierda", rh: "Mano derecha",
+      helpAria: "Cómo tocar", recordAria: "Grabar audio", recStopAria: "Detener la grabación",
+      aboutAria: "Acerca de Chordigits", touchSettingsAria: "Ajustes",
+      recChoiceTitle: "Grabar", recChoiceBody: "¿Qué quieres capturar?",
+      recHeadphones: "¿Vas a grabar tu voz? Usa auriculares. Con el sonido por los altavoces, el micrófono capta los instrumentos y tu voz queda muy baja en la grabación.",
+      recVoice: "Grabar mi voz",
+      recAudio: "Solo audio", recScreen: "Pantalla + audio",
+      ariaLX: "Posición horizontal de la UI izquierda", ariaLY: "Posición vertical de la UI izquierda", ariaLS: "Tamaño de la UI izquierda",
+      ariaRX: "Posición horizontal de la UI derecha", ariaRY: "Posición vertical de la UI derecha", ariaRS: "Tamaño de la UI derecha",
+      octMellow: "Grave (-1)", octNormal: "Normal (0)", octBright: "Brillante (+1)",
+      chromatic: "Cromática", major: "Mayor", minor: "Menor",
+      shapeWheel: "Dónut", shapeSlider: "Píldora", shapeGrid: "Cuadrícula",
+      handRight: "Diestro", handLeft: "Zurdo",
+      accNone: "Modo a dos manos",
+      accKeyboard: "Solo teclado (cámara opcional)", accTouch: "Pads táctiles (sin cámara)",
+      browSustain: "Sustain con cejas", onLabel: "Activado", offLabel: "Desactivado",
+      bootWelcome: "Bienvenido a Chordigits",
+      bootProject: 'Gratis y de <a href="{repo}" target="_blank" rel="noopener noreferrer">código abierto</a>. La cámara y el micrófono se quedan en este dispositivo: no se sube nada. Sin anuncios ni rastreadores.',
+      howToPlay: "Cómo tocar", startBtn: "Encender la cámara",
+      calibNote: "Cuando la cámara se active, mantén el rostro relajado y neutro durante 2 segundos: Chordigits calibra el sustain de cejas a tu medida.",
+      leftHand: "Mano izquierda", rightHand: "Mano derecha",
+      sixSeven: "Seis y siete", sixRock: "🤙 y 🤘", sixAsl: "Lengua de signos",
+      tutNumber: "Cuántos dedos levantas es el número del acorde en la tonalidad, de I a VII. 🤙 (pulgar y meñique) es VI, 🤘 (índice y meñique) es VII. El puño lo detiene.",
+      tutNumberAsl: "Cuántos dedos levantas es el número del acorde en la tonalidad, de I a VII. El pulgar tocando el meñique es VI, el pulgar tocando el anular es VII (como en lengua de signos). El puño lo detiene.",
+      tutType: "Cambia el tipo de acorde según cuántos dedos muestra.", tutFist: "Puño o fuera de cámara", tutFingers1: "1 dedo", tutFingersN: "{n} dedos", keyChord: "el acorde de la tonalidad",
+      tutPlay: "<strong>Para tocar:</strong> mantén los dedos quietos un momento. Para repetir un acorde, cierra la mano y ábrela otra vez.",
+      tutSustain: "<strong>Sustain:</strong> Levanta las cejas (o mantén pulsada la barra espaciadora) para que los acordes sigan sonando: tu boca queda libre para cantar.",
+      tutKbdTitle: "Modo teclado",
+      tutKbd1: "<strong>1–7:</strong> eligen el número del acorde, de I a VII (hasta 0, - y = en modo Cromático).",
+      tutKbd2: "<strong>Q–I:</strong> eligen el tipo de acorde.",
+      tutKbd3: "<strong>Intro</strong> (o un clic en el escenario) toca el acorde.",
+      tutKbd4: "<strong>Espacio:</strong> mantén pulsado para el sustain.",
+      tutTouchTitle: "Modo táctil",
+      tutTouch1: "<strong>Pads izquierdos:</strong> toca un acorde para reproducirlo.",
+      tutTouch2: "<strong>Pads derechos:</strong> elige el modificador; puedes mantener uno con un segundo dedo mientras tocas acordes.",
+      tutTouch3: "<strong>SUSTAIN:</strong> fija el botón de sustain para que los acordes sigan sonando.",
+      loadingAudio: "Cargando el motor de audio...", loadingSamples: "Cargando instrumentos...",
+      loadingModels: "Cargando el seguimiento de manos y rostro...", loadingCamera: "Permite el acceso a la cámara, por favor.",
+      finalizingVideo: "Finalizando tu grabación…",
+      errAudioTitle: "El motor de audio no pudo iniciarse",
+      errAudioBody: "Tu navegador bloqueó o no pudo iniciar el motor de audio. Comprueba que esta pestaña puede reproducir sonido y vuelve a intentarlo.",
+      errModelsTitle: "No se pudieron cargar los modelos de seguimiento",
+      errModelsBody: "No se pudieron descargar los modelos de seguimiento de manos y rostro. Comprueba tu conexión a internet y vuelve a intentarlo.",
+      errCameraTitle: "Se necesita acceso a la cámara",
+      errCameraBody: "Chordigits no pudo usar tu cámara. Toca el icono junto a la dirección web (en un iPhone: aA y luego Ajustes del sitio web), pon la cámara en Permitir y pulsa Reintentar. Todo el vídeo se queda en tu dispositivo.",
+      useKeyboard: "Continuar en modo teclado", useTouch: "Continuar con pads táctiles",
+      calibrating: "Calibrando… mantén el rostro neutro",
+      sustainOn: "SUSTAIN ACTIVO", playingLabel: "Sonando",
+      nagTitle: "Apoya a Chordigits",
+      nagBody: "¿Te encanta crear con Chordigits? ¡Ayuda a mantener el estudio vivo, sin anuncios y lleno de novedades!",
+      nagPatreon: "Apóyanos en Patreon", nagContinue: "Seguir tocando", nagSkip: "Saltar en {s} s…",
+      aboutTitle: "Acerca de Chordigits",
+      aboutBody: 'Chordigits es un sitio web de código abierto diseñado y cuidado por Drephie, cantante y coach vocal. La idea del proyecto es poner herramientas musicales al alcance de todo el mundo: cada línea de código es pública en el <a href="{repo}" target="_blank" rel="noopener noreferrer">repositorio</a>.<br><br>Es <strong>100% privado</strong>: todo el vídeo se procesa en tu dispositivo, dentro de tu navegador, y nunca se sube ni se almacena. Además es <strong>totalmente libre de anuncios</strong> y se financia gracias a la comunidad.<br><br>Para seguir las novedades y otros proyectos, o para <u><b>quitar la marca de agua</b></u>, ¡pásate por el <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>!',
+      aboutCredits: 'Sonido de piano: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> de Alexander Holm, con licencia <a href="https://creativecommons.org/licenses/by/3.0/deed.es" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
+      rotateTitle: "Gira tu dispositivo", rotateBody: "Chordigits se toca en horizontal. Gira tu dispositivo para continuar.",
+      sustainLatch: "SUSTAIN",
+      modTriadShort: "Tríada", mod7Short: "7ª",
+      modName_Triad: "Tríada (Auto)", modName_Maj: "Mayor", modName_Min: "Menor",
+      modName_Dim: "Disminuido", modName_Aug: "Aumentado", modName_7th: "7ª (Auto)",
+      modName_Maj7: "Séptima Mayor", modName_Min7: "Séptima Menor", modName_Dom7: "Séptima de Dominante",
+      modName_Dim7: "Séptima Disminuida", modName_Sus2: "Sus 2", modName_Sus4: "Sus 4",
+      modName_6: "Sexta", modName_Add9: "Add 9", modName_Maj9: "Novena Mayor", modName_Min9: "Novena Menor",
+    },
+    it: {
+      menu: "Menu", settingsTitle: "Impostazioni",
+      not: "Notazione", oct: "Ottava",
+      key: "Tonalità", mods: "Tipi di accordo…", modsTitle: "Tipi di accordo",
+      chordStyle: "Stile degli accordi", styleSmooth: "Fluido (fondamentale al basso)", styleStacked: "Impilato (posizione fondamentale)",
+      acc: "Accessibilità",
+      leftShape: "Forma sinistra", rightShape: "Forma destra", handLayout: "Mano dominante",
+      uiPos: "Sposta e ridimensiona i comandi…", uiPosTitle: "Posizionamento UI",
+      uiEditBtn: "Trascina e ridimensiona sullo schermo", uiFineTune: "Oppure regola con precisione:",
+      uiEditHint: "Trascina un elemento per spostarlo — trascina la maniglia ⤢ per ridimensionare (sempre in scala). Esc o Fatto per terminare.", uiEditDone: "Fatto",
+      reset: "Ripristina", back: "Torna al menu", lh: "Mano sinistra", rh: "Mano destra",
+      helpAria: "Come si suona", recordAria: "Registra audio", recStopAria: "Interrompi la registrazione",
+      aboutAria: "Informazioni su Chordigits", touchSettingsAria: "Impostazioni",
+      recChoiceTitle: "Registra", recChoiceBody: "Cosa vuoi registrare?",
+      recHeadphones: "Registri la tua voce? Usa le cuffie. Con il suono dalle casse, il microfono capta gli strumenti e la tua voce risulta molto bassa nella registrazione.",
+      recVoice: "Registra la mia voce",
+      recAudio: "Solo audio", recScreen: "Schermo + audio",
+      ariaLX: "Posizione orizzontale della UI sinistra", ariaLY: "Posizione verticale della UI sinistra", ariaLS: "Dimensione della UI sinistra",
+      ariaRX: "Posizione orizzontale della UI destra", ariaRY: "Posizione verticale della UI destra", ariaRS: "Dimensione della UI destra",
+      octMellow: "Scuro (-1)", octNormal: "Normale (0)", octBright: "Brillante (+1)",
+      chromatic: "Cromatica", major: "Maggiore", minor: "Minore",
+      shapeWheel: "Ciambella", shapeSlider: "Pillola", shapeGrid: "Griglia",
+      handRight: "Destrimano", handLeft: "Mancino",
+      accNone: "Modalità a due mani",
+      accKeyboard: "Solo tastiera (fotocamera opzionale)", accTouch: "Pad touch (senza fotocamera)",
+      browSustain: "Sustain con sopracciglia", onLabel: "Attivo", offLabel: "Disattivato",
+      bootWelcome: "Benvenuto in Chordigits",
+      bootProject: 'Gratis e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a>. Fotocamera e microfono restano su questo dispositivo: non viene caricato nulla. Niente pubblicità né tracker.',
+      howToPlay: "Come si suona", startBtn: "Accendi la fotocamera",
+      calibNote: "Quando la fotocamera si attiva, mantieni il viso rilassato e neutro per 2 secondi: Chordigits calibra il sustain delle sopracciglia su di te.",
+      leftHand: "Mano sinistra", rightHand: "Mano destra",
+      sixSeven: "Sei e sette", sixRock: "🤙 e 🤘", sixAsl: "Lingua dei segni",
+      tutNumber: "Quante dita alzi è il numero dell'accordo nella tonalità, da I a VII. 🤙 (pollice e mignolo) è VI, 🤘 (indice e mignolo) è VII. Il pugno lo ferma.",
+      tutNumberAsl: "Quante dita alzi è il numero dell'accordo nella tonalità, da I a VII. Il pollice che tocca il mignolo è VI, il pollice che tocca l'anulare è VII (come nella lingua dei segni). Il pugno lo ferma.",
+      tutType: "Cambia il tipo di accordo secondo quante dita mostra.", tutFist: "Pugno o fuori campo", tutFingers1: "1 dito", tutFingersN: "{n} dita", keyChord: "l'accordo della tonalità",
+      tutPlay: "<strong>Per suonare:</strong> tieni ferme le dita per un momento. Per ripetere un accordo, chiudi la mano e riaprila.",
+      tutSustain: "<strong>Sustain:</strong> Alza le sopracciglia (o tieni premuta la barra spaziatrice) per far durare gli accordi: la bocca resta libera per cantare.",
+      tutKbdTitle: "Modalità tastiera",
+      tutKbd1: "<strong>1–7:</strong> scelgono il numero dell'accordo, da I a VII (fino a 0, - e = in modalità Cromatica).",
+      tutKbd2: "<strong>Q–I:</strong> scelgono il tipo di accordo.",
+      tutKbd3: "<strong>Invio</strong> (o un clic sul palco) suona l'accordo.",
+      tutKbd4: "<strong>Spazio:</strong> tieni premuto per il sustain.",
+      tutTouchTitle: "Modalità touch",
+      tutTouch1: "<strong>Pad a sinistra:</strong> tocca un accordo per suonarlo.",
+      tutTouch2: "<strong>Pad a destra:</strong> scegli il modificatore; puoi tenerne premuto uno con un secondo dito mentre suoni gli accordi.",
+      tutTouch3: "<strong>SUSTAIN:</strong> blocca il pulsante sustain per far durare gli accordi.",
+      loadingAudio: "Caricamento del motore audio...", loadingSamples: "Caricamento degli strumenti...",
+      loadingModels: "Caricamento del tracciamento di mani e volto...", loadingCamera: "Consenti l'accesso alla fotocamera.",
+      finalizingVideo: "Finalizzazione della registrazione…",
+      errAudioTitle: "Impossibile avviare il motore audio",
+      errAudioBody: "Il browser ha bloccato o non è riuscito ad avviare il motore audio. Controlla che questa scheda possa riprodurre suoni e riprova.",
+      errModelsTitle: "Impossibile caricare i modelli di tracciamento",
+      errModelsBody: "Non è stato possibile scaricare i modelli di tracciamento di mani e volto. Controlla la connessione a internet e riprova.",
+      errCameraTitle: "Serve l'accesso alla fotocamera",
+      errCameraBody: "Chordigits non è riuscito a usare la fotocamera. Tocca l'icona accanto all'indirizzo web (su iPhone: aA, poi Impostazioni sito web), imposta la fotocamera su Consenti e premi Riprova. Tutto il video resta sul tuo dispositivo.",
+      useKeyboard: "Continua in modalità tastiera", useTouch: "Continua con i pad touch",
+      calibrating: "Calibrazione… mantieni il viso neutro",
+      sustainOn: "SUSTAIN ATTIVO", playingLabel: "In riproduzione",
+      nagTitle: "Sostieni Chordigits",
+      nagBody: "Ti piace creare con Chordigits? Aiutaci a mantenere lo studio vivo, senza pubblicità e pieno di novità!",
+      nagPatreon: "Sostienici su Patreon", nagContinue: "Continua a suonare", nagSkip: "Salta tra {s} s…",
+      aboutTitle: "Informazioni su Chordigits",
+      aboutBody: 'Chordigits è un sito web open source progettato e curato da Drephie, cantante e vocal coach. L\'idea alla base del progetto è rendere gli strumenti musicali accessibili a tutti: ogni riga di codice è pubblica nel <a href="{repo}" target="_blank" rel="noopener noreferrer">repository</a>.<br><br>È <strong>100% privato</strong>: tutto il video viene elaborato sul tuo dispositivo, nel tuo browser, e non viene mai caricato né salvato. È inoltre <strong>completamente senza pubblicità</strong> e sostenuto dagli utenti.<br><br>Per seguire aggiornamenti e altri progetti, o per <u><b>rimuovere la filigrana</b></u>, dai un\'occhiata al <a href="{patreon}" target="_blank" rel="noopener noreferrer">Patreon</a>!',
+      aboutCredits: 'Suono di pianoforte: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> di Alexander Holm, con licenza <a href="https://creativecommons.org/licenses/by/3.0/deed.it" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
+      rotateTitle: "Ruota il dispositivo", rotateBody: "Chordigits si suona in orizzontale. Ruota il dispositivo per continuare.",
+      sustainLatch: "SUSTAIN",
+      modTriadShort: "Triade", mod7Short: "7ª",
+      modName_Triad: "Triade (Auto)", modName_Maj: "Maggiore", modName_Min: "Minore",
+      modName_Dim: "Diminuito", modName_Aug: "Aumentato", modName_7th: "7ª (Auto)",
+      modName_Maj7: "Settima Maggiore", modName_Min7: "Settima Minore", modName_Dom7: "Settima di Dominante",
+      modName_Dim7: "Settima Diminuita", modName_Sus2: "Sus 2", modName_Sus4: "Sus 4",
+      modName_6: "Sesta", modName_Add9: "Add 9", modName_Maj9: "Nona Maggiore", modName_Min9: "Nona Minore",
+    }
+  };
+
+  const { t, interp, apply: applyI18n } = createI18n({
+    strings: mergeStrings(HUB_STRINGS, STRINGS),
+    getLang: () => languageSelector.value,
+    vars: { repo: REPO_URL, patreon: PATREON_URL },
+  });
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  // --- SETTINGS PERSISTENCE ---
+  const SETTINGS_KEY = 'chordigits.settings.v1';
+  const uiOffsets = { lx: 0, ly: 0, ls: 100, rx: 0, ry: 0, rs: 100 };
+  let browThreshold = 0.5;
+  let savedModifiers = null;
+  let currentModifiers = [];
+
+  function loadStoredSettings() {
+    try { return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch { return {}; }
+  }
+  // Deliberately narrow: only widget shapes and on-screen placement/size persist.
+  // Theme and language are the hub's one shared choice (loadLook/saveLook in
+  // shared/ui/page.js); everything else (key, instrument, volume, …) starts
+  // fresh each visit.
+  function saveSettings() {
+    const data = { leftShape: leftShape.value, rightShape: rightShape.value, sixSeven: sixSevenSel.value, uiOffsets: { ...uiOffsets } };
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(data)); } catch { /* storage unavailable */ }
+  }
+  function restoreSettings() {
+    const s = loadStoredSettings();
+    const setSel = (el, v) => {
+      if (v == null) return;
+      const opt = [...el.options].find(o => o.value === String(v) && !o.disabled);
+      if (opt) el.value = opt.value;
+    };
+    setSel(leftShape, s.leftShape); setSel(rightShape, s.rightShape); setSel(sixSevenSel, s.sixSeven);
+    if (s.uiOffsets) for (const k of Object.keys(uiOffsets)) {
+      const v = parseInt(s.uiOffsets[k], 10);
+      if (!isNaN(v)) { uiOffsets[k] = v; const el = $(k); if (el) el.value = v; }
+    }
+    const look = loadLook();
+    themeSelector.value = look.theme;
+    document.body.setAttribute('data-theme', look.theme);
+    syncThemeBar();
+    languageSelector.value = look.lang;
+  }
+
+  // --- CUSTOM SELECTS: shared/ui/select.js ---
+
+  // --- MODALS (dialog semantics, focus trap, Escape, focus return: shared/ui/modal.js) ---
+  const modals = createModalManager({
+    modals: allModals,
+    fallback: () => (bootModal.style.display !== 'none' ? bootModal : null),
+    onHidden: (wasOpen) => { if (wasOpen.includes(patreonNag)) nagDismissed(); },
+    escapeAction: (modal) => (modal === patreonNag ? dismissNag : modal === bootModal ? 'ignore' : 'hide'),
+  });
+  const openModal = modals.open;
+  const hideAllModals = modals.hideAll;
+  const currentDialog = modals.current;
+
+  // --- KEY MENU (note spelling and chord theory live in shared/theory.js) ---
+  function buildKeyOptions() {
+    const prev = modeSelector.value || '0_maj';
+    const solfege = notationSelector.value === 'solfeggio';
+    modeSelector.innerHTML = '';
+    const add = (value, label) => {
+      const o = document.createElement('option');
+      o.value = value; o.textContent = label;
+      modeSelector.appendChild(o);
+    };
+    add('chromatic', t('chromatic'));
+    modeSelector.options[0].disabled = accMode.value === 'none'; // fingers only count inside a key
+    for (let i = 0; i < 12; i++) add(`${i}_maj`, `${keyRootName(i, 'maj', solfege)} ${t('major')}`);
+    for (let i = 0; i < 12; i++) add(`${i}_min`, `${keyRootName(i, 'min', solfege)} ${t('minor')}`);
+    modeSelector.value = [...modeSelector.options].some(o => o.value === prev && !o.disabled) ? prev : '0_maj';
+  }
+
+  // --- LANGUAGE ---
+  function updateLanguage() {
+    applyI18n();
+    buildKeyOptions();
+    buildModifierCheckboxes();
+    setupCustomSelects();
+    updateTutorialText();
+    buildBootAbout();
+    updateRecordButtons();
+    buildTouchPads();
+  }
+
+  // --- BOOT FLOW: how to play first; the project in one closing line ---
+  function buildBootAbout() {
+    bootProject.innerHTML = interp(t('bootProject'));
+  }
+
+  // --- TUTORIAL TEXT ---
+  function tutorialHtml() {
+    if (touchOnly()) {
+      return `<h3>${t('tutTouchTitle')}</h3><ul><li>${t('tutTouch1')}</li><li>${t('tutTouch2')}</li><li>${t('tutTouch3')}</li></ul>`;
+    }
+    const mode = accMode.value;
+    if (mode === 'keyboard') {
+      return `<h3>${t('tutKbdTitle')}</h3><ul><li>${t('tutKbd1')}</li><li>${t('tutKbd2')}</li><li>${t('tutKbd3')}</li><li>${t('tutKbd4')}</li></ul>`;
+    }
+    const isRH = handednessMode.value === 'right';
+    const kinds = currentModifiers.slice(0, 6).map((id, n) =>
+      `${n === 0 ? t('tutFist') : n === 1 ? t('tutFingers1') : t('tutFingersN').replace('{n}', n)}: ${id === 'Triad' ? t('keyChord') : t('modName_' + id)}`).join(' · ');
+    return `<ul>
+      <li><strong>${t(isRH ? 'rightHand' : 'leftHand')}:</strong> ${t(sixSevenSel.value === 'asl' ? 'tutNumberAsl' : 'tutNumber')}</li>
+      <li><strong>${t(isRH ? 'leftHand' : 'rightHand')}:</strong> ${t('tutType')} ${kinds}.</li>
+      <li>${t('tutPlay')}</li>
+      <li>${t('tutSustain')}</li>
+    </ul>`;
+  }
+  function updateTutorialText() {
+    const html = tutorialHtml();
+    bootTutorialText.innerHTML = html;
+    menuTutorialText.innerHTML = html;
+    const cameraless = accMode.value === 'keyboard' || touchOnly();
+    bootCalibNote.style.display = cameraless ? 'none' : '';
+  }
+
+  // --- MODIFIERS ---
+  const allAvailableModifiers = [
+    { id: 'Triad', default: true }, { id: 'Maj', default: true }, { id: 'Min', default: true },
+    { id: 'Dim', default: false }, { id: 'Aug', default: false },
+    { id: '7th', default: true }, { id: 'Maj7', default: false },
+    { id: 'Min7', default: false }, { id: 'Dom7', default: false }, { id: 'Dim7', default: false },
+    { id: 'Sus2', default: false }, { id: 'Sus4', default: true },
+    { id: '6', default: false }, { id: 'Add9', default: true },
+    { id: 'Maj9', default: false }, { id: 'Min9', default: false }
+  ];
+  function modShortLabel(id) {
+    if (id === 'Triad') return t('modTriadShort');
+    if (id === '7th') return t('mod7Short');
+    return id;
+  }
+  function buildModifierCheckboxes() {
+    const checked = new Set(currentModifiers.length ? currentModifiers : (savedModifiers || allAvailableModifiers.filter(m => m.default).map(m => m.id)));
+    modifierCheckboxes.innerHTML = '';
+    allAvailableModifiers.forEach(mod => {
+      const label = document.createElement('label');
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.value = mod.id;
+      input.checked = checked.has(mod.id);
+      input.addEventListener('change', updateModifiersList);
+      label.appendChild(input);
+      label.appendChild(document.createTextNode(' ' + t('modName_' + mod.id)));
+      modifierCheckboxes.appendChild(label);
+    });
+  }
+
+  // --- MUSIC THEORY / STATE ---
+  let leftChordNames = [];
+  let currentKeyRootIdx = 0;
+  let isChromatic = false;
+  let currentScaleType = 'maj';
+  let activeNoteIdx = 0;
+  let activeTypeIdx = 0;
+  let currentlyPlayingKeys = [];
+  let leftLabels = [];   // what the number panel and pads show: 'ii Dm' (names only in Chromatic)
+  let keyNumerals = [];
+  // What each hand shows, held steady (shared/hands.js); numberNow 0 = fist, null = not in view.
+  const numberSteady = createSteady(), typeSteady = createSteady();
+  let numberNow = null, handsPlaying = false;
+  let wasTriggering = false;
+
+  let engineStarted = false;
+  let audioReady = false;
+  let visionReady = false;
+  let cameraReady = false;
+  let handLandmarker = null, faceLandmarker = null, currentStream = null;
+
+  let kbdTrigger = false, mouseTrigger = false;
+  let sustainKey = false, sustainBrow = false, sustainLatchOn = false;
+  let browSustainOn = true; // eyebrow-raise sustain; off for singers
+  const sustainActive = () => sustainBrow || sustainKey || sustainLatchOn;
+  // "Touch Pads (no camera)" is a regular accessibility mode now — phones
+  // default to full camera hand-tracking like desktop.
+  const touchOnly = () => accMode.value === 'touch';
+  const visionOn = () => cameraReady && visionReady && accMode.value !== 'keyboard' && !touchOnly();
+  function applyTouchClass() { document.body.classList.toggle('touch-mode', touchOnly()); }
+
+  function updateModifiersList() {
+    const checkedBoxes = [...modifierCheckboxes.querySelectorAll('input:checked')];
+    currentModifiers = checkedBoxes.map(box => box.value);
+    if (currentModifiers.length === 0) {
+      currentModifiers = ['Triad'];
+      const cb = modifierCheckboxes.querySelector('input[value="Triad"]');
+      if (cb) cb.checked = true;
+    }
+    activeTypeIdx = 0;
+    releaseAudio();
+    saveSettings();
+    buildTouchPads();
+    updateTutorialText();
+  }
+
+  function updateKeyContext() {
+    const solfege = notationSelector.value === 'solfeggio';
+    const key = parseKey(modeSelector.value);
+    isChromatic = key.chromatic;
+    if (!key.chromatic) {
+      currentKeyRootIdx = key.rootIdx;
+      currentScaleType = key.scaleType;
+    }
+    leftChordNames = keyChordNames(key, solfege);
+    keyNumerals = key.chromatic ? [] : leftChordNames.map((_, d) => chordNumeral(d, theoryChordInfo({ key, degree: d, modifiers: ['Triad', null] }).suffix));
+    leftLabels = leftChordNames.map((name, d) => (key.chromatic ? name : `${keyNumerals[d]} ${name}`));
+    lastUpper = null; // a new key starts its smooth chords afresh
+    if (activeNoteIdx >= leftChordNames.length) activeNoteIdx = 0;
+    updateModifiersList();
+  }
+
+  // Smooth chords (Chord Style setting): the root in the bass, and the notes
+  // above moved as little as possible from the last chord played (lastUpper,
+  // set in playChord, so a held chord never re-voices itself).
+  let lastUpper = null;
+  const smoothChords = () => chordStyleSelector.value === 'smooth';
+
+  // What the current gesture/keypress/tap means musically.
+  function getChordInfo() {
+    const key = isChromatic ? { chromatic: true } : { chromatic: false, rootIdx: currentKeyRootIdx, scaleType: currentScaleType };
+    const octave = parseInt(octaveSelector.value, 10);
+    const degree = Math.max(0, Math.min(leftChordNames.length - 1, activeNoteIdx));
+    const info = theoryChordInfo({
+      key,
+      degree,
+      modifiers: pickModifiers(currentModifiers, activeTypeIdx),
+      octave,
+      solfege: notationSelector.value === 'solfeggio',
+    });
+    info.label = isChromatic ? info.name : `${chordNumeral(degree, info.suffix)} · ${info.name}`;
+    return smoothChords() ? voiceChord(info, { prevUpper: lastUpper, tonicMidi: keyTonicMidi(key, octave) }) : info;
+  }
+
+  // --- AUDIO ENGINE (the instrument rack lives in shared/sound.js) ---
+  let rack = null;
+  let instruments = {};
+  let currentInstrument = 'piano';
+  let recorder = null, streamDest = null;
+
+  function disposeAudioNodes() {
+    if (rack) rack.dispose();
+    try { if (recorder) recorder.dispose(); } catch { /* already disposed */ }
+    rack = null;
+    instruments = {};
+    recorder = null;
+    streamDest = null;
+  }
+
+  async function initAudio() {
+    if (audioReady) return;
+    await startAudio();
+    disposeAudioNodes();
+    rack = await createRack({ onSamplesLoading: () => showLoading('loadingSamples') });
+    instruments = rack.instruments;
+
+    recorder = new Tone.Recorder();
+    rack.master.connect(recorder);
+    // Raw MediaStream of the master mix, used when recording screen + audio together.
+    streamDest = Tone.getContext().rawContext.createMediaStreamDestination();
+    rack.master.connect(streamDest);
+
+    audioReady = true;
+  }
+
+  function applyVolume() {
+    if (rack) rack.setVolume(volumeSelector.value);
+  }
+
+  // Push every pre-boot setting into the freshly built engine so nothing chosen
+  // before "Start Engine" is lost.
+  function syncAudioSettings() {
+    currentInstrument = instrumentSelector.value;
+    applyVolume();
+    updateKeyContext();
+  }
+
+  // Stuck-note strategy: releasing a live chord always uses the leak-proof
+  // releaseAll on every instrument, so every voice gets a note-off and nothing
+  // can ever hang. liveNotes tracks what we attacked.
+  let liveNotes = [];
+
+  function releaseLiveVoices(now) {
+    if (!audioReady) return;
+    for (const key in instruments) instruments[key].releaseAll(now);
+    liveNotes = [];
+  }
+
+  function playChord(info) {
+    if (!audioReady || !instruments[currentInstrument]) return;
+    const now = Tone.now();
+    if (!sustainActive()) releaseLiveVoices(now);
+    instruments[currentInstrument].triggerAttack(info.freqs, now + 0.01);
+    if (info.upper) lastUpper = info.upper;
+    liveNotes = liveNotes.concat(info.freqs);
+    currentlyPlayingKeys = info.freqs;
+    setChordDisplay(info);
+    lastActivityTime = Date.now();
+  }
+
+  function releaseAudio() {
+    if (audioReady) {
+      const now = Tone.now();
+      for (const key in instruments) instruments[key].releaseAll(now);
+    }
+    liveNotes = [];
+    currentlyPlayingKeys = [];
+    clearChordDisplay();
+  }
+
+  // --- LIVE CHORD DISPLAY ---
+  const chordDisplayState = { name: '', notes: [], playing: false, fadeStart: 0 };
+  function setChordDisplay(info) {
+    chordDisplayState.name = info.label;
+    chordDisplayState.notes = info.noteNames;
+    chordDisplayState.playing = true;
+    chordLive.textContent = `${t('playingLabel')}: ${info.label} (${info.noteNames.join(', ')})`;
+    if (touchOnly()) {
+      chordBannerName.textContent = info.label;
+      chordBannerNotes.textContent = info.noteNames.join(' · ');
+      chordBanner.classList.remove('idle');
+    }
+  }
+  function clearChordDisplay() {
+    if (!chordDisplayState.playing) return;
+    chordDisplayState.playing = false;
+    chordDisplayState.fadeStart = performance.now();
+    chordLive.textContent = '';
+    chordBanner.classList.add('idle');
+  }
+
+  // --- RECORDER ---
+  let isRecording = false, recStartTime = 0, recTimer = null;
+  const fmtTime = ms => {
+    const s = Math.floor(ms / 1000);
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  };
+  function updateRecordButtons() {
+    recordBtn.textContent = isRecording ? fmtTime(Date.now() - recStartTime) : 'REC';
+    recordBtn.classList.toggle('recording', isRecording);
+    recordBtn.setAttribute('aria-label', t(isRecording ? 'recStopAria' : 'recordAria'));
+    touchRecordBtn.textContent = isRecording ? fmtTime(Date.now() - recStartTime) : '';
+    touchRecordBtn.classList.toggle('recording', isRecording);
+    touchRecordBtn.setAttribute('aria-label', t(isRecording ? 'recStopAria' : 'recordAria'));
+  }
+  let recMode = 'audio'; // 'audio' | 'screen'
+  let screenRecorder = null, screenStream = null, screenChunks = [];
+
+  // Encode an AudioBuffer as 16-bit PCM WAV so audio exports open anywhere.
+  function audioBufferToWavBlob(buffer) {
+    const numCh = Math.min(2, buffer.numberOfChannels || 1);
+    const rate = buffer.sampleRate;
+    const frames = buffer.length;
+    const dataSize = frames * numCh * 2;
+    const ab = new ArrayBuffer(44 + dataSize);
+    const dv = new DataView(ab);
+    const wstr = (off, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(off + i, s.charCodeAt(i)); };
+    wstr(0, 'RIFF'); dv.setUint32(4, 36 + dataSize, true); wstr(8, 'WAVE');
+    wstr(12, 'fmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true);
+    dv.setUint16(22, numCh, true); dv.setUint32(24, rate, true);
+    dv.setUint32(28, rate * numCh * 2, true); dv.setUint16(32, numCh * 2, true); dv.setUint16(34, 16, true);
+    wstr(36, 'data'); dv.setUint32(40, dataSize, true);
+    const chans = [];
+    for (let c = 0; c < numCh; c++) chans.push(buffer.getChannelData(c));
+    let off = 44;
+    for (let i = 0; i < frames; i++) {
+      for (let c = 0; c < numCh; c++) {
+        const s = Math.max(-1, Math.min(1, chans[c][i]));
+        dv.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+        off += 2;
+      }
+    }
+    return new Blob([ab], { type: 'audio/wav' });
+  }
+
+  function downloadBlob(blob, prefix, ext) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = prefix + '-' + new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19) + '.' + ext;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
+  function beginRecordingUI() {
+    isRecording = true;
+    recStartTime = Date.now();
+    recTimer = setInterval(updateRecordButtons, 500);
+    updateRecordButtons();
+  }
+  // The REC button first asks what to capture: just the audio, or the screen too.
+  let recStarting = false; // true while the browser asks for the microphone
+  function toggleRecording(opener) {
+    if (!audioReady || !recorder || recStarting) return;
+    if (isRecording) { stopRecording(); return; }
+    $("rec-screen-btn").style.display = navigator.mediaDevices?.getDisplayMedia ? '' : 'none';
+    openModal(recChoiceModal, opener || null);
+  }
+  async function startAudioRecording() {
+    hideAllModals();
+    recStarting = true;
+    await connectVoice();
+    recStarting = false;
+    recMode = 'audio';
+    recorder.start();
+    beginRecordingUI();
+  }
+  // Brief overlay shown while a finished recording is assembled/encoded, so the
+  // heavy work happens AFTER capture instead of stuttering the live interface.
+  function showFinalizing() {
+    uiLayer.style.display = 'flex';
+    uiLayer.innerHTML = `<div class="loading-text"><div class="boot-logo">${LOGO_SVG}</div><h2 class="loading-sub">${t('finalizingVideo')}</h2></div>`;
+  }
+  function hideFinalizing() { uiLayer.style.display = 'none'; uiLayer.innerHTML = ''; }
+  const nextPaint = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+  async function startScreenRecording() {
+    hideAllModals();
+    let stream;
+    try {
+      // Cap the capture at 30 fps so software encoders don't choke the UI.
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: 30 }, audio: false });
+    } catch { return; } // user dismissed the browser's screen picker
+    // Ask for the mic only after the screen picker: the picker needs the click's user activation.
+    recStarting = true;
+    await connectVoice();
+    recStarting = false;
+    recMode = 'screen';
+    screenStream = stream;
+    const mixed = new MediaStream([...stream.getVideoTracks(), ...streamDest.stream.getAudioTracks()]);
+    // Prefer hardware-accelerated codecs (MP4/H.264 first — shareable and fast
+    // where available; then lightweight VP8; VP9 only as a last resort since its
+    // software encoder is the usual cause of recording lag).
+    const mime = ['video/mp4;codecs=avc1,mp4a', 'video/mp4', 'video/webm;codecs=vp8,opus', 'video/webm;codecs=vp9,opus', 'video/webm']
+      .find(m => MediaRecorder.isTypeSupported(m)) || '';
+    const opts = { videoBitsPerSecond: 8000000, audioBitsPerSecond: 128000 };
+    if (mime) opts.mimeType = mime;
+    screenChunks = [];
+    screenRecorder = new MediaRecorder(mixed, opts);
+    screenRecorder.ondataavailable = (e) => { if (e.data && e.data.size) screenChunks.push(e.data); };
+    screenRecorder.onstop = async () => {
+      showFinalizing();
+      await nextPaint(); // let the overlay paint before assembling the file
+      const type = (screenRecorder && screenRecorder.mimeType) || mime || 'video/webm';
+      downloadBlob(new Blob(screenChunks, { type }), 'chordigits-video', type.includes('mp4') ? 'mp4' : 'webm');
+      screenChunks = [];
+      if (screenStream) screenStream.getTracks().forEach(tr => tr.stop());
+      screenStream = null;
+      screenRecorder = null;
+      hideFinalizing();
+    };
+    // If the user ends the share from the browser chrome, wrap up the recording.
+    stream.getVideoTracks()[0].addEventListener('ended', () => { if (isRecording && recMode === 'screen') stopRecording(); });
+    screenRecorder.start(); // no timeslice → one blob at stop, minimal overhead
+    beginRecordingUI();
+  }
+  async function stopRecording() {
+    clearInterval(recTimer);
+    isRecording = false;
+    updateRecordButtons();
+    if (recMode === 'screen') {
+      if (screenRecorder && screenRecorder.state !== 'inactive') screenRecorder.stop(); // onstop finalizes
+      disconnectVoice();
+    } else {
+      const blob = await recorder.stop();
+      disconnectVoice();
+      showFinalizing();
+      await nextPaint();
+      try {
+        // Re-encode the compressed capture as WAV — universally usable.
+        const buf = await Tone.getContext().rawContext.decodeAudioData(await blob.arrayBuffer());
+        downloadBlob(audioBufferToWavBlob(buf), 'chordigits-audio', 'wav');
+      } catch (err) {
+        console.warn('WAV conversion failed, saving original capture', err);
+        const ext = blob.type.includes('mp4') ? 'm4a' : (blob.type.includes('ogg') ? 'ogg' : 'webm');
+        downloadBlob(blob, 'chordigits-audio', ext);
+      }
+      hideFinalizing();
+    }
+  }
+
+  // --- PATREON NAG (a natural pause: 10 s with no chord after playing; at most
+  // every 40 min, shared with the hub's other tools; × and Escape work at once) ---
+  const FIRST_NAG_MS = 3 * 60 * 1000;
+  const NAG_INTERVAL_MS = 40 * 60 * 1000;
+  const NAG_KEY = 'open-music-tools.supportPrompt';
+  const nagShownAt = () => { try { return Number(localStorage.getItem(NAG_KEY)) || 0; } catch { return 0; } };
+  const NAG_IDLE_MS = 10 * 1000;
+  let nagEligibleAt = null;
+  let lastActivityTime = Date.now();
+
+  let nagLocked = false, nagCountdownTimer = null;
+  function startNagCountdown() {
+    // No countdown any more: Continue and × work at once.
+    nagLocked = false;
+    nagCloseBtn.style.display = '';
+    skipNagBtn.disabled = false;
+    skipNagBtn.textContent = t('nagContinue');
+    skipNagBtn.focus({ preventScroll: true });
+    try { localStorage.setItem(NAG_KEY, String(Date.now())); } catch { /* storage unavailable */ }
+  }
+  function nagDismissed() {
+    nagEligibleAt = Date.now() + NAG_INTERVAL_MS;
+    if (nagCountdownTimer) { clearInterval(nagCountdownTimer); nagCountdownTimer = null; }
+    nagLocked = false;
+  }
+  function dismissNag() { if (nagLocked) return; hideAllModals(); }
+  function checkNag() {
+    if (!engineStarted || nagEligibleAt === null) return;
+    if (patreonNag.style.display === 'flex') return;
+    if (Date.now() < nagEligibleAt) return;
+    if (nagShownAt() && Date.now() - nagShownAt() < NAG_INTERVAL_MS) return;
+    if (currentDialog()) return;
+    if (isRecording) return;
+    if (currentlyPlayingKeys.length > 0) { lastActivityTime = Date.now(); return; }
+    if (Date.now() - lastActivityTime < NAG_IDLE_MS) return; // wait for a 10 s idle window
+    openModal(patreonNag, null);
+    startNagCountdown();
+  }
+  setInterval(checkNag, 1000);
+
+  // --- LOADING / ERROR SCREENS ---
+  // The browser's bar follows the theme's page colour.
+  function syncThemeBar() {
+    const bar = document.querySelector('meta[name="theme-color"]');
+    const page = getComputedStyle(document.body).getPropertyValue('--bg-page').trim();
+    if (bar && page) bar.setAttribute('content', page);
+  }
+  const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" aria-hidden="true">
+    <defs>
+      <linearGradient id="ringLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:var(--color-left)" stop-opacity="1"/><stop offset="100%" style="stop-color:var(--color-left)" stop-opacity="0.1"/>
+      </linearGradient>
+      <linearGradient id="ringRight" x1="100%" y1="100%" x2="0%" y2="0%">
+        <stop offset="0%" style="stop-color:var(--color-right)" stop-opacity="1"/><stop offset="100%" style="stop-color:var(--color-right)" stop-opacity="0.1"/>
+      </linearGradient>
+      <linearGradient id="diamondGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:var(--color-left)"/><stop offset="100%" style="stop-color:var(--color-right)"/>
+      </linearGradient>
+      <filter id="glass-glow" x="-30%" y="-30%" width="160%" height="160%">
+        <feGaussianBlur stdDeviation="12" result="blur" /><feComposite in="SourceGraphic" in2="blur" operator="over" />
+      </filter>
+      <filter id="intense-glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="8" result="blur1" /><feGaussianBlur stdDeviation="20" result="blur2" />
+        <feMerge><feMergeNode in="blur2" /><feMergeNode in="blur1" /><feMergeNode in="SourceGraphic" /></feMerge>
+      </filter>
+    </defs>
+    <circle cx="190" cy="256" r="140" style="fill:var(--color-left)" opacity="0.04" filter="url(#glass-glow)" />
+    <circle cx="322" cy="256" r="140" style="fill:var(--color-right)" opacity="0.06" filter="url(#glass-glow)" />
+    <g filter="url(#glass-glow)">
+      <circle cx="190" cy="256" r="140" fill="none" stroke="url(#ringLeft)" stroke-width="14" />
+      <circle cx="190" cy="256" r="60" fill="none" style="stroke:var(--color-left)" stroke-width="4" stroke-dasharray="6 12" opacity="0.4" />
+      <circle cx="190" cy="256" r="10" style="fill:var(--color-left)" opacity="0.9" />
+    </g>
+    <g filter="url(#glass-glow)">
+      <circle cx="322" cy="256" r="140" fill="none" stroke="url(#ringRight)" stroke-width="14" />
+      <circle cx="322" cy="256" r="60" fill="none" style="stroke:var(--color-right)" stroke-width="4" stroke-dasharray="6 12" opacity="0.5" />
+      <circle cx="322" cy="256" r="10" style="fill:var(--color-right)" opacity="0.9" />
+    </g>
+    <line x1="190" y1="256" x2="322" y2="256" style="stroke:var(--color-left)" stroke-width="3" stroke-dasharray="4 8" opacity="0.3" />
+    <g filter="url(#intense-glow)">
+      <path d="M 256 210 L 302 256 L 256 302 L 210 256 Z" fill="none" style="stroke:var(--color-right)" stroke-width="4" opacity="0.8" />
+      <path d="M 256 228 L 284 256 L 256 284 L 228 256 Z" fill="url(#diamondGrad)" />
+    </g>
+  </svg>`;
+  function showLoading(key) {
+    uiLayer.style.display = 'flex';
+    uiLayer.innerHTML = `<div class="loading-text"><div class="boot-logo">${LOGO_SVG}</div><h1 class="brand-title">CHORDIGITS</h1><h2 class="loading-sub">${t(key)}</h2></div>`;
+  }
+  function showError(titleKey, bodyKey, err, retryFn, offerKeyboard) {
+    uiLayer.style.display = 'flex';
+    uiLayer.innerHTML = `<div class="loading-text">
+      <h1 class="brand-title">CHORDIGITS</h1>
+      <h2 class="error-title">${t(titleKey)}</h2>
+      <p class="error-body">${t(bodyKey)}</p>
+      <div class="error-actions"></div>
+    </div>`;
+    const actions = uiLayer.querySelector('.error-actions');
+    const mk = (label, fn) => {
+      const b = document.createElement('button');
+      b.className = 'settings-action-btn';
+      b.textContent = label;
+      b.addEventListener('click', fn);
+      actions.appendChild(b);
+      return b;
+    };
+    if (err) console.warn('Chordigits:', err);
+    const retryBtn = mk(t('retry'), retryFn);
+    // On camera trouble, offer the fitting no-camera fallback (touch pads on
+    // touchscreens, keyboard mode elsewhere) as the main button: Retry rarely
+    // helps once the camera was refused.
+    if (offerKeyboard) {
+      const way = mk(IS_MOBILE ? t('useTouch') : t('useKeyboard'), IS_MOBILE ? switchToTouchMode : switchToKeyboardMode);
+      way.classList.add('boot-cta');
+      way.focus();
+    } else retryBtn.focus();
+  }
+  function switchToNoCameraMode(value) {
+    accMode.value = value;
+    buildKeyOptions();
+    updateKeyContext();
+    applyTouchClass();
+    setupCustomSelects();
+    updateTutorialText();
+    saveSettings();
+    stopCamera();
+    buildTouchPads();
+    finishStartup();
+  }
+  const switchToKeyboardMode = () => switchToNoCameraMode('keyboard');
+  const switchToTouchMode = () => switchToNoCameraMode('touch');
+
+  // --- STARTUP PIPELINE ---
+  // Audio, tracking models and the camera request all start in PARALLEL, so the
+  // webcam permission prompt appears the moment "Start Engine" is pressed
+  // instead of after every sample and model has finished downloading.
+  async function startEngine() {
+    bootModal.style.display = 'none';
+    showLoading('loadingAudio');
+    const wantVision = accMode.value !== 'keyboard' && !touchOnly();
+    const camP = wantVision ? initCamera().then(() => null, err => err) : null;
+    const visionP = wantVision ? initVisionModels().then(() => null, err => err) : null;
+    try {
+      await initAudio();
+    } catch (err) {
+      console.error('Audio initialization failed', err);
+      showError('errAudioTitle', 'errAudioBody', err, startEngine, false);
+      return;
+    }
+    if (!wantVision) { finishStartup(); return; }
+    showLoading('loadingModels');
+    const visErr = await visionP;
+    if (visErr) { console.error('Model load failed', visErr); showError('errModelsTitle', 'errModelsBody', visErr, startVision, true); return; }
+    showLoading('loadingCamera');
+    const camErr = await camP;
+    if (camErr) { console.error('Camera failed', camErr); showError('errCameraTitle', 'errCameraBody', camErr, startVision, true); return; }
+    finishStartup();
+  }
+
+  async function initVisionModels() {
+    const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm');
+    handLandmarker = await HandLandmarker.createFromOptions(vision, {
+      baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task', delegate: 'GPU' },
+      runningMode: 'VIDEO', numHands: 2
+    });
+    faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+      baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: 'GPU' },
+      outputFaceBlendshapes: true, runningMode: 'VIDEO', numFaces: 1
+    });
+    visionReady = true;
+  }
+  async function initCamera() {
+    // Ask for camera AND microphone together (one prompt). The mic is mixed
+    // into recordings only — it is never monitored, so there is no feedback.
+    try {
+      currentStream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 1280, height: 720 },
+        audio: { echoCancellation: true, noiseSuppression: true }
+      });
+    } catch (err) {
+      // Mic may be missing/denied separately — fall back to camera-only.
+      currentStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
+    }
+    video.srcObject = currentStream;
+    await new Promise(res => {
+      if (video.readyState >= 2) res();
+      else video.addEventListener('loadeddata', res, { once: true });
+    });
+    cameraReady = true;
+    lastVideoTime = -1;
+    resetCalibration();
+  }
+  // --- VOICE IN RECORDINGS ("Record my voice" switch in the recording window) ---
+  // While a recording with the switch on runs, the mic is routed into BOTH
+  // recording paths (Tone.Recorder for audio takes and streamDest for screen
+  // recordings). Camera modes reuse the camera's mic; keyboard and touch modes
+  // ask for the mic when such a recording starts and close it when it ends.
+  // The mic is never monitored, so there is no feedback.
+  let micTapSrc = null, micTapGain = null, micTapStream = null, micOnlyStream = null;
+  function closeMicTap() {
+    try { if (micTapSrc) micTapSrc.disconnect(); if (micTapGain) micTapGain.disconnect(); } catch { /* ignore */ }
+    micTapSrc = null; micTapGain = null; micTapStream = null;
+  }
+  async function connectVoice() {
+    if (!recVoiceToggle.checked) return;
+    let stream = currentStream && currentStream.getAudioTracks().length ? currentStream : null;
+    if (!stream) {
+      try {
+        micOnlyStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+        stream = micOnlyStream;
+      } catch (err) {
+        // No mic or permission refused: record the instruments only.
+        console.warn('Microphone unavailable', err);
+        recVoiceToggle.checked = false;
+        return;
+      }
+    }
+    try {
+      if (micTapStream !== stream) {
+        closeMicTap();
+        const rawCtx = Tone.getContext().rawContext;
+        micTapSrc = rawCtx.createMediaStreamSource(stream);
+        micTapGain = rawCtx.createGain();
+        micTapGain.gain.value = 1;
+        micTapSrc.connect(micTapGain);
+        micTapStream = stream;
+      }
+      if (streamDest) micTapGain.connect(streamDest);
+      if (recorder) Tone.connect(micTapGain, recorder);
+    } catch (err) { console.warn('Mic tap failed', err); }
+  }
+  function disconnectVoice() {
+    try { if (micTapGain) micTapGain.disconnect(); } catch { /* ignore */ }
+    if (micOnlyStream) {
+      if (micTapStream === micOnlyStream) closeMicTap();
+      micOnlyStream.getTracks().forEach(tr => tr.stop());
+      micOnlyStream = null;
+    }
+  }
+  function stopCamera() {
+    if (currentStream) currentStream.getTracks().forEach(tr => tr.stop());
+    if (micTapStream && micTapStream === currentStream) closeMicTap();
+    currentStream = null;
+    video.srcObject = null;
+    cameraReady = false;
+  }
+  // Sequential fallback used for retries and accessibility-mode switches.
+  async function startVision() {
+    if (!visionReady) {
+      showLoading('loadingModels');
+      try { await initVisionModels(); }
+      catch (err) { console.error('Model load failed', err); showError('errModelsTitle', 'errModelsBody', err, startVision, true); return; }
+    }
+    if (!cameraReady) {
+      showLoading('loadingCamera');
+      try { await initCamera(); }
+      catch (err) { console.error('Camera failed', err); showError('errCameraTitle', 'errCameraBody', err, startVision, true); return; }
+    }
+    finishStartup();
+  }
+
+  function finishStartup() {
+    uiLayer.style.display = 'none';
+    applyTouchClass();
+    if (!engineStarted) {
+      engineStarted = true;
+      document.body.classList.add('engine-on');
+      topRightMenu.style.display = 'flex';
+      nagEligibleAt = Date.now() + FIRST_NAG_MS;
+      lastActivityTime = Date.now();
+      buildTouchPads();
+      sizeCanvas();
+      requestAnimationFrame(renderLoop);
+    }
+    syncAudioSettings();
+  }
+
+  // --- BROW CALIBRATION ---
+  let calib = { done: true, startedAt: 0, samples: [] };
+  function resetCalibration() { calib = { done: false, startedAt: 0, samples: [] }; }
+
+  // --- COMPUTER VISION ---
+  const handConnections = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
+  const visionState = { hands: [] };
+  const fingerMemory = { Left: null, Right: null }; // last reading per hand, for readFingers' margin
+  const faceState = { present: false, brow: 0 };
+  let frameCount = 0;
+  let lastVideoTime = -1;
+  let lastFrameAdvanceMs = 0;   // when the camera feed last delivered a new frame
+  let handsGoneSince = 0;       // when hands last disappeared from frame
+  let sweepDone = false;        // one releaseAll sweep per hands-gone episode
+
+
+  // Precision aspect-crop matching (mirrored view)
+  function mapLandmarkToCanvas(lm, w, h) {
+    const vw = video.videoWidth || 1280, vh = video.videoHeight || 720;
+    const videoRatio = vw / vh;
+    const windowRatio = w / h;
+    const rx = 1 - lm.x;
+    if (windowRatio > videoRatio) {
+      const renderedHeight = w / videoRatio;
+      return { x: rx * w, y: lm.y * renderedHeight - (renderedHeight - h) / 2 };
+    }
+    const renderedWidth = h * videoRatio;
+    return { x: rx * renderedWidth - (renderedWidth - w) / 2, y: lm.y * h };
+  }
+
+  function processVision(nowMs) {
+    if (!handLandmarker || video.readyState < 2) return;
+    if (video.currentTime === lastVideoTime) return; // no new frame
+    lastVideoTime = video.currentTime;
+    lastFrameAdvanceMs = nowMs;
+    frameCount++;
+
+    const results = handLandmarker.detectForVideo(video, nowMs);
+    visionState.hands = [];
+    const lms = results.landmarks || [];
+    const handedness = results.handednesses || results.handedness || [];
+    for (let i = 0; i < lms.length; i++) {
+      const lm = lms[i];
+      const raw = handedness[i]?.[0]?.categoryName || null;
+      // MediaPipe labels assume mirrored (selfie) input; getUserMedia frames are
+      // unmirrored, so swap the label to get the user's true hand.
+      let userHand;
+      if (raw === 'Left') userHand = 'Right';
+      else if (raw === 'Right') userHand = 'Left';
+      else userHand = (1 - lm[0].x) < 0.5 ? 'Left' : 'Right';
+      // World points (metres) read fingers the same at any distance or angle.
+      const world = results.worldLandmarks?.[i];
+      const fingers = world ? readFingers(world, fingerMemory[userHand]) : null;
+      fingerMemory[userHand] = fingers;
+      visionState.hands.push({ lm, userHand, number: fingers ? chordNumber(fingers, world, sixSevenSel.value) : null, count: fingers ? countFingers(fingers) : null });
+    }
+    if (visionState.hands.length > 0) lastActivityTime = Date.now();
+
+    // FaceLandmarker runs every 2nd frame; values are held in between.
+    if (faceLandmarker && frameCount % 2 === 0) {
+      const fr = faceLandmarker.detectForVideo(video, nowMs);
+      const cats = fr.faceBlendshapes?.[0]?.categories;
+      if (cats) {
+        faceState.present = true;
+        faceState.brow = cats.find(c => c.categoryName === 'browInnerUp')?.score || 0;
+      } else {
+        faceState.present = false;
+      }
+      if (!calib.done && faceState.present) {
+        if (!calib.startedAt) calib.startedAt = Date.now();
+        calib.samples.push(faceState.brow);
+        if (Date.now() - calib.startedAt >= 2000 && calib.samples.length >= 8) {
+          const avg = calib.samples.reduce((a, b) => a + b, 0) / calib.samples.length;
+          browThreshold = Math.min(0.7, Math.max(0.35, avg + 0.25));
+          calib.done = true;
+          saveSettings();
+        }
+      }
+    }
+  }
+
+
+  // The number panel sits on the number hand's side.
+  function computeLayout() {
+    return handednessMode.value === 'right' ? { left: 'type', right: 'note' } : { left: 'note', right: 'type' };
+  }
+
+  function arraysEqual(a, b) {
+    if (a === b) return true;
+    if (a == null || b == null || a.length !== b.length) return false;
+    for (let i = 0; i < a.length; ++i) if (a[i] !== b[i]) return false;
+    return true;
+  }
+
+  // --- THEME CACHE (computed once per theme change, not per frame/item) ---
+  let themeCache = {};
+  function refreshThemeCache() {
+    const cs = getComputedStyle(document.body);
+    const g = v => cs.getPropertyValue(v).trim();
+    themeCache = {
+      colorLeft: g('--color-left'),
+      colorRight: g('--color-right'),
+      text: g('--color-text'),
+      textPinched: g('--color-text-pinched') || '#000000',
+      textInactive: g('--color-text-inactive'),
+      font: g('--font-main'),
+      blur: parseInt(g('--shadow-blur')) || 0,
+      isRetro: document.body.getAttribute('data-theme') === 'retro'
+    };
+  }
+
+  // uiScale shrinks canvas text/overlays proportionally on short screens
+  // (phone landscape) so the interface auto-fits instead of overflowing.
+  let uiScale = 1;
+  function sizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    uiScale = Math.max(0.55, Math.min(1, canvas.height / 640));
+  }
+
+  // --- RENDER LOOP ---
+  function renderLoop() {
+    const nowMs = performance.now();
+    // Touch-pads mode: the DOM pads drive the audio directly and the canvas is
+    // hidden — skip the whole gate/draw pass (it would auto-release pad-held
+    // notes) but keep the loop alive for mode switches.
+    if (touchOnly()) { requestAnimationFrame(renderLoop); return; }
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    const mode = accMode.value;
+    const active = visionOn();
+    const layout = computeLayout();
+    if (activeNoteIdx >= leftChordNames.length) activeNoteIdx = 0;
+    if (activeTypeIdx >= currentModifiers.length) activeTypeIdx = 0;
+
+    const zones = {
+      left: { x: W * 0.25 + uiOffsets.lx / 100 * W, y: H * 0.5 + uiOffsets.ly / 100 * H, r: H * 0.25 * (uiOffsets.ls / 100), shape: leftShape.value },
+      right: { x: W * 0.75 + uiOffsets.rx / 100 * W, y: H * 0.5 + uiOffsets.ry / 100 * H, r: H * 0.25 * (uiOffsets.rs / 100), shape: rightShape.value }
+    };
+
+    if (active) {
+      processVision(nowMs);
+      // If the camera feed froze (tab switch, device hiccup), the last detected
+      // hands are stale — never let a frozen count keep holding notes.
+      if (visionState.hands.length > 0 && lastFrameAdvanceMs && nowMs - lastFrameAdvanceMs > 1000) visionState.hands = [];
+      // The number hand picks I to VII (a fist stops); the other hand the kind
+      // of chord (fist or out of view: the first kind, the key's own chord).
+      const numberHand = handednessMode.value === 'right' ? 'Right' : 'Left';
+      let numberRaw = null, typeRaw = null;
+      for (const hand of visionState.hands) {
+        if (hand.userHand === numberHand) numberRaw = hand.number; else typeRaw = hand.count;
+      }
+      numberNow = numberSteady.update(numberRaw, nowMs);
+      const typeNow = typeSteady.update(typeRaw, nowMs);
+      // A new chord only once both hands are steady, so moving both at once
+      // never plays the new number with the old kind (or the reverse); a fist
+      // or a hand gone stops at once.
+      const settled = (raw, now) => raw == null || raw === now;
+      if (!(numberNow > 0)) handsPlaying = false;
+      else if (settled(numberRaw, numberNow) && settled(typeRaw, typeNow)) {
+        handsPlaying = true;
+        activeNoteIdx = Math.min(numberNow, leftChordNames.length) - 1;
+        activeTypeIdx = Math.min(typeNow || 0, currentModifiers.length - 1);
+      }
+
+      // Eyebrow sustain with hysteresis around the calibrated threshold.
+      // Optional: singers move their brows, so it can be switched off entirely.
+      if (browSustainOn && faceState.present && calib.done) {
+        if (!sustainBrow && faceState.brow > browThreshold) sustainBrow = true;
+        else if (sustainBrow && faceState.brow < browThreshold - 0.1) sustainBrow = false;
+      } else {
+        sustainBrow = false;
+      }
+    } else {
+      sustainBrow = false;
+    }
+
+    // Trigger gate: a steady number from 1 to 7 plays.
+    let isTriggering = false;
+    if (mode === 'keyboard') isTriggering = kbdTrigger || mouseTrigger;
+    else if (active) isTriggering = handsPlaying;
+
+    if (uiEditMode) isTriggering = false; // no notes while laying out widgets
+    if (audioReady && engineStarted && !uiEditMode) {
+      const info = getChordInfo();
+      if (isTriggering && (!wasTriggering || !arraysEqual(currentlyPlayingKeys, info.freqs))) playChord(info);
+      if (!isTriggering && !sustainActive() && (currentlyPlayingKeys.length > 0 || liveNotes.length > 0)) releaseAudio();
+    }
+    wasTriggering = isTriggering;
+
+    // Stuck-note watchdog: hands out of frame + no sustain means NOTHING may
+    // keep ringing. Live notes are released immediately; 400 ms later one deep
+    // releaseAll sweep kills any orphaned voice the bookkeeping ever missed.
+    if (active && audioReady) {
+      if (visionState.hands.length > 0) {
+        handsGoneSince = 0;
+        sweepDone = false;
+      } else if (!sustainActive() && !isTriggering) {
+        if (!handsGoneSince) handsGoneSince = nowMs;
+        if (liveNotes.length > 0 || currentlyPlayingKeys.length > 0) releaseAudio();
+        if (!sweepDone && nowMs - handsGoneSince > 400) {
+          for (const key in instruments) instruments[key].releaseAll();
+          sweepDone = true;
+        }
+      }
+    }
+
+    // Draw widgets
+    const th = themeCache;
+    const typeLabels = currentModifiers.map(modShortLabel);
+    const leftItems = layout.left === 'type' ? typeLabels : leftLabels;
+    const rightItems = layout.right === 'type' ? typeLabels : leftLabels;
+    const lPinchRender = isTriggering, rPinchRender = isTriggering;
+    const leftIndices = [layout.left === 'type' ? activeTypeIdx : activeNoteIdx];
+    const rightIndices = [layout.right === 'type' ? activeTypeIdx : activeNoteIdx];
+
+    drawZone(zones.left, leftItems, leftIndices, lPinchRender, th.colorLeft);
+    drawZone(zones.right, rightItems, rightIndices, rPinchRender, th.colorRight);
+
+    if (uiEditMode) drawEditHandles(zones);
+
+
+    drawChordDisplay(nowMs, W);
+
+    if (sustainActive()) {
+      ctx.font = `bold ${Math.round((th.isRetro ? 26 : 20) * uiScale)}px ${th.font}`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = th.colorLeft;
+      ctx.fillText(t('sustainOn'), W / 2, 152 * uiScale);
+    }
+    if (active && !calib.done) {
+      ctx.font = `bold ${Math.round((th.isRetro ? 24 : 16) * uiScale)}px ${th.font}`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = th.colorRight;
+      ctx.fillText(t('calibrating'), W / 2, H - 70 * uiScale);
+    }
+
+    if (active) for (const hand of visionState.hands) drawSkeleton(hand, W, H);
+
+    requestAnimationFrame(renderLoop);
+  }
+
+  // --- DRAWING ENGINE (shared helpers consolidate the three widget shapes) ---
+  function setStyles(color, isPinched, isActive) {
+    if (isActive) {
+      ctx.fillStyle = isPinched ? color : 'transparent';
+      ctx.strokeStyle = color;
+      ctx.shadowBlur = isPinched ? themeCache.blur : 0;
+      ctx.shadowColor = color;
+    } else {
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.strokeStyle = 'rgba(128,128,128,0.2)';
+      ctx.shadowBlur = 0;
+    }
+    ctx.lineWidth = 2;
+  }
+  function getTextColor(isActive, isPinched, colorHex) {
+    if (isActive && isPinched) return themeCache.textPinched;
+    if (isActive) return colorHex;
+    return themeCache.textInactive;
+  }
+  function drawItemText(text, x, y, basePx, isActive, isPinched, colorHex) {
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = getTextColor(isActive, isPinched, colorHex);
+    ctx.font = `bold ${Math.round((themeCache.isRetro ? basePx + 6 : basePx) * uiScale)}px ${themeCache.font}`;
+    ctx.fillText(text, x, y);
+  }
+
+  function drawZone(z, items, activeIndices, isPinched, colorHex) {
+    if (!items || items.length === 0) return;
+    activeIndices = (activeIndices || []).map(i => ((i % items.length) + items.length) % items.length);
+    if (z.shape === 'wheel') drawWheel(z.x, z.y, z.r, items, activeIndices, isPinched, colorHex);
+    else if (z.shape === 'slider') drawPill(z.x, z.y, z.r * 1.1, z.r * 2, items, activeIndices, isPinched, colorHex);
+    else drawColumns(z.x, z.y, z.r * 2.2, z.r * 2, items, activeIndices, isPinched, colorHex);
+  }
+
+  function drawColumns(xCenter, yCenter, totalWidth, totalHeight, items, activeIndices, isPinched, colorHex) {
+    const cols = 2, rows = Math.max(1, Math.ceil(items.length / cols));
+    const itemWidth = totalWidth / cols, itemHeight = totalHeight / rows;
+    const startX = xCenter - totalWidth / 2, startY = yCenter - totalHeight / 2;
+    for (let i = 0; i < items.length; i++) {
+      const itemX = startX + (i % cols) * itemWidth, itemY = startY + Math.floor(i / cols) * itemHeight;
+      const isActive = activeIndices.includes(i);
+      setStyles(colorHex, isPinched, isActive);
+      const w = Math.max(1, itemWidth - 12), h = Math.max(1, itemHeight - 12);
+      const r = Math.min(12, w / 2, h / 2);
+      ctx.beginPath(); ctx.roundRect(itemX + 6, itemY + 6, w, h, r); ctx.fill(); ctx.stroke();
+      drawItemText(items[i], itemX + itemWidth / 2, itemY + itemHeight / 2, 16, isActive, isPinched, colorHex);
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  function drawPill(xCenter, yCenter, width, height, items, activeIndices, isPinched, colorHex) {
+    const itemHeight = Math.max(1, height / items.length), startY = yCenter - height / 2;
+    for (let i = 0; i < items.length; i++) {
+      const itemY = startY + i * itemHeight, isActive = activeIndices.includes(i);
+      setStyles(colorHex, isPinched, isActive);
+      const w = Math.max(1, width), h = Math.max(1, itemHeight - 8);
+      const r = Math.min(h / 2, w / 2);
+      ctx.beginPath(); ctx.roundRect(xCenter - w / 2, itemY + 4, w, h, r); ctx.fill(); ctx.stroke();
+      drawItemText(items[i], xCenter, itemY + itemHeight / 2, 16, isActive, isPinched, colorHex);
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  function drawWheel(x, y, radius, items, activeIndices, isPinched, colorHex) {
+    const sliceAngle = (Math.PI * 2) / Math.max(1, items.length);
+    for (let i = 0; i < items.length; i++) {
+      const isActive = activeIndices.includes(i);
+      setStyles(colorHex, isPinched, isActive);
+      ctx.beginPath();
+      ctx.arc(x, y, radius, i * sliceAngle, (i + 1) * sliceAngle);
+      ctx.arc(x, y, radius * 0.4, (i + 1) * sliceAngle, i * sliceAngle, true);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      const midAngle = i * sliceAngle + sliceAngle / 2;
+      const textRadius = radius * 0.4 + (radius - radius * 0.4) / 2;
+      drawItemText(items[i], x + textRadius * Math.cos(midAngle), y + textRadius * Math.sin(midAngle), 18, isActive, isPinched, colorHex);
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  function drawChordDisplay(nowMs, W) {
+    const st = chordDisplayState;
+    if (!st.name) return;
+    const alpha = st.playing ? 1 : Math.max(0, 1 - (nowMs - st.fadeStart) / 700);
+    if (alpha <= 0) return;
+    const th = themeCache;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.shadowColor = th.colorLeft;
+    ctx.shadowBlur = Math.max(th.blur, 14);
+    ctx.fillStyle = th.text;
+    ctx.font = `900 ${Math.round((th.isRetro ? 56 : 42) * uiScale)}px ${th.font}`;
+    ctx.fillText(st.name, W / 2, 74 * uiScale);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = th.colorRight;
+    ctx.font = `700 ${Math.round((th.isRetro ? 26 : 17) * uiScale)}px ${th.font}`;
+    ctx.fillText(st.notes.join('  ·  '), W / 2, 112 * uiScale);
+    ctx.restore();
+  }
+
+  function drawSkeleton(hand, W, H) {
+    const th = themeCache;
+    const glowColor = hand.userHand === 'Left' ? th.colorLeft : th.colorRight;
+    const pts = hand.lm.map(p => mapLandmarkToCanvas(p, W, H));
+    ctx.strokeStyle = glowColor; ctx.lineWidth = 3; ctx.shadowBlur = th.blur; ctx.shadowColor = glowColor;
+    for (const [i, j] of handConnections) { ctx.beginPath(); ctx.moveTo(pts[i].x, pts[i].y); ctx.lineTo(pts[j].x, pts[j].y); ctx.stroke(); }
+    ctx.fillStyle = th.text; ctx.shadowBlur = 0;
+    for (const p of pts) { ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill(); }
+    // What the camera reads: the number (IV) by the number hand, the count by the other.
+    const isNumber = hand.userHand === (handednessMode.value === 'right' ? 'Right' : 'Left');
+    const read = isNumber ? (hand.number ? keyNumerals[hand.number - 1] : hand.number) : hand.count;
+    if (read != null) {
+      ctx.font = `900 ${Math.round((th.isRetro ? 44 : 34) * uiScale)}px ${th.font}`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillStyle = th.text; ctx.shadowBlur = Math.max(th.blur, 12); ctx.shadowColor = glowColor;
+      ctx.fillText(String(read), pts[9].x, Math.min(...pts.map(q => q.y)) - 12 * uiScale);
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  // --- KEYBOARD MODE + SPACEBAR SUSTAIN ---
+  const ROOT_KEYS = { Digit1: 0, Digit2: 1, Digit3: 2, Digit4: 3, Digit5: 4, Digit6: 5, Digit7: 6, Digit8: 7, Digit9: 8, Digit0: 9, Minus: 10, Equal: 11 };
+  const MOD_KEYS = { KeyQ: 0, KeyW: 1, KeyE: 2, KeyR: 3, KeyT: 4, KeyY: 5, KeyU: 6, KeyI: 7 };
+
+  document.addEventListener('keydown', (e) => {
+    lastActivityTime = Date.now();
+    const onControl = e.target.closest && e.target.closest('input, select, textarea, button, a, [role="combobox"], [contenteditable]');
+    if (e.code === 'Space' && !onControl) { sustainKey = true; e.preventDefault(); }
+    if (e.repeat) return;
+    if (accMode.value !== 'keyboard' || onControl || currentDialog()) return;
+    // Keyboard mode triggers audio directly in the handlers (not the render
+    // loop) so latency never depends on animation-frame timing.
+    if (e.code in ROOT_KEYS) {
+      const i = ROOT_KEYS[e.code];
+      if (i < leftChordNames.length) {
+        activeNoteIdx = i;
+        if (kbdTrigger || mouseTrigger) kbdPlayNow();
+      }
+    } else if (e.code in MOD_KEYS) {
+      const i = MOD_KEYS[e.code];
+      if (i < currentModifiers.length) {
+        activeTypeIdx = i;
+        if (kbdTrigger || mouseTrigger) kbdPlayNow();
+      }
+    } else if (e.code === 'Enter') {
+      kbdTrigger = true;
+      kbdPlayNow();
+    }
+  });
+  document.addEventListener('keyup', (e) => {
+    if (e.code === 'Space') { sustainKey = false; kbdMaybeRelease(); }
+    if (e.code === 'Enter') { kbdTrigger = false; kbdMaybeRelease(); }
+  });
+  window.addEventListener('blur', () => { kbdTrigger = false; mouseTrigger = false; sustainKey = false; kbdMaybeRelease(); });
+  // A hidden tab pauses the render loop, so its release logic never runs —
+  // silence live notes on the way out (the mobile SUSTAIN latch is respected).
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden || !engineStarted) return;
+    sustainBrow = false; sustainKey = false; kbdTrigger = false; mouseTrigger = false;
+    if (!sustainLatchOn) releaseAudio();
+  });
+
+  function kbdPlayNow() {
+    if (!engineStarted || uiEditMode) return;
+    playChord(getChordInfo());
+    wasTriggering = true;
+  }
+  function kbdMaybeRelease() {
+    if (accMode.value !== 'keyboard') return;
+    if (!kbdTrigger && !mouseTrigger) {
+      wasTriggering = false;
+      if (!sustainActive() && currentlyPlayingKeys.length > 0) releaseAudio();
+    }
+  }
+
+  document.addEventListener('pointerdown', (e) => {
+    lastActivityTime = Date.now();
+    if (uiEditMode) return;
+    if (accMode.value === 'keyboard' && engineStarted && !currentDialog()) {
+      if (e.target === video || e.target.id === 'media-wrapper' || e.target.id === 'container') {
+        mouseTrigger = true;
+        kbdPlayNow();
+      }
+    }
+  });
+  document.addEventListener('pointerup', () => {
+    if (mouseTrigger) { mouseTrigger = false; kbdMaybeRelease(); }
+  });
+
+  // --- ON-CANVAS WIDGET EDIT MODE (drag to move, pull to resize — uniform scale) ---
+  // Every widget's size comes from a single radius `r`, so scaling is inherently
+  // uniform: a donut can never become an oval. Move updates lx/ly|rx/ry, resize
+  // updates ls|rs, all clamped to the same ranges the sliders use and persisted.
+  let uiEditMode = false;
+  let editDrag = null;
+  const clampN = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const BASE_X = { left: 0.25, right: 0.75 };
+
+  function zoneGeom(side, W, H) {
+    const o = uiOffsets;
+    const sz = side === 'left' ? o.ls : o.rs;
+    return {
+      x: W * BASE_X[side] + (side === 'left' ? o.lx : o.rx) / 100 * W,
+      y: H * 0.5 + (side === 'left' ? o.ly : o.ry) / 100 * H,
+      r: H * 0.25 * (sz / 100),
+      shape: (side === 'left' ? leftShape : rightShape).value
+    };
+  }
+  // Half-extents of each shape's bounding box, expressed as multiples of r.
+  function unitExtents(shape) {
+    if (shape === 'wheel') return { hw: 1, hh: 1 };
+    if (shape === 'slider') return { hw: 0.55, hh: 1 };
+    return { hw: 1.1, hh: 1 }; // columns/grid
+  }
+
+  function drawEditHandles(zones) {
+    const th = themeCache;
+    for (const side of ['left', 'right']) {
+      const z = zones[side];
+      const col = side === 'left' ? th.colorLeft : th.colorRight;
+      const { hw, hh } = unitExtents(z.shape);
+      const bw = hw * z.r, bh = hh * z.r;
+      ctx.save();
+      ctx.globalAlpha = 0.95;
+      ctx.setLineDash([9, 7]); ctx.lineWidth = 2; ctx.strokeStyle = col; ctx.shadowBlur = 0;
+      ctx.strokeRect(z.x - bw, z.y - bh, bw * 2, bh * 2);
+      ctx.setLineDash([]);
+      // size readout
+      ctx.fillStyle = col; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = `bold ${th.isRetro ? 22 : 15}px ${th.font}`;
+      ctx.fillText(Math.round(side === 'left' ? uiOffsets.ls : uiOffsets.rs) + '%', z.x, z.y - bh - 16);
+      // resize handle (bottom-right corner of the bounding box)
+      const hx = z.x + bw, hy = z.y + bh;
+      ctx.beginPath(); ctx.arc(hx, hy, 13, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
+      ctx.fillStyle = th.textPinched; ctx.font = `bold 15px ${th.font}`;
+      ctx.fillText('⤢', hx, hy + 1);
+      ctx.restore();
+    }
+  }
+
+  function editHitTest(px, py) {
+    const W = canvas.width, H = canvas.height;
+    const geo = { left: zoneGeom('left', W, H), right: zoneGeom('right', W, H) };
+    // Resize handles take priority over the body.
+    for (const side of ['left', 'right']) {
+      const z = geo[side]; const { hw, hh } = unitExtents(z.shape);
+      if (Math.hypot(px - (z.x + hw * z.r), py - (z.y + hh * z.r)) <= 18) {
+        return { side, kind: 'resize', uhw: hw, uhh: hh };
+      }
+    }
+    for (const side of ['left', 'right']) {
+      const z = geo[side]; const { hw, hh } = unitExtents(z.shape);
+      const inside = z.shape === 'wheel'
+        ? Math.hypot(px - z.x, py - z.y) <= z.r
+        : (Math.abs(px - z.x) <= hw * z.r && Math.abs(py - z.y) <= hh * z.r);
+      if (inside) return { side, kind: 'move', grabX: px - z.x, grabY: py - z.y };
+    }
+    return null;
+  }
+
+  function syncOffsetSliders() {
+    ['lx', 'ly', 'ls', 'rx', 'ry', 'rs'].forEach(id => { const el = $(id); if (el) el.value = Math.round(uiOffsets[id]); });
+  }
+
+  function enterUiEdit() {
+    if (touchOnly() || !engineStarted) return;
+    hideAllModals();
+    releaseAudio();
+    uiEditMode = true;
+    document.body.classList.add('ui-editing');
+    canvas.style.pointerEvents = 'auto';
+    $("ui-edit-done").focus();
+  }
+  function exitUiEdit() {
+    if (!uiEditMode) return;
+    uiEditMode = false; editDrag = null;
+    document.body.classList.remove('ui-editing');
+    canvas.style.pointerEvents = 'none';
+    saveSettings();
+  }
+
+  canvas.addEventListener('pointerdown', (e) => {
+    if (!uiEditMode) return;
+    const hit = editHitTest(e.clientX, e.clientY);
+    if (!hit) return;
+    e.preventDefault();
+    editDrag = hit;
+    try { canvas.setPointerCapture(e.pointerId); } catch { /* ignore */ }
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!uiEditMode || !editDrag) return;
+    const W = canvas.width, H = canvas.height, side = editDrag.side;
+    if (editDrag.kind === 'move') {
+      const nx = e.clientX - editDrag.grabX, ny = e.clientY - editDrag.grabY;
+      const ox = clampN(Math.round((nx - W * BASE_X[side]) / W * 100), -40, 40);
+      const oy = clampN(Math.round((ny - H * 0.5) / H * 100), -40, 40);
+      if (side === 'left') { uiOffsets.lx = ox; uiOffsets.ly = oy; } else { uiOffsets.rx = ox; uiOffsets.ry = oy; }
+    } else {
+      const z = zoneGeom(side, W, H);
+      // Uniform scale: map the finger's distance from centre along the corner
+      // diagonal back to a single radius, then to a size percentage.
+      const unitDiag = Math.hypot(editDrag.uhw, editDrag.uhh) || 1;
+      const newR = Math.hypot(e.clientX - z.x, e.clientY - z.y) / unitDiag;
+      const sz = clampN(Math.round(newR / (H * 0.25) * 100), 50, 150);
+      if (side === 'left') uiOffsets.ls = sz; else uiOffsets.rs = sz;
+    }
+    syncOffsetSliders();
+  });
+  window.addEventListener('pointerup', () => { if (editDrag) { editDrag = null; saveSettings(); } });
+
+  $("ui-drag-btn").addEventListener('click', enterUiEdit);
+  $("ui-edit-done").addEventListener('click', exitUiEdit);
+  document.addEventListener('keydown', (e) => { if (uiEditMode && e.key === 'Escape') { e.preventDefault(); exitUiEdit(); } }, true);
+  $("ui-edit-reset").addEventListener('click', () => {
+    Object.assign(uiOffsets, { lx: 0, ly: 0, ls: 100, rx: 0, ry: 0, rs: 100 });
+    syncOffsetSliders();
+    saveSettings();
+  });
+
+  // --- MOBILE TOUCH UI ---
+  const heldRootPointers = new Map();
+  function buildTouchPads() {
+    if (!touchOnly()) return;
+    touchRoots.innerHTML = '';
+    touchMods.innerHTML = '';
+    leftLabels.forEach((name, idx) => {
+      const b = document.createElement('button');
+      b.className = 'pad pad-root';
+      b.textContent = name;
+      b.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (b.setPointerCapture) try { b.setPointerCapture(e.pointerId); } catch { /* ignore */ }
+        heldRootPointers.set(e.pointerId, idx);
+        activeNoteIdx = idx;
+        b.classList.add('held');
+        if (audioReady) playChord(getChordInfo());
+        lastActivityTime = Date.now();
+      });
+      const up = (e) => {
+        if (!heldRootPointers.has(e.pointerId)) return;
+        heldRootPointers.delete(e.pointerId);
+        b.classList.remove('held');
+        if (heldRootPointers.size === 0 && !sustainActive() && currentlyPlayingKeys.length > 0) releaseAudio();
+      };
+      b.addEventListener('pointerup', up);
+      b.addEventListener('pointercancel', up);
+      touchRoots.appendChild(b);
+    });
+    currentModifiers.forEach((id, idx) => {
+      const b = document.createElement('button');
+      b.className = 'pad pad-mod' + (idx === activeTypeIdx ? ' selected' : '');
+      b.textContent = modShortLabel(id);
+      b.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        activeTypeIdx = idx;
+        [...touchMods.children].forEach((c, i) => c.classList.toggle('selected', i === idx));
+        if (heldRootPointers.size > 0 && audioReady) playChord(getChordInfo());
+        lastActivityTime = Date.now();
+      });
+      touchMods.appendChild(b);
+    });
+  }
+  sustainLatchBtn.addEventListener('click', () => {
+    sustainLatchOn = !sustainLatchOn;
+    sustainLatchBtn.classList.toggle('latched', sustainLatchOn);
+    sustainLatchBtn.setAttribute('aria-pressed', String(sustainLatchOn));
+    if (!sustainLatchOn && heldRootPointers.size === 0 && currentlyPlayingKeys.length > 0) releaseAudio();
+  });
+  touchSettingsBtn.addEventListener('click', () => openModal(controlsPanel, touchSettingsBtn));
+  touchRecordBtn.addEventListener('click', () => toggleRecording(touchRecordBtn));
+  window.matchMedia('(orientation: portrait)').addEventListener('change', (e) => {
+    if (IS_MOBILE && e.matches) { heldRootPointers.clear(); releaseAudio(); }
+  });
+
+  // --- EVENT WIRING ---
+  settingsToggle.addEventListener('click', () => {
+    if (controlsPanel.style.display === 'flex') hideAllModals();
+    else openModal(controlsPanel, settingsToggle);
+  });
+  tutorialToggle.addEventListener('click', () => openModal(tutorialModal, tutorialToggle));
+  logoTrigger.addEventListener('click', () => openModal(logoInfoModal, logoTrigger));
+  logoTrigger.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(logoInfoModal, logoTrigger); }
+  });
+  $("open-modifiers-btn").addEventListener('click', (e) => openModal(modifiersModal, e.currentTarget));
+  $("open-ui-layout-btn").addEventListener('click', (e) => openModal(uiLayoutModal, e.currentTarget));
+  document.querySelectorAll('.back-to-menu-btn').forEach(btn => {
+    btn.addEventListener('click', () => openModal(controlsPanel, settingsToggle));
+  });
+  document.querySelectorAll('.modal-close').forEach(btn => {
+    btn.addEventListener('click', () => hideAllModals());
+  });
+  nagCloseBtn.addEventListener('click', dismissNag);
+  skipNagBtn.addEventListener('click', dismissNag);
+  document.addEventListener('click', (e) => {
+    if (e.target === video || e.target.id === 'media-wrapper' || e.target.id === 'overlay') {
+      if (patreonNag.style.display === 'flex') dismissNag();
+      else hideAllModals(false);
+    }
+  });
+
+  ['lx', 'ly', 'ls', 'rx', 'ry', 'rs'].forEach(id => {
+    $(id).addEventListener('input', (e) => { uiOffsets[id] = parseInt(e.target.value, 10); saveSettings(); });
+  });
+  $("reset-ui-btn").addEventListener('click', () => {
+    Object.assign(uiOffsets, { lx: 0, ly: 0, ls: 100, rx: 0, ry: 0, rs: 100 });
+    ['lx', 'ly', 'rx', 'ry'].forEach(id => $(id).value = 0);
+    ['ls', 'rs'].forEach(id => $(id).value = 100);
+    saveSettings();
+  });
+
+  themeSelector.addEventListener('change', (e) => {
+    document.body.setAttribute('data-theme', e.target.value);
+    syncThemeBar();
+    refreshThemeCache();
+    saveLook({ theme: e.target.value });
+  });
+  modeSelector.addEventListener('change', () => { updateKeyContext(); });
+  notationSelector.addEventListener('change', () => {
+    buildKeyOptions();
+    updateKeyContext();
+    setupCustomSelects();
+  });
+  instrumentSelector.addEventListener('change', (e) => {
+    releaseAudio();
+    currentInstrument = e.target.value;
+    saveSettings();
+  });
+  volumeSelector.addEventListener('change', () => { applyVolume(); saveSettings(); });
+  octaveSelector.addEventListener('change', () => { lastUpper = null; releaseAudio(); saveSettings(); });
+  chordStyleSelector.addEventListener('change', () => { lastUpper = null; releaseAudio(); });
+  handednessMode.addEventListener('change', () => { updateTutorialText(); saveSettings(); });
+  languageSelector.addEventListener('change', () => { updateLanguage(); saveLook({ lang: languageSelector.value }); });
+  // Chosen on the home page or in another tool, in another tab or before coming Back here.
+  watchLook((look) => {
+    if (look.theme !== themeSelector.value) {
+      themeSelector.value = look.theme;
+      document.body.setAttribute('data-theme', look.theme);
+      syncThemeBar();
+      refreshThemeCache();
+      setupCustomSelects();
+    }
+    if (look.lang !== languageSelector.value) { languageSelector.value = look.lang; updateLanguage(); }
+  });
+  accMode.addEventListener('change', () => {
+    buildKeyOptions();
+    updateKeyContext();
+    setupCustomSelects();
+    numberSteady.reset(); typeSteady.reset(); numberNow = null;
+    updateTutorialText();
+    applyTouchClass();
+    saveSettings();
+    if (!engineStarted) return;
+    releaseAudio(); // never carry held notes across control modes
+    if (accMode.value === 'keyboard' || touchOnly()) { stopCamera(); buildTouchPads(); }
+    else if (!cameraReady) startVision();
+  });
+  sixSevenSel.addEventListener('change', () => { updateTutorialText(); saveSettings(); });
+  browSustainSel.addEventListener('change', () => {
+    browSustainOn = browSustainSel.value === 'on';
+    if (!browSustainOn) sustainBrow = false;
+  });
+  recordBtn.addEventListener('click', () => toggleRecording(recordBtn));
+  $("rec-audio-btn").addEventListener('click', startAudioRecording);
+  $("rec-screen-btn").addEventListener('click', startScreenRecording);
+
+  startBtn.addEventListener('click', startEngine);
+  window.addEventListener('resize', sizeCanvas);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refreshThemeCache);
+
+  // --- INIT ---
+  buildKeyOptions();      // create native options first so restore can match values
+  restoreSettings();
+  buildModifierCheckboxes();
+  updateKeyContext();
+  updateLanguage();       // localizes labels/options, rebuilds custom selects, boot + tutorials
+  refreshThemeCache();
+  sizeCanvas();
+  bootModal.scrollTop = 0;   // the welcome window opens at its top
+
+  // --- SERVICE WORKER (the hub's one worker caches assets for instant repeat visits) ---
+  registerHubWorker('../');
+</script>
+</body>
+</html>

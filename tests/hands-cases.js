@@ -6,6 +6,8 @@
  *
  *   checkHands(hands, theory) -> rows [{ section, checked, failed, stats, examples }]
  *     hands = shared/hands.js, theory = shared/theory.js
+ *   makeHand(shape), place(points, view)  the made-up hands (also for feeding
+ *     Chordigits in the browser)
  *
  * Used by tests/hands.html and tests/tools/run-hands-test.js.
  */
@@ -44,7 +46,7 @@ function fingerPoints(name, bend) {
 }
 
 // shape: { thumb: THUMB key or [x, y, z] or { touch: finger }, index: POSE key or [a, b, c], ... }
-function makeHand(shape) {
+export function makeHand(shape) {
   const p = new Array(21);
   p[0] = [0, 0, 0];
   for (const name of Object.keys(BASE)) {
@@ -61,7 +63,7 @@ function makeHand(shape) {
 
 // Turn (roll in the picture, yaw left-right, pitch back-forward), mirror
 // (left hand), scale to metres, move, and jitter each point.
-function place(p, { roll = 0, yaw = 0, pitch = 0, mirror = false, palm = 0.085, jitter = 0, rand }) {
+export function place(p, { roll = 0, yaw = 0, pitch = 0, mirror = false, palm = 0.085, jitter = 0, rand }) {
   const [cr, sr, cy, sy, cp, sp] = [roll, yaw, pitch].flatMap((d) => [Math.cos(d * RAD), Math.sin(d * RAD)]);
   const off = [0.02, -0.01, 0.4];
   return p.map(([x, y, z]) => {
