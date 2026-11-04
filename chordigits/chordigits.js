@@ -10,7 +10,7 @@ import { LANGUAGES, mergeStrings, createI18n } from '../shared/ui/i18n.js';
 import { HUB_STRINGS } from '../shared/ui/strings.js';
 import { setupCustomSelects } from '../shared/ui/select.js';
 import { createModalManager } from '../shared/ui/modal.js';
-import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
+import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, TIKTOK_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
 import { mountCameraLook } from '../shared/camera-look.js';
 import { CHORDIGITS_STRINGS } from './strings.js';
@@ -35,7 +35,7 @@ const save = () => saveSettings(SETTINGS_KEY, { sound: settings.sound, glide: se
 const i18n = createI18n({
   strings: mergeStrings(HUB_STRINGS, CHORDIGITS_STRINGS),
   getLang: () => settings.lang,
-  vars: { patreon: PATREON_URL, instagram: DESIGNER_URL, repo: REPO_URL },
+  vars: { patreon: PATREON_URL, instagram: DESIGNER_URL, tiktok: TIKTOK_URL, repo: REPO_URL },
 });
 const { t } = i18n;
 
@@ -236,7 +236,9 @@ async function startCamera() {
   showMsg(null);
   status('loadingTracking');
   // Ask for the camera (and the microphone, for "Record my voice") at once, while the models load.
-  const cam = navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: { echoCancellation: true, noiseSuppression: true } })
+  // The voice is recorded as it is: the browser's echo cancelling and noise
+  // cleaning muted it under the chords, even with headphones (Drephie's test).
+  const cam = navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } })
     .catch(() => navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } }));
   cam.catch(() => {}); // handled below, after the models load
   try { await loadTracking(); } catch (err) { console.warn('Chordigits: tracking', err); starting = false; status(null); showMsg('errModels'); return; }
@@ -396,7 +398,7 @@ async function connectVoice() {
   if (!$('rec-voice').checked) return;
   let s = stream && stream.getAudioTracks().length ? stream : null;
   if (!s) {
-    try { s = micOnly = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); }
+    try { s = micOnly = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }); }
     catch (err) { console.warn('Chordigits: microphone', err); $('rec-voice').checked = false; return; }
   }
   // The microphone goes only into the recording, never to the speakers.
