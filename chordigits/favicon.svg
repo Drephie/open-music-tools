@@ -1,75 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
-  <defs>
-    <!-- Dark, frosty radial background matching Liquid Glass overlay -->
-    <radialGradient id="bgGlow" cx="30%" cy="30%" r="70%">
-      <stop offset="0%" stop-color="#1A2433"/>
-      <stop offset="100%" stop-color="#080B10"/>
-    </radialGradient>
-
-    <!-- Left Ring Gradient: Solid White fading to Translucent -->
-    <linearGradient id="ringLeft" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.1"/>
-    </linearGradient>
-
-    <!-- Right Ring Gradient: Solid Cyan fading to Translucent -->
-    <linearGradient id="ringRight" x1="100%" y1="100%" x2="0%" y2="0%">
-      <stop offset="0%" stop-color="#8ad4ff" stop-opacity="1"/>
-      <stop offset="100%" stop-color="#8ad4ff" stop-opacity="0.1"/>
-    </linearGradient>
-
-    <!-- Center Spark Gradient: White to Cyan -->
-    <linearGradient id="diamondGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#8ad4ff"/>
-    </linearGradient>
-
-    <!-- Liquid Glass Soft Outer Glow -->
-    <filter id="glass-glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="12" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
-
-    <!-- Intense Pinch / Trigger Energy Glow -->
-    <filter id="intense-glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="8" result="blur1" />
-      <feGaussianBlur stdDeviation="20" result="blur2" />
-      <feMerge>
-        <feMergeNode in="blur2" />
-        <feMergeNode in="blur1" />
-        <feMergeNode in="SourceGraphic" />
-      </feMerge>
-    </filter>
-  </defs>
-
-  <!-- App Icon Background Squircle -->
-  <rect width="512" height="512" rx="115" fill="url(#bgGlow)"/>
-  <rect width="510" height="510" x="1" y="1" rx="115" fill="none" stroke="#ffffff" stroke-opacity="0.1" stroke-width="2"/>
-
-  <!-- Ambient frosted glass background glows for depth -->
-  <circle cx="190" cy="256" r="140" fill="#ffffff" opacity="0.04" filter="url(#glass-glow)" />
-  <circle cx="322" cy="256" r="140" fill="#8ad4ff" opacity="0.06" filter="url(#glass-glow)" />
-
-  <!-- LEFT RING (The Root Note) -->
-  <g filter="url(#glass-glow)">
-    <circle cx="190" cy="256" r="140" fill="none" stroke="url(#ringLeft)" stroke-width="14" />
-    <circle cx="190" cy="256" r="60" fill="none" stroke="#ffffff" stroke-width="4" stroke-dasharray="6 12" opacity="0.4" />
-    <circle cx="190" cy="256" r="10" fill="#ffffff" opacity="0.9" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Chordigits: three raised fingers whose tips are note heads, a chord counted on a hand. -->
+  <rect width="64" height="64" rx="14" fill="#0f1419"/>
+  <g fill="none" stroke="#f3f5f8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20.5 26.5V43c0 6.5 5 11 11 11s11-4.5 11-11V23.5"/>
+    <path d="M31.5 18.5V44"/>
   </g>
-
-  <!-- RIGHT RING (The Modifier) -->
-  <g filter="url(#glass-glow)">
-    <circle cx="322" cy="256" r="140" fill="none" stroke="url(#ringRight)" stroke-width="14" />
-    <circle cx="322" cy="256" r="60" fill="none" stroke="#8ad4ff" stroke-width="4" stroke-dasharray="6 12" opacity="0.5" />
-    <circle cx="322" cy="256" r="10" fill="#8ad4ff" opacity="0.9" />
-  </g>
-
-  <!-- CONNECTION TRACK (The Invisible Line Between Hands) -->
-  <line x1="190" y1="256" x2="322" y2="256" stroke="#ffffff" stroke-width="3" stroke-dasharray="4 8" opacity="0.3" />
-
-  <!-- THE SPARK (The Generated Chord at the Intersection) -->
-  <g filter="url(#intense-glow)">
-    <path d="M 256 210 L 302 256 L 256 302 L 210 256 Z" fill="none" stroke="#8ad4ff" stroke-width="4" opacity="0.8" />
-    <path d="M 256 228 L 284 256 L 256 284 L 228 256 Z" fill="url(#diamondGrad)" />
+  <g fill="#8ad4ff">
+    <ellipse cx="24" cy="25" rx="5.8" ry="4.4" transform="rotate(-24 24 25)"/>
+    <ellipse cx="35" cy="17" rx="5.8" ry="4.4" transform="rotate(-24 35 17)"/>
+    <ellipse cx="46" cy="22" rx="5.8" ry="4.4" transform="rotate(-24 46 22)"/>
   </g>
 </svg>

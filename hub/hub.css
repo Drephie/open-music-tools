@@ -2,8 +2,8 @@
  * Theme variables only. On computers every tool is a square card of the same
  * size; hub.js shrinks the names until every word fits (--name-size) and makes
  * all cards as tall as the tallest one when a description needs more than a
- * square (--card-h). The flagship (li.featured, Choordination) is first and
- * bigger: two columns by two rows. On phones the flagship is a full-width card
+ * square (--card-h). The flagships (li.featured: Choordination, Chordigits) are
+ * first and bigger: two columns by two rows each. On phones the flagship is a full-width card
  * and the other tools are one grouped list (rows split by thin lines), so names
  * and descriptions stay readable. .beta-badge: a "Beta" tag on a card.
  */
@@ -57,12 +57,19 @@ body:is([data-theme="y2k"], [data-theme="retro"]) .hub-logo { color: var(--color
 .featured-art .wheel { stroke: color-mix(in srgb, var(--color-text) 14%, transparent); }
 .featured-art .wheel-on.left { stroke: var(--color-left); }
 .featured-art .wheel-on.right { stroke: var(--color-right); }
+/* Chordigits: its seven chord numbers, one lit. */
+.featured-art .tile { fill: color-mix(in srgb, var(--color-text) 14%, transparent); }
+.featured-art .tile-on { fill: var(--color-right); }
 
 /* Name and description at the foot of each card, the drawing at the top. */
 .tool-grid > li:not(.featured) .tool-icon { margin-bottom: auto; }
-/* No hole after the last tool: with an odd number beside the flagship (7), the
-   last card is wider; with 8 (since Chordigits) the 4- and 3-column grids fill exactly. */
-@media (min-width: 601px) { section:first-of-type .tool-grid > li:last-child:nth-child(even) { grid-column: span 2; } }
+/* No hole after the last tool. Two flagships and seven tools: four columns put
+   the seven in a row of 4 and one of 3, so the last card is wider; three columns
+   fill exactly once the small cards may fill the gaps beside the flagships (dense). */
+.tool-grid { grid-auto-flow: dense; }
+/* Side by side, the flagships set their own height: room for the art above the name. */
+@media (min-width: 601px) { .featured .tool-card { min-height: 340px; } }
+@media (min-width: 861px) { section:first-of-type .tool-grid > li:last-child:nth-child(odd) { grid-column: span 2; } }
 /* Planned tools: compact rows, lighter than the real ones. */
 .tool-card.soon { min-height: 0; display: grid; grid-template-columns: 28px minmax(0, 1fr); column-gap: var(--space-3); row-gap: 2px; align-items: center; padding: 14px 16px; }
 .tool-card.soon .tool-icon { grid-row: span 2; width: 26px; height: 26px; margin: 0; }
