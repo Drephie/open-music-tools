@@ -6,18 +6,21 @@ body { overflow: hidden; }
 #webcam, #overlay { position: fixed; inset: 0; width: 100%; height: 100%; }
 /* The camera picture as in Choordination: inside the theme's frame, faded into
    the page colour (60%) and coloured by the theme, so each theme shows its world. */
+#webcam, #cam-noise { position: fixed; inset: 0; z-index: 0; clip-path: inset(var(--fy-top) var(--fx) var(--fy-bottom) var(--fx) round var(--frame-radius)); }
 #webcam {
-  z-index: 0; object-fit: cover; transform: scaleX(-1); opacity: 0; transition: opacity 0.4s ease, filter 0.5s ease;
-  clip-path: inset(var(--fy-top) var(--fx) var(--fy-bottom) var(--fx) round var(--frame-radius));
+  object-fit: cover; transform: scaleX(-1); opacity: 0; transition: opacity 0.4s ease, filter 0.5s ease;
+  /* The theme's colours, then your own (Settings > Camera picture, shared/camera-look.js). */
+  filter: var(--theme-filter,) brightness(var(--cam-brightness, 1)) contrast(var(--cam-contrast, 1)) saturate(var(--cam-saturation, 1)) hue-rotate(var(--cam-hue, 0deg));
 }
 body.camera-on #webcam { opacity: 0.6; }
-body[data-theme="liquid"] #webcam { filter: saturate(1.1) contrast(1.05); }
-body[data-theme="y2k"] #webcam { filter: saturate(1.5) contrast(1.1); }
-body[data-theme="pink"] #webcam { filter: saturate(1.45) contrast(1.02) brightness(1.15) hue-rotate(333deg); }
-body[data-theme="bw"] #webcam { filter: grayscale(1) contrast(1.4); }
-body[data-theme="retro"] #webcam { filter: sepia(0.8) hue-rotate(80deg) contrast(1.2) brightness(0.9); }
-body[data-theme="rouge"] #webcam { filter: sepia(0.45) saturate(1.6) hue-rotate(-25deg) contrast(1.15) brightness(0.8); }
-body[data-theme="snap"] #webcam { filter: sepia(0.35) saturate(1.25) contrast(0.95) brightness(1.1); }
+body:not(.camera-on) #cam-noise { display: none; }
+body[data-theme="liquid"] #webcam { --theme-filter: saturate(1.1) contrast(1.05); }
+body[data-theme="y2k"] #webcam { --theme-filter: saturate(1.5) contrast(1.1); }
+body[data-theme="pink"] #webcam { --theme-filter: saturate(1.45) contrast(1.02) brightness(1.15) hue-rotate(333deg); }
+body[data-theme="bw"] #webcam { --theme-filter: grayscale(1) contrast(1.4); }
+body[data-theme="retro"] #webcam { --theme-filter: sepia(0.8) hue-rotate(80deg) contrast(1.2) brightness(0.9); }
+body[data-theme="rouge"] #webcam { --theme-filter: sepia(0.45) saturate(1.6) hue-rotate(-25deg) contrast(1.15) brightness(0.8); }
+body[data-theme="snap"] #webcam { --theme-filter: sepia(0.35) saturate(1.25) contrast(0.95) brightness(1.1); }
 /* Frames page.css doesn't draw: Monochrome's black bars, Rouge's dark red
    vignette, Retrosnap's instant-photo border (wider at the bottom). */
 #theme-frame { z-index: 1; } /* between the picture and the controls, as in Choordination */
@@ -34,7 +37,8 @@ body.camera-on :is(.tool-header .icon-btn, .cdg-bar, .cdg-chord, .cdg-status:not
   background: color-mix(in srgb, var(--bg-page) 72%, transparent);
 }
 /* The name big at the top left, as Choordination's; the links free in the bottom corners. */
-.tool-header .tool-title { font-size: clamp(26px, 4.6vw, 40px); text-shadow: var(--credit-shadow); }
+/* The name, big and in capitals: it shows in the videos people share. */
+.tool-header .tool-title { font-size: clamp(30px, 5vw, 58px); line-height: 1; text-transform: uppercase; letter-spacing: 0.08em; text-shadow: var(--credit-shadow); }
 .tool-header { flex-wrap: wrap; } /* a narrow window: the buttons go under the name, on the right */
 .header-actions { margin-left: auto; }
 .tool-footer { text-shadow: var(--credit-shadow); }
@@ -97,7 +101,7 @@ body[data-theme] .cdg-bar :is(.num-btn.on, .chip[aria-pressed="true"]) { backgro
 /* Short windows (a sideways phone): tighter, so the hands keep the middle. */
 @media (max-height: 500px) {
   .page { gap: var(--space-2); padding-top: calc(var(--fy-top) + var(--space-2) + env(safe-area-inset-top)); padding-bottom: calc(var(--fy-bottom) + var(--space-2) + env(safe-area-inset-bottom)); }
-  .tool-header .tool-title { font-size: 24px; }
+  .tool-header .tool-title { font-size: 32px; }
   .cdg-name { font-size: clamp(28px, 10dvh, 44px); }
   .cdg-sub { font-size: 14px; }
   .cdg-bar { padding: var(--space-2); gap: var(--space-1); }

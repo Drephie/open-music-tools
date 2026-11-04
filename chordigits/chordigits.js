@@ -12,6 +12,7 @@ import { setupCustomSelects } from '../shared/ui/select.js';
 import { createModalManager } from '../shared/ui/modal.js';
 import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
+import { mountCameraLook } from '../shared/camera-look.js';
 import { CHORDIGITS_STRINGS } from './strings.js';
 
 const $ = (id) => document.getElementById(id);
@@ -531,6 +532,7 @@ function applyLanguage() {
   keyContext();
   keyOptions();
   updateRecordButton();
+  mountCameraLook($('cam-look'), t);
   if (msgKey) showMsg(msgKey);
   if (statusKey) status(statusKey);
   if (sounding) showChord(sounding);
@@ -546,6 +548,7 @@ soundSelect.value = settings.sound;
 glideSelect.value = settings.glide ? 'on' : 'off';
 handSelect.value = settings.hand;
 sixSelect.value = settings.sixSeven;
+octaveSelect.value = String(settings.octave);
 volumeSlider.style.setProperty('--fill', '80%');
 applyLanguage();
 loadRack();

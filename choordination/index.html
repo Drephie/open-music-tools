@@ -19,6 +19,7 @@
 
   <link rel="stylesheet" href="../shared/ui/themes.css">
   <link rel="stylesheet" href="../shared/ui/select.css">
+  <link rel="stylesheet" href="../shared/ui/camera-look.css">
   <style>
     body { margin: 0; overflow: hidden; background: var(--bg-page); color: var(--color-text); font-family: var(--font-main); transition: all 0.5s ease; }
     #container { position: relative; width: 100vw; height: 100vh; }
@@ -45,14 +46,17 @@
 
     #scanlines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--crt-scanline); pointer-events: none; z-index: 5; }
 
-    video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.6; transition: filter 0.5s ease; }
-    body[data-theme="liquid"] video { filter: saturate(1.1) contrast(1.05); }
-    body[data-theme="y2k"] video { filter: saturate(1.5) contrast(1.1); }
-    body[data-theme="pink"] video { filter: saturate(1.45) contrast(1.02) brightness(1.15) hue-rotate(333deg); }
-    body[data-theme="bw"] video { filter: grayscale(1) contrast(1.4); }
-    body[data-theme="retro"] video { filter: sepia(0.8) hue-rotate(80deg) contrast(1.2) brightness(0.9); }
-    body[data-theme="rouge"] video { filter: sepia(0.45) saturate(1.6) hue-rotate(-25deg) contrast(1.15) brightness(0.8); }
-    body[data-theme="snap"] video { filter: sepia(0.35) saturate(1.25) contrast(0.95) brightness(1.1); }
+    video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.6; transition: filter 0.5s ease;
+      /* The theme's colours, then your own (Settings > Camera picture, shared/camera-look.js). */
+      filter: var(--theme-filter,) brightness(var(--cam-brightness, 1)) contrast(var(--cam-contrast, 1)) saturate(var(--cam-saturation, 1)) hue-rotate(var(--cam-hue, 0deg)); }
+    #cam-noise { position: absolute; inset: 0; }
+    body[data-theme="liquid"] video { --theme-filter: saturate(1.1) contrast(1.05); }
+    body[data-theme="y2k"] video { --theme-filter: saturate(1.5) contrast(1.1); }
+    body[data-theme="pink"] video { --theme-filter: saturate(1.45) contrast(1.02) brightness(1.15) hue-rotate(333deg); }
+    body[data-theme="bw"] video { --theme-filter: grayscale(1) contrast(1.4); }
+    body[data-theme="retro"] video { --theme-filter: sepia(0.8) hue-rotate(80deg) contrast(1.2) brightness(0.9); }
+    body[data-theme="rouge"] video { --theme-filter: sepia(0.45) saturate(1.6) hue-rotate(-25deg) contrast(1.15) brightness(0.8); }
+    body[data-theme="snap"] video { --theme-filter: sepia(0.35) saturate(1.25) contrast(0.95) brightness(1.1); }
 
     canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
 
@@ -67,14 +71,14 @@
     #choordination-watermark {
         position: absolute; top: calc(30px + var(--frame-top)); left: calc(30px + var(--frame-sides)); z-index: 5;
         /* Never wider than a narrow computer window (it used to stick out below ~430 px). */
-        font-family: var(--font-display); font-size: clamp(16px, 4.5vw, 30px); font-weight: var(--title-weight); line-height: 1;
-        color: var(--color-text); opacity: 0.7; letter-spacing: 0.14em; white-space: nowrap;
+        font-family: var(--font-display); font-size: clamp(24px, 4.2vw, 54px); font-weight: var(--title-weight); line-height: 1;
+        color: var(--color-text); opacity: 0.95; letter-spacing: 0.14em; white-space: nowrap;
         text-shadow: var(--credit-shadow); transition: opacity 0.3s ease, transform 0.3s ease, text-shadow 0.3s ease;
         transform-origin: top left;
         pointer-events: auto; cursor: pointer;
     }
     #choordination-watermark:hover, #choordination-watermark:focus-visible { opacity: 1; transform: scale(1.04); }
-    body:is([data-theme="pink"], [data-theme="snap"]) #choordination-watermark { color: var(--color-title); opacity: 0.9; }
+    body:is([data-theme="pink"], [data-theme="snap"]) #choordination-watermark { color: var(--color-title); opacity: 1; }
 
     #patreon-link { position: absolute; bottom: calc(25px + var(--frame-bottom)); left: calc(30px + var(--frame-sides)); z-index: 6; font-size: 14px; font-weight: 600; color: var(--color-text); text-shadow: var(--credit-shadow); transition: all 0.5s ease; }
     #patreon-link a { color: var(--color-right); text-decoration: none; font-weight: 700; transition: color 0.5s ease;} #patreon-link a:hover { text-decoration: underline; }
@@ -264,7 +268,7 @@
     body.mobile-mode #patreon-link, body.mobile-mode #designer-credit { display: none; }
     /* Narrow computer windows: the two footer links would meet, so the Patreon one goes a line up. */
     @media (max-width: 560px) { #patreon-link { bottom: calc(50px + var(--frame-bottom)); } }
-    body.mobile-mode #choordination-watermark { font-size: 13px; transform: scale(1); letter-spacing: 2px; top: calc(14px + var(--frame-top)); left: calc(14px + var(--frame-sides)); }
+    body.mobile-mode #choordination-watermark { font-size: 24px; transform: scale(1); letter-spacing: 3px; top: calc(14px + var(--frame-top)); left: calc(14px + var(--frame-sides)); }
     body.mobile-mode .centered-modal { width: min(480px, 86vw); max-height: 88vh; }
     @media (orientation: portrait) {
       body.mobile-mode #rotate-overlay { display: flex; }
@@ -275,7 +279,7 @@
        Shrinks chrome, modals and toolbars so the interface fits the phone;
        canvas widget/text scaling is handled in JS via uiScale. --- */
     @media (max-height: 520px) {
-      #choordination-watermark { font-size: 13px !important; transform: scale(1) !important; letter-spacing: 2px; top: calc(10px + var(--frame-top)); left: calc(12px + var(--frame-sides)); }
+      #choordination-watermark { font-size: 22px !important; transform: scale(1) !important; letter-spacing: 3px; top: calc(10px + var(--frame-top)); left: calc(12px + var(--frame-sides)); }
       #top-right-menu { top: calc(10px + var(--frame-top)); right: calc(10px + var(--frame-sides)); gap: 6px; }
       .menu-btn { padding: 6px 10px; font-size: 13px; }
       .icon-btn { width: 44px; height: 44px; }
@@ -310,6 +314,7 @@
   <h1 class="visually-hidden">Choordination</h1>
   <div id="media-wrapper">
     <video id="webcam" autoplay playsinline muted></video>
+    <div id="cam-noise" aria-hidden="true"></div>
     <canvas id="overlay"></canvas>
   </div>
 
@@ -503,6 +508,7 @@
         </select>
       </div>
     </div>
+    <div id="cam-look" class="cam-look row-gap-t"></div>
 
     <hr class="menu-divider">
 
@@ -665,6 +671,7 @@
   import { createModalManager } from '../shared/ui/modal.js';
   import { registerHubWorker } from '../shared/offline.js';
   import { loadLook, saveLook, watchLook } from '../shared/ui/page.js';
+  import { mountCameraLook } from '../shared/camera-look.js';
 
   // --- roundRect polyfill (older Safari) ---
   if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
@@ -1067,6 +1074,7 @@
     buildBootAbout();
     updateRecordButtons();
     buildTouchPads();
+    mountCameraLook($("cam-look"), t);
   }
 
   // --- BOOT FLOW: how to play first; the project in one closing line ---

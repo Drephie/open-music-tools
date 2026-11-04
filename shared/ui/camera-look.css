@@ -1,0 +1,32 @@
+/* shared/ui/camera-look.css: your own look for the camera picture
+ * (shared/camera-look.js): the slider rows in Settings and the noise layer.
+ * The camera tools put <div id="cam-noise"> over their picture (under the
+ * hand drawings) and size and place it themselves. Theme variables only. */
+
+.cam-look { display: flex; flex-direction: column; gap: 6px; }
+.cam-look-title { margin: 0; font-size: 15px; font-weight: 700; }
+.cam-look-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px; }
+.cam-look-row label { font-size: 14px; font-weight: 600; }
+.cam-look-row output { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--color-text-inactive); }
+.cam-look-row input { grid-column: 1 / -1; width: 100%; margin: 6px 0; }
+.cam-look-reset {
+  align-self: flex-start; min-height: 44px; padding: 8px 16px; margin-top: 4px; cursor: pointer;
+  font-family: var(--font-main); font-size: 15px; font-weight: 700; color: var(--color-btn-text);
+  background: var(--color-panel); border: 1px solid var(--border-panel); border-radius: var(--radius-control);
+}
+.cam-look-reset:hover { background: var(--color-hover); color: var(--color-hover-text); }
+.cam-look-reset:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
+
+/* Film-like noise: tiles of grain, moved a few times a second. */
+#cam-noise {
+  pointer-events: none; opacity: var(--cam-noise, 0); mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+body:not(.cam-noise-on) #cam-noise { display: none; }
+body.cam-noise-on #cam-noise { animation: cam-noise 0.5s steps(1) infinite; }
+@keyframes cam-noise {
+  0% { background-position: 0 0; } 20% { background-position: -47px 31px; } 40% { background-position: 63px -52px; }
+  60% { background-position: -71px -19px; } 80% { background-position: 29px 74px; }
+}
+@media (prefers-reduced-motion: reduce) { body.cam-noise-on #cam-noise { animation: none; } }
