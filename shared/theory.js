@@ -30,10 +30,12 @@
  *     modPair = [i, j] picks two to blend; dualMod adds the next one. Both
  *     are optional. Indices are clamped to the list.
  *   getChordInfo({ key, degree, modifiers, octave = 0, solfege = false })
- *     -> { freqs, midiNotes, name, noteNames }
+ *     -> { freqs, midiNotes, name, noteNames, suffix }
  *     degree is 0..6 in a key, 0..11 in chromatic (clamped). Degree 0 of C
  *     major at octave 0 is MIDI 48 (C3). Two different modifiers blend:
  *     name 'C' + 'maj+sus4'.
+ *   chordNumeral(degree, suffix)  theory-style number of a chord in a key,
+ *     from getChordInfo's suffix: 'V7', 'ii', 'vii°', 'iiø7', 'IVsus4'
  *   midiToFreq(n)  equal temperament, A4 = 440 Hz (same numbers as Tone.js)
  *   MIDI_BASE, MAJOR_SCALE_STEPS, MINOR_SCALE_STEPS, DIATONIC_QUALITIES
  *
@@ -261,7 +263,15 @@ export function getChordInfo({ key, degree = 0, modifiers = [], octave = 0, solf
   if (modifier2 && modifier2 !== modifier1) {
     suffix = (suffix || 'maj') + '+' + (modifierSuffix(modifier2, baseThird, baseFifth, baseSeventh) || 'maj');
   }
-  return { freqs, midiNotes, name: rootName + sep + suffix, noteNames };
+  return { freqs, midiNotes, name: rootName + sep + suffix, noteNames, suffix };
+}
+
+// Theory-style chord number: capitals for major, small for minor, then the
+// chord's extras ('V7', 'ii', 'vii°', 'IVsus4'). degree 0..6 in a key.
+const NUMERAL_EXTRA = { m: '', dim: '°', aug: '+', m7: '7', 'm7♭5': 'ø7', dim7: '°7', 'm(add9)': 'add9', m9: '9' };
+export function chordNumeral(degree, suffix) {
+  const n = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][degree];
+  return (/^(m(?!aj)|dim)/.test(suffix) ? n.toLowerCase() : n) + (NUMERAL_EXTRA[suffix] ?? suffix);
 }
 
 // --- SMOOTH CHORDS (root in the bass, the chord above moves as little as possible) ---
