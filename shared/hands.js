@@ -14,9 +14,11 @@
  *     A finger is raised when its tip is clearly farther from the wrist than
  *     its middle joint. The thumb is raised when its tip reaches past the
  *     index knuckle, sideways (open hand, 🤙) or up (thumbs-up).
- *   countFingers(fingers) -> 0..5
+ *   countFingers(fingers) -> 0..5  the thumb counts only with two or more
+ *     other fingers (thumb + 2 = 3, open hand = 5): a thumb that pops out
+ *     beside one finger, or a fist, was misread too often (Drephie's test).
  *   chordNumber(fingers, points, sixSeven = 'rock') -> 0..7  the number hand
- *     1-5 = raised fingers; 0 = fist.
+ *     1-5 = countFingers; 0 = fist.
  *     'rock': 🤙 (thumb and little only) = 6; 🤘 (index and little, middle and
  *     ring down, thumb either way) = 7.
  *     'asl' (American Sign Language): thumb touching the little finger's tip
@@ -75,7 +77,10 @@ export function readFingers(p, prev = null) {
   return out;
 }
 
-export const countFingers = (f) => f.thumb + f.index + f.middle + f.ring + f.little;
+export function countFingers(f) {
+  const n = f.index + f.middle + f.ring + f.little;
+  return n >= 2 ? n + f.thumb : n;
+}
 
 export function chordNumber(f, p, sixSeven = 'rock') {
   if (sixSeven === 'asl') {

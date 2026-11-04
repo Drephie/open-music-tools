@@ -1,6 +1,6 @@
 # Chordigits: spec
 
-**Status:** redesign, draft, 2026-11-04. The first version (approved 2026-11-04) was Choordination with a new way to play; Drephie found it looked like Choordination and the donuts useless. This version takes ideas from Eric Wei's Gesture Synth (tilt for major or minor, hand height for the octave, a soft gliding synth) without copying it, and looks like the hub's other tools. Items marked *(Claude's pick)* weren't asked: say if you want them changed.
+**Status:** redesign approved by Drephie, 2026-11-04. Drephie's camera test (2026-11-04): the design works; the thumb misfired on I and II, so it now counts only with two or more other fingers. The first version (approved 2026-11-04) was Choordination with a new way to play; Drephie found it looked like Choordination and the donuts useless. This version takes ideas from Eric Wei's Gesture Synth (tilt for major or minor, hand height for the octave, a soft gliding synth) without copying it, and looks like the hub's other tools. Items marked *(Claude's pick)* weren't asked: say if you want them changed.
 
 ## What it is for
 
@@ -8,7 +8,7 @@ Play the chords of a song with your hands in front of the camera: one hand count
 
 ## What it does
 
-- **Number hand** (right; left with "Left-handed"): how many fingers you hold up is the chord's number in the key. 1 to 5 fingers: I to V, counted any way. **🤙** (thumb and little finger) is VI, **🤘** (index and little finger) is VII. A fist, or no hand, is silence. Setting **Six and seven**: or sign language (thumb touches the little finger = VI, the ring finger = VII).
+- **Number hand** (right; left with "Left-handed"): how many fingers you hold up is the chord's number in the key. 1 to 5 fingers: I to V, counted any way; the thumb counts only with two or more other fingers (thumb + 2 = III, open hand = V), so a thumb that pops out beside one finger doesn't turn I into II *(after Drephie's camera test, 2026-11-04)*. **🤙** (thumb and little finger) is VI, **🤘** (index and little finger) is VII. A fist, or no hand, is silence. Setting **Six and seven**: or sign language (thumb touches the little finger = VI, the ring finger = VII).
 - **Height of the number hand = octave:** hand in the top third of the picture plays an octave higher, the bottom third an octave lower.
 - **Other hand, tilt = major or minor:**
   - upright: the chord as the key has it (in C: C, Dm, Em, F, G, Am, B°);
