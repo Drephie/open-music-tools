@@ -14,6 +14,7 @@ Made by [Drephie](https://instagram.com/drephie), a singer and vocal coach. The 
 - **Pitch Detector**: the line your voice draws as you sing
 - **Pitch Training**: warm-ups to hear, sing back and see the notes you sang in tune
 - **Choordination**: play chords with your hands in front of the camera
+- **Chordigits**: count chords on your fingers in front of the camera, tilt for major or minor
 
 Coming later: BPM Finder, Chord Finder, Practice Player and Jam Machine.
 
