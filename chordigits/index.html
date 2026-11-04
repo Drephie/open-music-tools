@@ -22,16 +22,16 @@
   <div id="theme-frame" aria-hidden="true"></div>
   <div class="page">
     <header class="tool-header">
-      <a class="icon-btn home-btn" href="../" data-i18n-aria="home" aria-label="Home: all the tools">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>
-      </a>
       <h1 class="tool-title" data-i18n="title">Chordigits</h1>
       <div class="header-actions">
-        <button id="camera-btn" class="icon-btn" aria-pressed="false" data-i18n-aria="startCamera" aria-label="Start the camera">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5A1.5 1.5 0 0 1 4.5 7h2l1.5-2h8l1.5 2h2A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/><circle cx="12" cy="13" r="3.5"/></svg>
-        </button>
+        <a class="icon-btn home-btn" href="../" data-i18n-aria="home" aria-label="Home: all the tools">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>
+        </a>
         <button id="record-btn" class="icon-btn" data-i18n-aria="recordAria" aria-label="Record">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6" fill="currentColor"/></svg><span id="rec-time" class="rec-time"></span>
+        </button>
+        <button id="help-btn" class="icon-btn" data-i18n-aria="howTitle" aria-label="How to play">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.9.8c0 1.7-2.5 2.2-2.5 3.8"/><circle cx="12" cy="17.2" r="0.6" fill="currentColor"/></svg>
         </button>
         <button id="about-btn" class="icon-btn" data-i18n-aria="about" aria-label="About">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
@@ -49,13 +49,11 @@
       </div>
       <p id="chord-live" class="visually-hidden" role="status" aria-live="polite"></p>
 
-      <section id="start-card" class="panel cdg-start" aria-labelledby="how-title">
-        <h2 id="how-title" data-i18n="howTitle">How to play</h2>
-        <ul id="how-list" class="cdg-how"></ul>
-        <p id="start-msg" class="mic-msg" hidden></p>
+      <section id="start-card" class="panel cdg-start" hidden>
+        <p id="start-msg" class="mic-msg"></p>
         <div class="cdg-start-btns">
-          <button id="start-camera" class="btn btn-primary" data-i18n="startCamera">Start the camera</button>
-          <button id="no-camera" class="btn" data-i18n="noCamera">Play without the camera</button>
+          <button id="no-camera" class="btn btn-primary" data-i18n="noCamera">Play without the camera</button>
+          <button id="start-camera" class="btn" data-i18n="retry">Retry</button>
         </div>
       </section>
 
@@ -148,6 +146,15 @@
       <label for="brow-select" data-i18n="browSustain">Eyebrow sustain</label>
       <div class="custom-select"><select id="brow-select"><option value="on" data-i18n="on">On</option><option value="off" data-i18n="off">Off</option></select></div>
     </div>
+  </div>
+
+  <div id="how-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="how-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="how-title" data-i18n="howTitle">How to play</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <ul id="how-list" class="cdg-how"></ul>
+    <button id="how-ok" class="btn btn-primary" data-i18n="howOk">Got it</button>
   </div>
 
   <div id="about-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="about-title" tabindex="-1" style="display:none">

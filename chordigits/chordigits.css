@@ -4,19 +4,40 @@
 
 body { overflow: hidden; }
 #webcam, #overlay { position: fixed; inset: 0; width: 100%; height: 100%; }
-#webcam { z-index: 0; object-fit: cover; transform: scaleX(-1); opacity: 0; transition: opacity 0.4s ease; }
-body.camera-on #webcam { opacity: 1; }
+/* The camera picture as in Choordination: inside the theme's frame, faded into
+   the page colour (60%) and coloured by the theme, so each theme shows its world. */
+#webcam {
+  z-index: 0; object-fit: cover; transform: scaleX(-1); opacity: 0; transition: opacity 0.4s ease, filter 0.5s ease;
+  clip-path: inset(var(--fy-top) var(--fx) var(--fy-bottom) var(--fx) round var(--frame-radius));
+}
+body.camera-on #webcam { opacity: 0.6; }
+body[data-theme="liquid"] #webcam { filter: saturate(1.1) contrast(1.05); }
+body[data-theme="y2k"] #webcam { filter: saturate(1.5) contrast(1.1); }
+body[data-theme="pink"] #webcam { filter: saturate(1.45) contrast(1.02) brightness(1.15) hue-rotate(333deg); }
+body[data-theme="bw"] #webcam { filter: grayscale(1) contrast(1.4); }
+body[data-theme="retro"] #webcam { filter: sepia(0.8) hue-rotate(80deg) contrast(1.2) brightness(0.9); }
+body[data-theme="rouge"] #webcam { filter: sepia(0.45) saturate(1.6) hue-rotate(-25deg) contrast(1.15) brightness(0.8); }
+body[data-theme="snap"] #webcam { filter: sepia(0.35) saturate(1.25) contrast(0.95) brightness(1.1); }
+/* Frames page.css doesn't draw: Monochrome's black bars, Rouge's dark red
+   vignette, Retrosnap's instant-photo border (wider at the bottom). */
+#theme-frame { z-index: 1; } /* between the picture and the controls, as in Choordination */
+body[data-theme="bw"] #theme-frame { border-top: var(--fy-top) solid #000; border-bottom: var(--fy-bottom) solid #000; }
+body[data-theme="rouge"] #theme-frame { box-shadow: inset 0 0 140px 30px rgba(42, 6, 16, 0.9); }
+body[data-theme="snap"] { --frame-top: 12px; --frame-sides: 12px; --frame-bottom: 40px; --frame-radius: 2px; }
+body[data-theme="snap"] #theme-frame { border: solid var(--color-panel); border-width: var(--fy-top) var(--fx) var(--fy-bottom); border-radius: calc(var(--frame-radius) + var(--fy-top)); box-shadow: inset 0 0 0 1px rgba(75, 48, 0, 0.18), inset 0 2px 10px rgba(75, 48, 0, 0.25); }
 #overlay { z-index: 3; pointer-events: none; }
 .page { position: relative; z-index: 2; max-width: none; height: 100vh; height: 100dvh; min-height: 0; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* Over the camera, panels get a solid-enough backing to stay readable in every theme. */
-body.camera-on :is(.tool-header .icon-btn, .cdg-bar, .cdg-chord, .cdg-status:not(:empty), .tool-footer) {
+body.camera-on :is(.tool-header .icon-btn, .cdg-bar, .cdg-chord, .cdg-status:not(:empty)) {
   background: color-mix(in srgb, var(--bg-page) 72%, transparent);
 }
-body.camera-on .tool-title { padding: 2px 12px; border-radius: var(--radius-control); background: color-mix(in srgb, var(--bg-page) 60%, transparent); justify-self: start; }
-body.camera-on .home-btn + .tool-title { flex: 0 1 auto; margin-right: auto; }
-body.camera-on .tool-footer { align-self: stretch; padding: 4px 12px; border-radius: var(--radius-control); }
+/* The name big at the top left, as Choordination's; the links free in the bottom corners. */
+.tool-header .tool-title { font-size: clamp(26px, 4.6vw, 40px); text-shadow: var(--credit-shadow); }
+.tool-header { flex-wrap: wrap; } /* a narrow window: the buttons go under the name, on the right */
+.header-actions { margin-left: auto; }
+.tool-footer { text-shadow: var(--credit-shadow); }
 
 .cdg { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 0; }
 
@@ -29,15 +50,13 @@ body.camera-on .tool-footer { align-self: stretch; padding: 4px 12px; border-rad
 .cdg-sub { font-size: 16px; font-weight: 700; color: var(--color-right); margin-top: 2px; }
 .cdg-chord.fading { opacity: 0.35; transition: opacity 0.7s ease; }
 
-.cdg-start { width: min(560px, 100%); display: flex; flex-direction: column; gap: var(--space-3); margin: auto 0; min-height: 0; overflow: hidden; }
-.cdg-start > * { flex: none; }
-.cdg-start .cdg-how { flex: 0 1 auto; min-height: 3em; overflow-y: auto; } /* only the text scrolls: the buttons stay in view */
-.cdg-start h2 { margin: 0; font-family: var(--font-display); color: var(--color-title); font-size: 22px; font-weight: var(--title-weight); letter-spacing: var(--title-spacing); text-transform: var(--title-transform); }
+/* Only when the camera or hand tracking fails: what happened, and the way on without it. */
+.cdg-start { width: min(560px, 100%); display: flex; flex-direction: column; gap: var(--space-3); margin: auto 0; min-height: 0; overflow-y: auto; }
+.cdg-start[hidden] { display: none; }
 .cdg-how { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); font-size: 15px; line-height: 1.45; }
 .cdg-how strong { color: var(--color-right); }
 .cdg-start-btns { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .cdg-start-btns .btn { flex: 1 1 200px; }
-body.started .cdg-start, .cdg-start .mic-msg[hidden] { display: none; }
 
 .cdg-status { margin: 0; min-height: 1.3em; font-size: 15px; font-weight: 700; color: var(--color-right); text-align: center; padding: 2px 12px; border-radius: var(--radius-control); }
 
@@ -55,14 +74,13 @@ body.started .cdg-start, .cdg-start .mic-msg[hidden] { display: none; }
 /* Lit: specific enough to beat a theme's own button colours (Soft Pink's). */
 body[data-theme] .cdg-bar :is(.num-btn.on, .chip[aria-pressed="true"]) { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-primary-text); }
 .num-btn.on span { color: inherit; }
-/* Before you start, the How to play card has the room. */
-body:not(.started) .cdg-bar { display: none; }
+/* While the no-camera card shows, it has the room. */
+.cdg-start:not([hidden]) ~ .cdg-bar { display: none; }
 
 /* Record button: a dot, the running time while recording. */
 #record-btn svg { width: 16px; height: 16px; color: var(--color-bad); }
 #record-btn.recording { width: auto; padding: 0 12px; gap: 6px; border-radius: var(--radius-control); }
 .rec-time { font-size: 14px; font-variant-numeric: tabular-nums; }
-#camera-btn[aria-pressed="true"] { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-primary-text); }
 .rec-voice { display: flex; align-items: center; gap: var(--space-2); font-weight: 700; min-height: 44px; }
 .rec-voice input { width: 20px; height: 20px; }
 
@@ -79,7 +97,7 @@ body:not(.started) .cdg-bar { display: none; }
 /* Short windows (a sideways phone): tighter, so the hands keep the middle. */
 @media (max-height: 500px) {
   .page { gap: var(--space-2); padding-top: calc(var(--fy-top) + var(--space-2) + env(safe-area-inset-top)); padding-bottom: calc(var(--fy-bottom) + var(--space-2) + env(safe-area-inset-bottom)); }
-  .tool-title { font-size: 20px; }
+  .tool-header .tool-title { font-size: 24px; }
   .cdg-name { font-size: clamp(28px, 10dvh, 44px); }
   .cdg-sub { font-size: 14px; }
   .cdg-bar { padding: var(--space-2); gap: var(--space-1); }
@@ -88,7 +106,6 @@ body:not(.started) .cdg-bar { display: none; }
   .cdg-kinds { gap: var(--space-1) var(--space-4); }
   .chip { min-height: 38px; padding: 4px 10px; font-size: 13px; }
   .cdg-start { padding: var(--space-4); }
-  .cdg-how { font-size: 14px; }
 }
 @media (max-width: 600px) {
   .cdg-numbers.chromatic { grid-template-columns: repeat(6, minmax(0, 1fr)); }

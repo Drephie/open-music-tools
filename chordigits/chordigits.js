@@ -29,7 +29,7 @@ const settings = {
   key: '0_maj', notation: 'letter', volume: 100, octave: 0, style: 'smooth', brow: true,
 };
 Object.assign(settings, loadLook({}));
-const save = () => saveSettings(SETTINGS_KEY, { sound: settings.sound, glide: settings.glide, hand: settings.hand, sixSeven: settings.sixSeven });
+const save = () => saveSettings(SETTINGS_KEY, { sound: settings.sound, glide: settings.glide, hand: settings.hand, sixSeven: settings.sixSeven, seenHow: true });
 
 const i18n = createI18n({
   strings: mergeStrings(HUB_STRINGS, CHORDIGITS_STRINGS),
@@ -44,8 +44,8 @@ if (IS_MOBILE) document.body.classList.add('mobile-mode');
 const video = $('webcam'), canvas = $('overlay'), ctx = canvas.getContext('2d');
 const numbersEl = $('numbers'), chordEl = $('chord'), chordName = $('chord-name'), chordSub = $('chord-sub'), chordLive = $('chord-live');
 const statusEl = $('status'), startMsg = $('start-msg'), howList = $('how-list');
-const cameraBtn = $('camera-btn'), recordBtn = $('record-btn'), recTime = $('rec-time');
-const settingsModal = $('settings-modal'), aboutModal = $('about-modal'), recModal = $('rec-modal'), supportModal = $('support-modal');
+const startCard = $('start-card'), recordBtn = $('record-btn'), recTime = $('rec-time');
+const settingsModal = $('settings-modal'), aboutModal = $('about-modal'), recModal = $('rec-modal'), supportModal = $('support-modal'), howModal = $('how-modal');
 const themeSelect = $('theme-select'), langSelect = $('lang-select'), keySelect = $('key-select'), notationSelect = $('notation-select');
 const soundSelect = $('sound-select'), glideSelect = $('glide-select'), volumeSlider = $('volume-slider'), octaveSelect = $('octave-select');
 const styleSelect = $('style-select'), handSelect = $('hand-select'), sixSelect = $('six-select'), browSelect = $('brow-select');
@@ -160,7 +160,8 @@ function howToPlay() {
   howList.innerHTML = lines.map((l) => `<li>${l}</li>`).join('');
 }
 let msgKey = null;
-function showMsg(k) { msgKey = k; startMsg.hidden = !k; startMsg.textContent = k ? t(k) : ''; document.body.classList.remove('started'); }
+// The no-camera card shows only when the camera or hand tracking fails.
+function showMsg(k) { msgKey = k; startCard.hidden = !k; startMsg.textContent = k ? t(k) : ''; }
 
 // --- PLAYING WITHOUT THE CAMERA: hold a number; tap major/minor and colour ---
 const held = new Map(); // pointerId -> degree
@@ -236,6 +237,7 @@ async function startCamera() {
   // Ask for the camera (and the microphone, for "Record my voice") at once, while the models load.
   const cam = navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: { echoCancellation: true, noiseSuppression: true } })
     .catch(() => navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } }));
+  cam.catch(() => {}); // handled below, after the models load
   try { await loadTracking(); } catch (err) { console.warn('Chordigits: tracking', err); starting = false; status(null); showMsg('errModels'); return; }
   status('askCamera');
   try { stream = await cam; } catch (err) { console.warn('Chordigits: camera', err); starting = false; status(null); showMsg('errCamera'); return; }
@@ -246,21 +248,9 @@ async function startCamera() {
   calib = { done: false, startedAt: 0, samples: [] };
   if (key.chromatic) { settings.key = keySelect.value = '0_maj'; keyContext(); }
   keyOptions();
-  document.body.classList.add('camera-on', 'started');
-  cameraBtn.setAttribute('aria-pressed', 'true');
+  document.body.classList.add('camera-on');
   status(null);
   sizeCanvas();
-}
-function stopCamera() {
-  if (stream) stream.getTracks().forEach((tr) => tr.stop());
-  stream = null; video.srcObject = null; cameraOn = false;
-  numberSteady.reset(); typeSteady.reset(); handsPlaying = false; handOctave = 0;
-  stop();
-  keyOptions();
-  document.body.classList.remove('camera-on');
-  cameraBtn.setAttribute('aria-pressed', 'false');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  status(null);
 }
 let statusKey = null;
 function status(k) { statusKey = k; statusEl.textContent = k ? t(k) : ''; }
@@ -340,7 +330,9 @@ function tick(nowMs) {
   } else sustainBrow = false;
   endSustain();
   if (handsPlaying) play(); else if (sounding && !held.size && !keysDown.length) stop();
-  status(!rack && handsPlaying ? 'loadingSound' : !calib.done && settings.brow ? 'calibrating' : sustain() && sounding ? 'sustainOn' : null);
+  // Browsers start sound only after a tap or a key: hands alone can't do it.
+  const soundOff = !window.Tone || Tone.context.state !== 'running';
+  status(soundOff ? 'tapForSound' : !rack && handsPlaying ? 'loadingSound' : !calib.done && settings.brow ? 'calibrating' : sustain() && sounding ? 'sustainOn' : null);
   draw();
 }
 
@@ -487,7 +479,7 @@ async function stopRecording() {
 
 // --- WINDOWS ---
 const modals = createModalManager({
-  modals: [settingsModal, aboutModal, recModal, supportModal],
+  modals: [settingsModal, aboutModal, recModal, supportModal, howModal],
   escapeAction: (m) => (m === supportModal && support.locked() ? 'ignore' : 'hide'),
 });
 closeOnBackdrop(modals);
@@ -497,8 +489,11 @@ const support = createSupportPrompt({ dialog: supportModal, modals, t, isBusy: (
 $('settings-btn').addEventListener('click', (e) => modals.open(settingsModal, e.currentTarget));
 $('about-btn').addEventListener('click', (e) => modals.open(aboutModal, e.currentTarget));
 $('start-camera').addEventListener('click', startCamera);
-$('no-camera').addEventListener('click', () => { loadRack(); document.body.classList.add('started'); });
-cameraBtn.addEventListener('click', () => (cameraOn ? stopCamera() : startCamera()));
+$('no-camera').addEventListener('click', () => { loadRack(); showMsg(null); });
+// Open at the top: on a short screen the focused button would scroll the first line away.
+const openHow = (opener) => { modals.open(howModal, opener); howModal.scrollTop = 0; };
+$('help-btn').addEventListener('click', (e) => openHow(e.currentTarget));
+$('how-ok').addEventListener('click', () => modals.hideAll());
 
 // --- SETTINGS WINDOW ---
 function keyOptions() {
@@ -536,7 +531,6 @@ function applyLanguage() {
   keyContext();
   keyOptions();
   updateRecordButton();
-  cameraBtn.setAttribute('aria-label', t('startCamera'));
   if (msgKey) showMsg(msgKey);
   if (statusKey) status(statusKey);
   if (sounding) showChord(sounding);
@@ -555,6 +549,8 @@ sixSelect.value = settings.sixSeven;
 volumeSlider.style.setProperty('--fill', '80%');
 applyLanguage();
 loadRack();
+startCamera(); // the camera is the way to play: it starts at once (no-camera only if it fails)
+if (!saved.seenHow) { openHow(); save(); } // How to play, on the first visit only
 sizeCanvas();
 addEventListener('resize', sizeCanvas);
 requestAnimationFrame(tick);
