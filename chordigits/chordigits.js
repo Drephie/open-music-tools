@@ -8,7 +8,7 @@ import { readFingers, countFingers, chordNumber, handTilt, heightBand, createSte
 import { startAudio, createRack, INSTRUMENTS } from '../shared/sound.js';
 import { LANGUAGES, mergeStrings, createI18n } from '../shared/ui/i18n.js';
 import { HUB_STRINGS } from '../shared/ui/strings.js';
-import { setupCustomSelects } from '../shared/ui/select.js';
+import { setupCustomSelects, setSelectRoom } from '../shared/ui/select.js';
 import { createModalManager } from '../shared/ui/modal.js';
 import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, TIKTOK_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
@@ -39,8 +39,9 @@ const i18n = createI18n({
 });
 const { t } = i18n;
 
-const IS_MOBILE = matchMedia('(pointer: coarse)').matches && (navigator.maxTouchPoints || 0) > 0 && Math.min(screen.width, screen.height) <= 900;
-if (IS_MOBILE) document.body.classList.add('mobile-mode');
+// The voice is recorded as it is: the browser's echo cancelling and noise
+// cleaning muted it under the chords, even with headphones (Drephie's test).
+const MIC = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
 
 const video = $('webcam'), canvas = $('overlay'), ctx = canvas.getContext('2d');
 const numbersEl = $('numbers'), chordEl = $('chord'), chordName = $('chord-name'), chordSub = $('chord-sub'), chordLive = $('chord-live');
@@ -239,12 +240,17 @@ async function startCamera() {
   // Ask for the camera (and the microphone, for "Record my voice") at once, while the models load.
   // The voice is recorded as it is: the browser's echo cancelling and noise
   // cleaning muted it under the chords, even with headphones (Drephie's test).
-  const cam = navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } })
+  const cam = navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: MIC })
     .catch(() => navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } }));
   cam.catch(() => {}); // handled below, after the models load
   try { await loadTracking(); } catch (err) { console.warn('Chordigits: tracking', err); starting = false; status(null); showMsg('errModels'); return; }
   status('askCamera');
   try { stream = await cam; } catch (err) { console.warn('Chordigits: camera', err); starting = false; status(null); showMsg('errCamera'); return; }
+  // Came without the microphone? Ask for it now, so "Record my voice" works.
+  if (!stream.getAudioTracks().length) {
+    try { (await navigator.mediaDevices.getUserMedia({ audio: MIC })).getAudioTracks().forEach((tr) => stream.addTrack(tr)); }
+    catch (err) { console.warn('Chordigits: microphone', err); } // recordings then keep the instruments only
+  }
   video.srcObject = stream;
   await new Promise((res) => (video.readyState >= 2 ? res() : video.addEventListener('loadeddata', res, { once: true })));
   starting = false;
@@ -340,6 +346,33 @@ function tick(nowMs) {
   draw();
 }
 
+// --- LAYOUT: the page never turns vertical on a phone (as the Piano) ---
+// An upright phone shows the stage turned the way the phone was last held
+// sideways, so nothing jumps; sideways phones and computers fit the window.
+const stage = $('stage'), coarse = matchMedia('(pointer: coarse)');
+let stageW = innerWidth, stageH = innerHeight, turnMatrix = null, lastAngle = 90;
+function layout() {
+  const w = innerWidth, h = innerHeight;
+  const angle = screen.orientation ? screen.orientation.angle : window.orientation;
+  if (w > h && typeof angle === 'number') lastAngle = angle;
+  const phone = coarse.matches && Math.min(w, h) < 600, turned = phone && h > w;
+  stageW = turned ? h : w; stageH = turned ? w : h;
+  const b = document.body.classList;
+  b.toggle('phone', phone); b.toggle('turned', turned); b.toggle('flipped', turned && (lastAngle === 270 || lastAngle === -90));
+  b.toggle('compact', stageH <= 500); b.toggle('narrow', stageW < 640);
+  stage.style.width = `${stageW}px`; stage.style.height = `${stageH}px`;
+  turnMatrix = turned ? new DOMMatrixReadOnly(getComputedStyle(stage).transform) : null;
+  sizeCanvas(); sizeWave();
+}
+// Dropdown lists open up or down by the room on the stage, not on the screen.
+function toLocal(x, y) { return turnMatrix ? turnMatrix.inverse().transformPoint(new DOMPoint(x, y)) : { x, y }; }
+setSelectRoom((trigger) => {
+  const r = trigger.getBoundingClientRect(), a = toLocal(r.left, r.top), z = toLocal(r.right, r.bottom);
+  return { above: Math.min(a.y, z.y), below: stageH - Math.max(a.y, z.y) };
+});
+addEventListener('resize', layout);
+addEventListener('orientationchange', () => setTimeout(layout, 250));
+
 // --- THE CHORD'S WAVE across the screen ---
 // Drawn from the notes playing (the sum of their waves, slowed right down), so
 // every chord has its own shape; it glides to the next chord and settles into
@@ -348,7 +381,7 @@ const waveCanvas = $('wave'), wctx = waveCanvas.getContext('2d');
 const stillWave = matchMedia('(prefers-reduced-motion: reduce)');
 const waveNotes = []; // { f, a } shown now, low to high
 let waveLevel = 0, waveTime = 0, waveLast = 0;
-function sizeWave() { const r = devicePixelRatio || 1; waveCanvas.width = innerWidth * r; waveCanvas.height = innerHeight * r; }
+function sizeWave() { const r = devicePixelRatio || 1; waveCanvas.width = stageW * r; waveCanvas.height = stageH * r; }
 function drawWave(now) {
   requestAnimationFrame(drawWave);
   const dt = Math.min(0.05, Math.max(0, (now - waveLast) / 1000)); waveLast = now;
@@ -391,7 +424,7 @@ function readLook() {
   const g = (v) => cs.getPropertyValue(v).trim();
   look = { left: g('--color-left'), right: g('--color-right'), text: g('--color-text'), bg: g('--bg-page'), font: g('--font-display'), blur: parseInt(g('--shadow-blur'), 10) || 0 };
 }
-function sizeCanvas() { canvas.width = innerWidth; canvas.height = innerHeight; }
+function sizeCanvas() { canvas.width = stageW; canvas.height = stageH; }
 // The picture fills the window (object-fit: cover) and is mirrored, like a mirror.
 function toCanvas(p) {
   const vw = video.videoWidth || 1280, vh = video.videoHeight || 720, W = canvas.width, H = canvas.height;
@@ -419,10 +452,10 @@ function draw() {
       text = [q ? t(KIND_WORD[q]) : '', c ? t(COLOR_WORD[c]) : ''].filter(Boolean).join(' · ');
     }
     if (!text) continue;
-    const big = h.side === numberSide();
-    ctx.font = `700 ${big ? 34 : 18}px ${look.font}`;
+    const big = h.side === numberSide(), k = stageH <= 500 ? 0.7 : 1; // smaller on a phone
+    ctx.font = `700 ${Math.round((big ? 34 : 18) * k)}px ${look.font}`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-    const x = pts[9].x, y = Math.min(...pts.map((p) => p.y)) - 12, w = ctx.measureText(text).width + 20, hgt = big ? 44 : 30;
+    const x = pts[9].x, y = Math.min(...pts.map((p) => p.y)) - 12, w = ctx.measureText(text).width + 20 * k, hgt = (big ? 44 : 30) * k;
     ctx.fillStyle = look.bg; ctx.globalAlpha = 0.72;
     ctx.beginPath(); (ctx.roundRect || ctx.rect).call(ctx, x - w / 2, y - hgt + 4, w, hgt, 10); ctx.fill();
     ctx.globalAlpha = 1; ctx.fillStyle = col;
@@ -444,7 +477,7 @@ async function connectVoice() {
   if (!$('rec-voice').checked) return;
   let s = stream && stream.getAudioTracks().length ? stream : null;
   if (!s) {
-    try { s = micOnly = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }); }
+    try { s = micOnly = await navigator.mediaDevices.getUserMedia({ audio: MIC }); }
     catch (err) { console.warn('Chordigits: microphone', err); $('rec-voice').checked = false; return; }
   }
   // The microphone goes only into the recording, never to the speakers.
@@ -602,10 +635,7 @@ applyLanguage();
 loadRack();
 startCamera(); // the camera is the way to play: it starts at once (no-camera only if it fails)
 if (!saved.seenHow) { openHow(); save(); } // How to play, on the first visit only
-sizeCanvas();
-addEventListener('resize', sizeCanvas);
-addEventListener('resize', sizeWave);
-sizeWave();
+layout();
 requestAnimationFrame(tick);
 requestAnimationFrame(drawWave);
 registerHubWorker('../');

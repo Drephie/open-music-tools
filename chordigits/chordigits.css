@@ -2,7 +2,31 @@
  * The camera picture fills the window behind the page; the hand drawings sit
  * on top of everything (they never take a tap). Theme variables only. */
 
-body { overflow: hidden; }
+html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+/* Everything lives in #stage, sized to the window by chordigits.js, or turned
+   sideways on an upright phone so the page never turns vertical (as the
+   Piano): body.turned, body.flipped the other way round. Sizes use the stage's
+   own units (cqw, cqh) and body classes (compact, narrow), since vw, vh and
+   media queries would measure the upright screen. The safe areas (notch, home
+   bar) follow the turn, with a little extra room for rounded corners. */
+#stage {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; overflow: hidden; container-type: size;
+  --corner: 0px;
+  --safe-t: env(safe-area-inset-top); --safe-r: env(safe-area-inset-right);
+  --safe-b: env(safe-area-inset-bottom); --safe-l: env(safe-area-inset-left);
+}
+body.phone #stage { --corner: 14px; }
+body.turned #stage {
+  transform-origin: 0 0; transform: rotate(90deg) translateY(-100%);
+  --safe-t: env(safe-area-inset-right); --safe-r: env(safe-area-inset-bottom);
+  --safe-b: env(safe-area-inset-left); --safe-l: env(safe-area-inset-top);
+}
+body.turned.flipped #stage {
+  transform: rotate(-90deg) translateX(-100%);
+  --safe-t: env(safe-area-inset-left); --safe-r: env(safe-area-inset-top);
+  --safe-b: env(safe-area-inset-right); --safe-l: env(safe-area-inset-bottom);
+}
+.centered-modal { width: min(420px, calc(100cqw - 32px)); max-height: calc(100cqh - 24px); }
 #webcam, #overlay { position: fixed; inset: 0; width: 100%; height: 100%; }
 /* The camera picture as in Choordination: inside the theme's frame, faded into
    the page colour (60%) and coloured by the theme, so each theme shows its world. */
@@ -31,7 +55,11 @@ body[data-theme="snap"] #theme-frame { border: solid var(--color-panel); border-
 #overlay { z-index: 3; pointer-events: none; }
 /* The chord's wave across the screen: over the picture, under the controls and the hands. */
 #wave { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
-.page { position: relative; z-index: 2; max-width: none; height: 100vh; height: 100dvh; min-height: 0; }
+.page {
+  position: absolute; inset: 0; z-index: 2; max-width: none; min-height: 0;
+  padding: calc(var(--fy-top) + var(--space-4) + max(var(--safe-t), var(--corner) / 2)) calc(var(--fx) + var(--gutter) + max(var(--safe-r), var(--corner)))
+           calc(var(--fy-bottom) + var(--space-4) + max(var(--safe-b), var(--corner) / 2)) calc(var(--fx) + var(--gutter) + max(var(--safe-l), var(--corner)));
+}
 .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* Over the camera, panels get a solid-enough backing to stay readable in every theme. */
@@ -44,7 +72,7 @@ body.camera-on :is(.tool-header .icon-btn, .cdg-bar, .cdg-chord, .cdg-status:not
 .title-btn { all: unset; cursor: pointer; display: inline-block; transition: transform 0.2s ease; }
 .title-btn:hover { transform: scale(1.03); }
 .title-btn:focus-visible { outline: 2px solid var(--color-right); outline-offset: 4px; border-radius: 6px; }
-.tool-header .tool-title { font-size: clamp(30px, 5vw, 58px); line-height: 1; text-transform: uppercase; letter-spacing: 0.08em; text-shadow: var(--credit-shadow); }
+.tool-header .tool-title { font-size: clamp(30px, 5cqw, 58px); line-height: 1; text-transform: uppercase; letter-spacing: 0.08em; text-shadow: var(--credit-shadow); }
 .tool-header { flex-wrap: wrap; } /* a narrow window: the buttons go under the name, on the right */
 .header-actions { margin-left: auto; }
 .tool-footer { text-shadow: var(--credit-shadow); }
@@ -55,7 +83,7 @@ body.camera-on :is(.tool-header .icon-btn, .cdg-bar, .cdg-chord, .cdg-status:not
 .cdg-chord { text-align: center; padding: var(--space-2) var(--space-5); border-radius: var(--radius-panel); }
 .cdg-name {
   font-family: var(--font-display); font-weight: var(--title-weight); letter-spacing: var(--title-spacing);
-  color: var(--color-title); font-size: clamp(34px, 9dvh, 72px); line-height: 1.05;
+  color: var(--color-title); font-size: clamp(34px, 9cqh, 72px); line-height: 1.05;
 }
 .cdg-sub { font-size: 16px; font-weight: 700; color: var(--color-right); margin-top: 2px; }
 .cdg-chord.fading { opacity: 0.35; transition: opacity 0.7s ease; }
@@ -98,25 +126,30 @@ body[data-theme] .cdg-bar :is(.num-btn.on, .chip[aria-pressed="true"]) { backgro
 .cdg-busy[hidden] { display: none; }
 .cdg-busy p { margin: 0; font-weight: 700; }
 
-.cdg-rotate { position: fixed; inset: 0; z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-3); padding: var(--space-6); box-sizing: border-box; text-align: center; background: var(--bg-page); }
-.cdg-rotate svg { width: 108px; height: 72px; color: var(--color-left); }
-.cdg-rotate h2 { margin: 0; font-family: var(--font-display); color: var(--color-title); }
-.cdg-rotate p { margin: 0; max-width: 420px; line-height: 1.6; }
-@media (orientation: portrait) { body.mobile-mode .cdg-rotate { display: flex; } }
 
-/* Short windows (a sideways phone): tighter, so the hands keep the middle. */
-@media (max-height: 500px) {
-  .page { gap: var(--space-2); padding-top: calc(var(--fy-top) + var(--space-2) + env(safe-area-inset-top)); padding-bottom: calc(var(--fy-bottom) + var(--space-2) + env(safe-area-inset-bottom)); }
-  .tool-header .tool-title { font-size: 32px; }
-  .cdg-name { font-size: clamp(28px, 10dvh, 44px); }
-  .cdg-sub { font-size: 14px; }
-  .cdg-bar { padding: var(--space-2); gap: var(--space-1); }
-  .num-btn { min-height: 44px; font-size: 11px; }
-  .num-btn b { font-size: 18px; }
-  .cdg-kinds { gap: var(--space-1) var(--space-4); }
-  .chip { min-height: 38px; padding: 4px 10px; font-size: 13px; }
-  .cdg-start { padding: var(--space-4); }
-}
-@media (max-width: 600px) {
-  .cdg-numbers.chromatic { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-}
+/* A short stage (a sideways phone): smaller and airier, so the camera picture
+   and the hands have the screen (Drephie: room for the videos people post). */
+body.compact .page { gap: var(--space-2); padding-top: calc(var(--fy-top) + var(--space-2) + max(var(--safe-t), var(--corner) / 2)); padding-bottom: calc(var(--fy-bottom) + var(--space-2) + max(var(--safe-b), var(--corner) / 2)); }
+body.compact .tool-header .tool-title { font-size: 28px; }
+body.compact .cdg-name { font-size: clamp(24px, 9cqh, 36px); }
+body.compact .cdg-sub { font-size: 12px; }
+body.compact .cdg-kinds { gap: var(--space-1) var(--space-4); }
+body.compact .cdg-start { padding: var(--space-4); }
+body.compact .cdg-bar { width: min(600px, 100%); padding: 6px; gap: 4px; }
+body.compact.camera-on .cdg-bar { background: color-mix(in srgb, var(--bg-page) 55%, transparent); }
+body.compact .cdg-numbers { gap: 4px; }
+body.compact .num-btn { min-height: 36px; padding: 2px; font-size: 10px; }
+body.compact .num-btn b { font-size: 15px; }
+body.compact .chip { min-height: 30px; padding: 2px 9px; font-size: 12px; }
+body.compact .tool-header .icon-btn { width: 36px; height: 36px; }
+body.compact .tool-header .icon-btn svg { width: 18px; height: 18px; }
+body.compact .header-actions { gap: 6px; }
+body.compact .cdg-chord { padding: 2px 14px; }
+body.compact .tool-footer { font-size: 11px; }
+/* How to play on a short stage: small enough to read whole, its button always in view. */
+body.compact #how-modal { padding: 14px 16px; gap: 8px; }
+body.compact #how-modal .cdg-how { font-size: 13px; line-height: 1.35; gap: 4px; }
+body.compact #how-modal .about-small { font-size: 12px; }
+body.compact #how-modal .modal-header h2 { font-size: 17px; }
+#how-ok { position: sticky; bottom: 0; flex: none; }
+body.narrow .cdg-numbers.chromatic { grid-template-columns: repeat(6, minmax(0, 1fr)); }

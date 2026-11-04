@@ -35,7 +35,7 @@ Full-screen camera, as in Gesture Synth, in the hub's themes and fonts, with the
 - **Each theme's look on the camera, as in Choordination** *(Drephie, 2026-11-04)*: the picture faded into the page colour and coloured by the theme (Rouge red, Retro CRT green, Monochrome grey, Retrosnap sepia…), inside the theme's frame (Rouge's dark red vignette, Retrosnap's instant-photo border, Monochrome's black bars). Support on Patreon and @drephie sit free in the bottom corners, with no bar.
 - **The chord's wave** *(Drephie, 2026-11-04)*: a glowing line across the screen, behind the hands, in the theme's colour: the shape of the notes playing, gliding to the next chord, a calm line when nothing plays (still with reduce motion). The same wave is the art on its home page card.
 - **Camera picture** (Settings, shared with Choordination): brightness, contrast, saturation, hue and noise sliders over the theme's colours, and Reset the picture *(Drephie, 2026-11-04)*.
-- Phones: sideways, as now (a "turn your phone" screen when upright).
+- Phones: sideways, and the page never turns vertical: an upright phone shows it still sideways, turned the way the phone was last held, as the Piano does *(Drephie, 2026-11-04)*. On phones everything is smaller and airier, to leave the camera picture and the hands the screen (the videos people post); the name and buttons keep clear of rounded corners and the notch.
 
 **Settings:** Theme and Language; Musical key; Notation; Sound; Glide; Volume; Octave; Chord style; Hand layout; Six and seven; Eyebrow sustain.
 

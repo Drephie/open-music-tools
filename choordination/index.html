@@ -195,6 +195,8 @@
     .modal-note { font-size: 12px; color: var(--color-right); line-height: 1.5; margin: 5px 0 0; }
     .boot-title { font-family: var(--font-display); }
     /* The welcome windows' Continue and Start: the main action, filled. */
+    /* Start stays in view at the window's bottom while the text above scrolls. */
+    #boot-modal .boot-cta { position: sticky; bottom: 0; }
     .boot-cta { width: auto; min-height: 44px; align-self: flex-end; font-size: 16px; padding: 12px 25px; background: var(--color-primary); color: var(--color-primary-text); border-color: var(--color-primary); }
     .boot-cta:hover:not(:disabled) { background: color-mix(in srgb, var(--color-primary) 86%, var(--color-text)); color: var(--color-primary-text); }
     #boot-step-2 { display: flex; flex-direction: column; gap: 15px; }
@@ -268,7 +270,10 @@
     body.mobile-mode #patreon-link, body.mobile-mode #designer-credit { display: none; }
     /* Narrow computer windows: the two footer links would meet, so the Patreon one goes a line up. */
     @media (max-width: 560px) { #patreon-link { bottom: calc(50px + var(--frame-bottom)); } }
-    body.mobile-mode #choordination-watermark { font-size: 24px; transform: scale(1); letter-spacing: 3px; top: calc(14px + var(--frame-top)); left: calc(14px + var(--frame-sides)); }
+    /* Phones: the name and the menu keep clear of rounded corners and the notch. */
+    body.mobile-mode #choordination-watermark { font-size: 24px; transform: scale(1); letter-spacing: 3px; top: calc(var(--frame-top) + max(12px, env(safe-area-inset-top) + 6px)); left: calc(var(--frame-sides) + max(26px, env(safe-area-inset-left) + 10px)); }
+    body.mobile-mode #top-right-menu { top: calc(var(--frame-top) + max(12px, env(safe-area-inset-top) + 6px)); right: calc(var(--frame-sides) + max(22px, env(safe-area-inset-right) + 8px)); }
+    body.mobile-mode #touch-ui { padding-left: max(0px, env(safe-area-inset-left)); padding-right: max(0px, env(safe-area-inset-right)); }
     body.mobile-mode .centered-modal { width: min(480px, 86vw); max-height: 88vh; }
     @media (orientation: portrait) {
       body.mobile-mode #rotate-overlay { display: flex; }
@@ -279,8 +284,14 @@
        Shrinks chrome, modals and toolbars so the interface fits the phone;
        canvas widget/text scaling is handled in JS via uiScale. --- */
     @media (max-height: 520px) {
-      #choordination-watermark { font-size: 22px !important; transform: scale(1) !important; letter-spacing: 3px; top: calc(10px + var(--frame-top)); left: calc(12px + var(--frame-sides)); }
-      #top-right-menu { top: calc(10px + var(--frame-top)); right: calc(10px + var(--frame-sides)); gap: 6px; }
+      #choordination-watermark { font-size: 22px !important; transform: scale(1) !important; letter-spacing: 3px; top: calc(var(--frame-top) + max(12px, env(safe-area-inset-top) + 6px)); left: calc(var(--frame-sides) + max(26px, env(safe-area-inset-left) + 10px)); }
+      #top-right-menu { top: calc(var(--frame-top) + max(12px, env(safe-area-inset-top) + 6px)); right: calc(var(--frame-sides) + max(22px, env(safe-area-inset-right) + 8px)); gap: 6px; }
+      /* The welcome window fits a sideways phone: smaller text, Start always in view. */
+      #boot-modal { gap: 6px; }
+      #boot-modal .boot-title { font-size: 16px; padding-bottom: 6px; }
+      #boot-modal li { font-size: 12px; line-height: 1.35; padding: 4px 8px; margin-bottom: 3px; }
+      #boot-step-2 { gap: 6px; }
+      .boot-project { font-size: 11px; line-height: 1.35; }
       .menu-btn { padding: 6px 10px; font-size: 13px; }
       .icon-btn { width: 44px; height: 44px; }
       .centered-modal { padding: 14px 16px; gap: 8px; max-height: 92vh; width: min(440px, 92vw); font-size: 13px; }

@@ -45,7 +45,6 @@ export const CHORDIGITS_STRINGS = {
     recChoiceTitle: "Record", recChoiceBody: "What would you like to capture?", recVoice: "Record my voice",
     recHeadphones: "Recording your voice? Wear headphones. With the sound on speakers, the microphone picks up the instruments and your voice ends up very quiet in the recording.",
     recAudio: "Audio only", recScreen: "Screen + audio", finalizing: "Finishing your recording…",
-    rotateTitle: "Turn your phone sideways", rotateBody: "Chordigits plays with the phone sideways, so both hands fit in the picture.",
   },
   es: {
     title: "Chordigits",
@@ -87,7 +86,6 @@ export const CHORDIGITS_STRINGS = {
     recChoiceTitle: "Grabar", recChoiceBody: "¿Qué quieres capturar?", recVoice: "Grabar mi voz",
     recHeadphones: "¿Vas a grabar tu voz? Usa auriculares. Con el sonido por los altavoces, el micrófono capta los instrumentos y tu voz queda muy baja en la grabación.",
     recAudio: "Solo audio", recScreen: "Pantalla + audio", finalizing: "Terminando tu grabación…",
-    rotateTitle: "Gira el móvil", rotateBody: "Chordigits se toca con el móvil en horizontal, para que las dos manos quepan en la imagen.",
   },
   it: {
     title: "Chordigits",
@@ -129,6 +127,5 @@ export const CHORDIGITS_STRINGS = {
     recChoiceTitle: "Registra", recChoiceBody: "Cosa vuoi registrare?", recVoice: "Registra la mia voce",
     recHeadphones: "Registri la tua voce? Usa le cuffie. Con il suono dalle casse, il microfono capta gli strumenti e la tua voce risulta molto bassa nella registrazione.",
     recAudio: "Solo audio", recScreen: "Schermo + audio", finalizing: "Sto finendo la registrazione…",
-    rotateTitle: "Gira il telefono", rotateBody: "Chordigits si suona con il telefono in orizzontale, così entrambe le mani entrano nell'inquadratura.",
   },
 };
