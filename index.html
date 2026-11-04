@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="shared/ui/page.css">
   <link rel="stylesheet" href="hub/hub.css">
 </head>
-<body data-theme="liquid">
+<body data-theme="rouge">
 <script>/* The saved theme before the first paint, so pages never flash Liquid Glass (page.js checks it afterwards). */try{var l=JSON.parse(localStorage.getItem('open-music-tools.look.v1'));if(l&&/^[a-z0-9]+$/.test(l.theme))document.body.dataset.theme=l.theme}catch(e){}</script>
   <div id="theme-frame" aria-hidden="true"></div>
   <div class="page">
@@ -34,6 +34,10 @@
         <p class="hub-privacy" data-i18n="privacy">Everything runs on your device: nothing is uploaded, no ads, no trackers.</p>
       </div>
       <div class="header-actions">
+        <div class="lang-pick">
+          <button id="lang-btn" class="icon-btn flag-btn" aria-haspopup="true" aria-expanded="false" aria-controls="lang-menu" aria-label="Language"></button>
+          <div id="lang-menu" class="lang-menu" role="menu" hidden></div>
+        </div>
         <button id="about-btn" class="icon-btn" data-i18n-aria="about" aria-label="About">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
         </button>

@@ -1,25 +1,29 @@
 /* shared/ui/page.js: helpers for the page of a hub tool (see page.css).
  *
- *   THEMES          [[value, HUB_STRINGS key], …] for the seven themes in themes.css
+ *   THEMES          [[value, HUB_STRINGS key], …] for the seven themes in themes.css,
+ *                   in menu order: Rouge (the default), Liquid Glass, then A to Z
  *   LANGUAGE_NAMES  { en: 'English', es: 'Español', it: 'Italiano' } (always
  *                   shown in their own language)
  *   PATREON_URL, DESIGNER_URL   for {patreon} in strings and the footer links
  *   TIKTOK_URL                  Drephie's TikTok, for {tiktok} in About texts
  *   REPO_URL                    the public code, for {repo} in strings
- *   browserLanguage()           'es' or 'it' when the browser prefers it, else 'en'
  *   loadSettings(key)           the object saved under key in localStorage, or {}
  *   saveSettings(key, data)     saves it; silently does nothing when storage is
  *                               unavailable (private mode, blocked storage)
- *   applyTheme(theme)           sets <body data-theme>, and the browser bar's colour
- *                               (meta theme-color) to the theme's page colour
+ *   applyTheme(theme)           sets <body data-theme>, the browser bar's colour
+ *                               (meta theme-color) to the theme's page colour, and
+ *                               the tab's icon to the theme's colours (themeFavicon)
+ *   themeFavicon()              recolours the page's favicon.svg (its dark ground,
+ *                               white and light blue) with the theme's page colour,
+ *                               --color-left and --color-right
  *
  * The theme and language are one choice for the whole hub (the home page and
  * every tool), saved in localStorage under LOOK_KEY:
  *   loadLook(saved)   { theme, lang } for this page. A value the hub has not
  *                     saved yet comes from `saved` (the tool's own settings
  *                     from before the hub shared them: { theme, lang }), and
- *                     is then passed on to the hub; else 'liquid' and
- *                     browserLanguage().
+ *                     is then passed on to the hub; else 'rouge' and
+ *                     English (Drephie, 2026-11-04).
  *   saveLook(changes) saves { theme } and/or { lang } for every tool
  *   watchLook(apply)  calls apply({ theme, lang }) when another tab changes
  *                     them, and when the browser's Back or Forward button
@@ -46,8 +50,8 @@
  */
 
 export const THEMES = [
-  ['liquid', 'themeLiquid'], ['y2k', 'themeY2k'], ['pink', 'themePink'], ['bw', 'themeBw'], ['retro', 'themeRetro'],
-  ['rouge', 'themeRouge'], ['snap', 'themeSnap'],
+  ['rouge', 'themeRouge'], ['liquid', 'themeLiquid'], ['bw', 'themeBw'], ['retro', 'themeRetro'], ['snap', 'themeSnap'],
+  ['pink', 'themePink'], ['y2k', 'themeY2k'],
 ];
 export const LANGUAGE_NAMES = { en: 'English', es: 'Español', it: 'Italiano' };
 export const PATREON_URL = 'https://patreon.com/drephie';
@@ -55,14 +59,6 @@ export const DESIGNER_URL = 'https://instagram.com/drephie';
 export const TIKTOK_URL = 'https://www.tiktok.com/@itsnotdre';
 export const REPO_URL = 'https://github.com/Drephie/open-music-tools';
 
-export function browserLanguage() {
-  for (const tag of navigator.languages || [navigator.language || 'en']) {
-    const lang = String(tag).slice(0, 2).toLowerCase();
-    if (lang === 'es' || lang === 'it') return lang;
-    if (lang === 'en') return 'en';
-  }
-  return 'en';
-}
 
 export function loadSettings(key) {
   try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; }
@@ -76,6 +72,20 @@ export function applyTheme(theme) {
   const bar = document.querySelector('meta[name="theme-color"]');
   const page = getComputedStyle(document.body).getPropertyValue('--bg-page').trim();
   if (bar && page) bar.setAttribute('content', page);
+  themeFavicon();
+}
+// The favicons are drawn in a dark ground (#0f1419 and kin), white and light blue.
+const FAVICON_COLOURS = /#(0f1419|0b0d12|1a2433|080b10|ffffff|f3f5f8|8ad4ff|3b78e7)\b/gi;
+const faviconRole = { '0f1419': '--bg-page', '0b0d12': '--bg-page', '1a2433': '--bg-page', '080b10': '--bg-page', ffffff: '--color-left', f3f5f8: '--color-left', '8ad4ff': '--color-right', '3b78e7': '--color-right' };
+let faviconSvg;
+export async function themeFavicon() {
+  const link = document.querySelector('link[rel="icon"]');
+  if (!link) return;
+  if (faviconSvg === undefined) faviconSvg = fetch(link.getAttribute('href')).then((r) => r.text()).catch(() => '');
+  const svg = await faviconSvg;
+  if (!svg) return;
+  const cs = getComputedStyle(document.body);
+  link.href = 'data:image/svg+xml,' + encodeURIComponent(svg.replace(FAVICON_COLOURS, (_, hex) => cs.getPropertyValue(faviconRole[hex.toLowerCase()]).trim() || `#${hex}`));
 }
 
 export const LOOK_KEY = 'open-music-tools.look.v1';
@@ -89,8 +99,8 @@ export function loadLook(saved = {}) {
   if (!validLang(hub.lang) && validLang(saved.lang)) passOn.lang = saved.lang;
   if (Object.keys(passOn).length) saveLook(passOn);
   return {
-    theme: validTheme(hub.theme) ? hub.theme : passOn.theme || 'liquid',
-    lang: validLang(hub.lang) ? hub.lang : passOn.lang || browserLanguage(),
+    theme: validTheme(hub.theme) ? hub.theme : passOn.theme || 'rouge',
+    lang: validLang(hub.lang) ? hub.lang : passOn.lang || 'en',
   };
 }
 export function saveLook(changes) {

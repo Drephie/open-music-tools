@@ -103,6 +103,7 @@ Silent bars practice (the click drops out for a bar), a speed trainer that slowl
 
 ## Open decisions
 
+- Decided (Drephie, 2026-11-04): Rouge is the first theme for new visitors, and the theme lists read Rouge, Liquid Glass, then A to Z; new visitors start in English (no more browser-language guess), with a flag on the home page (UK, Spain, Italy) to switch; every tab's icon takes the theme's colours (`themeFavicon` in `shared/ui/page.js`).
 - Decided for the launch (Drephie, 2026-11-03): see "Launch" below (license, name and domain, funding, privacy, hosting, Choordination's address, the email in the history).
 - Done (2026-10-24): theme and language are one choice for the whole hub, Choordination included (it used to start in Liquid Glass and English every time).
 - Middle C is Do4 in the Piano (as in Drephie's Diapason); some Italian and Spanish books call it Do3. Ask Drephie if it ever matters.

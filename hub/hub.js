@@ -74,9 +74,35 @@ function setTheme(theme) {
   applyTheme(theme);
   queueFit();
 }
+// --- LANGUAGE FLAG (top right): the flag of the language in use, a tap opens the other two ---
+// Flags keep their own colours (like Patreon's red): they are pictures, not theme parts.
+const FLAGS = {
+  en: '<rect width="60" height="40" fill="#012169"/><path d="M0 0l60 40M60 0L0 40" stroke="#fff" stroke-width="8"/><path d="M0 0l60 40M60 0L0 40" stroke="#c8102e" stroke-width="3"/><path d="M30 0v40M0 20h60" stroke="#fff" stroke-width="12"/><path d="M30 0v40M0 20h60" stroke="#c8102e" stroke-width="7"/>',
+  it: '<rect width="20" height="40" fill="#009246"/><rect x="20" width="20" height="40" fill="#fff"/><rect x="40" width="20" height="40" fill="#ce2b37"/>',
+  es: '<rect width="60" height="40" fill="#aa151b"/><rect y="10" width="60" height="20" fill="#f1bf00"/>',
+};
+const flag = (l) => `<svg class="flag" viewBox="0 0 60 40" aria-hidden="true">${FLAGS[l]}</svg>`;
+const langBtn = $('lang-btn'), langMenu = $('lang-menu');
+function showFlag() {
+  langBtn.innerHTML = flag(look.lang);
+  langBtn.setAttribute('aria-label', `${t('lang')}: ${LANGUAGE_NAMES[look.lang]}`);
+  langMenu.innerHTML = LANGUAGES.map((l) => `<button role="menuitemradio" aria-checked="${l === look.lang}" data-lang="${l}">${flag(l)}<span>${LANGUAGE_NAMES[l]}</span></button>`).join('');
+}
+const openMenu = (open) => { langMenu.hidden = !open; langBtn.setAttribute('aria-expanded', String(open)); if (open) langMenu.querySelector('[aria-checked="true"]').focus(); };
+langBtn.addEventListener('click', () => openMenu(langMenu.hidden));
+langMenu.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-lang]');
+  if (!b) return;
+  openMenu(false); langBtn.focus();
+  if (b.dataset.lang !== look.lang) { setLanguage(b.dataset.lang); saveLook({ lang: look.lang }); }
+});
+document.addEventListener('click', (e) => { if (!langMenu.hidden && !e.target.closest('.lang-pick')) openMenu(false); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !langMenu.hidden) { openMenu(false); langBtn.focus(); } });
+
 function setLanguage(lang) {
   look.lang = lang;
   langSelect.value = lang;
+  showFlag();
   i18n.apply();
   document.title = t('title');
   setupCustomSelects();   // labels and option texts changed
