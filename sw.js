@@ -16,7 +16,7 @@
  * Bump CACHE_NAME whenever a cached file changes. Add each new tool's files
  * to APP_SHELL. Bump CDN_CACHE only when a pinned CDN version changes.
  */
-const CACHE_NAME = 'open-music-tools-v15';
+const CACHE_NAME = 'open-music-tools-v16';
 const CDN_CACHE = 'open-music-tools-cdn-v1';
 const APP_SHELL = [
   './',
@@ -32,6 +32,7 @@ const APP_SHELL = [
   'shared/pitch.js',
   'shared/pitch-worklet.js',
   'shared/wave.js',
+  'shared/hands.js',
   'shared/ui/themes.css',
   'shared/ui/select.css',
   'shared/ui/select.js',
@@ -58,6 +59,10 @@ const APP_SHELL = [
   'choordination/index.html',
   'choordination/manifest.json',
   'choordination/favicon.svg',
+  'chordigits/',
+  'chordigits/index.html',
+  'chordigits/manifest.json',
+  'chordigits/favicon.svg',
   'metronome/',
   'metronome/index.html',
   'metronome/metronome.css',

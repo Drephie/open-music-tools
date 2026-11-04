@@ -20,7 +20,7 @@ SITE=$(git ls-files | grep -vE '^(tests|specs|\.claude)/|\.md$|^(LICENSE|CNAME|\
 TEXT=$(echo "$SITE" | grep -E '\.(html|js|css|json|svg)$')
 
 echo "== Tests (JavaScriptCore)"
-for t in theory ear-trainer pitch instrument-tuner pitch-detector pitch-training strings; do
+for t in theory ear-trainer pitch instrument-tuner pitch-detector pitch-training hands strings; do
   case $t in strings) f=tests/tools/run-strings-check.js ;; *) f=tests/tools/run-$t-test.js ;; esac
   if out=$("$JSC" -m "$f" 2>&1); then pass "$f"; else fail "$f: $(echo "$out" | grep -E 'FAIL|Error' | head -5 | tr '\n' ' ')"; fi
 done
@@ -68,7 +68,7 @@ echo "== Credits and licenses"
 check "LICENSE is the AGPL-3.0" "$(grep -q 'GNU AFFERO GENERAL PUBLIC LICENSE' LICENSE 2>/dev/null || echo missing)"
 check "CNAME is openmusictools.org, .nojekyll is there" "$( [ "$(cat CNAME 2>/dev/null)" = openmusictools.org ] || echo CNAME; [ -f .nojekyll ] || echo .nojekyll)"
 # Every page that plays the Salamander piano (it imports shared/sound.js) credits it, CC BY 3.0.
-PIANO_PAGES=$(for f in $(echo "$TEXT" | grep -E '/[a-z-]+\.js$|^choordination/index\.html$'); do grep -l -E "from ['\"]\.\./shared/sound\.js['\"]|shared/sound\.js" "$f"; done | grep -v '^shared/' | cut -d/ -f1 | sort -u)
+PIANO_PAGES=$(for f in $(echo "$TEXT" | grep -E '/[a-z-]+\.js$|^(choordination|chordigits)/index\.html$'); do grep -l -E "from ['\"]\.\./shared/sound\.js['\"]|shared/sound\.js" "$f"; done | grep -v '^shared/' | cut -d/ -f1 | sort -u)
 check "Salamander piano credited where it plays ($(echo $PIANO_PAGES))" "$(for d in $PIANO_PAGES; do grep -q -s 'Salamander' "$d/strings.js" "$d/index.html" || echo "$d"; done)"
 check "every font has its OFL license" "$(for w in shared/fonts/*.woff2; do n=$(basename "$w" | sed -E 's/\.woff2$//; s/-//g'); [ -f "shared/fonts/OFL-$n.txt" ] || echo "$w"; done)"
 check "README credits Salamander, Tone.js, MediaPipe and the fonts" "$(for w in Salamander Tone.js MediaPipe 'Open Font License'; do grep -q "$w" README.md || echo "$w"; done)"
