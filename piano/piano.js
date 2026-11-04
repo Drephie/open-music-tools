@@ -18,7 +18,7 @@ const $ = (id) => document.getElementById(id);
 const LOW = 21, HIGH = 108;   // A0 to C8: the 88 keys
 const IS_BLACK = [0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0];
 const MODES = ['hold', 'ring', 'drone'];
-const SOUND_KEYS = { piano: 'sndPiano', epiano: 'sndEpiano', esynth: 'sndEsynth', pad: 'sndPad', organ: 'sndOrgan', harp: 'sndHarp' };
+const SOUND_KEYS = { piano: 'sndPiano', epiano: 'sndEpiano', esynth: 'sndEsynth', pad: 'sndPad', organ: 'sndOrgan', harp: 'sndHarp', dreamy: 'sndDreamy' };
 // Key sizes, biggest first: the width a white key aims for. The keys then
 // fill the width exactly, so a sideways phone shows about 7 to 17 of them.
 const KEY_WIDTHS = [92, 80, 71, 64, 58, 53, 49, 45, 42, 38];

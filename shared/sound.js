@@ -5,9 +5,14 @@
  *   const rack = await createRack({ onSamplesLoading })
  *     Builds the chain and waits for the piano samples. onSamplesLoading()
  *     is called just before that wait (to show a loading message).
- *     rack.instruments  { piano, epiano, esynth, pad, organ, harp }: Tone
- *                       instruments; play with triggerAttack(freqs, time),
+ *     rack.instruments  { piano, epiano, esynth, pad, organ, harp, dreamy }:
+ *                       Tone instruments; play with triggerAttack(freqs, time),
  *                       triggerRelease(freqs, time), releaseAll(time).
+ *     rack.glideTo(freqs, time)  Dreamy chords that slide into each other
+ *                       (Chordigits' Glide): the notes, low to high, each glide
+ *                       from the last chord's note in the same place (0.22 s);
+ *                       after a silence they start fresh. Up to 6 notes.
+ *     rack.releaseGlide(time)    lets the gliding chord fade out
  *     rack.master       the final Tone.Volume (connect recorders to it)
  *     rack.setVolume(percent)  0..125; 0 mutes. Strings are parsed; junk -> 100.
  *     rack.dispose()
@@ -23,7 +28,16 @@
  * credit it in any tool that uses the rack.
  */
 
-export const INSTRUMENTS = ['piano', 'epiano', 'esynth', 'pad', 'organ', 'harp'];
+export const INSTRUMENTS = ['piano', 'epiano', 'esynth', 'pad', 'organ', 'harp', 'dreamy'];
+
+// Dreamy: a soft wave (the note and four quiet overtones), three copies 1.5
+// cents apart, a slow smooth fade-in and a long fade-out, through a soft
+// low-pass filter. Our own sound on the idea of Eric Wei's Gesture Synth.
+const DREAMY_DB = -12; // as loud as the pad (measured with Tone.Offline: held triad, -14 dB RMS)
+const DREAMY = {
+  oscillator: { type: 'fatcustom', partials: [1, 0.24, 0.11, 0.045, 0.018], count: 3, spread: 3 },
+  envelope: { attack: 0.18, attackCurve: 'sine', decay: 0.1, sustain: 1, release: 0.9 },
+};
 
 // Tone's default 100 ms scheduling look-ahead makes gestures feel laggy;
 // 20 ms keeps scheduling stable while making pinch->sound near-instant.
@@ -37,11 +51,24 @@ export async function startAudio() {
 export async function createRack({ onSamplesLoading } = {}) {
   let instruments = {};
   let masterVolume = null, limiter = null, compressor = null, reverb = null;
-  let padFilter = null, synthFilter = null, organVibrato = null;
+  let padFilter = null, synthFilter = null, organVibrato = null, dreamyFilter = null;
+  let glideVoices = [], gliding = [];
 
   const rack = {
     get instruments() { return instruments; },
     get master() { return masterVolume; },
+    glideTo(freqs, time) {
+      glideVoices.forEach((v, i) => {
+        if (i < freqs.length) {
+          if (gliding[i]) v.setNote(freqs[i], time); // slides (portamento)
+          else v.triggerAttack(freqs[i], time);       // set at once: its envelope is near silent
+          gliding[i] = true;
+        } else if (gliding[i]) { v.triggerRelease(time); gliding[i] = false; }
+      });
+    },
+    releaseGlide(time) {
+      glideVoices.forEach((v, i) => { if (gliding[i]) v.triggerRelease(time); gliding[i] = false; });
+    },
     setVolume(value) {
       if (!masterVolume) return;
       let pct = parseInt(value, 10);
@@ -55,11 +82,12 @@ export async function createRack({ onSamplesLoading } = {}) {
       }
     },
     dispose() {
-      [...Object.values(instruments), padFilter, synthFilter, organVibrato, reverb, compressor, limiter, masterVolume].forEach(n => {
+      [...Object.values(instruments), ...glideVoices, padFilter, synthFilter, organVibrato, dreamyFilter, reverb, compressor, limiter, masterVolume].forEach(n => {
         try { if (n) n.dispose(); } catch { /* already disposed */ }
       });
       instruments = {};
-      masterVolume = limiter = compressor = reverb = padFilter = synthFilter = organVibrato = null;
+      masterVolume = limiter = compressor = reverb = padFilter = synthFilter = organVibrato = dreamyFilter = null;
+      glideVoices = []; gliding = [];
     },
   };
 
@@ -72,6 +100,7 @@ export async function createRack({ onSamplesLoading } = {}) {
 
     padFilter = new Tone.Filter(2400, 'lowpass').connect(reverb);
     synthFilter = new Tone.Filter(1700, 'lowpass').connect(reverb);
+    dreamyFilter = new Tone.Filter({ frequency: 1200, type: 'lowpass', Q: 0.7 }).connect(reverb);
 
     // Salamander grand, sampled every 3 semitones across C2-C6 (17 files, ~2 MB).
     const pianoUrls = {};
@@ -119,8 +148,10 @@ export async function createRack({ onSamplesLoading } = {}) {
         envelope: { attack: 0.002, decay: 1.8, sustain: 0, release: 1.6 },
         modulation: { type: 'sine' },
         modulationEnvelope: { attack: 0.002, decay: 0.25, sustain: 0, release: 0.2 }
-      }).connect(reverb)
+      }).connect(reverb),
+      dreamy: new Tone.PolySynth(Tone.Synth, DREAMY).connect(dreamyFilter),
     };
+    glideVoices = Array.from({ length: 6 }, () => new Tone.Synth({ ...DREAMY, portamento: 0.22 }).connect(dreamyFilter));
     // Level-match the rack
     instruments.piano.volume.value = -1;
     instruments.epiano.volume.value = -7;
@@ -128,6 +159,8 @@ export async function createRack({ onSamplesLoading } = {}) {
     instruments.pad.volume.value = -9;
     instruments.organ.volume.value = -12;
     instruments.harp.volume.value = -6;
+    instruments.dreamy.volume.value = DREAMY_DB;
+    glideVoices.forEach((v) => { v.volume.value = DREAMY_DB; });
 
     if (onSamplesLoading) onSamplesLoading();
     await Tone.loaded();

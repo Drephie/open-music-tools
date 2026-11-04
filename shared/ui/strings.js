@@ -21,7 +21,7 @@ export const HUB_STRINGS = {
     // Themes (shared/ui/themes.css)
     theme: "Theme", themeLiquid: "Liquid Glass", themeY2k: "Y2K Cyber", themePink: "Soft Pink", themeBw: "Monochrome", themeRetro: "Retro CRT", themeRouge: "Rouge", themeSnap: "Retrosnap",
     // Instrument rack (shared/sound.js INSTRUMENTS)
-    inst: "Instrument Rack", instPiano: "Grand Piano", instEpiano: "Classic Electric Piano", instEsynth: "Electric Synth", instPad: "Smooth Analog Pad", instOrgan: "Warm Organ", instHarp: "Dream Harp",
+    inst: "Instrument Rack", instPiano: "Grand Piano", instEpiano: "Classic Electric Piano", instEsynth: "Electric Synth", instPad: "Smooth Analog Pad", instOrgan: "Warm Organ", instHarp: "Dream Harp", instDreamy: "Dreamy Synth",
     // Metronome sounds (shared/transport.js CLICK_SOUNDS)
     metClick: "Click", metBeep: "Beep", metWood: "Wood", metHat: "Hi-hat",
     // Interval names by semitones (shared/theory.js INTERVAL_SHORT; iv0 and iv12 are the octave)
@@ -39,7 +39,7 @@ export const HUB_STRINGS = {
     // Themes (shared/ui/themes.css)
     theme: "Tema", themeLiquid: "Cristal Líquido", themeY2k: "Cyber Y2K", themePink: "Rosa Suave", themeBw: "Monocromo", themeRetro: "CRT Retro", themeRouge: "Rouge", themeSnap: "Retrosnap",
     // Instrument rack (shared/sound.js INSTRUMENTS)
-    inst: "Instrumento", instPiano: "Piano de Cola", instEpiano: "Piano Eléctrico Clásico", instEsynth: "Sinte Eléctrico", instPad: "Pad Analógico Suave", instOrgan: "Órgano Cálido", instHarp: "Arpa de Ensueño",
+    inst: "Instrumento", instPiano: "Piano de Cola", instEpiano: "Piano Eléctrico Clásico", instEsynth: "Sinte Eléctrico", instPad: "Pad Analógico Suave", instOrgan: "Órgano Cálido", instHarp: "Arpa de Ensueño", instDreamy: "Sinte Soñador",
     // Metronome sounds (shared/transport.js CLICK_SOUNDS)
     metClick: "Clic", metBeep: "Bip", metWood: "Madera", metHat: "Hi-hat",
     // Interval names by semitones (shared/theory.js INTERVAL_SHORT; iv0 and iv12 are the octave)
@@ -57,7 +57,7 @@ export const HUB_STRINGS = {
     // Themes (shared/ui/themes.css)
     theme: "Tema", themeLiquid: "Vetro Liquido", themeY2k: "Cyber Y2K", themePink: "Rosa Tenue", themeBw: "Monocromatico", themeRetro: "CRT Retrò", themeRouge: "Rouge", themeSnap: "Retrosnap",
     // Instrument rack (shared/sound.js INSTRUMENTS)
-    inst: "Strumento", instPiano: "Pianoforte a Coda", instEpiano: "Piano Elettrico Classico", instEsynth: "Synth Elettrico", instPad: "Pad Analogico Morbido", instOrgan: "Organo Caldo", instHarp: "Arpa da Sogno",
+    inst: "Strumento", instPiano: "Pianoforte a Coda", instEpiano: "Piano Elettrico Classico", instEsynth: "Synth Elettrico", instPad: "Pad Analogico Morbido", instOrgan: "Organo Caldo", instHarp: "Arpa da Sogno", instDreamy: "Synth Sognante",
     // Metronome sounds (shared/transport.js CLICK_SOUNDS)
     metClick: "Clic", metBeep: "Bip", metWood: "Legno", metHat: "Hi-hat",
     // Interval names by semitones (shared/theory.js INTERVAL_SHORT; iv0 and iv12 are the octave)
