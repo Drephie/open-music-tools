@@ -2,7 +2,7 @@
 
 Free, open-source music tools that help you learn music and make your own: **https://openmusictools.org**
 
-Made by [Drephie](https://instagram.com/drephie), a singer and vocal coach. The tools never make music for you: no AI-generated music, lyrics or melodies.
+Made by Drephie ([Instagram](https://instagram.com/drephie), [TikTok](https://www.tiktok.com/@itsnotdre)). The tools never make music for you: no AI-generated music, lyrics or melodies.
 
 ## The tools
 

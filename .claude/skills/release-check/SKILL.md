@@ -17,7 +17,7 @@ It runs, and prints one line each:
 
 - the JavaScriptCore tests (`tests/tools/run-*-test.js`) and `run-strings-check.js` (es and it have every key en has; every `data-i18n` key in the pages exists);
 - **service worker**: every file that goes online is in `APP_SHELL` and every `APP_SHELL` entry exists; `CACHE_NAME` changed since the last `release-*` tag if any cached file changed;
-- **no trackers, no ads, https only**: no tracker or ad code; only known outside addresses (loaded from: cdnjs.cloudflare.com, cdn.jsdelivr.net, storage.googleapis.com, tonejs.github.io; links only: Patreon, Instagram, GitHub, archive.org, creativecommons.org); nothing over plain `http://`; every outside `<script src>` has an SRI hash; no font service;
+- **no trackers, no ads, https only**: no tracker or ad code; only known outside addresses (loaded from: cdnjs.cloudflare.com, cdn.jsdelivr.net, storage.googleapis.com, tonejs.github.io; links only: Patreon, Instagram, TikTok, GitHub, archive.org, creativecommons.org); nothing over plain `http://`; every outside `<script src>` has an SRI hash; no font service;
 - **credits and licenses**: `LICENSE` (AGPL-3.0), `CNAME` and `.nojekyll`; the Salamander piano credited (CC BY 3.0) in every tool that plays it; an OFL license next to every font; README credits;
 - **links**: every local `href` and `src` in the pages exists;
 - **personal details**: no computer folder names in the files, every commit uses Drephie's private GitHub address, no `.DS_Store`.

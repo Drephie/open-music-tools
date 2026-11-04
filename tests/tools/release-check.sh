@@ -53,11 +53,11 @@ else
 fi
 
 echo "== No trackers, no ads, https only"
-TRACKERS='google-analytics|googletagmanager|gtag\(|doubleclick|googlesyndication|adsbygoogle|adservice|facebook\.(net|com/tr)|fbq\(|hotjar|clarity\.ms|plausible\.io|matomo|piwik|mixpanel|amplitude\.com|segment\.(io|com)|sentry\.io|cloudflareinsights|sendBeacon|umami\.is|usefathom|tiktok|analytics\.js'
+TRACKERS='google-analytics|googletagmanager|gtag\(|doubleclick|googlesyndication|adsbygoogle|adservice|facebook\.(net|com/tr)|fbq\(|hotjar|clarity\.ms|plausible\.io|matomo|piwik|mixpanel|amplitude\.com|segment\.(io|com)|sentry\.io|cloudflareinsights|sendBeacon|umami\.is|usefathom|analytics\.tiktok\.com|ttq\.(load|track|page)|analytics\.js'
 check "no tracker or ad code" "$(echo "$TEXT" | xargs grep -n -i -E "$TRACKERS" 2>/dev/null)"
 # Addresses the pages load from (anything else is a link people tap, never loaded by itself).
 LOADS='cdnjs.cloudflare.com|cdn.jsdelivr.net|storage.googleapis.com|tonejs.github.io'
-LINKS='patreon.com|instagram.com|github.com|archive.org|creativecommons.org|www.w3.org'
+LINKS='patreon.com|instagram.com|www.tiktok.com|github.com|archive.org|creativecommons.org|www.w3.org'
 HOSTS=$(echo "$TEXT" | xargs grep -h -o -E 'https?://[a-zA-Z0-9.-]+' 2>/dev/null | sed -E 's#https?://##' | sort -u)
 check "only known outside addresses ($LOADS; links: $LINKS)" "$(echo "$HOSTS" | grep -v -x -E "$LOADS|$LINKS|localhost")"
 check "nothing loaded over plain http" "$(echo "$TEXT" | xargs grep -n -E 'http://' 2>/dev/null | grep -v -E 'http://www\.w3\.org/|http://localhost')"

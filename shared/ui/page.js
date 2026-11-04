@@ -4,6 +4,7 @@
  *   LANGUAGE_NAMES  { en: 'English', es: 'Español', it: 'Italiano' } (always
  *                   shown in their own language)
  *   PATREON_URL, DESIGNER_URL   for {patreon} in strings and the footer links
+ *   TIKTOK_URL                  Drephie's TikTok, for {tiktok} in About texts
  *   REPO_URL                    the public code, for {repo} in strings
  *   browserLanguage()           'es' or 'it' when the browser prefers it, else 'en'
  *   loadSettings(key)           the object saved under key in localStorage, or {}
@@ -51,6 +52,7 @@ export const THEMES = [
 export const LANGUAGE_NAMES = { en: 'English', es: 'Español', it: 'Italiano' };
 export const PATREON_URL = 'https://patreon.com/drephie';
 export const DESIGNER_URL = 'https://instagram.com/drephie';
+export const TIKTOK_URL = 'https://www.tiktok.com/@itsnotdre';
 export const REPO_URL = 'https://github.com/Drephie/open-music-tools';
 
 export function browserLanguage() {
