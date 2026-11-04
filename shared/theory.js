@@ -26,6 +26,7 @@
  *   modifierSuffix(mod, third, fifth, seventh)     'm', 'maj7', 'sus4', ...
  *     'Triad', '7th' and 'Add9' use the key's own third/fifth/seventh on that
  *     degree (so '7th' on V in major, or VII in minor, is a dominant 7th).
+ *     Two more ids, not in the menu list: 'MajAdd9' and 'MinAdd9' (Chordigits).
  *   pickModifiers(list, typeIdx, dualMod, modPair) -> [mod1, mod2 | null]
  *     modPair = [i, j] picks two to blend; dualMod adds the next one. Both
  *     are optional. Indices are clamped to the list.
@@ -176,6 +177,8 @@ export function modifierIntervals(mod, baseThird, baseFifth, baseSeventh) {
     case 'Add9': return [0, baseThird, baseFifth, 14];
     case 'Maj9': return [0, 4, 7, 11, 14];
     case 'Min9': return [0, 3, 7, 10, 14];
+    case 'MajAdd9': return [0, 4, 7, 14];
+    case 'MinAdd9': return [0, 3, 7, 14];
     default: return [0, baseThird, baseFifth];
   }
 }
@@ -200,6 +203,8 @@ export function modifierSuffix(mod, baseThird, baseFifth, baseSeventh) {
     case 'Add9': return baseThird === 3 ? 'm(add9)' : 'add9';
     case 'Maj9': return 'maj9';
     case 'Min9': return 'm9';
+    case 'MajAdd9': return 'add9';
+    case 'MinAdd9': return 'm(add9)';
     default: return '';
   }
 }

@@ -193,7 +193,40 @@ export function checkHands(H, T) {
     }
   }
 
-  // 4. Theory-style numbers.
+  // 4. Tilt: upright, leaning left or right, whatever the hand shows.
+  {
+    const r = row('Tilt: upright (within 15°) reads 0, leaning 50° or more reads +1 or -1 by side, even turned 30° or leaning 30° towards the camera, either hand, any fingers; no flip-flop between 24° and 29° (the hand itself leans about 5°)');
+    const shapes = [SHAPES[0][1], SHAPES[12][1], SHAPES[3][1], SHAPES[6][1]]; // fist, open, 1, 2
+    for (const shape of shapes) for (const mirror of [false, true]) for (const yaw of [-30, 0, 30]) for (const pitch of [-30, 0, 30]) {
+      for (const [roll, want] of [[0, 0], [15, 0], [-15, 0], [-50, 1], [-70, 1], [50, -1], [70, -1]]) {
+        const p = place(makeHand(shape), { roll, yaw, pitch, mirror, jitter: 0.02, rand });
+        const got = H.handTilt(p);
+        r.checked++;
+        if (got !== want) fail(r, `roll ${roll}° yaw ${yaw}° pitch ${pitch}°${mirror ? ' left hand' : ''}: ${got}, expected ${want}`);
+      }
+    }
+    for (const [start, startWant] of [[0, 0], [-50, 1]]) {
+      let prev = H.handTilt(place(makeHand(shapes[1]), { roll: start, rand }));
+      for (let i = 0; i < 12; i++) {
+        prev = H.handTilt(place(makeHand(shapes[1]), { roll: i % 2 ? -24 : -29, rand }), prev);
+        r.checked++;
+        if (prev !== startWant) { fail(r, `from roll ${start}°, wobble ${i}: ${prev}`); break; }
+      }
+    }
+  }
+
+  // 5. Height of the hand in the picture.
+  {
+    const r = row('Height: top third +1, bottom third -1, middle 0; a hand near a border keeps its band');
+    const cases = [[0.1, 0, 1], [0.29, 0, 1], [0.33, 0, 0], [0.33, 1, 1], [0.37, 1, 0], [0.5, 1, 0], [0.5, -1, 0], [0.68, 0, 0], [0.68, -1, -1], [0.72, 0, -1], [0.62, -1, 0], [0.95, 1, -1], [0.05, -1, 1]];
+    for (const [y, prev, want] of cases) {
+      r.checked++;
+      const got = H.heightBand(y, prev);
+      if (got !== want) fail(r, `y ${y} after ${prev}: ${got}, expected ${want}`);
+    }
+  }
+
+  // 6. Theory-style numbers.
   {
     const r = row('Chord numbers: I ii iii IV V vi vii° in major, i ii° III iv v VI VII in minor, and with chord types (V7, II, iiø7, IVsus4)');
     const num = (keyValue, degree, mod) => {
@@ -209,6 +242,9 @@ export function checkHands(H, T) {
       ['0_maj', 'Min', 'i ii iii iv v vi vii'],
       ['0_maj', 'Sus4', 'Isus4 IIsus4 IIIsus4 IVsus4 Vsus4 VIsus4 VIIsus4'],
       ['0_maj', 'Add9', 'Iadd9 iiadd9 iiiadd9 IVadd9 Vadd9 viadd9 viiadd9'],
+      ['0_maj', 'Dom7', 'I7 II7 III7 IV7 V7 VI7 VII7'],
+      ['0_maj', 'MajAdd9', 'Iadd9 IIadd9 IIIadd9 IVadd9 Vadd9 VIadd9 VIIadd9'],
+      ['0_maj', 'MinAdd9', 'iadd9 iiadd9 iiiadd9 ivadd9 vadd9 viadd9 viiadd9'],
     ];
     for (const [key, mod, line] of want) {
       const got = [0, 1, 2, 3, 4, 5, 6].map((d) => num(key, d, mod)).join(' ');

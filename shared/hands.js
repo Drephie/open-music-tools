@@ -22,6 +22,14 @@
  *     'asl' (American Sign Language): thumb touching the little finger's tip
  *     with index, middle, ring up = 6; thumb touching the ring finger's tip
  *     with index, middle, little up = 7.
+ *   handTilt(points, prev = 0) -> 1 | 0 | -1  the hand's sideways lean from
+ *     upright (wrist to middle knuckle; leaning towards the camera doesn't
+ *     count): 1 = fingers towards the picture's +x side (the person's left,
+ *     facing the camera), -1 the other way. Past 35° counts as leaning, back
+ *     under 20° as upright again.
+ *   heightBand(y, prev = 0) -> 1 | 0 | -1  where a hand is up the picture:
+ *     y is the picture `landmarks` y (0 top, 1 bottom) of the middle knuckle;
+ *     top third 1, bottom third -1, with a margin before it changes back.
  *   createSteady({ holdMs = 200, stopMs = 120, lostMs = 250 })
  *     -> { update(reading, nowMs) -> steady, reset(), value }
  *     A reading (a number, or null for no hand) becomes the steady value
@@ -79,6 +87,19 @@ export function chordNumber(f, p, sixSeven = 'rock') {
     if (f.index && f.little && !f.middle && !f.ring) return 7;
   }
   return countFingers(f);
+}
+
+export function handTilt(p, prev = 0) {
+  const [dx, dy, dz] = sub(p[9], p[0]);
+  // Sideways lean only: leaning towards the camera (y into z) doesn't count.
+  const deg = Math.atan2(dx, Math.hypot(dy, dz)) * 180 / Math.PI;
+  return Math.abs(deg) > (Math.sign(deg) === prev ? 20 : 35) ? Math.sign(deg) : 0;
+}
+
+export function heightBand(y, prev = 0) {
+  if (y < (prev === 1 ? 0.36 : 0.3)) return 1;
+  if (y > (prev === -1 ? 0.64 : 0.7)) return -1;
+  return 0;
 }
 
 export function createSteady({ holdMs = 200, stopMs = 120, lostMs = 250 } = {}) {
