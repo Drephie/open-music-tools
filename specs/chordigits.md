@@ -27,11 +27,12 @@ Choordination's donuts, watermark and Menu button; the "Kinds of chord" list (th
 ## Look and layout
 
 Full-screen camera, as in Gesture Synth, in the hub's themes and fonts, with the parts of our other tools on top:
-- **Top:** the tools' header: home button, "Chordigits", record, About and Settings icon buttons.
+- **Top:** "Chordigits" big on the left, as Choordination's name; on the right the home, record, How to play (?), About and Settings buttons *(Drephie, 2026-11-04: home on the right, a bigger name, no camera button)*.
 - **Centre top:** the chord name big in the theme's title font, its number (V7) and notes under it.
 - **Next to each hand:** what the camera reads (the number by one hand, ↑ or ↓ for the octave; major / minor / colour by the other).
 - **Bottom:** a bar with the seven numbers (I ii iii IV V vi vii°, each with its chord name), lit while playing, and two small rows of choices: as in the key / major / minor, and plain / 7th / sus4 / add9, lit by the hands or tapped. Patreon and @drephie links small under it.
-- **Before the camera starts:** a card in the middle: how to play (with the hands drawn), "Start the camera" (main button) and "Play without the camera".
+- **The camera starts at once** *(Drephie, 2026-11-04)*. Only if it or the hand tracking fails, a card says what happened, with "Play without the camera" (main button) and "Retry". How to play opens by itself on the first visit, then from the ? button. Until a first tap or key, a line says to tap for sound (browsers start sound only then).
+- **Each theme's look on the camera, as in Choordination** *(Drephie, 2026-11-04)*: the picture faded into the page colour and coloured by the theme (Rouge red, Retro CRT green, Monochrome grey, Retrosnap sepia…), inside the theme's frame (Rouge's dark red vignette, Retrosnap's instant-photo border, Monochrome's black bars). Support on Patreon and @drephie sit free in the bottom corners, with no bar.
 - Phones: sideways, as now (a "turn your phone" screen when upright).
 
 **Settings:** Theme and Language; Musical key; Notation; Sound; Glide; Volume; Octave; Chord style; Hand layout; Six and seven; Eyebrow sustain.
