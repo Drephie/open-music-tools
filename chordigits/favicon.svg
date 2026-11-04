@@ -1,13 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Chordigits: three raised fingers whose tips are note heads, a chord counted on a hand. -->
-  <rect width="64" height="64" rx="14" fill="#0f1419"/>
-  <g fill="none" stroke="#f3f5f8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M20.5 26.5V43c0 6.5 5 11 11 11s11-4.5 11-11V23.5"/>
-    <path d="M31.5 18.5V44"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Chordigits: the chord number IV made of fingers. I is one raised finger (white,
+       the left hand), V is two fingers in a V (light blue, the right hand), the
+       chord's spark where they meet, the three counted fingertips glowing and joined.
+       Choordination's sibling: same glass tile, glows and dashed details. -->
+  <defs>
+    <radialGradient id="bg" cx="30%" cy="30%" r="70%"><stop offset="0%" stop-color="#1A2433"/><stop offset="100%" stop-color="#080B10"/></radialGradient>
+    <linearGradient id="litUp" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.12"/><stop offset="55%" stop-color="#ffffff" stop-opacity="0.85"/><stop offset="100%" stop-color="#ffffff"/></linearGradient>
+    <linearGradient id="litCyan" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#8ad4ff" stop-opacity="0.12"/><stop offset="55%" stop-color="#8ad4ff" stop-opacity="0.85"/><stop offset="100%" stop-color="#8ad4ff"/></linearGradient>
+    <linearGradient id="spark" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ffffff"/><stop offset="100%" stop-color="#8ad4ff"/></linearGradient>
+    <filter id="glass" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="12" result="b"/><feComposite in="SourceGraphic" in2="b" operator="over"/></filter>
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="8" result="b1"/><feGaussianBlur stdDeviation="20" result="b2"/><feMerge><feMergeNode in="b2"/><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="512" height="512" rx="115" fill="url(#bg)"/>
+  <rect width="510" height="510" x="1" y="1" rx="115" fill="none" stroke="#ffffff" stroke-opacity="0.1" stroke-width="2"/>
+  <ellipse cx="200" cy="262" rx="120" ry="140" fill="#ffffff" opacity="0.035" filter="url(#glass)"/>
+  <ellipse cx="320" cy="262" rx="130" ry="140" fill="#8ad4ff" opacity="0.055" filter="url(#glass)"/>
+  <line x1="148" y1="150" x2="372" y2="150" stroke="#ffffff" stroke-width="3" stroke-dasharray="4 8" opacity="0.3"/>
+  <g filter="url(#glass)">
+    <rect x="124.0" y="126.0" width="48" height="266.0" rx="24.0" transform="rotate(0.00 148 368)" fill="none" stroke="url(#litUp)" stroke-width="13"/>
+    <line x1="148.0" y1="333.1" x2="148.0" y2="184.9" stroke="#ffffff" stroke-width="4" stroke-dasharray="6 12" stroke-linecap="round" opacity="0.4"/>
+    <rect x="286.0" y="117.4" width="48" height="274.6" rx="24.0" transform="rotate(-15.88 310 368)" fill="none" stroke="url(#litCyan)" stroke-width="13"/>
+    <line x1="295.1" y1="315.7" x2="262.9" y2="202.3" stroke="#8ad4ff" stroke-width="4" stroke-dasharray="6 12" stroke-linecap="round" opacity="0.5"/>
+    <rect x="286.0" y="117.4" width="48" height="274.6" rx="24.0" transform="rotate(15.88 310 368)" fill="none" stroke="url(#litCyan)" stroke-width="13"/>
+    <line x1="324.9" y1="315.7" x2="357.1" y2="202.3" stroke="#8ad4ff" stroke-width="4" stroke-dasharray="6 12" stroke-linecap="round" opacity="0.5"/>
   </g>
-  <g fill="#8ad4ff">
-    <ellipse cx="24" cy="25" rx="5.8" ry="4.4" transform="rotate(-24 24 25)"/>
-    <ellipse cx="35" cy="17" rx="5.8" ry="4.4" transform="rotate(-24 35 17)"/>
-    <ellipse cx="46" cy="22" rx="5.8" ry="4.4" transform="rotate(-24 46 22)"/>
-  </g>
+  <circle cx="148.0" cy="150.0" r="10" fill="#ffffff" filter="url(#glow)"/>
+  <circle cx="248.0" cy="150.0" r="10" fill="#8ad4ff" filter="url(#glow)"/>
+  <circle cx="372.0" cy="150.0" r="10" fill="#8ad4ff" filter="url(#glow)"/>
+  <g filter="url(#glow)"><path d="M310 335.4L340.6 366L310 396.6L279.4 366Z" fill="none" stroke="#8ad4ff" stroke-width="4" opacity="0.8"/><path d="M310 348L328 366L310 384L292 366Z" fill="url(#spark)"/></g>
 </svg>
