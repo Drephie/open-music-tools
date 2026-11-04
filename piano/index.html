@@ -37,6 +37,9 @@
 
       <main class="piano-main">
         <section class="pbar">
+          <a class="icon-btn home-btn bar-home" href="../" data-i18n-aria="home" aria-label="Home: all the tools">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>
+          </a>
           <div id="readout" class="readout" aria-live="polite">
             <div class="chord-big"><span id="chord-root">C</span><span id="chord-qual" class="chord-qual"></span></div>
             <div class="chord-lines">
@@ -46,31 +49,22 @@
             </div>
           </div>
           <div class="controls">
-            <div class="ctrl-row">
-              <div class="control-group sound-group">
-                <label for="sound-select" class="visually-hidden" data-i18n="sound">Sound</label>
-                <div class="custom-select"><select id="sound-select"></select></div>
-              </div>
-              <div class="bar-icons">
-                <a class="icon-btn home-btn" href="../" data-i18n-aria="home" aria-label="Home: all the tools">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>
-                </a>
-                <button class="icon-btn about-btn" data-i18n-aria="about" aria-label="About">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
-                </button>
-                <button class="icon-btn settings-btn" data-i18n-aria="settings" aria-label="Settings">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                </button>
-              </div>
+            <div id="mode-seg" class="seg" role="group" data-i18n-aria="modeGroup" aria-label="How a key sounds">
+              <button data-mode="hold" aria-pressed="true" data-i18n="modeHold">Hold</button>
+              <button data-mode="ring" aria-pressed="false" data-i18n="modeRing">Ring</button>
+              <button data-mode="drone" aria-pressed="false" data-i18n="modeDrone">Drone</button>
             </div>
-            <div class="ctrl-row">
-              <div id="mode-seg" class="seg" role="group" data-i18n-aria="modeGroup" aria-label="How a key sounds">
-                <button data-mode="hold" aria-pressed="true" data-i18n="modeHold">Hold</button>
-                <button data-mode="ring" aria-pressed="false" data-i18n="modeRing">Ring</button>
-                <button data-mode="drone" aria-pressed="false" data-i18n="modeDrone">Drone</button>
-              </div>
-              <button id="names-btn" class="toggle" aria-pressed="true" data-i18n="names">Names</button>
-              <button id="solfege-btn" class="toggle" aria-pressed="false" data-i18n-aria="solfegeAria" aria-label="Note names: Do Re Mi or C D E">C D E</button>
+            <div class="control-group sound-group">
+              <label for="sound-select" class="visually-hidden" data-i18n="sound">Sound</label>
+              <div class="custom-select"><select id="sound-select"></select></div>
+            </div>
+            <div class="bar-icons">
+              <button class="icon-btn about-btn" data-i18n-aria="about" aria-label="About">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
+              </button>
+              <button class="icon-btn settings-btn" data-i18n-aria="settings" aria-label="Settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              </button>
             </div>
           </div>
         </section>
@@ -101,6 +95,7 @@
         <h2 id="settings-title" data-i18n="settings">Settings</h2>
         <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
       </div>
+      <div class="settings-grid">
       <div class="setting-row control-group">
         <label for="theme-select" data-i18n="theme">Theme</label>
         <div class="custom-select"><select id="theme-select"></select></div>
@@ -108,6 +103,20 @@
       <div class="setting-row control-group">
         <label for="lang-select" data-i18n="lang">Language</label>
         <div class="custom-select"><select id="lang-select"></select></div>
+      </div>
+      <div class="setting-row">
+        <span id="notation-label" class="setting-label" data-i18n="noteNames">Note names</span>
+        <div id="notation-seg" class="seg" role="group" aria-labelledby="notation-label">
+          <button data-notation="letters" aria-pressed="true">C D E</button>
+          <button data-notation="solfege" aria-pressed="false">Do Re Mi</button>
+        </div>
+      </div>
+      <div class="setting-row">
+        <span id="names-label" class="setting-label" data-i18n="namesOnKeys">Names on the keys</span>
+        <div id="names-seg" class="seg" role="group" aria-labelledby="names-label">
+          <button data-names="on" aria-pressed="true" data-i18n="namesShow">Show</button>
+          <button data-names="off" aria-pressed="false" data-i18n="namesHide">Hide</button>
+        </div>
       </div>
       <div class="setting-row">
         <span id="keys-label" class="setting-label" data-i18n="keys">Keys on screen</span>
@@ -127,6 +136,7 @@
         <button id="flip-btn" class="icon-btn" aria-labelledby="flip-label">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5.3"/><path d="M18 3v4h-4"/><path d="M20 12a8 8 0 0 1-14 5.3"/><path d="M6 21v-4h4"/></svg>
         </button>
+      </div>
       </div>
     </div>
 

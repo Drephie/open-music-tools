@@ -19,10 +19,12 @@ const LOW = 21, HIGH = 108;   // A0 to C8: the 88 keys
 const IS_BLACK = [0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0];
 const MODES = ['hold', 'ring', 'drone'];
 const SOUND_KEYS = { piano: 'sndPiano', epiano: 'sndEpiano', esynth: 'sndEsynth', pad: 'sndPad', organ: 'sndOrgan', harp: 'sndHarp', dreamy: 'sndDreamy' };
-// Key sizes, biggest first: the width a white key aims for. The keys then
-// fill the width exactly, so a sideways phone shows about 7 to 17 of them.
+// Key sizes, biggest first. On a phone, how many white keys fill the screen
+// (12 by default: C to the G above the next C, whatever the phone's width);
+// elsewhere, the width a white key aims for, so a computer shows more keys.
+const KEY_COUNTS = [7, 8, 9, 10, 11, 12, 13, 14, 15, 17];
 const KEY_WIDTHS = [92, 80, 71, 64, 58, 53, 49, 45, 42, 38];
-const DEFAULT_KEY_SIZE = 5;   // about 12 white keys on a sideways phone: C to the G above the next C
+const DEFAULT_KEY_SIZE = 5;
 // Computer keys (by position, so any keyboard layout works): an octave from C.
 const KEYMAP = { KeyA: 0, KeyW: 1, KeyS: 2, KeyE: 3, KeyD: 4, KeyF: 5, KeyT: 6, KeyG: 7, KeyY: 8, KeyH: 9, KeyU: 10, KeyJ: 11, KeyK: 12 };
 const SETTINGS_KEY = 'piano.settings.v1';
@@ -63,7 +65,7 @@ const stage = $('stage');
 const kb = $('kb'), keysWrap = $('keys-wrap'), track = $('track'), thumb = $('thumb');
 const readout = $('readout'), rootEl = $('chord-root'), qualEl = $('chord-qual');
 const wordsEl = $('chord-words'), notesEl = $('chord-notes'), alsoEl = $('chord-also');
-const soundSelect = $('sound-select'), modeSeg = $('mode-seg'), namesBtn = $('names-btn'), solfegeBtn = $('solfege-btn');
+const soundSelect = $('sound-select'), modeSeg = $('mode-seg'), notationSeg = $('notation-seg'), namesSeg = $('names-seg');
 const loadingEl = $('loading');
 const themeSelect = $('theme-select'), langSelect = $('lang-select');
 const volSlider = $('volume-slider'), volOut = $('volume-out');
@@ -177,6 +179,7 @@ function stopAll() {
 function pressKey(source, m) {
   if (m < LOW || m > HIGH) return;
   ensureAudio();
+  hideModeHint();
   if (sources.has(source)) releaseKey(source);
   sources.set(source, m);
   holds.set(m, (holds.get(m) || 0) + 1);
@@ -294,7 +297,8 @@ function fitKeys() {
   const avail = keysWrap.clientWidth;
   if (!avail) return;
   const center = pos + visible / 2;
-  visible = Math.max(5, Math.round(avail / KEY_WIDTHS[settings.keySize]));
+  visible = document.body.classList.contains('phone') ? KEY_COUNTS[settings.keySize]
+    : Math.max(5, Math.round(avail / KEY_WIDTHS[settings.keySize]));
   W = avail / visible;
   keysOut.textContent = visible;
   const BW = W * 0.62;
@@ -496,7 +500,7 @@ function fitBig() {
     big.style.fontSize = `${Math.max(18, Math.floor(base * room / big.scrollWidth))}px`;
   }
 }
-document.fonts?.ready.then(fitBig);
+document.fonts?.ready.then(() => { placeModeSwitch(); fitBig(); });
 
 // --- LAYOUT: sideways on phones ---
 // An upright phone shows the page turned (as after turning the phone to the
@@ -519,8 +523,18 @@ function layout() {
   stage.style.width = `${stageW}px`;
   stage.style.height = `${stageH}px`;
   turnMatrix = turned ? new DOMMatrixReadOnly(getComputedStyle(stage).transform) : null;
+  placeModeSwitch();
   fitKeys();
   fitBig();
+}
+// On a sideways phone the mode switch sits in the top row beside the chord
+// name. When that leaves the name too little room (small phones, longer words
+// in Spanish or Italian), it moves down beside the scroll bar (body.tight).
+const controls = document.querySelector('.controls'), scrubRow = document.querySelector('.scrub-row');
+function placeModeSwitch() {
+  const body = document.body.classList;
+  if (body.contains('tight')) { body.remove('tight'); controls.prepend(modeSeg); }
+  if (body.contains('compact') && readout.clientWidth < 140) { body.add('tight'); scrubRow.prepend(modeSeg); }
 }
 // Screen point -> point on the (possibly turned) stage.
 function toLocal(x, y) {
@@ -568,36 +582,52 @@ function setMode(mode) {
   stopAll();
   settings.mode = mode;
   for (const b of modeSeg.children) b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
-  showModeHint();
+  showModeHint(true);
   save();
 }
-// One line under the switch says what the chosen mode does (the About window's sentences).
-function showModeHint() {
+// What the chosen mode does (the About window's sentences): a line under the
+// bar on big screens; on phones it shows for a moment over the keys when the
+// page opens or the mode changes, and goes at the first key.
+const modeHint = $('mode-hint');
+let hintTimer = null;
+function showModeHint(flash = false) {
   const key = { hold: 'modeHold', ring: 'modeRing', drone: 'modeDrone' }[settings.mode] || 'modeHold';
-  const hint = $('mode-hint');
-  hint.replaceChildren();
+  modeHint.replaceChildren();
   const name = document.createElement('strong');
   name.textContent = t(key);
-  hint.append(name, ': ' + t(key + 'Hint'));
+  modeHint.append(name, ': ' + t(key + 'Hint'));
+  if (!flash) return;
+  modeHint.classList.add('show');
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(hideModeHint, 3000);
+}
+function hideModeHint() {
+  clearTimeout(hintTimer);
+  modeHint.classList.remove('show');
 }
 modeSeg.addEventListener('click', (e) => {
   const b = e.target.closest('button');
   if (b) setMode(b.dataset.mode);
 });
-namesBtn.addEventListener('click', () => {
-  settings.names = !settings.names;
-  namesBtn.setAttribute('aria-pressed', String(settings.names));
+// Settings: Note names (C D E or Do Re Mi) and Names on the keys (show or hide).
+const pressIn = (seg, attr, value) => { for (const b of seg.children) b.setAttribute('aria-pressed', String(b.dataset[attr] === value)); };
+namesSeg.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  settings.names = b.dataset.names === 'on';
+  pressIn(namesSeg, 'names', settings.names ? 'on' : 'off');
   labelKeys();
   save();
 });
-solfegeBtn.addEventListener('click', () => {
-  settings.solfege = !solfege();
+notationSeg.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  settings.solfege = b.dataset.notation === 'solfege';
   save();
   showNotation();
 });
 function showNotation() {
-  solfegeBtn.textContent = solfege() ? 'Do Re Mi' : 'C D E';
-  solfegeBtn.setAttribute('aria-pressed', String(solfege()));
+  pressIn(notationSeg, 'notation', solfege() ? 'solfege' : 'letters');
   labelTicks();
   drawThumb();
   render(null);
@@ -631,7 +661,7 @@ document.querySelectorAll('.about-btn').forEach((b) => b.addEventListener('click
 themeSelect.innerHTML = THEMES.map(([value, key]) => `<option value="${value}" data-i18n="${key}"></option>`).join('');
 langSelect.innerHTML = LANGUAGES.map((l) => `<option value="${l}">${LANGUAGE_NAMES[l]}</option>`).join('');
 soundSelect.innerHTML = INSTRUMENTS.map((id) => `<option value="${id}" data-i18n="${SOUND_KEYS[id]}"></option>`).join('');
-themeSelect.addEventListener('change', () => { settings.theme = themeSelect.value; applyTheme(settings.theme); save(); saveLook({ theme: settings.theme }); setTimeout(fitBig, 500); });
+themeSelect.addEventListener('change', () => { settings.theme = themeSelect.value; applyTheme(settings.theme); save(); saveLook({ theme: settings.theme }); setTimeout(() => { placeModeSwitch(); fitBig(); }, 500); });
 langSelect.addEventListener('change', () => { settings.lang = langSelect.value; applyLanguage(); save(); saveLook({ lang: settings.lang }); });
 // Chosen on the home page or in another tool, in another tab or before coming Back here.
 watchLook((look) => {
@@ -646,6 +676,7 @@ function applyLanguage() {
   showNotation();   // Do/C may follow the language
   showModeHint();
   setupCustomSelects();   // labels and option texts changed
+  placeModeSwitch();
   fitBig();
 }
 
@@ -692,7 +723,7 @@ themeSelect.value = settings.theme;
 langSelect.value = settings.lang;
 soundSelect.value = settings.instrument;
 volSlider.value = settings.volume;
-namesBtn.setAttribute('aria-pressed', String(settings.names));
+pressIn(namesSeg, 'names', settings.names ? 'on' : 'off');
 for (const b of modeSeg.children) b.setAttribute('aria-pressed', String(b.dataset.mode === settings.mode));
 letterKeys();
 layout();
@@ -701,5 +732,6 @@ setVolume(settings.volume);
 applyLanguage();
 render(false);
 paintKeys();
+showModeHint(true);
 loadRack();   // the piano samples start loading now, so the first note is ready
 registerHubWorker('../');

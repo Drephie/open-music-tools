@@ -11,7 +11,7 @@ A piano in the browser for anyone: play notes and chords, hear a real grand pian
 
 - **88 keys** (A0 to C8), a part of them on screen. Drag the **scroll bar** at the bottom (marked C1 to C7) to move along: the keys follow the finger smoothly and settle on a whole key when you let go; a tap on the bar glides there *(after the phone test: whole-key jumps felt jittery)*. Starts on middle C.
 - **Always sideways on phones.** A phone held upright shows the piano sideways by itself, as it looks after turning the phone to the left (no "turn your phone" screen). With auto-rotate on, the phone turns the page itself and both sideways directions work. With rotation lock on, holding the phone the other way turns the piano around by itself where the page may read the motion sensor (Android); iPhone would ask a one-time "Allow motion" question for that, so there **Turn the piano around** (⟲) in Settings flips it instead *(Claude's pick; moved off the bar after the phone test)*. On computers and tablets the layout fits the window.
-- **Key size:** **Keys on screen** − 12 + in Settings *(moved off the bar after the phone test)*, from about 7 big to about 17 small white keys across a sideways phone; starts at 12, an octave and a fifth (C to the G above the next C; Drephie, 2026-10-23: 10 was too few). A key is the same size on every screen, so a computer shows more keys.
+- **Key size:** **Keys on screen** − 12 + in Settings *(moved off the bar after the phone test)*, from 7 big to 17 small white keys across a sideways phone; starts at 12, an octave and a fifth (C to the G above the next C; Drephie, 2026-10-23: 10 was too few). On a phone it counts keys, so every phone starts at 12 whatever its width *(2026-11-04: keys were too small on wider iPhones)*; on computers and tablets a key keeps one size, so they show more keys.
 - **Up to 7 notes at once, or more:** every finger plays its own key, and sliding a finger plays each key it crosses. iPhones track at most 5 fingers at once (iPads more); Ring and Drone let you go past that.
 - **Three ways a key sounds** (Diapason's Short, Hold and Latch, renamed). Changing it stops every sound.
   - **Hold** (default): sounds while you hold the key.
@@ -25,7 +25,7 @@ A piano in the browser for anyone: play notes and chords, hear a real grand pian
   - It lights up when you play and fades over 1.5 s; the last one stays until you play again.
   - Spelled for the chord: B♭ in B♭m, A♯ in F♯. Each chord takes the spelling with the fewest sharps and flats (C♯m, not D♭m; A♭, not G♯).
   - About 40 chord types from Diapason's list: major, minor, diminished, augmented, sus, 6ths, 7ths, 9ths, 11ths, 13ths, add9 and the altered ones.
-- **Note names on the keys**, two switches on the bar: **Names** on/off and **Do / C**. Starts on Do Re Mi in Italian and Spanish, C D E in English. Black keys show the sharp name (Do♯), or while pressed the chord's spelling (Re♭). C keys show their octave (Do4); middle C has a mark.
+- **Note names**, in Settings *(moved off the bar, 2026-11-04)*: **Note names** C D E or Do Re Mi, and **Names on the keys** Show or Hide. Starts on Do Re Mi in Italian and Spanish, C D E in English. Black keys show the sharp name (Do♯), or while pressed the chord's spelling (Re♭). C keys show their octave (Do4); middle C has a mark.
 - **Computer keys, on computers only:** A W S E D F T G Y H U J K play an octave from C (small letters on those keys show which), Z and X move it down or up an octave, and holding Space lets notes ring *(Claude's pick)*. Phones and tablets show none of this.
 - **Patreon window**, as in the Metronome. While any note sounds (held, ringing or drone) the page counts as in use, so the window never interrupts.
 - Keeps the phone screen awake while a drone sounds (on the real https site) *(Claude's pick, at build time)*.
@@ -38,13 +38,13 @@ MIDI keyboard input (Drephie, 2026-10-23: computer keys only; MIDI wouldn't work
 ## Layout
 
 **Sideways phone (about 667 × 375), top to bottom; nothing scrolls the page:**
-1. Bar: the chord name big on the left, its lines beside it. On the right, one block of two rows of the same width: [Sound ▾] (i) (⚙), and [Hold | Ring | Drone] [Names] [Do] *(rebalanced after the phone test, so the chord name has more room)*. No title on phones, to give the keys room (like Diapason; *Claude's pick*).
+1. Bar, one 44 px row *(2026-11-04: two rows and a hint line took too much height, and Home sat next to (i))*: Home on the far left, the chord name big with its words and notes beside it, then [Hold | Ring | Drone] [Sound ▾] and (i) (⚙) at the far right. When that leaves the chord name too little room (small phones, Spanish and Italian), Hold | Ring | Drone moves to the bottom row beside the scroll bar. What the chosen mode does shows for 3 seconds over the keys when the page opens or the mode changes, and goes at the first key. No title on phones, to give the keys room (like Diapason; *Claude's pick*).
 2. The keys, filling the rest.
 3. The scroll bar, with "Patreon" and "@drephie" small at its two ends *(Claude's pick)*.
 
 **Computer:** title, About and Settings at the top; the chord name bigger, with the same two rows of controls on the right; the keys as tall as fits (up to about 380 px); scroll bar; footer.
 
-**Settings (⚙):** one row each: Theme, Language, Keys on screen, Volume (0–100%, starts at 100%; *Claude's pick*), and Turn the piano around on an upright phone.
+**Settings (⚙):** one row each (two columns on a sideways phone, so it never scrolls): Theme, Language, Note names, Names on the keys, Keys on screen, Volume (0–100%, starts at 100%; *Claude's pick*), and Turn the piano around on an upright phone.
 **About (i):** short text as in the Metronome, the Salamander credit, the Patreon button, keyboard tips on computers only.
 
 ## Wording (English)
@@ -73,3 +73,5 @@ Nothing is recorded or uploaded, and there is no microphone. The piano samples (
 **Drephie, by ear and hand on the iPhone:** each of the six sounds low, middle and high; the delay between touching a key and hearing it; 5 fingers at once and sliding; Hold, Ring and Drone; the names of a few chords you know; upright phone shown sideways, then turned both ways; key size; the Spanish and Italian wording.
 
 **Drephie's iPhone test (2026-10-23):** everything works (sound, delay, fingers, modes, chord names, size, wording); changes asked: smoother scrolling, key size and turn-around into Settings, a better-balanced bar. **Re-check:** those three perfect; Ring was too long and not gradual, with no visual feedback, so it now fades gradually with the key's light; Drephie then picked a bit longer (3.5 s at middle C).
+
+**Phone layout pass (2026-11-04, Drephie: "keys are small, too much height on buttons, Home opens (i)"):** one bar row instead of two plus a hint line, names into Settings, 12 keys by count on phones. At 844 × 390 (Drephie's iPhone sideways) the bar went from 98 to 44 px and the keys from 211 to 282 px tall. Home now sits at the other end of the bar from (i); the misfire could not be reproduced in Chromium (probably the iPhone's tap correction between targets 6 px apart), so Drephie's phone test decides.

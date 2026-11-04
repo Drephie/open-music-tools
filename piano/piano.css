@@ -54,30 +54,29 @@ body.phone, body.compact { --fx: min(var(--frame-sides), 8px); --fy-top: min(var
 .chord-notes { font-size: 15px; letter-spacing: 0.02em; color: color-mix(in srgb, var(--color-text) 82%, transparent); }
 .chord-also { font-size: 14px; color: var(--color-right); }
 
-/* One block on the right, two rows of the same width: the sound (stretched),
-   then how a key sounds and the note names. */
-.controls { flex: none; margin-left: auto; display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
-.ctrl-row { display: flex; align-items: center; gap: 8px; }
-.sound-group { flex: 1 1 auto; min-width: 0; }
-.seg { flex: 1 1 auto; }
-.seg button { flex: 1 1 auto; }
-.bar-icons { display: none; gap: 6px; flex: none; }
+/* The controls, one row on the right: how a key sounds, then the sound. The
+   note names live in Settings. On phones Home starts the bar, well away from
+   About and Settings at its end, so a thumb can't hit the wrong one. */
+.controls { flex: none; margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.sound-group { flex: none; width: 190px; }
+.bar-home, .bar-icons { display: none; }
+.bar-icons { flex: none; gap: 8px; margin-left: 4px; }
+a.icon-btn { box-sizing: border-box; }
 
-.seg { display: flex; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); overflow: hidden; }
-.seg button, .toggle {
+/* A segmented switch (the mode, and the name settings): 44 px tall, its border included. */
+.seg { display: flex; box-sizing: border-box; height: 44px; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); overflow: hidden; }
+.seg button {
   font-family: var(--font-main); font-weight: 600; font-size: 14px; line-height: 1.15;
-  min-height: 44px; padding: 0 14px; color: var(--color-btn-text); background: var(--color-panel); border: 0; cursor: pointer;
+  height: 100%; padding: 0 14px; color: var(--color-btn-text); background: var(--color-panel); border: 0; cursor: pointer;
   touch-action: manipulation; transition: background 0.15s, color 0.15s;
 }
 .seg button + button { border-left: 1px solid var(--border-panel); }
-.toggle { border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); min-width: 44px; }
-.seg button[aria-pressed="true"], .toggle[aria-pressed="true"] { background: var(--color-left); color: var(--color-text-pinched); }
-:is(.seg button, .toggle, .track):focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
+.seg button[aria-pressed="true"] { background: var(--color-left); color: var(--color-text-pinched); }
+:is(.seg button, .track):focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
 
 /* What the chosen mode does, in one line under the bar. */
 .mode-hint { flex: none; margin: 0; font-size: 14px; line-height: 1.3; color: var(--color-text-inactive); text-wrap: balance; }
 .mode-hint strong { color: var(--color-text); font-weight: 700; }
-body.compact .mode-hint { font-size: 12px; line-height: 1.25; }
 
 /* --- The keys (positions and --kw, the white key width, set in piano.js) --- */
 .keys-wrap { position: relative; flex: 1 1 auto; min-height: 110px; max-height: 380px; overflow: hidden; touch-action: none; }
@@ -136,14 +135,17 @@ body.compact .mode-hint { font-size: 12px; line-height: 1.25; }
 .scrub-link { display: none; padding-block: 15px; margin-block: -15px; font-size: 11px; font-weight: 700; text-decoration: none; white-space: nowrap; line-height: 1.2; }
 .designer-link { color: var(--color-right); }
 
-/* Settings: one row per setting, the label on the left. */
+/* Settings: one row per setting, the label on the left; two columns on short
+   screens (sideways phones), so the window never needs scrolling. */
 #settings-modal .setting-row.control-group { flex-direction: row; align-items: center; gap: 12px; }
+.settings-grid { display: flex; flex-direction: column; }
 #settings-modal .setting-row .custom-select { width: 190px; min-width: 0; }
 .stepper { display: flex; align-items: center; gap: 8px; }
 .stepper output { min-width: 2ch; text-align: center; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 22px; font-weight: 700; }
 .round-btn.small { width: 44px; height: 44px; font-size: 22px; }
 .round-btn:disabled { opacity: 0.4; cursor: default; }
-.volume-row .range { flex: 1 1 auto; min-width: 80px; }
+.volume-row { flex-wrap: nowrap; }
+.volume-row .range { flex: 1 1 0; width: auto; min-width: 80px; }
 #volume-out { min-width: 3.2em; text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 700; }
 .flip-row { display: none; }
 body.turned .flip-row { display: flex; }
@@ -155,6 +157,7 @@ body.narrow .controls { margin-left: 0; align-items: flex-start; }
 
 /* --- Short stages: sideways phones (and short windows) --- */
 body.compact .tool-header, body.compact .tool-footer { display: none; }
+body.compact .bar-home { display: inline-flex; }
 body.compact .bar-icons { display: flex; }
 body.compact .scrub-link { display: block; }
 body.compact .piano-page {
@@ -162,33 +165,49 @@ body.compact .piano-page {
   padding: calc(var(--fy-top) + 6px + var(--safe-t)) calc(var(--fx) + 10px + var(--safe-r))
            calc(var(--fy-bottom) + 6px + var(--safe-b)) calc(var(--fx) + 10px + var(--safe-l));
 }
-body.compact .piano-main { gap: 6px; justify-content: flex-start; }
-body.compact .pbar { gap: 10px; }
+/* One 44 px bar instead of two rows and a hint line: the height goes to the keys. */
+body.compact .piano-main { position: relative; gap: 8px; justify-content: flex-start; }
+body.compact .pbar { flex: none; height: 44px; gap: 12px; }
 body.compact .readout { flex: 1 1 auto; gap: 10px; }
-body.compact .chord-big { font-size: 46px; }
-body.compact .chord-lines { gap: 1px; }
-body.compact .chord-lines > div { line-height: 1.25; }
-body.compact .chord-words { font-size: 14px; }
-body.compact .chord-notes { font-size: 12px; letter-spacing: 0.5px; }
-body.compact .chord-also { font-size: 12px; }
-body.compact .controls { gap: 6px; }
-body.compact .ctrl-row { gap: 6px; }
+body.compact .chord-big { font-size: 38px; }
+body.compact .chord-lines { gap: 2px; }
+body.compact .chord-lines > div { line-height: 1.2; }
+body.compact .chord-words { font-size: 13px; }
+body.compact .chord-notes { font-size: 12px; letter-spacing: 0.02em; }
+body.compact .chord-also { display: none; }
+body.compact .sound-group { width: 132px; }
 body.compact .sound-group .custom-select { font-size: 12px; }
+/* The mode hint shows for a moment over the top of the keys (piano.js), and
+   never catches a tap. */
+body.compact .mode-hint {
+  position: absolute; z-index: 6; top: 60px; left: 50%; width: max-content; max-width: min(540px, calc(100% - 32px)); box-sizing: border-box;
+  padding: 9px 16px; border-radius: var(--radius-control); border: var(--border-width) solid var(--border-panel);
+  background: var(--bg-select); color: var(--color-select-text); box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.6);
+  font-size: 13px; line-height: 1.3; text-align: center; text-wrap: balance; pointer-events: none;
+  opacity: 0; transform: translate(-50%, -6px); transition: opacity 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+body.compact .mode-hint strong { color: inherit; }
+body.compact .mode-hint.show { opacity: 1; transform: translate(-50%, 0); }
 body.compact .sound-group .select-selected { padding: 0 30px 0 10px; min-height: 44px; box-sizing: border-box; line-height: 1.2; }
 body.compact .icon-btn { width: 44px; height: 44px; }
 body.compact .icon-btn svg { width: 18px; height: 18px; }
-body.compact .seg button, body.compact .toggle { min-height: 44px; padding: 0 10px; font-size: 13px; }
-body.compact .toggle { min-width: 44px; }
+body.compact .seg button { padding: 0 10px; font-size: 13px; }
 body.compact .keys-wrap { max-height: none; min-height: 90px; }
 body.compact .scrub-row { height: 36px; gap: 8px; }
+body.tight .scrub-row { height: 44px; }
+body.tight .scrub-row .seg { flex: none; }
+body.tight .track { min-width: 120px; }
 body.compact .tick { font-size: 10px; }
-body.compact #settings-modal { padding: 12px 18px; gap: 2px; }
+body.compact #settings-modal { width: min(680px, calc(100cqw - 32px)); padding: 12px 20px; gap: 2px; }
+body.compact .settings-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; }
+body.compact .settings-grid > .setting-row { border-top: 1px solid color-mix(in srgb, var(--border-panel) 50%, transparent); }
+body.compact .settings-grid > .setting-row:nth-child(-n+2) { border-top: 0; }
 body.compact #settings-modal .modal-header { padding-bottom: 6px; }
 body.compact #settings-modal .setting-row { min-height: 44px; }
 body.compact #settings-modal .round-btn.small { width: 44px; height: 44px; }
 
 /* Theme shapes and sizes */
-body[data-theme="pink"] .seg button:not([aria-pressed="true"]), body[data-theme="pink"] .toggle:not([aria-pressed="true"]) { background: var(--color-panel); color: var(--color-left); }
+body[data-theme="pink"] .seg button:not([aria-pressed="true"]) { background: var(--color-panel); color: var(--color-left); }
 body[data-theme="bw"] .key { border-radius: 0; }
 body[data-theme="y2k"] .chord-big, body[data-theme="retro"] .chord-big { text-shadow: 0 0 var(--shadow-blur) color-mix(in srgb, var(--color-left) 60%, transparent); }
 /* Rouge: the blush accent vanishes on bone keys, so keys light up cherry. */
