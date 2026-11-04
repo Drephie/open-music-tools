@@ -39,7 +39,11 @@ body.camera-on :is(.tool-header .icon-btn, .cdg-bar, .cdg-chord, .cdg-status:not
   background: color-mix(in srgb, var(--bg-page) 72%, transparent);
 }
 /* The name big at the top left, as Choordination's; the links free in the bottom corners. */
-/* The name, big and in capitals: it shows in the videos people share. */
+/* The name, big and in capitals: it shows in the videos people share. A tap on
+   it opens About, as Choordination's name does. */
+.title-btn { all: unset; cursor: pointer; display: inline-block; transition: transform 0.2s ease; }
+.title-btn:hover { transform: scale(1.03); }
+.title-btn:focus-visible { outline: 2px solid var(--color-right); outline-offset: 4px; border-radius: 6px; }
 .tool-header .tool-title { font-size: clamp(30px, 5vw, 58px); line-height: 1; text-transform: uppercase; letter-spacing: 0.08em; text-shadow: var(--credit-shadow); }
 .tool-header { flex-wrap: wrap; } /* a narrow window: the buttons go under the name, on the right */
 .header-actions { margin-left: auto; }

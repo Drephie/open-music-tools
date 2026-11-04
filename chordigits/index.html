@@ -25,7 +25,7 @@
   <canvas id="wave" aria-hidden="true"></canvas>
   <div class="page">
     <header class="tool-header">
-      <h1 class="tool-title" data-i18n="title">Chordigits</h1>
+      <h1 class="tool-title"><button id="title-btn" class="title-btn" data-i18n-aria="aboutTitle" aria-label="About Chordigits"><span data-i18n="title">Chordigits</span></button></h1>
       <div class="header-actions">
         <a class="icon-btn home-btn" href="../" data-i18n-aria="home" aria-label="Home: all the tools">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>
@@ -35,9 +35,6 @@
         </button>
         <button id="help-btn" class="icon-btn" data-i18n-aria="howTitle" aria-label="How to play">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.9.8c0 1.7-2.5 2.2-2.5 3.8"/><circle cx="12" cy="17.2" r="0.6" fill="currentColor"/></svg>
-        </button>
-        <button id="about-btn" class="icon-btn" data-i18n-aria="about" aria-label="About">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
         </button>
         <button id="settings-btn" class="icon-btn" data-i18n-aria="settings" aria-label="Settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -66,7 +63,6 @@
         <div id="numbers" class="cdg-numbers" role="group" data-i18n-aria="numbersAria" aria-label="Chord numbers"></div>
         <div class="cdg-kinds">
           <div id="qualities" class="cdg-chips" role="group" data-i18n-aria="qualityAria" aria-label="Major or minor">
-            <button class="btn chip" data-q="0" aria-pressed="true" data-i18n="qKey">as in the key</button>
             <button class="btn chip" data-q="1" aria-pressed="false" data-i18n="qMaj">major</button>
             <button class="btn chip" data-q="-1" aria-pressed="false" data-i18n="qMin">minor</button>
           </div>

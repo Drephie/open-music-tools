@@ -181,12 +181,13 @@ const lift = (e) => {
 };
 ['pointerup', 'pointercancel'].forEach((ev) => numbersEl.addEventListener(ev, lift));
 const replay = () => { if (sounding) { sounding = null; play(); } else lightUp(); };
-$('qualities').addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (b) { quality = Number(b.dataset.q); replay(); } });
+// Major and minor switch on and off: neither is the key's own chord.
+$('qualities').addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (b) { const q = Number(b.dataset.q); quality = quality === q ? 0 : q; replay(); } });
 $('colors').addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (b) { color = Number(b.dataset.c); replay(); } });
 
 // Keyboard: hold 1-7 (up to 0, - and = in Chromatic), Q W E, A S D F, Space sustains.
 const NUM_KEYS = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal'];
-const Q_KEYS = { KeyQ: 0, KeyW: 1, KeyE: -1 }, C_KEYS = { KeyA: 0, KeyS: 1, KeyD: 2, KeyF: 3 };
+const Q_KEYS = { KeyW: 1, KeyE: -1 }, C_KEYS = { KeyA: 0, KeyS: 1, KeyD: 2, KeyF: 3 };
 const keysDown = [];
 document.addEventListener('keydown', (e) => {
   if (modals.current() || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -195,7 +196,7 @@ document.addEventListener('keydown', (e) => {
   if (e.repeat) return;
   const d = NUM_KEYS.indexOf(e.code);
   if (d >= 0 && d < names.length) { keysDown.push(d); degree = d; play(); return; }
-  if (e.code in Q_KEYS) { quality = Q_KEYS[e.code]; replay(); }
+  if (e.code in Q_KEYS) { quality = quality === Q_KEYS[e.code] ? 0 : Q_KEYS[e.code]; replay(); }
   else if (e.code in C_KEYS) { color = C_KEYS[e.code]; replay(); }
 });
 document.addEventListener('keyup', (e) => {
@@ -397,7 +398,7 @@ function toCanvas(p) {
   const s = Math.max(W / vw, H / vh);
   return { x: W / 2 - (p.x - 0.5) * vw * s, y: H / 2 + (p.y - 0.5) * vh * s };
 }
-const KIND_WORD = { 0: 'qKey', 1: 'qMaj', [-1]: 'qMin' }, COLOR_WORD = ['cPlain', 'c7', 'cSus', 'cAdd9'];
+const KIND_WORD = { 1: 'qMaj', [-1]: 'qMin' }, COLOR_WORD = ['cPlain', 'c7', 'cSus', 'cAdd9'];
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (const h of hands) {
@@ -411,11 +412,13 @@ function draw() {
     let text;
     if (h.side === numberSide()) {
       const n = h.code % 10, band = Math.floor(h.code / 10) - 1;
-      text = n ? (numerals[n - 1] || String(n)) + (band > 0 ? ' ↑' : band < 0 ? ' ↓' : '') : '✊';
+      text = n ? (numerals[n - 1] || String(n)) + (band > 0 ? ' ↑' : band < 0 ? ' ↓' : '') : ''; // a fist: nothing
     } else {
+      // Only what changes the chord: major or minor when tilted, and the colour.
       const q = Math.floor(h.code / 10) - 1, c = h.code % 10;
-      text = c ? `${t(KIND_WORD[q])} · ${t(COLOR_WORD[c])}` : t(KIND_WORD[q]);
+      text = [q ? t(KIND_WORD[q]) : '', c ? t(COLOR_WORD[c]) : ''].filter(Boolean).join(' · ');
     }
+    if (!text) continue;
     const big = h.side === numberSide();
     ctx.font = `700 ${big ? 34 : 18}px ${look.font}`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
@@ -533,7 +536,7 @@ document.querySelectorAll('.modal-header .close-btn').forEach((b) => b.addEventL
 // The Patreon window waits for a pause after playing (never during a chord).
 const support = createSupportPrompt({ dialog: supportModal, modals, t, isBusy: () => !!sounding });
 $('settings-btn').addEventListener('click', (e) => modals.open(settingsModal, e.currentTarget));
-$('about-btn').addEventListener('click', (e) => modals.open(aboutModal, e.currentTarget));
+$('title-btn').addEventListener('click', (e) => modals.open(aboutModal, e.currentTarget));
 $('start-camera').addEventListener('click', startCamera);
 $('no-camera').addEventListener('click', () => { loadRack(); showMsg(null); });
 // Open at the top: on a short screen the focused button would scroll the first line away.
