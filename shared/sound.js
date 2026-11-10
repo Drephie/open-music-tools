@@ -96,7 +96,6 @@ export async function createRack({ onSamplesLoading } = {}) {
     limiter = new Tone.Limiter(-3).connect(masterVolume);
     compressor = new Tone.Compressor({ threshold: -18, ratio: 3, attack: 0.005, release: 0.25 }).connect(limiter);
     reverb = new Tone.Reverb({ decay: 2.2, preDelay: 0.02, wet: 0.28 }).connect(compressor);
-    await reverb.ready;
 
     padFilter = new Tone.Filter(2400, 'lowpass').connect(reverb);
     synthFilter = new Tone.Filter(1700, 'lowpass').connect(reverb);
@@ -163,7 +162,8 @@ export async function createRack({ onSamplesLoading } = {}) {
     glideVoices.forEach((v) => { v.volume.value = DREAMY_DB; });
 
     if (onSamplesLoading) onSamplesLoading();
-    await Tone.loaded();
+    // The reverb tail is made while the piano files download, not before them.
+    await Promise.all([reverb.ready, Tone.loaded()]);
   } catch (err) {
     rack.dispose();
     throw err;

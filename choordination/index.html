@@ -92,6 +92,13 @@
     @keyframes logopulse { 50% { transform: scale(1.06); opacity: 0.82; } }
     .brand-title { font-family: var(--font-display); font-weight: var(--title-weight); letter-spacing: var(--title-spacing); font-size: clamp(1.5rem, 8.5vw, 3.5rem); line-height: 1.05; margin: 0; color: var(--color-title); white-space: nowrap; }
     .loading-sub { color: var(--color-text); margin: 0; }
+    .boot-steps { list-style: none; margin: 14px auto 0; padding: 0; display: inline-block; text-align: left; font-size: 17px; font-weight: 600; color: var(--color-text); }
+    .boot-steps li { margin: 6px 0; padding-left: 28px; position: relative; transition: opacity 0.3s ease; }
+    .boot-steps li::before { content: '○'; position: absolute; left: 0; }
+    .boot-steps .pending { opacity: 0.4; }
+    .boot-steps .active::before { content: '●'; animation: logopulse 1.2s ease-in-out infinite; }
+    .boot-steps .done { opacity: 0.75; }
+    .boot-steps .done::before { content: '✓'; color: var(--color-right); }
     .error-title { color: var(--color-right); margin: 20px 0 0; }
     .error-body { max-width: 540px; line-height: 1.7; font-size: 15px; margin: 12px auto; }
     .error-detail { font-size: 12px; opacity: 0.6; max-width: 540px; word-break: break-word; margin: 0 auto 10px; }
@@ -119,7 +126,7 @@
     @keyframes recblink { 50% { opacity: 0.55; } }
     /* Reduce motion: the logo stays still; recording still shows in red. */
     @media (prefers-reduced-motion: reduce) {
-      .boot-logo, #record-btn.recording, #touch-record-btn.recording { animation: none; }
+      .boot-logo, .boot-steps .active::before, #record-btn.recording, #touch-record-btn.recording { animation: none; }
     }
 
     .icon-btn { padding: 0; width: 44px; height: 44px; border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; }
@@ -671,7 +678,6 @@
 </div>
 
 <script type="module">
-  import { HandLandmarker, FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs";
   // (SRI cannot be applied to ES-module imports without an import map; the file is
   //  cached by the hub's service worker, ../sw.js, after first load.)
   import { parseKey, keyRootName, keyChordNames, pickModifiers, getChordInfo as theoryChordInfo, voiceChord, keyTonicMidi } from '../shared/theory.js';
@@ -1257,7 +1263,7 @@
     if (audioReady) return;
     await startAudio();
     disposeAudioNodes();
-    rack = await createRack({ onSamplesLoading: () => showLoading('loadingSamples') });
+    rack = await createRack({ onSamplesLoading: () => { setStep('loadingAudio', 'done'); setStep('loadingSamples', 'active'); } });
     instruments = rack.instruments;
 
     recorder = new Tone.Recorder();
@@ -1575,6 +1581,16 @@
     uiLayer.style.display = 'flex';
     uiLayer.innerHTML = `<div class="loading-text"><div class="boot-logo">${LOGO_SVG}</div><h1 class="brand-title">CHOORDINATION</h1><h2 class="loading-sub">${t(key)}</h2></div>`;
   }
+  // The start-up list: every step is on screen at once, each pending, active (dots) or done (tick).
+  function showSteps(keys) {
+    uiLayer.style.display = 'flex';
+    uiLayer.innerHTML = `<div class="loading-text"><div class="boot-logo">${LOGO_SVG}</div><h1 class="brand-title">CHOORDINATION</h1><ul class="boot-steps">${keys.map((k) => `<li data-step="${k}" class="pending">${t(k)}</li>`).join('')}</ul></div>`;
+  }
+  function setStep(key, state) {
+    const li = uiLayer.querySelector(`[data-step="${key}"]`);
+    if (li) li.className = state;
+    else if (state === 'active') showLoading(key);   // no list on screen (a retry): the single line
+  }
   function showError(titleKey, bodyKey, err, retryFn, offerKeyboard) {
     uiLayer.style.display = 'flex';
     uiLayer.innerHTML = `<div class="loading-text">
@@ -1616,16 +1632,22 @@
   const switchToKeyboardMode = () => switchToNoCameraMode('keyboard');
   const switchToTouchMode = () => switchToNoCameraMode('touch');
 
+  const MP_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/';
+  const HAND_MODEL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
+  const FACE_MODEL = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
+
   // --- STARTUP PIPELINE ---
   // Audio, tracking models and the camera request all start in PARALLEL, so the
   // webcam permission prompt appears the moment "Start Engine" is pressed
   // instead of after every sample and model has finished downloading.
   async function startEngine() {
     bootModal.style.display = 'none';
-    showLoading('loadingAudio');
     const wantVision = accMode.value !== 'keyboard' && !touchOnly();
-    const camP = wantVision ? initCamera().then(() => null, err => err) : null;
-    const visionP = wantVision ? initVisionModels().then(() => null, err => err) : null;
+    showSteps(wantVision ? ['loadingAudio', 'loadingSamples', 'loadingModels', 'loadingCamera'] : ['loadingAudio', 'loadingSamples']);
+    setStep('loadingAudio', 'active');
+    const track = (key, p) => { setStep(key, 'active'); return p.then(() => null, err => err).then((err) => { if (!err) setStep(key, 'done'); return err; }); };
+    const camP = wantVision ? track('loadingCamera', initCamera()) : null;
+    const visionP = wantVision ? track('loadingModels', initVisionModels()) : null;
     try {
       await initAudio();
     } catch (err) {
@@ -1633,26 +1655,29 @@
       showError('errAudioTitle', 'errAudioBody', err, startEngine, false);
       return;
     }
+    setStep('loadingSamples', 'done');
     if (!wantVision) { finishStartup(); return; }
-    showLoading('loadingModels');
     const visErr = await visionP;
     if (visErr) { console.error('Model load failed', visErr); showError('errModelsTitle', 'errModelsBody', visErr, startVision, true); return; }
-    showLoading('loadingCamera');
     const camErr = await camP;
     if (camErr) { console.error('Camera failed', camErr); showError('errCameraTitle', 'errCameraBody', camErr, startVision, true); return; }
     finishStartup();
   }
 
+  // Loaded only when the camera is wanted, and the two models are built side by side.
   async function initVisionModels() {
-    const vision = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm');
-    handLandmarker = await HandLandmarker.createFromOptions(vision, {
-      baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task', delegate: 'GPU' },
-      runningMode: 'VIDEO', numHands: 2
-    });
-    faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
-      baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: 'GPU' },
-      outputFaceBlendshapes: true, runningMode: 'VIDEO', numFaces: 1
-    });
+    const { HandLandmarker, FaceLandmarker, FilesetResolver } = await import(MP_BASE + 'vision_bundle.mjs');
+    const vision = await FilesetResolver.forVisionTasks(MP_BASE + 'wasm');
+    [handLandmarker, faceLandmarker] = await Promise.all([
+      HandLandmarker.createFromOptions(vision, {
+        baseOptions: { modelAssetPath: HAND_MODEL, delegate: 'GPU' },
+        runningMode: 'VIDEO', numHands: 2
+      }),
+      FaceLandmarker.createFromOptions(vision, {
+        baseOptions: { modelAssetPath: FACE_MODEL, delegate: 'GPU' },
+        outputFaceBlendshapes: true, runningMode: 'VIDEO', numFaces: 1
+      })
+    ]);
     visionReady = true;
   }
   async function initCamera() {
@@ -2560,6 +2585,16 @@
   refreshThemeCache();
   sizeCanvas();
   bootModal.scrollTop = 0;   // the welcome window opens at its top
+
+  // While people read the welcome window, fetch the big files they will need (the service
+  // worker keeps them for next time), so pressing Start finds most of them ready.
+  // shortcut: guesses the wasm file names of MediaPipe 0.10.3; if they change, only the head start is lost.
+  if (accMode.value !== 'keyboard' && !touchOnly() && !(navigator.connection && navigator.connection.saveData)) {
+    window.addEventListener('load', () => setTimeout(() => {
+      [MP_BASE + 'vision_bundle.mjs', MP_BASE + 'wasm/vision_wasm_internal.js', MP_BASE + 'wasm/vision_wasm_internal.wasm', HAND_MODEL, FACE_MODEL]
+        .forEach((u) => fetch(u, { mode: 'cors' }).catch(() => {}));
+    }, 1500));
+  }
 
   // --- SERVICE WORKER (the hub's one worker caches assets for instant repeat visits) ---
   registerHubWorker('../');
