@@ -206,6 +206,8 @@
     #boot-modal .boot-cta { position: sticky; bottom: 0; }
     .boot-cta { width: auto; min-height: 44px; align-self: flex-end; font-size: 16px; padding: 12px 25px; background: var(--color-primary); color: var(--color-primary-text); border-color: var(--color-primary); }
     .boot-cta:hover:not(:disabled) { background: color-mix(in srgb, var(--color-primary) 86%, var(--color-text)); color: var(--color-primary-text); }
+    /* The welcome keeps the first three lines; the rest (sustain, tips) lives in How to play. */
+    #boot-modal li:nth-child(n+4), #boot-modal .tutorial-tip { display: none; }
     #boot-step-2 { display: flex; flex-direction: column; gap: 15px; }
     .boot-project { margin: 0; font-size: 14px; line-height: 1.5; color: var(--color-text-inactive); }
     .boot-project a { color: var(--color-right); }
@@ -582,7 +584,6 @@
       <div id="boot-tutorial-text">
         <!-- Injected via JS (i18n) -->
       </div>
-      <p id="boot-calib-note" class="modal-note" data-i18n="calibNote"></p>
       <p id="boot-project" class="boot-project"></p>
       <button id="start-btn" class="settings-action-btn boot-cta" data-i18n="startBtn">Start the camera</button>
     </div>
@@ -597,6 +598,7 @@
     <div id="menu-tutorial-text">
         <!-- Injected via JS -->
     </div>
+    <p id="boot-calib-note" class="modal-note" data-i18n="calibNote"></p>
   </div>
 
   <!-- About / Logo Modal -->
@@ -810,7 +812,7 @@
       accKeyboard: "Keyboard only (camera optional)", accTouch: "Touch pads (no camera)", accHandsfree: "Hands-free mode (coming soon)",
       browSustain: "Eyebrow sustain", onLabel: "On", offLabel: "Off",
       bootWelcome: "Welcome to Choordination",
-      bootProject: 'Free and <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a>. The camera and microphone stay on this device: nothing is uploaded. No ads, no trackers.',
+      bootProject: 'More in the menu, under How to play. <a href="{repo}" target="_blank" rel="noopener noreferrer">Open source</a>; nothing leaves your device. No ads, no trackers.',
       howToPlay: "How to play", startBtn: "Start the camera",
       calibNote: "When the camera starts, keep a relaxed, neutral face for 2 seconds — Choordination calibrates the eyebrow sustain to you.",
       leftHand: "Left hand", rightHand: "Right hand",
@@ -885,7 +887,7 @@
       accKeyboard: "Solo teclado (cámara opcional)", accTouch: "Pads táctiles (sin cámara)", accHandsfree: "Manos libres (próximamente)",
       browSustain: "Sustain con cejas", onLabel: "Activado", offLabel: "Desactivado",
       bootWelcome: "Bienvenido a Choordination",
-      bootProject: 'Gratis y de <a href="{repo}" target="_blank" rel="noopener noreferrer">código abierto</a>. La cámara y el micrófono se quedan en este dispositivo: no se sube nada. Sin anuncios ni rastreadores.',
+      bootProject: 'Más en el menú, en Cómo tocar. <a href="{repo}" target="_blank" rel="noopener noreferrer">Código abierto</a>; nada sale de tu dispositivo. Sin anuncios ni rastreadores.',
       howToPlay: "Cómo tocar", startBtn: "Encender la cámara",
       calibNote: "Cuando la cámara se active, mantén el rostro relajado y neutro durante 2 segundos: Choordination calibra el sustain de cejas a tu medida.",
       leftHand: "Mano izquierda", rightHand: "Mano derecha",
@@ -960,7 +962,7 @@
       accKeyboard: "Solo tastiera (fotocamera opzionale)", accTouch: "Pad touch (senza fotocamera)", accHandsfree: "Senza mani (prossimamente)",
       browSustain: "Sustain con sopracciglia", onLabel: "Attivo", offLabel: "Disattivato",
       bootWelcome: "Benvenuto in Choordination",
-      bootProject: 'Gratis e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a>. Fotocamera e microfono restano su questo dispositivo: non viene caricato nulla. Niente pubblicità né tracker.',
+      bootProject: 'Altro nel menu, in Come si suona. <a href="{repo}" target="_blank" rel="noopener noreferrer">Open source</a>; nulla lascia il tuo dispositivo. Niente pubblicità né tracker.',
       howToPlay: "Come si suona", startBtn: "Accendi la fotocamera",
       calibNote: "Quando la fotocamera si attiva, mantieni il viso rilassato e neutro per 2 secondi: Choordination calibra il sustain delle sopracciglia su di te.",
       leftHand: "Mano sinistra", rightHand: "Mano destra",
@@ -1959,8 +1961,10 @@
   // (phone landscape) so the interface auto-fits instead of overflowing.
   let uiScale = 1;
   function sizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    // The size it is shown at (not innerWidth/Height, which a phone's browser bar or a turn can leave stale), so it is never stretched.
+    if (!canvas.clientWidth || !canvas.clientHeight) return;
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
     uiScale = Math.max(0.55, Math.min(1, canvas.height / 640));
   }
 
@@ -2574,6 +2578,7 @@
 
   startBtn.addEventListener('click', startEngine);
   window.addEventListener('resize', sizeCanvas);
+  new ResizeObserver(sizeCanvas).observe(canvas);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(refreshThemeCache);
 
   // --- INIT ---
