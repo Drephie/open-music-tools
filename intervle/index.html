@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Intervle</title>
+  <meta name="description" content="Intervle: a free daily ear puzzle. Three puzzles a day: an interval, a note and a chord. Runs in your browser; nothing is uploaded.">
+  <meta name="theme-color" content="#0f1419">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" integrity="sha384-c6Uo4N9c3SOEigMVzP6IshUG1wQ5uMp3xeoQFiHWAQ86joWdgyajkvopySyKy/Z6" crossorigin="anonymous" defer></script>
+  <link rel="stylesheet" href="../shared/fonts/fonts.css">
+  <link rel="stylesheet" href="../shared/ui/themes.css">
+  <link rel="stylesheet" href="../shared/ui/select.css">
+  <link rel="stylesheet" href="../shared/ui/page.css">
+  <link rel="stylesheet" href="intervle.css">
+</head>
+<body data-theme="rouge">
+  <svg class="icons" aria-hidden="true">
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 2.2c.7 3.6 5.6 6 5.6 11.4a5.6 5.6 0 0 1-11.2 0c0-2.6 1.3-4.6 2.8-5.9 0 1.9.9 3.2 2.3 3.8-.6-3.3-.4-6.3.5-9.3z" fill="currentColor"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cross" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></g></symbol>
+  </svg>
+  <div id="theme-frame" aria-hidden="true"></div>
+  <div class="page">
+    <header class="tool-header">
+      <a class="icon-btn home-btn" href="../" data-i18n-aria="home" aria-label="Home: all the tools">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>
+        </a>
+      <h1 class="tool-title"><span data-i18n="title">Intervle</span> <span class="alpha" data-i18n="alpha">Alpha</span></h1>
+      <div class="header-actions">
+        <button id="about-btn" class="icon-btn" data-i18n-aria="about" aria-label="About">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
+        </button>
+        <button id="settings-btn" class="icon-btn" data-i18n-aria="settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="iv">
+      <p class="day-line"><span id="day-label"></span> <button id="today-btn" class="link-btn" data-i18n="backToday" hidden>Back to today</button></p>
+      <div class="tabs" role="tablist" data-i18n-aria="modesAria" aria-label="Modes">
+        <button role="tab" class="tab" data-mode="easy" id="tab-easy" aria-controls="panel"><span data-i18n="easy">Easy</span><span class="tab-mark"></span></button>
+        <button role="tab" class="tab" data-mode="medium" id="tab-medium" aria-controls="panel"><span data-i18n="medium">Medium</span><span class="tab-mark"></span></button>
+        <button role="tab" class="tab" data-mode="hard" id="tab-hard" aria-controls="panel"><span data-i18n="hard">Hard</span><span class="tab-mark"></span></button>
+      </div>
+      <div id="panel" class="panel play-panel" role="tabpanel">
+        <p id="prompt" class="prompt"></p>
+        <button id="play-btn" class="btn play-btn">
+          <svg aria-hidden="true"><use href="#i-play"/></svg><span data-i18n="play">Play</span>
+        </button>
+        <p id="loading" class="loading" hidden></p>
+        <div id="tries" class="tries" role="img"></div>
+        <div id="answers" class="answers" role="group" aria-labelledby="prompt"></div>
+        <input id="type-box" class="type-box computer-only" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-aria="typeAria" placeholder="Or type your answer, then Enter">
+        <div id="feedback" class="feedback" aria-live="polite">
+          <p id="fb-main" class="fb-main"></p>
+          <p id="fb-detail" class="fb-detail"></p>
+        </div>
+        <div class="day-actions">
+          <button id="copy-btn" class="btn" data-i18n="copy" hidden>Copy result</button>
+          <span id="copied" class="copied" role="status"></span>
+        </div>
+      </div>
+      <div class="bottom-row">
+        <button id="past-btn" class="card-btn"><svg class="card-icon" aria-hidden="true"><use href="#i-calendar"/></svg><span class="card-title" data-i18n="past">Past games</span></button>
+        <div id="streaks" class="streaks"></div>
+      </div>
+    </main>
+
+    <footer class="tool-footer">
+      <a class="support-link" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+      <span class="designer-credit"><span data-i18n="designedBy">Designed by</span> <a href="https://instagram.com/drephie" target="_blank" rel="noopener noreferrer">@drephie</a></span>
+    </footer>
+  </div>
+
+  <div id="settings-modal" class="centered-modal has-dropdowns" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="settings-title" data-i18n="settings">Settings</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <div class="pair">
+      <div class="control-group">
+        <label for="theme-select" data-i18n="theme">Theme</label>
+        <div class="custom-select"><select id="theme-select"></select></div>
+        <p class="soon-note" data-i18n="moreThemes">More themes coming soon</p>
+      </div>
+      <div class="control-group">
+        <label for="lang-select" data-i18n="lang">Language</label>
+        <div class="custom-select"><select id="lang-select"></select></div>
+      </div>
+    </div>
+    <div class="control-group">
+      <span id="names-label" class="group-label" data-i18n="names">Note names</span>
+      <div id="names-seg" class="seg" role="group" aria-labelledby="names-label">
+        <button type="button" data-names="solfege" data-i18n="namesSolfege">Do Re Mi</button>
+        <button type="button" data-names="letters" data-i18n="namesLetters">C D E</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="past-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="past-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="past-title" data-i18n="past">Past games</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <p class="about-small" data-i18n="pastNote">Past days don't count for your streak.</p>
+    <ul id="past-list" class="past-list"></ul>
+  </div>
+
+  <div id="about-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="about-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="about-title" data-i18n="aboutTitle">About Intervle</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <p class="about-text" data-i18n="aboutBody"></p>
+    <p class="about-small" data-i18n="aboutCredits"></p>
+    <a class="btn patreon-btn" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+    <p class="about-small computer-only" data-i18n="aboutKeys"></p>
+  </div>
+
+  <div id="support-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="support-title" aria-describedby="support-body" style="display:none">
+    <div class="centered-modal support-card">
+      <button class="close-btn support-close" data-i18n-aria="closeAria" aria-label="Close" hidden>×</button>
+      <h2 id="support-title" data-i18n="supportTitle">Support Intervle</h2>
+      <p id="support-body" data-i18n="supportBody"></p>
+      <a class="btn patreon-btn" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+      <button class="btn support-continue" disabled></button>
+    </div>
+  </div>
+
+  <script type="module" src="intervle.js"></script>
+</body>
+</html>
