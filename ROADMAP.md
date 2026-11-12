@@ -18,6 +18,7 @@
 | **BPM Finder** | Tempo of an audio file you own, plus tap tempo; always shows half- and double-time alternatives | analysis |
 | **Chord Finder** | Key, chords and key changes of an audio file you own, using existing open-source analysis; built to be easy to correct | analysis, theory |
 | **Practice Player** | Slow a song down without changing pitch and loop sections; transposing comes later | analysis (beat grid) |
+| **Intervle** | A daily ear puzzle, the same for everyone, 3 tries each: Easy (name the interval, second note above), Medium (told the first note, name the second, above or below), Hard (told the root, name the chord: sus2, sus4, 7, maj7, m7, 6, 9). A fixed list of 365 puzzles per mode from #1 (2026-11-07, so 5 past games at the start), a new one at the player's midnight, past games playable (no streak), a streak per mode, Copy result. **Alpha: Rouge theme only**, card tagged Alpha (built 2026-11-12, `intervle/`; spec `specs/intervle.md`; Drephie's idea and name; phone and listening test: Drephie) | theory, sound |
 | **Jam Machine** | Chord progressions by style that you can re-roll and edit, with BPM, key and open-source instruments | theory, sound, transport |
 
 ## Parked or dropped (don't propose these again without asking)
@@ -96,6 +97,10 @@ Telling deliberate singing from background sound by more than loudness (on a tra
 ## Pitch Training: later ideas (not in the first version)
 
 Teacher-made exercises shared by link, the exercise kept in the link itself and nothing stored on a site (Drephie: later); clicks while you sing (Drephie: count-in only); minor scales and other patterns; vowels or words to sing on; a tip for slides of their own; scoring the timing; changing A from 440. Drephie picks.
+
+## Intervle: later ideas (not in the first version)
+
+Clues after a wrong try; the other themes after the alpha; an Interval or Progression mode; a new list before day 365 (2027-11-06; until then the list repeats in other notes). `tests/tools/make-intervle-puzzles.js` makes the list.
 
 ## Metronome: later ideas (not in the first version)
 
