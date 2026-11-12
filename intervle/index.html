@@ -21,6 +21,7 @@
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-cross" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
     <symbol id="i-calendar" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></g></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/></g></symbol>
   </svg>
   <div id="theme-frame" aria-hidden="true"></div>
   <div class="page">
@@ -40,33 +41,36 @@
     </header>
 
     <main class="iv">
-      <p class="day-line"><span id="day-label"></span> <button id="today-btn" class="link-btn" data-i18n="backToday" hidden>Back to today</button></p>
+      <div class="day-line">
+        <span id="day-num" class="day-num"></span>
+        <span class="day-text"><span id="day-date" class="day-date"></span><button id="today-btn" class="today-btn" data-i18n="backToday" hidden>Back to today</button></span>
+        <span id="streak" class="streak" role="img"></span>
+        <button id="copy-btn" class="icon-btn share-btn" data-i18n-aria="copy" aria-label="Copy result" hidden><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
+        <span id="copied" class="copied" role="status"></span>
+        <button id="past-btn" class="icon-btn past-btn" data-i18n-aria="past" aria-label="Past games"><svg aria-hidden="true"><use href="#i-calendar"/></svg></button>
+      </div>
       <div class="tabs" role="tablist" data-i18n-aria="modesAria" aria-label="Modes">
         <button role="tab" class="tab" data-mode="easy" id="tab-easy" aria-controls="panel"><span data-i18n="easy">Easy</span><span class="tab-mark"></span></button>
         <button role="tab" class="tab" data-mode="medium" id="tab-medium" aria-controls="panel"><span data-i18n="medium">Medium</span><span class="tab-mark"></span></button>
         <button role="tab" class="tab" data-mode="hard" id="tab-hard" aria-controls="panel"><span data-i18n="hard">Hard</span><span class="tab-mark"></span></button>
       </div>
-      <div id="panel" class="panel play-panel" role="tabpanel">
+      <div id="panel" class="play-panel" role="tabpanel">
         <p id="prompt" class="prompt"></p>
-        <button id="play-btn" class="btn play-btn">
-          <svg aria-hidden="true"><use href="#i-play"/></svg><span data-i18n="play">Play</span>
-        </button>
-        <p id="loading" class="loading" hidden></p>
-        <div id="tries" class="tries" role="img"></div>
+        <div class="play-row">
+          <button id="play-btn" class="play-btn" data-i18n-aria="play" aria-label="Play">
+            <svg aria-hidden="true"><use href="#i-play"/></svg>
+          </button>
+          <div id="note-dots" class="note-dots" aria-hidden="true"></div>
+        </div>
+        <p id="loading" class="loading" role="status" hidden></p>
+
         <div id="answers" class="answers" role="group" aria-labelledby="prompt"></div>
         <input id="type-box" class="type-box computer-only" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-aria="typeAria" placeholder="Or type your answer, then Enter">
         <div id="feedback" class="feedback" aria-live="polite">
+          <div id="tries" class="tries" role="img"></div>
           <p id="fb-main" class="fb-main"></p>
           <p id="fb-detail" class="fb-detail"></p>
         </div>
-        <div class="day-actions">
-          <button id="copy-btn" class="btn" data-i18n="copy" hidden>Copy result</button>
-          <span id="copied" class="copied" role="status"></span>
-        </div>
-      </div>
-      <div class="bottom-row">
-        <button id="past-btn" class="card-btn"><svg class="card-icon" aria-hidden="true"><use href="#i-calendar"/></svg><span class="card-title" data-i18n="past">Past games</span></button>
-        <div id="streaks" class="streaks"></div>
       </div>
     </main>
 

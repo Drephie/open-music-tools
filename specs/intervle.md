@@ -33,7 +33,7 @@ Mode tabs (Easy, Medium, Hard); Play; the answer buttons (Easy 12, Medium 12, Ha
 ## Layout
 
 **Phone, upright,** one screen at 375 × 667.
-Header (house, Intervle, About, Settings) · "#12 · Thursday 12 November" · three tabs with ✓ or ✗ once done · the question line ("How far apart are the two notes?" / "This is Do. Which note comes next?" / "This is Do. Which chord is built on it?") · big **Play** · three dots for the tries · answer buttons, 3 or 4 per row · result line · **Past games** and streaks at the bottom.
+Header (house, Intervle, About, Settings) · a top row: the big day number "#12" and the date, the mode's streak flame, a copy button once the day's three are done, Past games (calendar) · the three mode tabs with ✓ or ✗ once done · the question · a big round **Play** button with one dot per sound, lit as it plays · answer tiles, 3 or 4 per row, the one tapped turns over · a bar of three tries and the result line. *(Redesigned 2026-11-12 after Drephie's first look: "daily game" style.)*
 **Computer:** the same in a centered column. Keys: Space = Play, 1 to 9, 0, -, = for the buttons, or type the answer.
 
 ## Wording (English)

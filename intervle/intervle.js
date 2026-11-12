@@ -54,7 +54,7 @@ const i18n = createI18n({
 const { t } = i18n;
 const tf = (key, vars) => t(key).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-const pretty = (name) => name.replace(/#/g, '♯').replace(/(?<=[A-Za-z])b/g, '♭');
+const pretty = (name) => name.replace(/#/g, '♯').replace(/([A-Za-z])b/g, '$1♭');
 const noteName = (midi) => pretty(commonNoteName(midi, solfege()).name);
 
 // --- THE DAY ---
@@ -90,7 +90,7 @@ function bestStreak(mode) {
 }
 
 // --- SOUND: the grand piano; notes go on the Transport so Play can restart them ---
-let rack = null, rackLoading = null, soundEnd = 0, endTimer = null, pending = null;
+let rack = null, rackLoading = null, soundEnd = 0, endTimer = null;
 const loadingEl = $('loading'), playBtn = $('play-btn');
 function loadRack() {
   if (!rackLoading) {
@@ -103,24 +103,35 @@ function loadRack() {
 const unlockAudio = () => { if (Tone.context.state !== 'running') startAudio(); };
 ['pointerup', 'touchend', 'click', 'keydown'].forEach((ev) => window.addEventListener(ev, unlockAudio, true));
 
+let playToken = 0, dotTimers = [];
+const dotsEl = $('note-dots');
+function showDots(count, lit) {
+  dotsEl.innerHTML = Array.from({ length: count }, (_, i) => `<span class="dot${i === lit ? ' on' : ''}${i < lit ? ' was' : ''}"></span>`).join('');
+}
 function stopSound() {
-  pending = null;
   Tone.Transport.cancel(0);
   if (rack) rack.instruments.piano.releaseAll(Tone.now());
   clearTimeout(endTimer);
+  dotTimers.forEach(clearTimeout);
+  dotTimers = [];
   soundEnd = 0;
-  playBtn.classList.remove('playing');
+  playBtn.classList.remove('playing', 'waiting');
 }
-function playEvents(events) {
-  unlockAudio();
-  if (!rack) {
-    pending = events;
-    if (!rackLoading) loadingEl.textContent = t('loading');
-    loadingEl.hidden = false;
-    loadRack().then(() => { if (rack && pending === events) playEvents(events); });
-    return;
-  }
+// The sound is switched on first (Tone.start() runs at once, inside the tap) and the
+// piano loaded; only then are the notes scheduled, so the first Play is never lost.
+async function playEvents(events) {
+  const token = ++playToken;
   stopSound();
+  const ready = Tone.context.state === 'running' ? null : startAudio();
+  if (ready || !rack) playBtn.classList.add('waiting');
+  if (ready) await ready;
+  if (!rack) {
+    loadingEl.textContent = t('loading');
+    loadingEl.hidden = false;
+    await loadRack();
+    if (!rack || token !== playToken) return;
+  }
+  playBtn.classList.remove('waiting');
   const piano = rack.instruments.piano;
   if (Tone.Transport.state !== 'started') Tone.Transport.start();
   const start = Tone.Transport.seconds + 0.1;
@@ -128,10 +139,12 @@ function playEvents(events) {
     const freqs = e.notes.map(midiToFreq);
     Tone.Transport.schedule((time) => piano.triggerAttackRelease(freqs, e.dur, time), start + e.at);
   }
+  // One dot per sound, lit while it plays (timers, not Tone.Draw, which drops late frames).
+  events.forEach((e, i) => dotTimers.push(setTimeout(() => showDots(events.length, i), (0.1 + e.at) * 1000)));
   const length = 0.1 + Math.max(...events.map((e) => e.at + e.dur));
   soundEnd = Tone.now() + length;
   playBtn.classList.add('playing');
-  endTimer = setTimeout(() => playBtn.classList.remove('playing'), length * 1000);
+  endTimer = setTimeout(() => { playBtn.classList.remove('playing'); showDots(events.length, -1); }, length * 1000);
 }
 const isPlaying = () => Tone.now() < soundEnd;
 const playPuzzle = () => playEvents(puzzle(settings.mode, day).events);
@@ -145,7 +158,9 @@ const dateText = (n, opts) => dateOf(n).toLocaleDateString(settings.lang, opts);
 
 function render() {
   const mode = settings.mode, p = puzzle(mode, day), tr = tries(day, mode), st = status(tr, p.answer);
-  $('day-label').textContent = tf('dayLabel', { n: day, date: dateText(day, { weekday: 'long', day: 'numeric', month: 'long' }) });
+  $('day-num').textContent = '#' + day;
+  $('day-date').textContent = dateText(day, { weekday: 'long', day: 'numeric', month: 'long' });
+  if (!isPlaying()) showDots(p.events.length, -1);
   $('today-btn').hidden = day === today;
   tabs.forEach((b) => {
     const on = b.dataset.mode === mode, r = resultOf(day, b.dataset.mode);
@@ -158,7 +173,7 @@ function render() {
   $('prompt').textContent = mode === 'easy' ? t('askEasy') : tf(mode === 'medium' ? 'askMedium' : 'askHard', { note: noteName(p.ref) });
 
   const left = TRIES - tr.length;
-  triesEl.innerHTML = Array.from({ length: TRIES }, (_, i) => `<span class="try${i < tr.length ? ' used' : ''}"></span>`).join('');
+  triesEl.innerHTML = Array.from({ length: TRIES }, (_, i) => `<span class="try${i >= tr.length ? '' : tr[i] === p.answer ? ' good' : ' used'}"></span>`).join('');
   triesEl.setAttribute('aria-label', tf('triesAria', { n: st === 'open' ? left : 0 }));
 
   answersEl.dataset.mode = mode;
@@ -169,6 +184,7 @@ function render() {
     b.className = 'answer';
     b.answer = a;
     const tried = tr.includes(a), good = st !== 'open' && a === p.answer;
+    if (a === justAnswered) b.classList.add('flip');
     if (good) b.classList.add('good');
     else if (tried) b.classList.add('bad');
     if (st !== 'open' || tried) b.classList.add('after');
@@ -192,12 +208,14 @@ function render() {
     fbDetail.textContent = tf('answerWas', { name: answerName(mode, p.answer) });
   } else {
     fbMain.textContent = tr.length ? t('wrong') : '';
-    fbDetail.textContent = tr.length ? tf('triesAria', { n: left }) : '';
+    fbDetail.textContent = tf('triesAria', { n: left });
   }
   copyBtn.hidden = MODES.some((m) => resultOf(day, m) === 'open');
 
-  $('streaks').innerHTML = MODES.map((m) => `<span class="streak" title="${tf('bestStreak', { n: bestStreak(m) })}"><svg class="flame" aria-hidden="true"><use href="#i-flame"/></svg><span class="streak-num">${streak(m)}</span><span class="streak-mode">${t(m)}</span></span>`).join('');
-  $('streaks').setAttribute('aria-label', MODES.map((m) => tf('streak', { name: t(m), n: streak(m) }) + ', ' + tf('bestStreak', { n: bestStreak(m) })).join('; '));
+  const st0 = streak(mode), best = tf('bestStreak', { n: bestStreak(mode) });
+  $('streak').innerHTML = `<svg class="flame" aria-hidden="true"><use href="#i-flame"/></svg><span class="streak-num">${st0}</span>`;
+  $('streak').setAttribute('aria-label', tf('streak', { name: t(mode), n: st0 }) + ', ' + best);
+  $('streak').title = best;
   showMatch();
 }
 
@@ -208,8 +226,12 @@ function answer(a) {
   r.a.push(a);
   save();
   typeBox.value = '';
+  justAnswered = a;
   render();
+  justAnswered = null;
 }
+
+let justAnswered = null;   // the tile just tapped turns over once
 
 // --- TYPING (computers): the button that matches lights up; Enter answers ---
 function typedNames() {
@@ -248,8 +270,18 @@ copyBtn.addEventListener('click', async () => {
     return `${t(m)} ${r === 'won' ? tries(day, m).length : 'X'}/${TRIES}`;
   });
   const line = `Intervle #${day} · ${parts.join(' · ')}`;
-  try { await navigator.clipboard.writeText(line); copiedEl.textContent = t('copied'); }
-  catch { copiedEl.textContent = t('copyFailed'); }
+  let ok = false;
+  try { await navigator.clipboard.writeText(line); ok = true; } catch { /* no clipboard API on plain http */ }
+  if (!ok) {   // the older way, which also works on the http test link
+    const ta = document.createElement('textarea');
+    ta.value = line;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { ok = document.execCommand('copy'); } catch { /* not allowed */ }
+    ta.remove();
+  }
+  copiedEl.textContent = t(ok ? 'copied' : 'copyFailed');
   setTimeout(() => { copiedEl.textContent = ''; }, 2500);
 });
 
