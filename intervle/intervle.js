@@ -11,7 +11,7 @@ import { setupCustomSelects } from '../shared/ui/select.js';
 import { createModalManager } from '../shared/ui/modal.js';
 import { LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
-import { MODES, ANSWERS, TRIES, dayNumber, dateOf, puzzle, parseAnswer, status } from './game.js';
+import { MODES, ANSWERS, TYPES, TRIES, dayNumber, dateOf, puzzle, parseAnswer, status } from './game.js';
 import { INTERVLE_STRINGS } from './strings.js';
 
 const $ = (id) => document.getElementById(id);
@@ -66,11 +66,12 @@ const resultOf = (n, mode) => status(tries(n, mode), puzzle(mode, n).answer);
 function answerName(mode, a) {
   if (mode === 'easy') return cap(t('iv' + a));
   if (mode === 'medium') return noteName(60 + a);
-  return t('ch_' + a);
+  const [pc, type] = a.split(':');   // 'F♯m7', 'Fa♯m7'; 'La sus4' with a space after a Do Re Mi name
+  return noteName(60 + +pc) + (solfege() && /^(s|ma)/.test(type) ? ' ' : '') + t('ch_' + type);
 }
 function answerSub(mode, a) {
   if (mode === 'easy') return a === 1 ? t('halfStep1') : tf('halfSteps', { n: a });
-  if (mode === 'hard') return t('chw_' + a);
+  if (mode === 'hard') return t('chw_' + a.split(':')[1]);
   return '';
 }
 
@@ -178,21 +179,17 @@ function render() {
 
   answersEl.dataset.mode = mode;
   answersEl.innerHTML = '';
-  ANSWERS[mode].forEach((a, i) => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'answer';
-    b.answer = a;
+  if (pickFor !== day + mode) { pick.root = pick.type = null; pickFor = day + mode; }
+  if (mode === 'hard') renderChordTiles(p, st);
+  else ANSWERS[mode].forEach((a, i) => {
     const tried = tr.includes(a), good = st !== 'open' && a === p.answer;
+    const b = tile(answerName(mode, a), answerSub(mode, a), ANSWER_KEYS[i]);
+    b.answer = a;
     if (a === justAnswered) b.classList.add('flip');
     if (good) b.classList.add('good');
     else if (tried) b.classList.add('bad');
     if (st !== 'open' || tried) b.classList.add('after');
     b.disabled = tried && !good;
-    const sub = answerSub(mode, a);
-    b.innerHTML = `<span class="answer-key computer-only" aria-hidden="true">${ANSWER_KEYS[i]}</span><span class="answer-name"></span>${sub ? '<span class="answer-sub"></span>' : ''}`;
-    b.querySelector('.answer-name').textContent = answerName(mode, a);
-    if (sub) b.querySelector('.answer-sub').textContent = sub;
     b.addEventListener('click', () => answer(a));
     answersEl.appendChild(b);
   });
@@ -207,7 +204,7 @@ function render() {
     fbMain.textContent = t('lost');
     fbDetail.textContent = tf('answerWas', { name: answerName(mode, p.answer) });
   } else {
-    fbMain.textContent = tr.length ? t('wrong') : '';
+    fbMain.textContent = tr.length ? t('wrong') + ': ' + answerName(mode, tr[tr.length - 1]) : '';
     fbDetail.textContent = tf('triesAria', { n: left });
   }
   copyBtn.hidden = MODES.some((m) => resultOf(day, m) === 'open');
@@ -233,16 +230,64 @@ function answer(a) {
 
 let justAnswered = null;   // the tile just tapped turns over once
 
+function tile(name, sub, key) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'answer';
+  b.innerHTML = `${key ? `<span class="answer-key computer-only" aria-hidden="true">${key}</span>` : ''}<span class="answer-name"></span>${sub ? '<span class="answer-sub"></span>' : ''}`;
+  b.querySelector('.answer-name').textContent = name;
+  if (sub) b.querySelector('.answer-sub').textContent = sub;
+  return b;
+}
+
+// Hard: pick the chord's note and its type (either first); the answer is sent once both are picked.
+const pick = { root: null, type: null };
+let pickFor = '';
+function renderChordTiles(p, st) {
+  const good = p.answer.split(':');
+  const group = (field, label, values, name) => {
+    const g = document.createElement('div');
+    g.className = 'tile-group ' + field;
+    g.setAttribute('role', 'group');
+    g.setAttribute('aria-label', t(label));
+    values.forEach((v) => {
+      const b = tile(name(v), '');
+      b.dataset[field] = v;
+      if (st !== 'open') b.classList.add('after');
+      if (st !== 'open' && String(v) === good[field === 'root' ? 0 : 1]) b.classList.add('good', ...(justAnswered ? ['flip'] : []));
+      if (field === 'type') b.title = t('chw_' + v);
+      b.setAttribute('aria-pressed', String(pick[field] === v));
+      b.addEventListener('click', () => pickPart(field, v));
+      g.appendChild(b);
+    });
+    answersEl.appendChild(g);
+  };
+  group('root', 'rootAria', ANSWERS.medium, (pc) => noteName(60 + pc));
+  group('type', 'typeGroupAria', TYPES, (type) => t('ch_' + type));
+}
+function pickPart(field, v) {
+  if (resultOf(day, 'hard') !== 'open') return;
+  pick[field] = pick[field] === v ? null : v;
+  if (pick.root !== null && pick.type !== null) {
+    const a = `${pick.root}:${pick.type}`;
+    pick.type = null;
+    if (!tries(day, 'hard').includes(a)) { pick.root = null; answer(a); return; }
+  }
+  render();
+}
+
 // --- TYPING (computers): the button that matches lights up; Enter answers ---
 function typedNames() {
   const mode = settings.mode, names = {};
-  for (const a of ANSWERS[mode]) names[a] = mode === 'easy' ? [t('iv' + a)] : mode === 'hard' ? [t('chw_' + a)] : [];
+  if (mode === 'easy') for (const a of ANSWERS.easy) names[a] = [t('iv' + a)];
   return names;
 }
 const typed = () => parseAnswer(settings.mode, typeBox.value, typedNames());
 function showMatch() {
-  const a = typed();
-  [...answersEl.children].forEach((b) => b.classList.toggle('match', a !== null && b.answer === a && !b.disabled));
+  const a = typed(), hard = settings.mode === 'hard';
+  const [root, type] = hard && a !== null ? a.split(':') : [];
+  answersEl.querySelectorAll('.answer').forEach((b) => b.classList.toggle('match', a !== null && !b.disabled &&
+    (hard ? b.dataset.root === root || b.dataset.type === type : b.answer === a)));
 }
 typeBox.addEventListener('input', showMatch);
 typeBox.addEventListener('keydown', (e) => {
@@ -363,7 +408,7 @@ document.addEventListener('keydown', (e) => {
   const el = document.activeElement;
   if (el === typeBox || (el && el.closest && el.closest('.custom-select'))) return;
   if (e.key === ' ') { e.preventDefault(); if (!e.repeat) playPuzzle(); return; }
-  const i = ANSWER_KEYS.indexOf(e.key);
+  const i = settings.mode === 'hard' ? -1 : ANSWER_KEYS.indexOf(e.key);   // Hard has two rows: type instead
   const btn = i >= 0 ? answersEl.children[i] : null;
   if (btn && !e.repeat) { e.preventDefault(); answer(btn.answer); }
 });

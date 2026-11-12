@@ -12,13 +12,13 @@ A daily ear puzzle, like a word-of-the-day game but for music: three short puzzl
 - **Three puzzles every day**, one per mode, each with **3 tries**. No clues yet: a wrong try just fades that answer, so you can't pick it again.
   - **Easy:** two notes, the second always **above** the first. Name the distance between them (the **interval**): "Major 3rd", with "4 half steps" small under it (a half step is one piano key to the very next).
   - **Medium:** you're told the first note ("This is Do") and hear it, then a second note **above or below**, within an octave. Name the second note.
-  - **Hard:** you're told a note and hear it, then a chord built on it (that note is the chord's lowest note, the **root**). The chord can sit **above or below** where the note was played: same root, other octave *(Claude's pick)*. Name the chord: **sus2, sus4, 7, maj7, m7, 6, 9** (add9 left out: too close to 9).
+  - **Hard:** you're told the first note ("This note is A") and hear it, then a whole chord on another note, within an octave above or below (e.g. F♯m7). Name the whole chord: tap its note (12 tiles), then its type (**sus2, sus4, 7, maj7, m7, 6, 9**; add9 left out: too close to 9), in either order; the answer forms itself and is checked (Drephie, 2026-11-12, after her first look).
 - **Play** button plays the puzzle; replay as often as you like *(Claude's pick)*. Grand piano. Intervals: one note then the other. Chords: one by one going up, then together *(Claude's pick)*.
 - **The day's puzzle** follows the player's own clock: a new one at their midnight. Each day has a number: **#1 is five days before the game goes up**, so five past games are there from the start.
 - **A year of puzzles:** a fixed list of 365 puzzles per mode, written once and kept in the tool, so day 40 is the same for everyone. Mixed so it doesn't repeat the same answer two days in a row, and every answer comes up about as often. After day 365 the list starts again from #1, shifted to new notes *(Claude's pick)*.
 - **Past games:** a list of every day since #1, with your result for each. Play any of them; past days don't count for the streak.
 - **Streak:** one per mode, the days in a row you solved today's puzzle. Your best streak is kept.
-- **Answers:** big buttons. Tried wrong answers fade. On a computer you can also type: "m3", "maj 3", "5" (half steps), "E", "Mi", "sus4", "maj7"; Enter answers.
+- **Answers:** big buttons. Tried wrong answers fade. On a computer you can also type: "m3", "maj 3", "5" (half steps), "E", "Mi", "F#m7", "Fa#m7"; Enter answers.
 - **Result:** after a mode, "Right in 2 tries" or "The answer was: Perfect 4th", with **Hear it again**. After all three, the day's summary and a **Copy result** button that copies one line, e.g. "Intervle #12 · Easy 1/3 · Medium 2/3 · Hard X" *(Claude's pick)*. Nothing is sent anywhere.
 - Note names follow the hub setting (Do Re Mi or C D E), spelled with flats or sharps as is easiest to read.
 
@@ -28,7 +28,7 @@ Clues after a wrong try; other themes (coming soon, after the alpha); other soun
 
 ## Controls
 
-Mode tabs (Easy, Medium, Hard); Play; the answer buttons (Easy 12, Medium 12, Hard 7); Hear it again; Copy result; Past games. Settings: language, note names; theme shows Rouge and "More themes coming soon".
+Mode tabs (Easy, Medium, Hard); Play; the answer tiles (Easy 12, Medium 12, Hard 12 notes + 7 types); Hear it again; Copy result; Past games. Settings: language, note names; theme shows Rouge and "More themes coming soon".
 
 ## Layout
 

@@ -2,17 +2,20 @@
  *
  *   MODES      ['easy', 'medium', 'hard']
  *   CHORDS     { sus2: [0,2,7], ... }  Hard's chords, semitones above the root
- *   ANSWERS    { easy: 1..12 (half steps), medium: 0..11 (pitch class), hard: chord ids }
+ *   TYPES      Hard's chord types, in button order
+ *   ANSWERS    { easy: 1..12 (half steps), medium: 0..11 (pitch class),
+ *                hard: '<root pitch class>:<type>', e.g. '6:m7' (F#m7) }
  *   TRIES      3
  *   START      [2026, 10, 7]: puzzle #1 (local date, month 0-based)
  *   dayNumber(date)  the puzzle number of a local date (1 = START; < 1 before it)
  *   dateOf(n)        the local Date of puzzle n
  *   puzzle(mode, n) -> { answer, events: [{ at, dur, notes: [midi] }], ref }
- *     ref is the told note's MIDI (Medium, Hard). After the 365-day list it
+ *     ref is the told note's MIDI (Medium, Hard). Hard: the told note, then a
+ *     whole chord on another root (within an octave): name its root and type. After the 365-day list it
  *     starts again, shifted to other notes.
  *   parseAnswer(mode, text, names) -> answer or null. Typed answers: half steps or
- *     "m3", "maj 3", "P5"... (easy), "E", "Mi", "Eb", "Re#" (medium), "sus4", "maj7"...
- *     (hard). names: extra { answer: [words] } from the page (translated names).
+ *     "m3", "maj 3", "P5"... (easy), "E", "Mi", "Eb", "Re#" (medium), "F#m7", "Fa#m7",
+ *     "Bb7", "Lasus4", "C maj7" (hard). names: extra { answer: [words] } from the page (translated names).
  *   status(tries, answer) -> 'open' | 'won' | 'lost'
  */
 import { EASY, MEDIUM, HARD } from './puzzles.js';
@@ -25,8 +28,9 @@ export const CHORDS = {
 export const ANSWERS = {
   easy: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
   medium: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-  hard: ['sus2', 'sus4', '7', 'maj7', 'm7', '6', '9'],
 };
+export const TYPES = ['sus2', 'sus4', '7', 'maj7', 'm7', '6', '9'];
+ANSWERS.hard = ANSWERS.medium.flatMap((pc) => TYPES.map((type) => `${pc}:${type}`));
 export const TRIES = 3;
 export const START = [2026, 10, 7];
 
@@ -47,12 +51,12 @@ export function puzzle(mode, n) {
   if (mode === 'medium') {
     return { answer: (ref + b + 120) % 12, ref, events: [{ at: 0, dur: 1, notes: [ref] }, { at: 1.1, dur: 1.4, notes: [ref + b] }] };
   }
-  const root = ref + c * 12;
-  const notes = CHORDS[b].map((s) => root + s);
+  const root = ref + b;
+  const notes = CHORDS[c].map((s) => root + s);
   const events = [{ at: 0, dur: 1, notes: [ref] }];
   notes.forEach((m, k) => events.push({ at: 1.3 + k * 0.45, dur: 0.6, notes: [m] }));
   events.push({ at: 1.5 + notes.length * 0.45, dur: 2.2, notes });
-  return { answer: b, ref, events };
+  return { answer: `${(root + 120) % 12}:${c}`, ref, events };
 }
 
 const LETTERS = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11, do: 0, re: 2, mi: 4, fa: 5, sol: 7, la: 9, si: 11 };
@@ -83,8 +87,11 @@ export function parseAnswer(mode, text, names = {}) {
     const acc = (m[2] || '');
     return (LETTERS[m[1]] + (acc[0] === '#' ? acc.length : -acc.length) + 12) % 12;
   }
-  const h = n.replace(/\s/g, '').replace(/^dom(inant)?/, '').replace(/^(min|minor|-)7$/, 'm7').replace(/^(major|ma|Δ)7$/i, 'maj7').replace(/th$/, '');
-  return ANSWERS.hard.includes(h) ? h : null;
+  const m = n.replace(/\s/g, '').match(/^(do|re|mi|fa|sol|la|si|[a-g])(#{1,2}|b{1,2})?(.*)$/);
+  if (!m) return null;
+  const pc = (LETTERS[m[1]] + (m[2] ? (m[2][0] === '#' ? m[2].length : -m[2].length) : 0) + 12) % 12;
+  const type = m[3].replace(/^dom(inant)?/, '').replace(/^(min|-)7$/, 'm7').replace(/^(ma|Δ)7$/i, 'maj7').replace(/th$/, '');
+  return TYPES.includes(type) ? `${pc}:${type}` : null;
 }
 
 export function status(tries, answer) {

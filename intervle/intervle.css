@@ -65,9 +65,15 @@ body { -webkit-user-select: none; user-select: none; }
 /* --- Answer tiles --- */
 .answers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; perspective: 600px; }
 .answers[data-mode="easy"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-/* Seven chords: 4 + 3, the short row centred. */
-.answers[data-mode="hard"] { display: flex; flex-wrap: wrap; justify-content: center; }
-.answers[data-mode="hard"] .answer { flex: 0 0 calc((100% - 18px) / 4); }
+/* Hard: the chord's note (6 + 6), then its type (one row of 7). */
+.answers[data-mode="hard"] { display: flex; flex-direction: column; gap: 10px; }
+.tile-group { display: grid; gap: 6px; }
+.tile-group.root { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.tile-group.type { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.tile-group .answer { min-height: 44px; padding: 2px; }
+.answers[data-mode="hard"] .answer-name { font-size: 16px; }
+.tile-group.type .answer-name { font-size: 13px; letter-spacing: -0.01em; }
+.answer[aria-pressed="true"] { background: var(--color-left); color: var(--color-text-pinched); box-shadow: none; transform: translateY(-2px); }
 .answer {
   position: relative; min-width: 0; min-height: clamp(44px, 7dvh, 58px); padding: 4px; border: 0; border-radius: var(--radius-control);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
