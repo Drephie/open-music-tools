@@ -505,6 +505,16 @@
       <label data-i18n="browSustain">Eyebrow Sustain</label>
       <div class="custom-select">
         <select id="brow-sustain">
+          <option value="on" data-i18n="onLabel">On</option>
+          <option value="off" selected data-i18n="offLabel">Off</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control-group row-gap-t">
+      <label data-i18n="holdChord">Hold chord briefly</label>
+      <div class="custom-select">
+        <select id="hold-chord">
           <option value="on" selected data-i18n="onLabel">On</option>
           <option value="off" data-i18n="offLabel">Off</option>
         </select>
@@ -750,6 +760,7 @@
   const rightShape = $("right-shape");
   const accMode = $("acc-mode");
   const browSustainSel = $("brow-sustain");
+  const holdChordSel = $("hold-chord");
   const handednessMode = $("handedness-mode");
   const modifierCheckboxes = $("modifier-checkboxes");
   const languageSelector = $("language-selector");
@@ -810,7 +821,7 @@
       handRight: "Right-handed", handLeft: "Left-handed",
       accNone: "Two-handed mode", accLeft: "Left hand + head tilt", accRight: "Right hand + head tilt",
       accKeyboard: "Keyboard only (camera optional)", accTouch: "Touch pads (no camera)", accHandsfree: "Hands-free mode (coming soon)",
-      browSustain: "Eyebrow sustain", onLabel: "On", offLabel: "Off",
+      holdChord: "Hold chord briefly", browSustain: "Eyebrow sustain", onLabel: "On", offLabel: "Off",
       bootWelcome: "Welcome to Choordination",
       bootProject: 'More in the menu, under How to play. <a href="{repo}" target="_blank" rel="noopener noreferrer">Open source</a>; nothing leaves your device. No ads, no trackers.',
       howToPlay: "How to play", startBtn: "Start the camera",
@@ -885,7 +896,7 @@
       handRight: "Diestro", handLeft: "Zurdo",
       accNone: "Modo a dos manos", accLeft: "Mano izquierda + inclinación de cabeza", accRight: "Mano derecha + inclinación de cabeza",
       accKeyboard: "Solo teclado (cámara opcional)", accTouch: "Pads táctiles (sin cámara)", accHandsfree: "Manos libres (próximamente)",
-      browSustain: "Sustain con cejas", onLabel: "Activado", offLabel: "Desactivado",
+      holdChord: "Mantener el acorde un instante", browSustain: "Sustain con cejas", onLabel: "Activado", offLabel: "Desactivado",
       bootWelcome: "Bienvenido a Choordination",
       bootProject: 'Más en el menú, en Cómo tocar. <a href="{repo}" target="_blank" rel="noopener noreferrer">Código abierto</a>; nada sale de tu dispositivo. Sin anuncios ni rastreadores.',
       howToPlay: "Cómo tocar", startBtn: "Encender la cámara",
@@ -960,7 +971,7 @@
       handRight: "Destrimano", handLeft: "Mancino",
       accNone: "Modalità a due mani", accLeft: "Mano sinistra + inclinazione della testa", accRight: "Mano destra + inclinazione della testa",
       accKeyboard: "Solo tastiera (fotocamera opzionale)", accTouch: "Pad touch (senza fotocamera)", accHandsfree: "Senza mani (prossimamente)",
-      browSustain: "Sustain con sopracciglia", onLabel: "Attivo", offLabel: "Disattivato",
+      holdChord: "Tieni l'accordo un istante", browSustain: "Sustain con sopracciglia", onLabel: "Attivo", offLabel: "Disattivato",
       bootWelcome: "Benvenuto in Choordination",
       bootProject: 'Altro nel menu, in Come si suona. <a href="{repo}" target="_blank" rel="noopener noreferrer">Open source</a>; nulla lascia il tuo dispositivo. Niente pubblicità né tracker.',
       howToPlay: "Come si suona", startBtn: "Accendi la fotocamera",
@@ -1190,7 +1201,11 @@
 
   let kbdTrigger = false, mouseTrigger = false;
   let sustainKey = false, sustainBrow = false, sustainLatchOn = false;
-  let browSustainOn = true; // eyebrow-raise sustain; off for singers
+  let browSustainOn = false; // eyebrow-raise sustain; off by default (singers move their brows)
+  // Hold chord briefly: a released pinch keeps ringing this long, so changing
+  // root and modifier between pinches leaves no silence.
+  const HOLD_MS = 400;
+  let holdUntil = 0;
   const sustainActive = () => sustainBrow || sustainKey || sustainLatchOn;
   // "Touch Pads (no camera)" is a regular accessibility mode now — phones
   // default to full camera hand-tracking like desktop.
@@ -2053,7 +2068,9 @@
     if (audioReady && engineStarted && !uiEditMode) {
       const info = getChordInfo();
       if (isTriggering && (!wasTriggering || !arraysEqual(currentlyPlayingKeys, info.freqs))) playChord(info);
-      if (!isTriggering && !sustainActive() && (currentlyPlayingKeys.length > 0 || liveNotes.length > 0)) releaseAudio();
+      if (isTriggering) holdUntil = 0;
+      else if (wasTriggering && holdChordSel.value === 'on') holdUntil = nowMs + HOLD_MS;
+      if (!isTriggering && nowMs >= holdUntil && !sustainActive() && (currentlyPlayingKeys.length > 0 || liveNotes.length > 0)) releaseAudio();
     }
     wasTriggering = isTriggering;
 
