@@ -69,8 +69,9 @@ body.camera-on :is(.tool-header .icon-btn, .cdg-bar, .cdg-chord, .cdg-status:not
 /* The name big at the top left, as Choordination's; the links free in the bottom corners. */
 /* The name, big and in capitals: it shows in the videos people share. A tap on
    it opens About, as Choordination's name does. */
-.title-btn { all: unset; cursor: pointer; display: inline-block; transition: transform 0.2s ease; }
-.title-btn:hover { transform: scale(1.03); }
+.title-btn { all: unset; cursor: pointer; display: inline-block; transition: transform 0.2s ease; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
+.title-btn:active { transform: scale(0.98); transition-duration: 0.1s; }
+@media (hover: hover) and (pointer: fine) { .title-btn:hover { transform: scale(1.03); } }
 .title-btn:focus-visible { outline: 2px solid var(--color-right); outline-offset: 4px; border-radius: 6px; }
 .tool-header .tool-title { font-size: clamp(30px, 5cqw, 58px); line-height: 1; text-transform: uppercase; letter-spacing: 0.08em; text-shadow: var(--credit-shadow); }
 .tool-header { flex-wrap: wrap; } /* a narrow window: the buttons go under the name, on the right */
@@ -89,7 +90,7 @@ body.camera-on :is(.tool-header .icon-btn, .cdg-bar, .cdg-chord, .cdg-status:not
 .cdg-chord.fading { opacity: 0.35; transition: opacity 0.7s ease; }
 
 /* Only when the camera or hand tracking fails: what happened, and the way on without it. */
-.cdg-start { width: min(560px, 100%); display: flex; flex-direction: column; gap: var(--space-3); margin: auto 0; min-height: 0; overflow-y: auto; }
+.cdg-start { width: min(560px, 100%); display: flex; flex-direction: column; gap: var(--space-3); margin: auto 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 .cdg-start[hidden] { display: none; }
 .cdg-how { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); font-size: 15px; line-height: 1.45; }
 .cdg-how strong { color: var(--color-right); }

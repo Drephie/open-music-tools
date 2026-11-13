@@ -22,6 +22,18 @@
   <link rel="stylesheet" href="../shared/ui/camera-look.css">
   <style>
     body { margin: 0; overflow: hidden; background: var(--bg-page); color: var(--color-text); font-family: var(--font-main); transition: all 0.5s ease; }
+    /* Phones: an app screen, not a website. No pull-to-refresh or page bounce, no
+       text growing when turned sideways, no grey flash on a tap. Controls never
+       select their label or open the callout on a long press, and a quick second
+       tap never zooms; text stays selectable. Hover looks only with a mouse
+       (a hover sticks after a tap on a touch screen); a press shows with :active. */
+    html, body { overscroll-behavior: none; }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+    button, [role="button"], .menu-btn, .settings-action-btn { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
+    :is(.menu-btn, .settings-action-btn, button.start-btn, .boot-cta, #sustain-latch, #touch-record-btn, #touch-settings-btn, #touch-home-btn):active:not(:disabled) { transform: scale(0.96); }
+    #choordination-watermark:active { transform: scale(0.98); }
+    .close-btn:active { color: var(--color-right); }
+    input[type=range]:active { opacity: 1; }
     #container { position: relative; width: 100vw; height: 100vh; height: 100dvh; }
 
     #media-wrapper {
@@ -77,14 +89,15 @@
         transform-origin: top left;
         pointer-events: auto; cursor: pointer;
     }
-    #choordination-watermark:hover, #choordination-watermark:focus-visible { opacity: 1; transform: scale(1.04); }
+    #choordination-watermark:focus-visible { opacity: 1; transform: scale(1.04); }
+    @media (hover: hover) and (pointer: fine) { #choordination-watermark:hover { opacity: 1; transform: scale(1.04); } }
     body:is([data-theme="pink"], [data-theme="snap"]) #choordination-watermark { color: var(--color-title); opacity: 1; }
 
     #patreon-link { position: absolute; bottom: calc(25px + var(--frame-bottom)); left: calc(30px + var(--frame-sides)); z-index: 6; font-size: 14px; font-weight: 600; color: var(--color-text); text-shadow: var(--credit-shadow); transition: all 0.5s ease; }
-    #patreon-link a { color: var(--color-right); text-decoration: none; font-weight: 700; transition: color 0.5s ease;} #patreon-link a:hover { text-decoration: underline; }
+    #patreon-link a { color: var(--color-right); text-decoration: none; font-weight: 700; transition: color 0.5s ease;} @media (hover: hover) and (pointer: fine) { #patreon-link a:hover { text-decoration: underline; } }
 
     #designer-credit { position: absolute; bottom: calc(25px + var(--frame-bottom)); right: calc(30px + var(--frame-sides)); z-index: 6; font-size: 14px; font-weight: 600; color: var(--color-text); text-shadow: var(--credit-shadow); transition: all 0.5s ease; }
-    #designer-credit a { color: var(--color-right); text-decoration: none; font-weight: 700; transition: color 0.5s ease;} #designer-credit a:hover { text-decoration: underline; }
+    #designer-credit a { color: var(--color-right); text-decoration: none; font-weight: 700; transition: color 0.5s ease;} @media (hover: hover) and (pointer: fine) { #designer-credit a:hover { text-decoration: underline; } }
 
     #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-overlay); z-index: 10; backdrop-filter: blur(10px); }
     .loading-text { box-sizing: border-box; max-width: 100%; padding: 0 20px; text-align: center; line-height: 1.5; margin-bottom: 20px; }
@@ -108,10 +121,10 @@
     #top-right-menu { position: absolute; top: calc(20px + var(--frame-top)); right: calc(20px + var(--frame-sides)); z-index: 6; gap: 10px; align-items: center; transition: all 0.5s ease; display: none; }
 
     .menu-btn { background: var(--color-panel); border: 1px solid var(--border-panel); color: var(--color-btn-text); padding: 8px 16px; min-height: 44px; border-radius: var(--radius-control); cursor: pointer; font-family: var(--font-main); font-weight: 600; backdrop-filter: blur(12px); font-size: 15px; transition: 0.2s; }
-    .menu-btn:hover { background: var(--color-hover); color: var(--color-hover-text); }
+    @media (hover: hover) and (pointer: fine) { .menu-btn:hover { background: var(--color-hover); color: var(--color-hover-text); } }
     /* Pink theme: solid candy-pink pill buttons with white text. */
     body[data-theme="pink"] .menu-btn { background: var(--color-left); border-color: var(--border-panel); color: var(--color-text-pinched); box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--color-left) 60%, transparent); }
-    body[data-theme="pink"] .menu-btn:hover { background: var(--color-right); color: var(--color-text-pinched); }
+    @media (hover: hover) and (pointer: fine) { body[data-theme="pink"] .menu-btn:hover { background: var(--color-right); color: var(--color-text-pinched); } }
     body[data-theme="pink"] .centered-modal { border-radius: 28px; border: 2px solid var(--border-panel); }
     body[data-theme="pink"] .select-selected, body[data-theme="pink"] .settings-action-btn,
     body[data-theme="pink"] button.start-btn { border-radius: 999px; }
@@ -124,9 +137,10 @@
 
     #record-btn.recording { color: var(--color-warn-end); border-color: var(--color-warn-end); animation: recblink 1.2s infinite; }
     @keyframes recblink { 50% { opacity: 0.55; } }
-    /* Reduce motion: the logo stays still; recording still shows in red. */
+    /* Reduce motion: the logo stays still, buttons don't shrink when pressed; recording still shows in red. */
     @media (prefers-reduced-motion: reduce) {
       .boot-logo, .boot-steps .active::before, #record-btn.recording, #touch-record-btn.recording { animation: none; }
+      :is(.menu-btn, .settings-action-btn, button.start-btn, .boot-cta, #sustain-latch, #touch-record-btn, #touch-settings-btn, #touch-home-btn, #choordination-watermark):active { transform: none; }
     }
 
     .icon-btn { padding: 0; width: 44px; height: 44px; border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; }
@@ -147,7 +161,7 @@
     .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-panel); padding-bottom: 10px; margin-bottom: 5px; }
     .modal-header h3, .modal-header h2 { margin: 0; font-family: var(--font-display); font-weight: var(--title-weight); color: var(--color-title); font-size: 21px; line-height: 1.15; text-transform: var(--title-transform); letter-spacing: var(--title-spacing); }
     .close-btn { background: transparent; border: none; color: var(--color-text); font-size: 26px; font-weight: 400; cursor: pointer; transition: 0.2s; padding: 0 5px; min-width: 44px; min-height: 44px; border-radius: var(--radius-round); }
-    .close-btn:hover { color: var(--color-right); }
+    @media (hover: hover) and (pointer: fine) { .close-btn:hover { color: var(--color-right); } }
     /* Drawn icons instead of text glyphs: the × and the record dot (a square while recording). */
     .close-btn { position: relative; font-size: 0 !important; }
     .close-btn::before, .close-btn::after { content: ''; position: absolute; left: 50%; top: 50%; width: 20px; height: 2px; margin: -1px 0 0 -10px; border-radius: 1px; background: currentColor; transform: rotate(45deg); }
@@ -158,7 +172,7 @@
     #touch-settings-btn svg { width: 22px; height: 22px; vertical-align: middle; }
 
     /* Keep the scrollbar inside the modal's rounded corners so the thumb never pokes out the top/bottom. */
-    .centered-modal { scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: var(--color-left) transparent; }
+    .centered-modal { overscroll-behavior: contain; scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: var(--color-left) transparent; }
     .centered-modal::-webkit-scrollbar { width: 12px; }
     .centered-modal::-webkit-scrollbar-track { background: transparent; margin: 16px 0; }
     .centered-modal::-webkit-scrollbar-thumb { background: var(--color-left); border-radius: 6px; border: 3px solid transparent; background-clip: padding-box; }
@@ -167,13 +181,13 @@
     .menu-divider { border: none; border-top: 1px solid var(--border-panel); opacity: 0.6; margin: 14px 0 12px; }
     label { font-size: 14px; font-weight: 600; color: var(--color-text); }
 
-    input[type=range] { width: 100%; cursor: pointer; opacity: 0.8; } input[type=range]:hover { opacity: 1; }
+    input[type=range] { width: 100%; cursor: pointer; opacity: 0.8; } @media (hover: hover) and (pointer: fine) { input[type=range]:hover { opacity: 1; } }
     input[type=range]:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
 
     .highlight-label { color: var(--color-right); }
 
     .settings-action-btn { width: 100%; min-height: 44px; padding: 10px; margin-top: 5px; font-family: var(--font-main); font-size: 14px; font-weight: 600; cursor: pointer; background: transparent; color: var(--color-right); border: var(--border-width) solid var(--color-right); border-radius: var(--radius-control); transition: 0.2s; text-align: center; display: inline-block; text-decoration: none; box-sizing: border-box; }
-    .settings-action-btn:hover:not(:disabled) { background: var(--color-left); color: var(--color-text-pinched); }
+    @media (hover: hover) and (pointer: fine) { .settings-action-btn:hover:not(:disabled) { background: var(--color-left); color: var(--color-text-pinched); } }
     .settings-action-btn:disabled { border-color: var(--color-text-inactive); color: var(--color-text-inactive); cursor: not-allowed; }
     .settings-action-btn:focus-visible, .menu-btn:focus-visible, .close-btn:focus-visible, button.start-btn:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
 
@@ -205,7 +219,7 @@
     /* Start stays in view at the window's bottom while the text above scrolls. */
     #boot-modal .boot-cta { position: sticky; bottom: 0; }
     .boot-cta { width: auto; min-height: 44px; align-self: flex-end; font-size: 16px; padding: 12px 25px; background: var(--color-primary); color: var(--color-primary-text); border-color: var(--color-primary); }
-    .boot-cta:hover:not(:disabled) { background: color-mix(in srgb, var(--color-primary) 86%, var(--color-text)); color: var(--color-primary-text); }
+    @media (hover: hover) and (pointer: fine) { .boot-cta:hover:not(:disabled) { background: color-mix(in srgb, var(--color-primary) 86%, var(--color-text)); color: var(--color-primary-text); } }
     /* The welcome keeps the first three lines; the rest (sustain, tips) lives in How to play. */
     #boot-modal li:nth-child(n+4), #boot-modal .tutorial-tip { display: none; }
     #boot-step-2 { display: flex; flex-direction: column; gap: 15px; }
@@ -217,7 +231,7 @@
     .about-credits a { color: var(--color-right); }
 
     button.start-btn { padding: 15px 40px; font-size: 20px; font-weight: 700; cursor: pointer; background: transparent; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); color: var(--color-text); transition: all 0.3s ease; font-family: var(--font-main); backdrop-filter: blur(5px); }
-    button.start-btn:hover { transform: scale(1.03); background: var(--color-hover); border-color: var(--color-right); }
+    @media (hover: hover) and (pointer: fine) { button.start-btn:hover { transform: scale(1.03); background: var(--color-hover); border-color: var(--color-right); } }
 
     /* Patreon Overlay — follows the active theme; only the Patreon button keeps
        its own warm color so it stays the inviting, actionable element. */
@@ -226,9 +240,9 @@
     #patreon-nag .nag-body { font-size: 16px; margin-top: 0; color: var(--color-text); }
     #nag-close { position: absolute; top: 10px; right: 14px; z-index: 2; }
     .patreon-glow-btn { background: var(--color-patreon) !important; color: var(--color-patreon-text) !important; border: none !important; font-weight: bold !important; padding: 15px !important; margin: 15px 0 !important; box-shadow: 0 4px 20px rgba(255, 66, 77, 0.4) !important; font-size: 19px !important; transition: transform 0.2s !important; text-decoration: none; }
-    .patreon-glow-btn:hover { transform: scale(1.05); box-shadow: 0 4px 30px rgba(255, 66, 77, 0.6) !important; }
+    @media (hover: hover) and (pointer: fine) { .patreon-glow-btn:hover { transform: scale(1.05); box-shadow: 0 4px 30px rgba(255, 66, 77, 0.6) !important; } }
 
-    .modifier-list { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border: 1px solid var(--border-panel); }
+    .modifier-list { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; overscroll-behavior: contain; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 6px; border: 1px solid var(--border-panel); }
     .modifier-list label { min-height: 40px; font-size: 14px; text-transform: none; display: flex; align-items: center; gap: 10px; cursor: pointer; }
     .rec-voice { font-size: 13px; text-transform: none; display: flex; align-items: center; gap: 8px; cursor: pointer; }
     .rec-voice input { cursor: pointer; transform: scale(1.2); accent-color: var(--color-left); }
