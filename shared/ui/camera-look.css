@@ -13,8 +13,10 @@
   align-self: flex-start; min-height: 44px; padding: 8px 16px; margin-top: 4px; cursor: pointer;
   font-family: var(--font-main); font-size: 15px; font-weight: 700; color: var(--color-btn-text);
   background: var(--color-panel); border: 1px solid var(--border-panel); border-radius: var(--radius-control);
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; transition: transform 0.08s ease-out;
 }
-.cam-look-reset:hover { background: var(--color-hover); color: var(--color-hover-text); }
+.cam-look-reset:active { background: var(--color-hover); color: var(--color-hover-text); transform: scale(0.97); }
+@media (hover: hover) and (pointer: fine) { .cam-look-reset:hover { background: var(--color-hover); color: var(--color-hover-text); } }
 .cam-look-reset:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
 
 /* Film-like noise: tiles of grain, moved a few times a second. */

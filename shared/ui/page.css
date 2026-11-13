@@ -36,7 +36,32 @@
  *   (--space-1 … --space-6: 4, 8, 12, 16, 24, 32 px), side margins of 16 px on
  *   phones and 24 px on computers plus the safe areas, labels in sentence case,
  *   and nothing wider than the screen: rows wrap, long labels wrap.
+ *
+ * Phones (so a tool feels like an app, not a website):
+ *   - A tool page doesn't pull to refresh or bounce at its ends (overscroll-
+ *     behavior: none on html and body). A page that is a document and scrolls
+ *     (the home page) sets html, body { overscroll-behavior: auto }. Anything
+ *     that scrolls inside the page (a window, a list) gets
+ *     overscroll-behavior: contain, so the page behind it never moves.
+ *   - Every <button> (and role="button") is a control: a long press never
+ *     selects its label or opens the callout, and a quick second tap never
+ *     zooms. Text that isn't a control stays selectable: never put
+ *     user-select: none on body. A tool's own tappable things that aren't
+ *     buttons (piano keys, a canvas) set it themselves.
+ *   - Hover looks only where there is a mouse: @media (hover: hover) and
+ *     (pointer: fine); on a touch screen a hover sticks after the tap. Every
+ *     tappable thing shows it is pressed with :active instead.
+ *   - Typing boxes: 16 px at least (iPhone and iPad Safari zoom into smaller
+ *     ones). Give them the right keyboard: inputmode, enterkeyhint,
+ *     autocorrect="off" where words aren't wanted.
  */
+
+/* A tool is an app screen: no pull-to-refresh or page bounce, and no text
+   growing when a phone is turned sideways. */
+html, body { overscroll-behavior: none; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+button, [role="button"] { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
+:where(input:not([type="range"], [type="checkbox"], [type="radio"]), textarea) { font-size: max(16px, 1em); }
 
 body {
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px;
@@ -110,7 +135,7 @@ body[data-theme="retro"] #theme-frame { border: var(--fy-top) solid rgb(14, 16, 
 .icon-btn svg { width: 22px; height: 22px; }
 .round-btn { width: 48px; height: 48px; flex: none; padding: 0; border-radius: var(--radius-round); font-size: 24px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
 .btn:active, .icon-btn:active, .round-btn:active { transform: scale(0.96); }
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   .btn:hover, .icon-btn:hover, .round-btn:hover { background: var(--color-hover); color: var(--color-hover-text); }
   .btn-primary:hover { background: color-mix(in srgb, var(--color-primary) 86%, var(--color-text)); border-color: transparent; color: var(--color-primary-text); }
   .btn.patreon-btn:hover { background: var(--color-patreon); color: var(--color-patreon-text); transform: scale(1.03); }
@@ -138,7 +163,7 @@ body[data-theme="retro"] #theme-frame { border: var(--fy-top) solid rgb(14, 16, 
   flex-direction: column; gap: var(--space-4); padding: var(--space-5);
   background: var(--bg-select); color: var(--color-text); border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-panel);
   box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.55), 0 0 0 100vmax rgba(0, 0, 0, 0.45);
-  scrollbar-width: thin; scrollbar-color: var(--color-left) transparent;
+  scrollbar-width: thin; scrollbar-color: var(--color-left) transparent; overscroll-behavior: contain;
 }
 .centered-modal.has-dropdowns { overflow: visible; }
 .modal-overlay { position: fixed; inset: 0; z-index: 80; box-sizing: border-box; padding: var(--space-4); align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.55); }
@@ -152,7 +177,8 @@ body[data-theme="retro"] #theme-frame { border: var(--fy-top) solid rgb(14, 16, 
 /* In a window that scrolls, the header (and its ×) stays in view. */
 .centered-modal:not(.has-dropdowns) > .modal-header { position: sticky; top: calc(-1 * var(--space-5)); z-index: 2; margin-top: calc(-1 * var(--space-5)); padding-top: var(--space-5); background: var(--bg-select); }
 .close-btn { flex: none; background: transparent; border: none; border-radius: var(--radius-round); color: var(--color-text); font-size: 28px; font-weight: 400; line-height: 1; cursor: pointer; padding: 4px 8px; min-width: 44px; min-height: 44px; }
-@media (hover: hover) { .close-btn:hover { background: var(--color-hover); } }
+.close-btn:active { background: var(--color-hover); }
+@media (hover: hover) and (pointer: fine) { .close-btn:hover { background: var(--color-hover); } }
 /* Drawn icons instead of text glyphs: × on close buttons, − on round buttons and
    + on round buttons with class "plus". Their names come from aria-label. */
 .close-btn:not(.support-close), .round-btn { position: relative; }
@@ -178,7 +204,8 @@ body[data-theme="retro"] #theme-frame { border: var(--fy-top) solid rgb(14, 16, 
 /* The links' touch area is 44 px tall (an invisible layer), without making the footer taller. */
 .tool-footer a { position: relative; text-decoration: none; font-weight: 700; text-underline-offset: 3px; }
 .tool-footer a::after { content: ''; position: absolute; inset: -18px -4px -10px; }
-.tool-footer a:hover { text-decoration: underline; }
+.tool-footer a:active { opacity: 0.7; }
+@media (hover: hover) and (pointer: fine) { .tool-footer a:hover { text-decoration: underline; } }
 .support-link { color: var(--color-right); }
 .designer-credit a { color: var(--color-right); }
 
