@@ -1,6 +1,6 @@
 # Intervle: spec
 
-**Status:** approved by Drephie, 2026-11-12. Name: Intervle (Drephie). Alpha: Rouge theme only, card on the home page marked Alpha.
+**Status:** approved by Drephie, 2026-11-12. Name: Intervle (Drephie). Beta since 2026-11-13: all seven themes, card on the home page marked Beta (Drephie, after her tests).
 Items marked *(Claude's pick)* weren't answered: say if you want them changed.
 
 ## What it is for
@@ -24,11 +24,11 @@ A daily ear puzzle, like a word-of-the-day game but for music: three short puzzl
 
 ## Not in this version
 
-Clues after a wrong try; other themes (coming soon, after the alpha); other sounds; chord inversions; intervals wider than an octave; a leaderboard or anything online; sharing as a picture; reminders.
+Clues after a wrong try; other sounds; chord inversions; intervals wider than an octave; a leaderboard or anything online; sharing as a picture; reminders.
 
 ## Controls
 
-Mode tabs (Easy, Medium, Hard); Play; the answer tiles (Easy 12, Medium 12, Hard 12 notes + 7 types); Hear it again; Copy result; Past games. Settings: language, note names; theme shows Rouge and "More themes coming soon".
+Mode tabs (Easy, Medium, Hard); Play; the answer tiles (Easy 12, Medium 12, Hard 12 notes + 7 types); Hear it again; Copy result; Past games. Settings: theme (the hub's seven), language, note names.
 
 ## Layout
 
@@ -38,7 +38,7 @@ Header (house, Intervle, About, Settings) · a top row: the big day number "#12"
 
 ## Wording (English)
 
-Intervle (same name in Spanish and Italian); Easy, Medium, Hard; Play; tries left; Right!; Not quite; The answer was…; Streak, Best; Past games; Copy result; Copied!; More themes coming soon. Interval names as in the Ear Trainer.
+Intervle (same name in Spanish and Italian); Easy, Medium, Hard; Play; tries left; Right!; Not quite; The answer was…; Streak, Best; Past games; Copy result; Copied!. Interval names as in the Ear Trainer.
 
 ## Remembered
 
@@ -55,5 +55,5 @@ Nothing is recorded or uploaded; no microphone. Salamander Grand Piano by Alexan
 
 ## How we check it
 
-**Claude:** Rouge, 3 languages, phone 375 × 667 and desktop; keyboard and typing; the day number around midnight and month ends; past games; streaks after a reload; the test page.
+**Claude:** 7 themes, 3 languages, phone 375 × 667 and desktop; keyboard and typing; the day number around midnight and month ends; past games; streaks after a reload; the test page.
 **Drephie, by ear on the phone:** gap between the two notes; whether chords one by one then together sound clear; whether sus2/sus4 and 6/9 are fair in Hard; the wording in all three languages.

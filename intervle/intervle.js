@@ -1,7 +1,7 @@
 /* intervle/intervle.js: Intervle, the daily ear puzzle (spec: specs/intervle.md).
  * The rules and the year of puzzles are in ./game.js; this file is the screen:
  * the day, the three modes, answers (buttons and typing), streaks, past games,
- * settings, windows and keyboard shortcuts. Alpha: Rouge theme only.
+ * settings, windows and keyboard shortcuts.
  */
 import { startAudio, createRack } from '../shared/sound.js';
 import { midiToFreq, commonNoteName } from '../shared/theory.js';
@@ -9,14 +9,13 @@ import { LANGUAGES, mergeStrings, createI18n } from '../shared/ui/i18n.js';
 import { HUB_STRINGS } from '../shared/ui/strings.js';
 import { setupCustomSelects } from '../shared/ui/select.js';
 import { createModalManager } from '../shared/ui/modal.js';
-import { LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
+import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
 import { MODES, ANSWERS, TYPES, TRIES, dayNumber, dateOf, puzzle, parseAnswer, status } from './game.js';
 import { INTERVLE_STRINGS } from './strings.js';
 
 const $ = (id) => document.getElementById(id);
 const SETTINGS_KEY = 'intervle.settings.v1';
-const THEME = 'rouge';   // Alpha: Rouge only (Drephie, 2026-11-12); more themes after the alpha
 const ANSWER_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
 
 try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch { /* not supported */ }
@@ -42,7 +41,7 @@ function readSettings() {
   };
 }
 const settings = readSettings();
-settings.lang = loadLook(loadSettings(SETTINGS_KEY)).lang;
+Object.assign(settings, loadLook(loadSettings(SETTINGS_KEY)));   // theme and language: the hub's one choice
 const save = () => saveSettings(SETTINGS_KEY, { mode: settings.mode, solfege: settings.solfege, results: settings.results });
 const solfege = () => (settings.solfege === null ? settings.lang !== 'en' : settings.solfege);
 
@@ -408,11 +407,15 @@ $('settings-btn').addEventListener('click', (e) => modals.open(settingsModal, e.
 $('about-btn').addEventListener('click', (e) => modals.open(aboutModal, e.currentTarget));
 
 const themeSelect = $('theme-select'), langSelect = $('lang-select'), namesSeg = $('names-seg');
-themeSelect.innerHTML = `<option value="${THEME}" data-i18n="themeRouge"></option>`;
+themeSelect.innerHTML = THEMES.map(([value, key]) => `<option value="${value}" data-i18n="${key}"></option>`).join('');
+themeSelect.addEventListener('change', () => { settings.theme = themeSelect.value; applyTheme(settings.theme); saveLook({ theme: settings.theme }); });
 langSelect.innerHTML = LANGUAGES.map((l) => `<option value="${l}">${LANGUAGE_NAMES[l]}</option>`).join('');
 langSelect.addEventListener('change', () => { settings.lang = langSelect.value; saveLook({ lang: settings.lang }); applyLanguage(); });
-// Language chosen elsewhere in the hub; the hub's theme is left alone (Rouge only here).
-watchLook((look) => { if (look.lang !== settings.lang) { settings.lang = langSelect.value = look.lang; applyLanguage(); } });
+// Chosen on the home page or in another tool, in another tab or before coming Back here.
+watchLook((look) => {
+  if (look.theme !== settings.theme) { settings.theme = themeSelect.value = look.theme; applyTheme(look.theme); setupCustomSelects(); }
+  if (look.lang !== settings.lang) { settings.lang = langSelect.value = look.lang; applyLanguage(); }
+});
 
 function renderNames() {
   [...namesSeg.children].forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.names === 'solfege') === solfege())));
@@ -447,8 +450,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 // --- START ---
-applyTheme(THEME);
-themeSelect.value = THEME;
+applyTheme(settings.theme);
+themeSelect.value = settings.theme;
 langSelect.value = settings.lang;
 applyLanguage();
 loadRack();
