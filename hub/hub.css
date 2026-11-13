@@ -6,7 +6,10 @@
  * first and bigger: two columns by two rows each. On phones the flagship is a full-width card
  * and the other tools are one grouped list (rows split by thin lines), so names
  * and descriptions stay readable. .beta-badge: a "Beta" tag on a card.
+ * The home page is a document that scrolls, so it keeps the phone's
+ * pull-to-refresh and bounce (page.css turns them off for the tools).
  */
+html, body { overscroll-behavior: auto; }
 /* Language flag, top right, and its little menu. */
 .lang-pick { position: relative; }
 .flag-btn .flag { width: 26px; height: 18px; }
@@ -24,7 +27,8 @@
   color: var(--color-select-text); font-family: var(--font-main); font-size: 15px; font-weight: 600;
 }
 .lang-menu .flag { width: 24px; height: 16px; flex: none; }
-.lang-menu button:hover, .lang-menu button[aria-checked="true"] { background: var(--color-select-hover); }
+.lang-menu button:active, .lang-menu button[aria-checked="true"] { background: var(--color-select-hover); }
+@media (hover: hover) and (pointer: fine) { .lang-menu button:hover { background: var(--color-select-hover); } }
 .lang-menu button:focus-visible { outline: 2px solid var(--color-right); outline-offset: -2px; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
@@ -104,8 +108,10 @@ body:is([data-theme="y2k"], [data-theme="retro"]) .hub-logo { color: var(--color
   font-size: 12px; font-weight: 700; line-height: 1.3; color: var(--color-right);
 }
 
+/* A card is a control: a long press doesn't select its words, a quick second tap doesn't zoom. */
+a.tool-card { -webkit-user-select: none; user-select: none; touch-action: manipulation; }
 a.tool-card:active { transform: scale(0.98); }
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   a.tool-card:hover { border-color: var(--color-right); background: color-mix(in srgb, var(--color-right) 12%, var(--color-panel)); transform: translateY(-2px); box-shadow: 0 14px 28px -16px rgba(0, 0, 0, 0.55); }
 }
 a.tool-card:focus-visible { outline: 3px solid var(--color-right); outline-offset: 3px; }
