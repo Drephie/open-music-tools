@@ -20,7 +20,7 @@ SITE=$(git ls-files | grep -vE '^(tests|specs|\.claude)/|\.md$|^(LICENSE|CNAME|\
 TEXT=$(echo "$SITE" | grep -E '\.(html|js|css|json|svg)$')
 
 echo "== Tests (JavaScriptCore)"
-for t in theory ear-trainer pitch instrument-tuner pitch-detector pitch-training hands strings; do
+for t in theory ear-trainer pitch instrument-tuner pitch-detector pitch-training hands intervle strings; do
   case $t in strings) f=tests/tools/run-strings-check.js ;; *) f=tests/tools/run-$t-test.js ;; esac
   if out=$("$JSC" -m "$f" 2>&1); then pass "$f"; else fail "$f: $(echo "$out" | grep -E 'FAIL|Error' | head -5 | tr '\n' ' ')"; fi
 done
