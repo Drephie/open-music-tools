@@ -52,11 +52,12 @@ body[data-theme="bw"] .tuner.has-note:not(.in-tune) :is(.note, .say) { color: va
 .string-btns { display: flex; justify-content: center; gap: clamp(6px, 3.2vw, 28px); padding: 6px 0 16px; }
 .string-btns:empty { display: none; }
 .string-btn {
-  position: relative; width: 44px; height: 44px; padding: 0; border-radius: 50%; cursor: pointer; touch-action: manipulation;
+  position: relative; width: 44px; height: 44px; padding: 0; border-radius: 50%; cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
   border: 1px solid color-mix(in srgb, var(--color-text) 35%, transparent); background: transparent; color: var(--color-text);
-  font: 700 17px/1 var(--font-display); transition: background 0.2s ease-out, color 0.2s ease-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out;
+  font: 700 17px/1 var(--font-display); transition: background 0.2s ease-out, color 0.2s ease-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out, transform 0.1s ease-out;
 }
+.string-btn:active { transform: scale(0.92); }
 .string-btn .name { display: inline-flex; align-items: flex-start; }
 .string-btn .acc { width: 0.42em; height: 0.68em; margin: -0.05em 0 0 0.04em; }
 .string-btn.active { border-color: var(--color-text); box-shadow: inset 0 0 0 1px var(--color-text); }
@@ -92,7 +93,7 @@ body[data-theme="bw"] .tuner.has-note:not(.in-tune) :is(.note, .say) { color: va
 }
 /* The main action is filled; while it runs it turns into an outline. */
 .listen-btn.on { background: transparent; color: var(--color-text); border-color: color-mix(in srgb, var(--color-text) 55%, transparent); }
-@media (hover: hover) { .listen-btn.on:hover { background: var(--color-hover); color: var(--color-hover-text); } }
+@media (hover: hover) and (pointer: fine) { .listen-btn.on:hover { background: var(--color-hover); color: var(--color-hover-text); } }
 .listen-btn svg { width: 20px; height: 20px; flex: none; }
 .listen-btn .stop-icon, .listen-btn.on .mic-icon { display: none; }
 .listen-btn.on .stop-icon { display: block; }
@@ -103,8 +104,9 @@ body[data-theme="bw"] .tuner.has-note:not(.in-tune) :is(.note, .say) { color: va
 .seg { display: flex; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); overflow: hidden; }
 .seg button {
   flex: 1 1 0; min-width: 0; min-height: 44px; padding: 4px 8px; border: 0; background: var(--color-panel); color: var(--color-btn-text); cursor: pointer;
-  font: 600 14px/1.15 var(--font-main); touch-action: manipulation; transition: background 0.15s ease-out, color 0.15s ease-out;
+  font: 600 14px/1.15 var(--font-main); transition: background 0.15s ease-out, color 0.15s ease-out, transform 0.1s ease-out;
 }
+.seg button:active { transform: scale(0.97); }
 .seg button + button { border-left: 1px solid var(--border-panel); }
 .seg button[aria-pressed="true"] { background: var(--color-left); color: var(--color-text-pinched); }
 .seg button:focus-visible { outline: 2px solid var(--color-right); outline-offset: -3px; }
