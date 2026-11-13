@@ -13,7 +13,7 @@ A daily ear puzzle, like a word-of-the-day game but for music: three short puzzl
   - **Easy:** two notes, the second always **above** the first. Name the distance between them (the **interval**): "Major 3rd", with "4 half steps" small under it (a half step is one piano key to the very next).
   - **Medium:** you're told the first note ("This is Do") and hear it, then a second note **above or below**, within an octave. Name the second note.
   - **Hard:** you're told the first note ("This note is A") and hear it, then a whole chord on another note, within an octave above or below (e.g. F♯m7). Name the whole chord: tap its note (12 tiles), then its type (**sus2, sus4, 7, maj7, m7, 6, 9**; add9 left out: too close to 9), in either order; the answer forms itself and is checked (Drephie, 2026-11-12, after her first look).
-- **Play** button plays the puzzle; replay as often as you like *(Claude's pick)*. Grand piano. Intervals: one note then the other. Chords: one by one going up, then together *(Claude's pick)*.
+- **Play** button plays the puzzle and turns into **Stop** while it plays (Drephie); replay as often as you like *(Claude's pick)*. Grand piano. Intervals: one note then the other. Chords: one by one going up, then together *(Claude's pick)*.
 - **The day's puzzle** follows the player's own clock: a new one at their midnight. Each day has a number: **#1 is five days before the game goes up**, so five past games are there from the start.
 - **A year of puzzles:** a fixed list of 365 puzzles per mode, written once and kept in the tool, so day 40 is the same for everyone. Mixed so it doesn't repeat the same answer two days in a row, and every answer comes up about as often. After day 365 the list starts again from #1, shifted to new notes *(Claude's pick)*.
 - **Past games:** a list of every day since #1, with your result for each. Play any of them; past days don't count for the streak.
@@ -33,7 +33,7 @@ Mode tabs (Easy, Medium, Hard); Play; the answer tiles (Easy 12, Medium 12, Hard
 ## Layout
 
 **Phone, upright,** one screen at 375 × 667.
-Header (house, Intervle, About, Settings) · a top row: the big day number "#12" and the date, the mode's streak flame, a copy button once the day's three are done, Past games (calendar) · the three mode tabs with ✓ or ✗ once done · the question · a big round **Play** button with one dot per sound, lit as it plays · answer tiles, 3 or 4 per row, the one tapped turns over · a bar of three tries and the result line. *(Redesigned 2026-11-12 after Drephie's first look: "daily game" style.)*
+Header (house, Intervle, About, Settings) · a top row: the big day number "#12" and the date, the mode's streak flame, a copy button once the day's three are done, Past games (calendar) · the three mode tabs with ✓ or ✗ once done · the question · a **Play** button (▶ Play, ■ Stop while playing) with one dot per sound, lit as it plays · answer tiles, 3 or 4 per row, the one tapped turns over · a bar of three tries and the result line. *(Redesigned 2026-11-12 after Drephie's first look: "daily game" style.)*
 **Computer:** the same in a centered column. Keys: Space = Play, 1 to 9, 0, -, = for the buttons, or type the answer.
 
 ## Wording (English)

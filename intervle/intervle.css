@@ -42,19 +42,12 @@ body { -webkit-user-select: none; user-select: none; }
 /* --- The puzzle --- */
 .play-panel { display: flex; flex-direction: column; align-items: stretch; gap: clamp(6px, 1.2dvh, 14px); }
 .prompt { margin: 0; min-height: 2.5em; display: grid; place-items: center; text-align: center; font: 600 19px/1.25 var(--font-display); color: var(--color-title); text-wrap: balance; }
-.play-row { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.play-btn {
-  position: relative; --play: clamp(72px, 11dvh, 92px); flex: none; width: var(--play); height: var(--play); min-height: 0; padding: 0; border-radius: 50%; border: 0; display: grid; place-items: center; cursor: pointer;
-  background: var(--color-primary); color: var(--color-primary-text); touch-action: manipulation;
-  box-shadow: 0 10px 28px -10px color-mix(in srgb, var(--color-primary) 80%, transparent);
-  transition: transform 0.15s ease-out, box-shadow 0.2s ease-out;
-}
-.play-btn svg { width: 40%; height: 40%; margin-left: 6%; }
-.play-btn:active { transform: scale(0.94); }
-.play-btn::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--color-right); opacity: 0; }
-.play-btn.playing::after { animation: ring 1s ease-out infinite; }
-.play-btn.waiting::after { opacity: 0.5; animation: ring 1.2s ease-in-out infinite alternate; }
-@keyframes ring { from { transform: scale(0.94); opacity: 0.8; } to { transform: scale(1.18); opacity: 0; } }
+.play-row { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.play-btn { min-width: 172px; min-height: 52px; padding: 10px 28px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-size: 18px; font-weight: 700; touch-action: manipulation; transition: transform 0.12s ease-out, background 0.15s ease-out; }
+.play-btn svg { width: 18px; height: 18px; flex: none; }
+.play-btn:active { transform: scale(0.96); }
+/* Playing: the same button, turned to Stop, with a quiet outline instead of the fill. */
+.play-btn.busy { background: transparent; color: var(--color-text); box-shadow: inset 0 0 0 2px var(--color-primary); }
 .note-dots { display: flex; gap: 6px; min-height: 8px; }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: color-mix(in srgb, var(--color-right) 30%, transparent); transition: background 0.15s, transform 0.15s; }
 .dot.was { background: color-mix(in srgb, var(--color-right) 60%, transparent); }
@@ -145,12 +138,12 @@ body { -webkit-user-select: none; user-select: none; }
 @media (hover: hover) and (pointer: fine) {
   .tab:hover:not([aria-selected="true"]) { background: var(--color-hover); color: var(--color-hover-text); }
   .answer:not(.after):hover { transform: translateY(-2px); background: var(--color-hover); color: var(--color-hover-text); }
-  .play-btn:hover { transform: scale(1.05); box-shadow: 0 14px 32px -10px color-mix(in srgb, var(--color-primary) 90%, transparent); }
-  .play-btn:active { transform: scale(0.94); }
+  .play-btn:hover { transform: translateY(-1px); }
+  .play-btn:active { transform: scale(0.96); }
+  .play-btn.busy:hover { background: color-mix(in srgb, var(--color-primary) 18%, transparent); color: var(--color-text); }
   :is(.seg button, .past-row):hover:not([aria-pressed="true"]) { background: var(--color-hover); color: var(--color-hover-text); }
   .past-row:hover { transform: translateY(-1px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .answer.flip, .play-btn.playing::after, .play-btn.waiting::after { animation: none; }
-  .play-btn.playing::after { opacity: 0.8; }
+  .answer.flip { animation: none; }
 }

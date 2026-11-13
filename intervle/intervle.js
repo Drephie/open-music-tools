@@ -116,7 +116,18 @@ function stopSound() {
   dotTimers.forEach(clearTimeout);
   dotTimers = [];
   soundEnd = 0;
-  playBtn.classList.remove('playing', 'waiting');
+  setBusy(false);
+}
+// While it plays (or gets ready), Play becomes Stop.
+function setBusy(on) {
+  playBtn.classList.toggle('busy', on);
+  playBtn.querySelector('use').setAttribute('href', on ? '#i-stop' : '#i-play');
+  playBtn.querySelector('.play-label').textContent = t(on ? 'stop' : 'play');
+}
+function stopPlay() {
+  playToken++;   // a Play still waiting for the piano never starts
+  stopSound();
+  showDots(puzzle(settings.mode, day).events.length, -1);
 }
 // The sound is switched on first (Tone.start() runs at once, inside the tap) and the
 // piano loaded; only then are the notes scheduled, so the first Play is never lost.
@@ -124,15 +135,15 @@ async function playEvents(events) {
   const token = ++playToken;
   stopSound();
   const ready = Tone.context.state === 'running' ? null : startAudio();
-  if (ready || !rack) playBtn.classList.add('waiting');
+  setBusy(true);
   if (ready) await ready;
+  if (token !== playToken) return;
   if (!rack) {
     loadingEl.textContent = t('loading');
     loadingEl.hidden = false;
     await loadRack();
     if (!rack || token !== playToken) return;
   }
-  playBtn.classList.remove('waiting');
   const piano = rack.instruments.piano;
   if (Tone.Transport.state !== 'started') Tone.Transport.start();
   const start = Tone.Transport.seconds + 0.1;
@@ -144,11 +155,10 @@ async function playEvents(events) {
   events.forEach((e, i) => dotTimers.push(setTimeout(() => showDots(events.length, i), (0.1 + e.at) * 1000)));
   const length = 0.1 + Math.max(...events.map((e) => e.at + e.dur));
   soundEnd = Tone.now() + length;
-  playBtn.classList.add('playing');
-  endTimer = setTimeout(() => { playBtn.classList.remove('playing'); showDots(events.length, -1); }, length * 1000);
+  endTimer = setTimeout(() => { setBusy(false); showDots(events.length, -1); }, length * 1000);
 }
 const isPlaying = () => Tone.now() < soundEnd;
-const playPuzzle = () => playEvents(puzzle(settings.mode, day).events);
+const playPuzzle = () => (playBtn.classList.contains('busy') ? stopPlay() : playEvents(puzzle(settings.mode, day).events));
 
 // --- SCREEN ---
 const tabs = [...document.querySelectorAll('.tab')];
@@ -297,7 +307,7 @@ typeBox.addEventListener('keydown', (e) => {
   if (a !== null) answer(a);
 });
 
-tabs.forEach((b) => b.addEventListener('click', () => { stopSound(); settings.mode = b.dataset.mode; save(); render(); }));
+tabs.forEach((b) => b.addEventListener('click', () => { stopPlay(); settings.mode = b.dataset.mode; save(); render(); }));
 document.querySelector('.tabs').addEventListener('keydown', (e) => {
   const i = MODES.indexOf(settings.mode), d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
   if (!d) return;
@@ -306,7 +316,7 @@ document.querySelector('.tabs').addEventListener('keydown', (e) => {
   tabs[MODES.indexOf(settings.mode)].focus();
 });
 playBtn.addEventListener('click', playPuzzle);
-$('today-btn').addEventListener('click', () => { stopSound(); day = today; render(); });
+$('today-btn').addEventListener('click', () => { stopPlay(); day = today; render(); });
 
 // --- COPY RESULT: one line on the clipboard; nothing is sent anywhere ---
 copyBtn.addEventListener('click', async () => {
@@ -344,7 +354,7 @@ function renderPast() {
     b.querySelector('.past-date').textContent = dateText(n, { weekday: 'short', day: 'numeric', month: 'short' });
     b.setAttribute('aria-label', `#${n}, ${dateText(n, { weekday: 'long', day: 'numeric', month: 'long' })}: ` +
       MODES.map((m) => `${t(m)} ${({ won: '✓', lost: '✗', open: t('notPlayed') })[resultOf(n, m)]}`).join(', '));
-    b.addEventListener('click', () => { stopSound(); day = n; modals.hideAll(false); render(); });
+    b.addEventListener('click', () => { stopPlay(); day = n; modals.hideAll(false); render(); });
     li.appendChild(b);
     pastList.appendChild(li);
   }
@@ -397,6 +407,7 @@ function applyLanguage() {
   document.title = t('title');
   renderNames();
   render();
+  setBusy(playBtn.classList.contains('busy'));
   if (!loadingEl.hidden) loadingEl.textContent = t(rackLoading ? 'loading' : 'loadFailed');
   if (modals.current() === pastModal) renderPast();
   setupCustomSelects();
