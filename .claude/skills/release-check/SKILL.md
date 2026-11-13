@@ -44,6 +44,6 @@ Start the `hub` server (`hub-8001` when another session has port 8000). The pane
 ## 4. Record and publish
 
 1. Write the result in `ROADMAP.md` under "Releases": the date, `CACHE_NAME`, what was checked and what failed or was accepted. Commit.
-2. Tag the commit: `git tag release-YYYY-MM-DD` (the next release's cache-name check compares with it).
-3. Drephie publishes: in GitHub Desktop, **Push origin** (tags go along). GitHub Pages updates in about a minute.
+2. Tag the commit: `git tag release-YYYY-MM-DD` (the next release's cache-name check compares with it). The tag stays on this Mac: GitHub Desktop doesn't push tags, and the check only needs it here.
+3. Drephie publishes: in GitHub Desktop, **Push origin**. If GitHub Desktop offers **Pull origin** instead (the history was rewritten), never pull: use **Force Push** from its menu. GitHub Pages updates in about a minute.
 4. Check the live site: `curl -s https://openmusictools.org/sw.js | grep CACHE_NAME` shows the new name, and https://openmusictools.org opens in the built-in browser with no console errors. Phones pick up the new version on their next visit (the service worker fetches our files from the network first).
