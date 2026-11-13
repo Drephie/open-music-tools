@@ -208,6 +208,9 @@ body[data-theme="retro"] #theme-frame { border: var(--fy-top) solid rgb(14, 16, 
 @media (hover: hover) and (pointer: fine) { .tool-footer a:hover { text-decoration: underline; } }
 .support-link { color: var(--color-right); }
 .designer-credit a { color: var(--color-right); }
+/* Links to the Privacy and Terms pages, between the support link and the credit. */
+.legal-links { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
+.legal-links a { color: var(--color-right); }
 
 /* Theme touches: depth and lettering that belong to each world. */
 body[data-theme="y2k"] :is(.tool-title, .modal-header h2) { text-shadow: 0 0 14px color-mix(in srgb, var(--color-left) 55%, transparent); }

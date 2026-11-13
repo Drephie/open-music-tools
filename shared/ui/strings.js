@@ -13,6 +13,7 @@ export const HUB_STRINGS = {
   en: {
     // Hub footer and links
     supportLink: "Support on Patreon", designedBy: "Designed by",
+    privacyLink: "Privacy", termsLink: "Terms",
     // Common controls
     lang: "Language", vol: "Master Volume", closeAria: "Close", retry: "Retry",
     settings: "Settings", about: "About", home: "Home: all the tools",
@@ -33,6 +34,7 @@ export const HUB_STRINGS = {
   es: {
     // Hub footer and links
     supportLink: "Apóyanos en Patreon", designedBy: "Diseñado por",
+    privacyLink: "Privacidad", termsLink: "Condiciones",
     // Common controls
     lang: "Idioma", vol: "Volumen", closeAria: "Cerrar", retry: "Reintentar",
     settings: "Ajustes", about: "Información", home: "Inicio: todas las herramientas",
@@ -52,6 +54,7 @@ export const HUB_STRINGS = {
   it: {
     // Hub footer and links
     supportLink: "Sostienici su Patreon", designedBy: "Progettato da",
+    privacyLink: "Privacy", termsLink: "Condizioni",
     // Common controls
     lang: "Lingua", vol: "Volume", closeAria: "Chiudi", retry: "Riprova",
     settings: "Impostazioni", about: "Informazioni", home: "Home: tutti gli strumenti",

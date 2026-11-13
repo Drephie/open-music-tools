@@ -16,7 +16,7 @@
  * Bump CACHE_NAME whenever a cached file changes. Add each new tool's files
  * to APP_SHELL. Bump CDN_CACHE only when a pinned CDN version changes.
  */
-const CACHE_NAME = 'open-music-tools-v37';
+const CACHE_NAME = 'open-music-tools-v38';
 const CDN_CACHE = 'open-music-tools-cdn-v1';
 const APP_SHELL = [
   './',
@@ -126,6 +126,14 @@ const APP_SHELL = [
   'pitch-training/score.js',
   'pitch-training/strings.js',
   'pitch-training/favicon.svg',
+  'privacy/',
+  'privacy/index.html',
+  'terms/',
+  'terms/index.html',
+  'legal/legal.css',
+  'legal/legal.js',
+  'legal/details.js',
+  'legal/strings.js',
 ];
 // Only our own caches are ever deleted: the hub may share its origin with other sites.
 const OWN_CACHE = (k) => k.startsWith('open-music-tools-') || k.startsWith('choordination-');

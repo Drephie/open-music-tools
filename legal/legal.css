@@ -1,0 +1,14 @@
+/* legal/legal.css: the Privacy and Terms pages. Loads after shared/ui/page.css.
+ * Theme variables only. Long text, so a readable width and plain headings. */
+html, body { overscroll-behavior: auto; }
+.legal-main { max-width: 760px; width: 100%; margin: 0 auto; }
+.legal-main .panel { display: flex; flex-direction: column; gap: var(--space-3); }
+.legal-main h2 { margin: var(--space-3) 0 0; font-size: 20px; line-height: 1.25; color: var(--color-title); font-family: var(--font-display); }
+.legal-main h2:first-of-type { margin-top: 0; }
+.legal-main p, .legal-main li { font-size: 16px; line-height: 1.6; margin: 0; }
+.legal-main ul { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: var(--space-1); }
+.legal-main a { color: var(--color-right); font-weight: 700; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.legal-updated, .legal-note { font-size: 14px; line-height: 1.5; color: var(--color-text-inactive); margin: 0; }
+.legal-switch { display: inline-block; padding: var(--space-2) 0; }
+/* Details the owner has not filled in yet. */
+.legal-main .todo { outline: 2px dashed var(--color-right); outline-offset: 1px; border-radius: 3px; padding: 0 3px; font-weight: 700; }

@@ -18,6 +18,7 @@ import { TUNER_STRINGS as VOCAL_STRINGS } from '../../vocal-tuner/strings.js';
 import { TUNER_STRINGS as INSTRUMENT_STRINGS } from '../../instrument-tuner/strings.js';
 import { DETECTOR_STRINGS } from '../../pitch-detector/strings.js';
 import { TRAINING_STRINGS } from '../../pitch-training/strings.js';
+import { LEGAL_STRINGS } from '../../legal/strings.js';
 
 const PAGES = [
   ['index.html', HUB_PAGE_STRINGS],
@@ -28,6 +29,8 @@ const PAGES = [
   ['instrument-tuner/index.html', INSTRUMENT_STRINGS],
   ['pitch-detector/index.html', DETECTOR_STRINGS],
   ['pitch-training/index.html', TRAINING_STRINGS],
+  ['privacy/index.html', LEGAL_STRINGS],
+  ['terms/index.html', LEGAL_STRINGS],
 ];
 
 let failed = 0;
