@@ -15,8 +15,10 @@
 .beat-dot::before {
   content: ''; position: absolute; left: 50%; top: 50%; width: 24px; height: 24px; box-sizing: border-box;
   transform: translate(-50%, -50%); border-radius: 50%; border: 3px solid var(--color-left); background: transparent;
-  transition: background 0.12s, border-color 0.12s, box-shadow 0.12s, width 0.12s, height 0.12s;
+  transition: background 0.12s, border-color 0.12s, box-shadow 0.12s, width 0.12s, height 0.12s, transform 0.1s ease-out;
 }
+/* Pressed: the dot gives a little under the finger. */
+.beat-dot:active::before { transform: translate(-50%, -50%) scale(0.86); }
 .beat-dot[data-level="strong"]::before { width: 34px; height: 34px; background: var(--color-left); }
 /* The strong beat sounding: a ring around it, so the bar's start is seen at a glance. */
 .beat-dot[data-level="strong"].lit::before { box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-right) 45%, transparent), 0 0 16px color-mix(in srgb, var(--color-right) 70%, transparent); }

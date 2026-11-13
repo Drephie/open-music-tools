@@ -7,7 +7,6 @@
  */
 
 .icons { position: absolute; width: 0; height: 0; overflow: hidden; }
-body { -webkit-user-select: none; user-select: none; }
 .ear { position: relative; width: 100%; max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; justify-content: center; }
 .screen { display: flex; flex-direction: column; gap: 12px; }
 .screen[hidden] { display: none; }
@@ -21,7 +20,7 @@ body { -webkit-user-select: none; user-select: none; }
 .tab {
   flex: 1 1 0; min-width: 0; min-height: 44px; padding: 6px 6px; border: 0; background: transparent; cursor: pointer;
   font: 600 14px/1.15 var(--font-main); color: var(--color-btn-text);
-  touch-action: manipulation; transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, transform 0.1s ease-out;
 }
 .tab + .tab { border-left: 1px solid var(--border-panel); }
 .tab[aria-selected="true"] { background: var(--color-left); color: var(--color-text-pinched); }
@@ -40,6 +39,7 @@ body { -webkit-user-select: none; user-select: none; }
   border: 2px solid var(--border-panel); background: var(--color-panel); color: var(--color-btn-text);
   transition: transform 0.15s, background 0.15s;
 }
+.step:active .step-circle { transform: scale(0.94); transition-duration: 0.1s; }
 .step.done .step-circle { background: var(--color-left); border-color: var(--color-left); color: var(--color-text-pinched); }
 .step.next .step-circle { border-color: var(--color-right); color: var(--color-right); animation: glow 1.8s ease-in-out infinite; }
 /* Lessons not reached yet: quiet, faint circles; the padlock shows only on the one tapped. */
@@ -168,7 +168,7 @@ body[data-theme="bw"] .answer.bad .answer-name { text-decoration: line-through; 
 .seg { display: flex; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); overflow: hidden; }
 .seg button {
   flex: 1 1 0; min-width: 0; min-height: 44px; padding: 0 8px; border: 0; background: var(--color-panel); color: var(--color-btn-text); cursor: pointer;
-  font: 600 14px/1.15 var(--font-main); touch-action: manipulation; transition: background 0.15s ease-out, color 0.15s ease-out;
+  font: 600 14px/1.15 var(--font-main); transition: background 0.15s ease-out, color 0.15s ease-out, transform 0.1s ease-out;
 }
 .seg button + button { border-left: 1px solid var(--border-panel); }
 .seg button[aria-pressed="true"] { background: var(--color-left); color: var(--color-text-pinched); }
@@ -178,8 +178,10 @@ body[data-theme="bw"] .answer.bad .answer-name { text-decoration: line-through; 
 .chip {
   min-width: 0; min-height: 44px; padding: 4px 6px; border-radius: var(--radius-control); border: var(--border-width) solid var(--border-panel);
   background: var(--color-panel); color: var(--color-btn-text); font: 600 14px/1.15 var(--font-main); cursor: pointer;
-  touch-action: manipulation; overflow-wrap: break-word; hyphens: auto; transition: background 0.15s ease-out, color 0.15s ease-out;
+  overflow-wrap: break-word; hyphens: auto; transition: background 0.15s ease-out, color 0.15s ease-out, transform 0.1s ease-out;
 }
+/* Pressed: tabs, segments and chips give a little under the finger. */
+:is(.tab, .seg button, .chip):active { transform: scale(0.97); }
 .chips[data-ex="degrees"] .chip { font-family: var(--font-num); font-size: 19px; font-weight: 700; padding: 4px 0; }
 .chip[aria-pressed="true"] { background: var(--color-left); border-color: var(--color-left); color: var(--color-text-pinched); }
 .pick-hint { margin: 0; font-size: 13px; color: var(--color-text-inactive); }
@@ -234,5 +236,5 @@ body[data-theme="bw"] :is(.flame, .heart:not(.lost)) { color: var(--color-text);
 @media (prefers-reduced-motion: reduce) {
   .step.next .step-circle { animation: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-right) 30%, transparent); }
   .done-stars .star, .pop, .shake, .burst span { animation: none; }
-  .answer:active:not(.after), .card-btn:active, .step[aria-pressed="true"] .step-circle { transform: none; }
+  .answer:active:not(.after), .card-btn:active, .step[aria-pressed="true"] .step-circle, .step:active .step-circle, :is(.tab, .seg button, .chip):active { transform: none; }
 }
