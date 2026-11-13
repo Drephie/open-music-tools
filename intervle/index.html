@@ -58,9 +58,12 @@
       <div id="panel" class="play-panel" role="tabpanel">
         <p id="prompt" class="prompt"></p>
         <div class="play-row">
-          <button id="play-btn" class="btn btn-primary play-btn">
-            <svg aria-hidden="true"><use href="#i-play"/></svg><span class="play-label">Play</span>
-          </button>
+          <div class="play-buttons">
+            <button id="play-btn" class="btn btn-primary play-btn">
+              <svg aria-hidden="true"><use href="#i-play"/></svg><span class="play-label">Play</span>
+            </button>
+            <button id="hint-btn" class="btn hint-btn" data-i18n="hint" hidden>Note by note</button>
+          </div>
           <div id="note-dots" class="note-dots" aria-hidden="true"></div>
         </div>
         <p id="loading" class="loading" role="status" hidden></p>

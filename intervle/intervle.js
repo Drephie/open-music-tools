@@ -124,10 +124,27 @@ function setBusy(on) {
   playBtn.querySelector('use').setAttribute('href', on ? '#i-stop' : '#i-play');
   playBtn.querySelector('.play-label').textContent = t(on ? 'stop' : 'play');
 }
+// Stop and changing mode: the piano and its echo fade out in 0.15 s instead of ringing on.
+let hushTimer = null, hushFrom = 0;
 function stopPlay() {
   playToken++;   // a Play still waiting for the piano never starts
+  if (rack && isPlaying()) {
+    const v = rack.master.volume;
+    if (!hushTimer) hushFrom = v.value;
+    v.cancelScheduledValues(Tone.now());
+    v.rampTo(-60, 0.15);
+    clearTimeout(hushTimer);
+    hushTimer = setTimeout(unhush, 400);
+  }
   stopSound();
   showDots(puzzle(settings.mode, day).events.length, -1);
+}
+function unhush() {
+  if (!hushTimer) return;
+  clearTimeout(hushTimer);
+  hushTimer = null;
+  rack.master.volume.cancelScheduledValues(Tone.now());
+  rack.master.volume.value = hushFrom;
 }
 // The sound is switched on first (Tone.start() runs at once, inside the tap) and the
 // piano loaded; only then are the notes scheduled, so the first Play is never lost.
@@ -138,6 +155,7 @@ async function playEvents(events) {
   setBusy(true);
   if (ready) await ready;
   if (token !== playToken) return;
+  if (rack) unhush();
   if (!rack) {
     loadingEl.textContent = t('loading');
     loadingEl.hidden = false;
@@ -159,6 +177,9 @@ async function playEvents(events) {
 }
 const isPlaying = () => Tone.now() < soundEnd;
 const playPuzzle = () => (playBtn.classList.contains('busy') ? stopPlay() : playEvents(puzzle(settings.mode, day).events));
+// Hard's hint: the chord again, one note at a time.
+const hintBtn = $('hint-btn');
+hintBtn.addEventListener('click', () => playEvents(puzzle('hard', day).hint));
 
 // --- SCREEN ---
 const tabs = [...document.querySelectorAll('.tab')];
@@ -172,6 +193,7 @@ function render() {
   $('day-num').textContent = '#' + day;
   $('day-date').textContent = dateText(day, { weekday: 'long', day: 'numeric', month: 'long' });
   if (!isPlaying()) showDots(p.events.length, -1);
+  hintBtn.hidden = mode !== 'hard';
   $('today-btn').hidden = day === today;
   tabs.forEach((b) => {
     const on = b.dataset.mode === mode, r = resultOf(day, b.dataset.mode);

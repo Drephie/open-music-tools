@@ -11,7 +11,8 @@
  *   dateOf(n)        the local Date of puzzle n
  *   puzzle(mode, n) -> { answer, events: [{ at, dur, notes: [midi] }], ref }
  *     ref is the told note's MIDI (Medium, Hard). Hard: the told note, then a
- *     whole chord on another root (within an octave): name its root and type. After the 365-day list it
+ *     whole chord on another root (within an octave), all at once: name its root
+ *     and type. Hard also has `hint`: the same, with the chord one note at a time first. After the 365-day list it
  *     starts again, shifted to other notes.
  *   parseAnswer(mode, text, names) -> answer or null. Typed answers: half steps or
  *     "m3", "maj 3", "P5"... (easy), "E", "Mi", "Eb", "Re#" (medium), "F#m7", "Fa#m7",
@@ -53,10 +54,9 @@ export function puzzle(mode, n) {
   }
   const root = ref + b;
   const notes = CHORDS[c].map((s) => root + s);
-  const events = [{ at: 0, dur: 1, notes: [ref] }];
-  notes.forEach((m, k) => events.push({ at: 1.3 + k * 0.45, dur: 0.6, notes: [m] }));
-  events.push({ at: 1.5 + notes.length * 0.45, dur: 2.2, notes });
-  return { answer: `${(root + 120) % 12}:${c}`, ref, events };
+  const first = { at: 0, dur: 1, notes: [ref] };
+  const hint = [first, ...notes.map((m, k) => ({ at: 1.3 + k * 0.45, dur: 0.6, notes: [m] })), { at: 1.5 + notes.length * 0.45, dur: 2.2, notes }];
+  return { answer: `${(root + 120) % 12}:${c}`, ref, events: [first, { at: 1.3, dur: 2.2, notes }], hint };
 }
 
 const LETTERS = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11, do: 0, re: 2, mi: 4, fa: 5, sol: 7, la: 9, si: 11 };

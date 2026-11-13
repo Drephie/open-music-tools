@@ -35,8 +35,9 @@ export function checkGame(game, theory) {
     if (p.events[0].notes[0] !== p.ref || Math.abs(root - p.ref) > 12) return `#${n}: ref ${p.ref} root ${root}`;
     if (root % 12 !== +pc || chord.map((m) => m - root).join() !== CHORDS[type].join()) return `#${n}: ${chord} is not ${p.answer}`;
     if (root < 36 || Math.max(...chord) > 90) return `#${n}: out of range ${chord}`;
-    const one = p.events.slice(1, -1).map((e) => e.notes[0]).join();
-    if (one !== chord.join()) return `#${n}: one by one ${one}, together ${chord}`;
+    if (p.events.length !== 2) return `#${n}: the chord isn't played all at once`;
+    const one = p.hint.slice(1, -1).map((e) => e.notes[0]).join();
+    if (p.hint[0].notes[0] !== p.ref || one !== chord.join() || p.hint[p.hint.length - 1].notes.join() !== chord.join()) return `#${n}: hint ${one}, chord ${chord}`;
   });
   for (const mode of game.MODES) {
     const list = days.slice(0, 365).map((n) => puzzle(mode, n).answer);
