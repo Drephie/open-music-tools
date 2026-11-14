@@ -247,9 +247,25 @@ body[data-theme="snap"] .panel { border-color: transparent; backdrop-filter: non
 }
 body[data-theme="bw"] :is(.mic-msg, .status.msg .status-main) { border-radius: 0; }
 
+/* Windows open gently: a quick fade and a slight grow, from the middle of the
+   screen (no closing animation: closing should feel instant). Browsers without
+   @starting-style simply show the window, as before. */
+.centered-modal { transition: opacity 0.2s cubic-bezier(0.23, 1, 0.32, 1), transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+.modal-overlay { transition: background-color 0.2s ease-out; }
+@starting-style {
+  .centered-modal { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+  .modal-overlay { background-color: transparent; }
+  .modal-overlay > .centered-modal { opacity: 0; transform: scale(0.96); }
+}
+
 /* Reduce motion (a phone or computer setting): no pressing bounce. */
 @media (prefers-reduced-motion: reduce) {
   .btn:active, .icon-btn:active, .round-btn:active { transform: none; }
+  /* Windows only fade in. */
+  @starting-style {
+    .centered-modal { transform: translate(-50%, -50%); }
+    .modal-overlay > .centered-modal { transform: none; }
+  }
 }
 
 /* A drawn sharp or flat (shared/ui/accidentals.js): strokes in the text colour. */
