@@ -145,7 +145,8 @@ body[data-theme="bw"] .answer.bad .answer-name { text-decoration: line-through; 
 .done-stars .star { width: 54px; height: 54px; animation: star-in 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) backwards; }
 .done-stars .star:nth-child(2) { width: 66px; height: 66px; margin-bottom: 8px; animation-delay: 0.15s; }
 .done-stars .star:nth-child(3) { animation-delay: 0.3s; }
-@keyframes star-in { from { transform: scale(0) rotate(-40deg); opacity: 0; } }
+/* From a little under full size, so the stars land instead of growing from a dot. */
+@keyframes star-in { from { transform: scale(0.5) rotate(-40deg); opacity: 0; } }
 .done-score { display: flex; align-items: center; gap: 6px; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 64px; font-weight: 800; line-height: 1; }
 .done-score .flame { width: 56px; height: 56px; }
 .done-title { margin: 0; font-family: var(--font-display); font-size: 28px; line-height: 1.1; font-weight: var(--title-weight); color: var(--color-title); text-transform: var(--title-transform); letter-spacing: var(--title-spacing); text-wrap: balance; }
