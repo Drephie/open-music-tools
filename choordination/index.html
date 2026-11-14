@@ -93,10 +93,10 @@
     @media (hover: hover) and (pointer: fine) { #choordination-watermark:hover { opacity: 1; transform: scale(1.04); } }
     body:is([data-theme="pink"], [data-theme="snap"]) #choordination-watermark { color: var(--color-title); opacity: 1; }
 
-    #patreon-link { position: absolute; bottom: calc(25px + var(--frame-bottom)); left: calc(30px + var(--frame-sides)); z-index: 6; font-size: 14px; font-weight: 600; color: var(--color-text); text-shadow: var(--credit-shadow); transition: all 0.5s ease; }
+    #patreon-link { position: absolute; bottom: calc(25px + var(--frame-bottom)); left: calc(30px + var(--frame-sides)); z-index: 6; font-size: 14px; font-weight: 600; color: var(--color-text); text-shadow: var(--credit-shadow); transition: color 0.5s ease, text-shadow 0.5s ease, opacity 0.5s ease; }
     #patreon-link a { color: var(--color-right); text-decoration: none; font-weight: 700; transition: color 0.5s ease;} @media (hover: hover) and (pointer: fine) { #patreon-link a:hover { text-decoration: underline; } }
 
-    #designer-credit { position: absolute; bottom: calc(25px + var(--frame-bottom)); right: calc(30px + var(--frame-sides)); z-index: 6; font-size: 14px; font-weight: 600; color: var(--color-text); text-shadow: var(--credit-shadow); transition: all 0.5s ease; }
+    #designer-credit { position: absolute; bottom: calc(25px + var(--frame-bottom)); right: calc(30px + var(--frame-sides)); z-index: 6; font-size: 14px; font-weight: 600; color: var(--color-text); text-shadow: var(--credit-shadow); transition: color 0.5s ease, text-shadow 0.5s ease, opacity 0.5s ease; }
     #designer-credit a { color: var(--color-right); text-decoration: none; font-weight: 700; transition: color 0.5s ease;} @media (hover: hover) and (pointer: fine) { #designer-credit a:hover { text-decoration: underline; } }
 
     #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-overlay); z-index: 10; backdrop-filter: blur(10px); }
@@ -118,9 +118,9 @@
     .error-actions { display: flex; gap: 12px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
     .error-actions .settings-action-btn { width: auto; padding: 12px 22px; }
 
-    #top-right-menu { position: absolute; top: calc(20px + var(--frame-top)); right: calc(20px + var(--frame-sides)); z-index: 6; gap: 10px; align-items: center; transition: all 0.5s ease; display: none; }
+    #top-right-menu { position: absolute; top: calc(20px + var(--frame-top)); right: calc(20px + var(--frame-sides)); z-index: 6; gap: 10px; align-items: center; transition: color 0.5s ease, text-shadow 0.5s ease, opacity 0.5s ease; display: none; }
 
-    .menu-btn { background: var(--color-panel); border: 1px solid var(--border-panel); color: var(--color-btn-text); padding: 8px 16px; min-height: 44px; border-radius: var(--radius-control); cursor: pointer; font-family: var(--font-main); font-weight: 600; backdrop-filter: blur(12px); font-size: 15px; transition: 0.2s; }
+    .menu-btn { background: var(--color-panel); border: 1px solid var(--border-panel); color: var(--color-btn-text); padding: 8px 16px; min-height: 44px; border-radius: var(--radius-control); cursor: pointer; font-family: var(--font-main); font-weight: 600; backdrop-filter: blur(12px); font-size: 15px; transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, transform 0.1s ease-out; }
     @media (hover: hover) and (pointer: fine) { .menu-btn:hover { background: var(--color-hover); color: var(--color-hover-text); } }
     /* Pink theme: solid candy-pink pill buttons with white text. */
     body[data-theme="pink"] .menu-btn { background: var(--color-left); border-color: var(--border-panel); color: var(--color-text-pinched); box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--color-left) 60%, transparent); }
@@ -155,6 +155,10 @@
         max-height: 85vh; max-height: 85dvh; overflow-y: auto; /* Fixes zoom overflow issue */
     }
     body[data-theme="liquid"] .centered-modal { box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+    /* Windows open gently (a quick fade and a slight grow), as in the other tools; closing stays instant. */
+    .centered-modal { transition: opacity 0.2s cubic-bezier(0.23, 1, 0.32, 1), transform 0.2s cubic-bezier(0.23, 1, 0.32, 1); }
+    @starting-style { .centered-modal { opacity: 0; transform: translate(-50%, -50%) scale(0.96); } }
+    @media (prefers-reduced-motion: reduce) { @starting-style { .centered-modal { transform: translate(-50%, -50%); } } }
 
     #tutorial-modal, #boot-modal, #patreon-nag, #logo-info-modal { width: 80%; max-width: 600px; gap: 15px; border-radius: 16px; }
 
@@ -186,7 +190,7 @@
 
     .highlight-label { color: var(--color-right); }
 
-    .settings-action-btn { width: 100%; min-height: 44px; padding: 10px; margin-top: 5px; font-family: var(--font-main); font-size: 14px; font-weight: 600; cursor: pointer; background: transparent; color: var(--color-right); border: var(--border-width) solid var(--color-right); border-radius: var(--radius-control); transition: 0.2s; text-align: center; display: inline-block; text-decoration: none; box-sizing: border-box; }
+    .settings-action-btn { width: 100%; min-height: 44px; padding: 10px; margin-top: 5px; font-family: var(--font-main); font-size: 14px; font-weight: 600; cursor: pointer; background: transparent; color: var(--color-right); border: var(--border-width) solid var(--color-right); border-radius: var(--radius-control); transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, transform 0.1s ease-out; text-align: center; display: inline-block; text-decoration: none; box-sizing: border-box; }
     @media (hover: hover) and (pointer: fine) { .settings-action-btn:hover:not(:disabled) { background: var(--color-left); color: var(--color-text-pinched); } }
     .settings-action-btn:disabled { border-color: var(--color-text-inactive); color: var(--color-text-inactive); cursor: not-allowed; }
     .settings-action-btn:focus-visible, .menu-btn:focus-visible, .close-btn:focus-visible, button.start-btn:focus-visible { outline: 2px solid var(--color-right); outline-offset: 2px; }
@@ -230,7 +234,7 @@
     .about-credits { font-size: 13px; line-height: 1.5; padding: 0 10px 10px; margin: 0; color: var(--color-text-inactive); }
     .about-credits a { color: var(--color-right); }
 
-    button.start-btn { padding: 15px 40px; font-size: 20px; font-weight: 700; cursor: pointer; background: transparent; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); color: var(--color-text); transition: all 0.3s ease; font-family: var(--font-main); backdrop-filter: blur(5px); }
+    button.start-btn { padding: 15px 40px; font-size: 20px; font-weight: 700; cursor: pointer; background: transparent; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); color: var(--color-text); transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, transform 0.1s ease-out; font-family: var(--font-main); backdrop-filter: blur(5px); }
     @media (hover: hover) and (pointer: fine) { button.start-btn:hover { transform: scale(1.03); background: var(--color-hover); border-color: var(--color-right); } }
 
     /* Patreon Overlay — follows the active theme; only the Patreon button keeps
