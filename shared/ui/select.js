@@ -145,8 +145,9 @@ export function buildCustomSelect(container) {
   });
   syncTriggerText();
 
-  trigger.addEventListener('click', (e) => { e.stopPropagation(); isOpen() ? close() : open(); });
+  trigger.addEventListener('click', (e) => { e.stopPropagation(); list.classList.remove('kbd'); isOpen() ? close() : open(); });
   trigger.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') list.classList.add('kbd');   // the highlight outline is for arrow keys only
     switch (e.key) {
       case 'ArrowDown': e.preventDefault(); isOpen() ? move(1) : open(); break;
       case 'ArrowUp': e.preventDefault(); isOpen() ? move(-1) : open(); break;

@@ -29,11 +29,23 @@
   top: 100%; left: 0; right: 0; z-index: 99; border-radius: min(var(--radius-control, 10px), 18px); margin-top: 6px; padding: 4px;
   max-height: 340px; overflow-y: auto; overscroll-behavior: contain; box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.55);
 }
+/* A list opens gently: a quick fade and a few pixels' slide out of its box
+   (up or down, the way it opens). Closing is instant. */
+.select-items { transform-origin: top center; transition: opacity 0.15s ease-out, transform 0.15s cubic-bezier(0.23, 1, 0.32, 1); }
+.select-items.select-up { transform-origin: bottom center; }
+@starting-style {
+  .select-items { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  .select-items.select-up { transform: translateY(4px) scale(0.98); }
+}
+@media (prefers-reduced-motion: reduce) {
+  @starting-style { .select-items, .select-items.select-up { transform: none; } }
+}
 .select-items div { color: var(--color-select-text); padding: 11px 12px; min-height: 22px; line-height: 1.25; cursor: pointer; touch-action: manipulation; border-radius: min(var(--radius-control, 10px), 12px); overflow-wrap: break-word; }
 .select-items div:active, .same-as-selected { background-color: var(--color-select-hover); color: var(--color-select-text); }
 @media (hover: hover) and (pointer: fine) { .select-items div:hover { background-color: var(--color-select-hover); color: var(--color-select-text); } }
 .same-as-selected { font-weight: 800; }
-.option-highlight { outline: 2px solid var(--color-right); outline-offset: -2px; }
+/* The arrow-key outline shows only while the list is used with the keyboard, not after a tap. */
+.select-items.kbd .option-highlight { outline: 2px solid var(--color-right); outline-offset: -2px; }
 .option-disabled { opacity: 0.45; cursor: not-allowed; }
 /* Must out-specify `.compact-grid .select-items { display: grid }` (0,2,0)
    or the Musical Key list can never collapse. */

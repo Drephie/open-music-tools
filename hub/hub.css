@@ -21,6 +21,10 @@ html, body { overscroll-behavior: auto; }
   box-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.5);
 }
 .lang-menu[hidden] { display: none; }
+/* Opens gently from the flag button: a quick fade and a few pixels' slide. */
+.lang-menu { transform-origin: top right; transition: opacity 0.15s ease-out, transform 0.15s cubic-bezier(0.23, 1, 0.32, 1); }
+@starting-style { .lang-menu { opacity: 0; transform: translateY(-4px) scale(0.98); } }
+@media (prefers-reduced-motion: reduce) { @starting-style { .lang-menu { transform: none; } } }
 .lang-menu button {
   display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 10px; cursor: pointer; text-align: left;
   border: 0; border-radius: calc(var(--radius-control) - 4px); background: transparent;
