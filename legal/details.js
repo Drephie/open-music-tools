@@ -7,10 +7,10 @@
  * `governingLaw` write the place whose law applies, e.g. "Spain" or "Italy".
  */
 export const LEGAL_DETAILS = {
-  legalName: '[LEGAL NAME]',            // your full legal name, or the company's name
-  country: '[COUNTRY]',                 // where you live or the company is based
-  email: '[CONTACT EMAIL]',             // a public address people can write to
+  legalName: 'Andrea Nicoli',           // your full legal name, or the company's name
+  country: { en: 'Italy', es: 'Italia', it: 'Italia' },   // a plain text, or one text per language
+  email: 'nicoliandrea@mail.com',      // a public address people can write to
   taxInfo: '',                          // tax or company number if you have one (e.g. "VAT: …"); '' to leave out
-  governingLaw: '[COUNTRY WHOSE LAW APPLIES]',
+  governingLaw: { en: 'Italy', es: 'Italia', it: 'Italia' },
   updated: '2026-11-14',                // the date the texts were last changed
 };

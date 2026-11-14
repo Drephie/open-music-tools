@@ -17,14 +17,18 @@ const look = loadLook();
 const page = document.body.dataset.page;   // 'privacy' or 'terms'
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const isTodo = (v) => /^\[.*\]$/.test(v);
-const details = Object.fromEntries(Object.entries(LEGAL_DETAILS).map(([k, v]) => [k, isTodo(v) ? `<span class="todo">${esc(v)}</span>` : esc(v)]));
-const anyTodo = Object.values(LEGAL_DETAILS).some(isTodo);
+const isTodo = (v) => typeof v === 'string' && /^\[.*\]$/.test(v);
+const pick = (v) => (v && typeof v === 'object' ? v[look.lang] ?? v.en : v);
+const show = (v) => (isTodo(v) ? `<span class="todo">${esc(v)}</span>` : esc(v));
+// Getters, so a language change picks the right text of a detail given per language.
+const details = {};
+for (const k of Object.keys(LEGAL_DETAILS)) Object.defineProperty(details, k, { enumerable: true, get: () => show(pick(LEGAL_DETAILS[k])) });
+const anyTodo = Object.values(LEGAL_DETAILS).some((v) => isTodo(pick(v)));
 
 const i18n = createI18n({
   strings: mergeStrings(HUB_STRINGS, LEGAL_STRINGS),
   getLang: () => look.lang,
-  vars: { patreon: PATREON_URL, instagram: DESIGNER_URL, tiktok: TIKTOK_URL, repo: REPO_URL, ...details },
+  vars: Object.defineProperties({ patreon: PATREON_URL, instagram: DESIGNER_URL, tiktok: TIKTOK_URL, repo: REPO_URL }, Object.getOwnPropertyDescriptors(details)),
 });
 const { t, interp } = i18n;
 

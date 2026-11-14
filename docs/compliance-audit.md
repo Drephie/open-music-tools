@@ -8,7 +8,7 @@ All in **`legal/details.js`** (one file; the pages show missing items as marked 
 
 | Placeholder | What to write |
 |---|---|
-| `legalName` | your full legal name, or the company name |
+| `legalName` | filled in: Andrea Nicoli |
 | `country` | where you live / the company is based |
 | `email` | a public contact address (also used for privacy questions) |
 | `taxInfo` | tax or company number if you have one (e.g. VAT number), otherwise leave empty |
