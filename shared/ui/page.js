@@ -129,6 +129,8 @@ export function saveLook(changes) {
       const url = new URL(location.href);
       url.searchParams.delete('lang');
       history.replaceState(history.state, '', url);
+      const canonical = document.querySelector('link[rel="canonical"]');
+      if (canonical) canonical.href = canonical.href.split('?')[0];
     } catch { /* no history: the address keeps it */ }
   }
 }

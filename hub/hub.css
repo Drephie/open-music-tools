@@ -50,6 +50,14 @@ body:is([data-theme="y2k"], [data-theme="retro"]) .hub-logo { color: var(--color
 
 .hub-main { display: flex; flex-direction: column; gap: var(--space-6); }
 .hub-section-title { margin: 0 0 var(--space-3); font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--color-text-inactive); }
+/* About and questions at the bottom: plain reading text (also what search engines read). */
+.hub-about { max-width: 44em; }
+.hub-about p { margin: 0 0 var(--space-3); font-size: 15px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 88%, transparent); text-wrap: pretty; }
+.hub-about a { color: inherit; font-weight: 700; text-underline-offset: 3px; }
+.hub-about h3 { margin-top: var(--space-5); }
+.hub-faq { margin: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+.hub-faq dt { font-size: 15px; font-weight: 700; line-height: 1.4; color: var(--color-text); }
+.hub-faq dd { margin: 2px 0 0; font-size: 15px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 82%, transparent); text-wrap: pretty; }
 .tool-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); }
 .tool-grid > li { display: flex; min-width: 0; }
 
