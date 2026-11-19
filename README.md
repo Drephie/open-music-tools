@@ -16,7 +16,9 @@ Made by Drephie ([Instagram](https://instagram.com/drephie), [TikTok](https://ww
 - **Choordination**: play chords with your hands in front of the camera
 - **Chordigits**: count chords on your fingers in front of the camera, tilt for major or minor
 
-Coming later: BPM Finder, Chord Finder, Practice Player and Jam Machine.
+- **Jam Machine**: a backing band (chords, drums and bass) in eight styles to play and sing over
+
+Coming later: BPM Finder, Chord Finder and Practice Player.
 
 ## Privacy
 

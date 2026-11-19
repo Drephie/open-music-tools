@@ -16,7 +16,7 @@
  * Bump CACHE_NAME whenever a cached file changes. Add each new tool's files
  * to APP_SHELL. Bump CDN_CACHE only when a pinned CDN version changes.
  */
-const CACHE_NAME = 'open-music-tools-v42';
+const CACHE_NAME = 'open-music-tools-v43';
 const CDN_CACHE = 'open-music-tools-cdn-v1';
 const APP_SHELL = [
   './',
@@ -95,6 +95,15 @@ const APP_SHELL = [
   'intervle/puzzles.js',
   'intervle/strings.js',
   'intervle/favicon.svg',
+  'jam-machine/',
+  'jam-machine/index.html',
+  'jam-machine/jam-machine.css',
+  'jam-machine/jam-machine.js',
+  'jam-machine/jam.js',
+  'jam-machine/styles.js',
+  'jam-machine/band.js',
+  'jam-machine/strings.js',
+  'jam-machine/favicon.svg',
   'vocal-tuner/',
   'vocal-tuner/index.html',
   'vocal-tuner/vocal-tuner.css',
