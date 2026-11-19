@@ -16,7 +16,7 @@ import { createModalManager } from '../shared/ui/modal.js';
 import { accidentalHtml, prettyName } from '../shared/ui/accidentals.js';
 import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
-import { STYLES, STYLE_IDS, METER_IDS, MAX_BEATS, chordBeats, styleMeter, MAX_BARS, MAX_SECTIONS, SECTION_TYPES, chordLabel, chordNotes, keyName, randomKey, newProgression, nextChord, suggestions, changeMode, moveChord, sameChord, toFile, fromFile, nextSectionType, sectionNumbers, duplicateSection, moveSection } from './jam.js';
+import { STYLES, STYLE_IDS, METERS, METER_IDS, MAX_BEATS, chordBeats, styleMeter, MAX_BARS, MAX_SECTIONS, SECTION_TYPES, chordLabel, chordNotes, keyName, randomKey, newProgression, nextChord, suggestions, changeMode, moveChord, sameChord, toFile, fromFile, nextSectionType, sectionNumbers, duplicateSection, moveSection } from './jam.js';
 import { createBand } from './band.js';
 import { JAM_STRINGS } from './strings.js';
 
@@ -201,6 +201,14 @@ function renderBars() {
     barsEl.appendChild(b);
   });
   $('add-bar').hidden = chords().length >= MAX_BARS;
+  // Whole bars? If the chords leave a bar short, the beat drifts each time it loops: say so and mark the gap.
+  const per = METERS[jam.meter].beats, total = chords().reduce((n, c) => n + chordBeats(c, jam.meter), 0);
+  const missing = (per - (total % per)) % per;
+  $('bar-warn').hidden = !missing;
+  document.querySelector('.jm').classList.toggle('warn', !!missing);
+  $('bar-warn-text').textContent = missing === 1 ? t('shortBar1') : missing ? tf('shortBar', { beats: beatsText(missing) }) : '';
+  const lastBar = barsEl.lastElementChild;
+  if (missing && lastBar) { lastBar.classList.add('short-bar'); lastBar.style.setProperty('--missing', missing); }
   $('bars-num').textContent = chords().length;
   lightBars(isPlaying() ? 0 : -1);
   fitNames();
@@ -401,6 +409,14 @@ function removeBar() {
   renderBars();
 }
 $('add-bar').addEventListener('click', addBar);
+// Fill the bar: the last chord gets the missing beats.
+$('fill-bar').addEventListener('click', () => {
+  const per = METERS[jam.meter].beats, list = chords(), last = list[list.length - 1];
+  const total = list.reduce((n, c) => n + chordBeats(c, jam.meter), 0), missing = (per - (total % per)) % per;
+  if (!missing) return;
+  last.beats = Math.min(MAX_BEATS, chordBeats(last, jam.meter) + missing);
+  renderBars();
+});
 
 // Holding − or + keeps going, faster and faster; a tap or a key press is one step.
 function holdRepeat(btn, step) {

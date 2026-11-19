@@ -41,6 +41,7 @@ These win over anything above.
 - **Chord length:** each chord's window has Length (− 4 beats +), 1 to 16 beats; a whole bar unless changed. The beat lines under a chord show its length. The drums keep their bars whatever the chords do.
 - **Sections** can be dragged to change the song's order (hold a name on a phone).
 - Synth drums in Jazz fixed (the ride and the hi-hat now have their own synths).
+- **Bars that aren't full:** when a section's chords don't add up to whole bars, the last chord gets a dashed outline with the missing beats drawn dashed, and a notice says how many beats are missing (the beat drifts each time it loops) with **Fill the bar**, which gives the last chord the missing beats (Drephie).
 - Bigger chords: four or fewer show as two big cards a row on phones and big cards on computers; stronger labels.
 
 ## Not in this version

@@ -43,6 +43,7 @@ export const JAM_STRINGS = {
     kit: "Drums", kitAcoustic: "Acoustic kit", kitSynth: "Synth drums",
     fileTitle: "Copy, save or open", fileHint: "A saved .omt file keeps the whole jam: sections, chords, key, speed and sounds. It stays on your device; open it here again any time.",
     meter: "Time signature", chordLen: "Length", fewerBeats: "One beat shorter", moreBeats: "One beat longer", beat1: "1 beat", beatsN: "{n} beats",
+    shortBar: "{beats} short of a full bar: the beat will drift each time it loops.", shortBar1: "1 beat short of a full bar: the beat will drift each time it loops.", fillBar: "Fill the bar",
     loading: "Loading sounds…", loadFailed: "The sounds didn't load. Check your connection and press Play again.",
   },
   es: {
@@ -76,6 +77,7 @@ export const JAM_STRINGS = {
     kit: "Batería", kitAcoustic: "Batería acústica", kitSynth: "Batería sintética",
     fileTitle: "Copiar, guardar o abrir", fileHint: "Un archivo .omt guardado conserva toda la jam: secciones, acordes, tonalidad, velocidad y sonidos. Se queda en tu dispositivo; ábrelo aquí cuando quieras.",
     meter: "Compás", chordLen: "Duración", fewerBeats: "Un tiempo menos", moreBeats: "Un tiempo más", beat1: "1 tiempo", beatsN: "{n} tiempos",
+    shortBar: "Faltan {beats} para completar el compás: el ritmo se desplazará en cada repetición.", shortBar1: "Falta 1 tiempo para completar el compás: el ritmo se desplazará en cada repetición.", fillBar: "Completar",
     loading: "Cargando sonidos…", loadFailed: "Los sonidos no se cargaron. Revisa tu conexión y pulsa Tocar otra vez.",
   },
   it: {
@@ -109,6 +111,7 @@ export const JAM_STRINGS = {
     kit: "Batteria", kitAcoustic: "Batteria acustica", kitSynth: "Batteria sintetica",
     fileTitle: "Copia, salva o apri", fileHint: "Un file .omt salvato conserva tutta la jam: sezioni, accordi, tonalità, velocità e suoni. Resta sul tuo dispositivo; riaprilo qui quando vuoi.",
     meter: "Metro", chordLen: "Durata", fewerBeats: "Un tempo in meno", moreBeats: "Un tempo in più", beat1: "1 tempo", beatsN: "{n} tempi",
+    shortBar: "Mancano {beats} per completare la battuta: il ritmo si sposterà a ogni ripetizione.", shortBar1: "Manca 1 tempo per completare la battuta: il ritmo si sposterà a ogni ripetizione.", fillBar: "Completa",
     loading: "Caricamento dei suoni…", loadFailed: "I suoni non si sono caricati. Controlla la connessione e premi di nuovo Suona.",
   },
 };

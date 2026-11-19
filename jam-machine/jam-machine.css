@@ -18,6 +18,7 @@
 .sections { order: 4; }
 .bars { order: 4; }
 .add-bar { order: 5; }
+.bar-warn { order: 5; }
 .loading { order: 6; }
 .actions { order: 7; }
 .mixer-panel { display: none; }
@@ -109,6 +110,7 @@
 .bars.few .bar-num { top: 8px; left: 11px; font-size: 12px; }
 .bars.few .bar-lock { top: 8px; right: 10px; width: 17px; height: 17px; }
 .jm.adv-open .bars.few .bar { height: clamp(70px, 11dvh, 96px); }
+.jm.warn .bars.few .bar { height: clamp(74px, 12.5dvh, 112px); }
 .sr-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .bar-num { position: absolute; top: 5px; left: 8px; font: 700 11px/1 var(--font-main); color: var(--color-text-inactive); }
 .bar-name { max-width: 100%; font: var(--title-weight) clamp(22px, 7vw, 34px)/1 var(--font-display); letter-spacing: var(--title-spacing); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -142,6 +144,13 @@ body.drag-on { cursor: grabbing; }
 }
 .add-bar svg { width: 18px; height: 18px; }
 .add-bar[hidden] { display: none; }
+/* The chords don't fill whole bars: the last one is marked and a notice offers to fill the bar. */
+.bar-warn { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: 8px 8px 8px 14px; border-radius: var(--radius-control);
+  border: var(--border-width) solid var(--color-warn-end); background: color-mix(in srgb, var(--color-warn-end) 14%, transparent); font-size: 13.5px; font-weight: 600; line-height: 1.3; }
+.bar-warn[hidden] { display: none; }
+.bar-warn .btn { flex: none; min-height: 44px; padding: 6px 14px; font-size: 15px; }
+.bar.short-bar { border-style: dashed; border-color: var(--color-warn-end); }
+.bar.short-bar .beats::after { content: ''; flex: var(--missing, 1); height: 4px; border-radius: 2px; border: 1.5px dashed var(--color-warn-end); box-sizing: border-box; }
 .loading { margin: 0; text-align: center; font-size: 14px; font-weight: 600; color: var(--color-text-inactive); }
 
 /* --- New chords, Play, Sounds --- */
