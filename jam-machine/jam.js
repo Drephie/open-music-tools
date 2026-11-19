@@ -16,7 +16,7 @@
  *   STYLE_IDS, STYLES (./styles.js), QUALITIES, MAX_BARS (64), MAJOR, MINOR
  *   parseNumeral(token, mode) -> chord   ('bVII', 'ii7', 'Imaj7', 'iiø7'...)
  *   resolve(chord, mode) -> { step, semi, quality }
- *   chordLabel(chord, key, solfege) -> { name: 'F#m7' | 'Fa#m7', numeral: 'vi7' }
+ *   chordLabel(chord, key, solfege) -> { name: 'F#m7' | 'Fa# m7', root: 'F#', suffix: 'm7', numeral: 'vi7' }
  *     (plain # and b; the screen draws ♯ and ♭)
  *   chordNotes(chord, key, prevUpper) -> { pcs, upper, bass, root, third, fifth, seventh }
  *     upper: MIDI notes for the chord sound, near the key's note around
@@ -115,6 +115,7 @@ export function chordLabel(chord, key, solfege) {
   const shift = mod12(r.semi - scale(key.mode)[r.step]);
   const roman = LOWER.has(r.quality) ? ROMAN[r.step].toLowerCase() : ROMAN[r.step];
   return {
+    root, suffix,
     name: root + (solfege && suffix ? ' ' : '') + suffix,   // 'La m7', as theory.js names chords
     numeral: (shift === 11 ? 'b' : shift === 1 ? '#' : '') + roman + NUM_SUFFIX[r.quality],
   };

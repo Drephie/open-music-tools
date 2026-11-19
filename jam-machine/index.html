@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Jam Machine</title>
+  <meta name="description" content="Jam Machine: a free backing band to play and sing over. Chord progressions in eight styles with drums and bass. Runs in your browser; nothing is uploaded.">
+  <meta name="theme-color" content="#0f1419">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" integrity="sha384-c6Uo4N9c3SOEigMVzP6IshUG1wQ5uMp3xeoQFiHWAQ86joWdgyajkvopySyKy/Z6" crossorigin="anonymous" defer></script>
+  <link rel="stylesheet" href="../shared/fonts/fonts.css">
+  <link rel="stylesheet" href="../shared/ui/themes.css">
+  <link rel="stylesheet" href="../shared/ui/select.css">
+  <link rel="stylesheet" href="../shared/ui/page.css">
+  <link rel="stylesheet" href="jam-machine.css">
+</head>
+<body data-theme="rouge">
+<script>/* The saved theme before the first paint, so pages never flash Liquid Glass (page.js checks it afterwards). */try{var l=JSON.parse(localStorage.getItem('open-music-tools.look.v1'));if(l&&/^[a-z0-9]+$/.test(l.theme))document.body.dataset.theme=l.theme}catch(e){}</script>
+  <svg class="icons" aria-hidden="true">
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2.5" fill="currentColor"/></symbol>
+    <symbol id="i-dice" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><g fill="currentColor"><circle cx="8.5" cy="8.5" r="1.6"/><circle cx="15.5" cy="15.5" r="1.6"/><circle cx="12" cy="12" r="1.6"/></g></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M6 4v16M12 4v16M18 4v16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><g fill="currentColor"><rect x="3" y="13" width="6" height="3.5" rx="1.5"/><rect x="9" y="7" width="6" height="3.5" rx="1.5"/><rect x="15" y="11" width="6" height="3.5" rx="1.5"/></g></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8 10.5V8a4 4 0 0 1 7.6-1.8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/></g></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-open" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </svg>
+  <div id="theme-frame" aria-hidden="true"></div>
+  <div class="page">
+    <header class="tool-header">
+      <a class="icon-btn home-btn" href="../" data-i18n-aria="home" aria-label="Home: all the tools">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>
+      </a>
+      <h1 class="tool-title" data-i18n="title">Jam Machine</h1>
+      <div class="header-actions">
+        <button id="about-btn" class="icon-btn" data-i18n-aria="about" aria-label="About">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg>
+        </button>
+        <button id="settings-btn" class="icon-btn" data-i18n-aria="settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="jm">
+      <div class="col col-side">
+        <div id="styles" class="styles" role="group" data-i18n-aria="styleAria" aria-label="Style"></div>
+        <section id="advanced" class="advanced" data-i18n-aria="advancedAria" aria-label="Key and speed" hidden>
+          <div class="adv-row">
+            <div class="control-group">
+              <label for="key-select" data-i18n="key">Key</label>
+              <div class="custom-select"><select id="key-select"></select></div>
+            </div>
+            <div class="control-group">
+              <span id="mode-label" class="group-label" data-i18n="majorMinor">Major or minor</span>
+              <div id="mode-seg" class="seg" role="group" aria-labelledby="mode-label">
+                <button type="button" data-mode="random" data-i18n="random">Random</button>
+                <button type="button" data-mode="maj" data-i18n="major">Major</button>
+                <button type="button" data-mode="min" data-i18n="minor">Minor</button>
+              </div>
+            </div>
+          </div>
+          <div class="control-group">
+            <span id="speed-label" class="sr-label" data-i18n="speed">Speed</span>
+            <div class="tempo" role="group" aria-labelledby="speed-label">
+              <button id="slower" class="round-btn" data-i18n-aria="slower" aria-label="Slower">−</button>
+              <div class="bpm"><span id="bpm" class="bpm-num">100</span><span id="tempo-word" class="bpm-word"></span></div>
+              <button id="faster" class="round-btn plus" data-i18n-aria="faster" aria-label="Faster">+</button>
+              <button id="tap" class="btn tap-btn" data-i18n="tap">Tap</button>
+            </div>
+          </div>
+        </section>
+        <section class="panel mixer-panel" data-i18n-aria="sounds" aria-label="Sounds">
+          <div class="mixer"></div>
+        </section>
+      </div>
+
+      <div class="col col-main">
+        <div class="sheet-head">
+          <button id="adv-btn" class="key-btn" aria-expanded="false" aria-controls="advanced">
+            <span id="key-title" class="key-title"></span><span id="key-meta" class="key-meta"></span><svg class="chev" aria-hidden="true"><use href="#i-chevron"/></svg>
+          </button>
+          <span class="sheet-tools">
+            <button id="copy-btn" class="icon-btn" data-i18n-aria="copy" aria-label="Copy chords"><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
+            <button id="save-btn" class="icon-btn" data-i18n-aria="save" aria-label="Save to a file"><svg aria-hidden="true"><use href="#i-save"/></svg></button>
+            <button id="open-btn" class="icon-btn" data-i18n-aria="open" aria-label="Open a file"><svg aria-hidden="true"><use href="#i-open"/></svg></button>
+          </span>
+          <span id="toast" class="toast" role="status"></span>
+          <input id="file-input" type="file" hidden>
+        </div>
+        <div id="bars" class="bars" role="group" data-i18n-aria="barsAria" aria-label="The chords, one per bar"></div>
+        <button id="add-bar" class="add-bar"><svg aria-hidden="true"><use href="#i-plus"/></svg><span data-i18n="addBar">Add a bar</span></button>
+        <p id="loading" class="loading" role="status" hidden></p>
+        <div class="actions">
+          <button id="new-btn" class="btn"><svg aria-hidden="true"><use href="#i-dice"/></svg><span data-i18n="newChords">New chords</span></button>
+          <button id="play-btn" class="btn btn-primary play-btn"><svg aria-hidden="true"><use href="#i-play"/></svg><span class="play-label">Play</span></button>
+          <button id="sounds-btn" class="btn sounds-btn" data-i18n-aria="sounds" aria-label="Sounds"><svg aria-hidden="true"><use href="#i-sliders"/></svg></button>
+        </div>
+      </div>
+    </main>
+
+    <footer class="tool-footer">
+      <a class="support-link" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+      <span class="legal-links"><a href="../privacy/" data-i18n="privacyLink">Privacy</a><a href="../terms/" data-i18n="termsLink">Terms</a></span>
+      <span class="designer-credit"><span data-i18n="designedBy">Designed by</span> <a href="https://instagram.com/drephie" target="_blank" rel="noopener noreferrer">@drephie</a></span>
+    </footer>
+  </div>
+
+  <div id="chord-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="chord-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="chord-title">Bar 1</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <p class="group-label" data-i18n="fit">Chords that fit</p>
+    <div id="fit-list" class="choice-grid"></div>
+    <p class="group-label" data-i18n="more">More chords</p>
+    <div id="more-list" class="choice-grid"></div>
+    <div class="chord-actions">
+      <button id="lock-btn" class="btn"><svg aria-hidden="true"><use href="#i-lock"/></svg><span></span></button>
+      <button id="remove-btn" class="btn"><svg aria-hidden="true"><use href="#i-trash"/></svg><span data-i18n="remove">Remove</span></button>
+    </div>
+    <p class="about-small" data-i18n="dragHint"></p>
+  </div>
+
+  <div id="sounds-modal" class="centered-modal has-dropdowns" role="dialog" aria-modal="true" aria-labelledby="sounds-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="sounds-title" data-i18n="sounds">Sounds</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <div class="mixer"></div>
+  </div>
+
+  <div id="settings-modal" class="centered-modal has-dropdowns" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="settings-title" data-i18n="settings">Settings</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <div class="pair">
+      <div class="control-group">
+        <label for="theme-select" data-i18n="theme">Theme</label>
+        <div class="custom-select"><select id="theme-select"></select></div>
+      </div>
+      <div class="control-group">
+        <label for="lang-select" data-i18n="lang">Language</label>
+        <div class="custom-select"><select id="lang-select"></select></div>
+      </div>
+    </div>
+    <div class="control-group">
+      <span id="names-label" class="group-label" data-i18n="names">Note names</span>
+      <div id="names-seg" class="seg" role="group" aria-labelledby="names-label">
+        <button type="button" data-names="solfege" data-i18n="namesSolfege">Do Re Mi</button>
+        <button type="button" data-names="letters" data-i18n="namesLetters">C D E</button>
+      </div>
+    </div>
+    <div class="setting-row">
+      <span class="setting-text"><span id="countin-label" class="setting-label" data-i18n="countIn">Count-in</span><span class="about-small" data-i18n="countInHint"></span></span>
+      <button id="countin-switch" class="switch" role="switch" aria-checked="false" aria-labelledby="countin-label"></button>
+    </div>
+  </div>
+
+  <div id="about-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="about-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="about-title" data-i18n="aboutTitle">About the Jam Machine</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <p class="about-text" data-i18n="aboutBody"></p>
+    <p class="about-small" data-i18n="aboutCredits"></p>
+    <a class="btn patreon-btn" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+    <p class="about-small computer-only" data-i18n="aboutKeys"></p>
+  </div>
+
+  <div id="support-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="support-title" aria-describedby="support-body" style="display:none">
+    <div class="centered-modal support-card">
+      <button class="close-btn support-close" data-i18n-aria="closeAria" aria-label="Close" hidden>×</button>
+      <h2 id="support-title" data-i18n="supportTitle">Support the Jam Machine</h2>
+      <p id="support-body" data-i18n="supportBody"></p>
+      <a class="btn patreon-btn" href="https://patreon.com/drephie" target="_blank" rel="noopener noreferrer" data-i18n="supportLink">Support on Patreon</a>
+      <button class="btn support-continue" disabled></button>
+    </div>
+  </div>
+
+  <script type="module" src="jam-machine.js"></script>
+</body>
+</html>
