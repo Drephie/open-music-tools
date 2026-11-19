@@ -98,6 +98,7 @@ function setPlayBtn(on) {
   playBtn.classList.toggle('busy', on);
   playBtn.querySelector('use').setAttribute('href', on ? '#i-stop' : '#i-play');
   playBtn.querySelector('.play-label').textContent = t(on ? 'stop' : 'play');
+  fitActions();
 }
 async function play() {
   wantPlay = true;
@@ -296,8 +297,20 @@ $('del-btn').addEventListener('click', () => {
 const moveSec = (by) => { const to = jam.cur + by; jam.sections = moveSection(jam.sections, jam.cur, by); jam.cur = Math.max(0, Math.min(jam.sections.length - 1, to)); renderSectionModal(); renderSections(); };
 $('earlier-btn').addEventListener('click', () => moveSec(-1));
 $('later-btn').addEventListener('click', () => moveSec(1));
+// The action row stacks when a button's icon or words would reach its edges.
+function fitActions() {
+  const row = document.querySelector('.actions');
+  row.classList.remove('stacked');
+  const crowded = (b) => {
+    const r = b.getBoundingClientRect(), cs = getComputedStyle(b);
+    const left = r.left + parseFloat(cs.paddingLeft) - 1, right = r.right - parseFloat(cs.paddingRight) + 1;
+    return [...b.querySelectorAll('svg, span')].some((e) => { const q = e.getBoundingClientRect(); return q.width && (q.left < left || q.right > right); });
+  };
+  if ([...row.querySelectorAll('.btn')].some((b) => b.offsetParent && crowded(b))) row.classList.add('stacked');
+}
 // A chord name that doesn't fit its box gets smaller (Dmaj7 in a wide theme font).
 function fitNames() {
+  fitActions();
   shapeBeats();
   // Measured from the parts themselves: a centred overflow spills both ways, which scrollWidth can't see.
   const tooBig = (el) => {

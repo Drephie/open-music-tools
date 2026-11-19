@@ -41,8 +41,9 @@
 .add-sec svg { width: 18px; height: 18px; }
 
 /* --- The key and speed line, and Advanced --- */
-.sheet-head { position: relative; display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
-.transpose { flex: 1 1 auto; display: flex; align-items: center; gap: 6px; min-width: 0; }
+.sheet-head { position: relative; display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 4px var(--space-2); min-width: 0; }
+/* The key keeps room for its name; on a very small phone the speed and the file button go to the next line. */
+.transpose { flex: 1 1 170px; display: flex; align-items: center; gap: 6px; min-width: 0; }
 .transpose .round-btn { flex: none; }
 .transpose .round-btn { width: 40px; height: 40px; }
 .key-btn {
@@ -174,7 +175,14 @@ body.drag-on { cursor: grabbing; }
 
 /* --- New chords, Play, Sounds --- */
 .actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 56px; gap: var(--space-2); }
-.actions .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 6px 10px; line-height: 1.1; }
+.actions .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 6px 10px; line-height: 1.1; font-size: clamp(14px, 4.4vw, 17px); }
+/* Icons and words keep clear of a button's round ends: Soft Pink's are fully round, so more room at the sides. */
+:is(.actions, .chord-actions, .file-actions, .section-actions, .bar-warn) .btn:not(.sounds-btn) { padding-inline: 12px; }
+body[data-theme="pink"] :is(.actions, .chord-actions, .file-actions, .section-actions, .bar-warn) .btn:not(.sounds-btn) { padding-inline: 24px; }
+/* When New chords' words can't fit beside Play (a very narrow screen; jam-machine.js measures):
+   New chords and Sounds on one row, Play full width below. */
+.actions.stacked { grid-template-columns: minmax(0, 1fr) 56px; }
+.actions.stacked .play-btn { grid-column: 1 / -1; grid-row: 2; }
 .actions svg { width: 20px; height: 20px; flex: none; }
 .play-btn { font-size: 18px; }
 .sounds-btn { width: 56px; padding: 0 !important; }
