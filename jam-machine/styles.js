@@ -96,3 +96,50 @@ export const STYLES = {
     bass: [[0, 6, 'r', 0.75], [10, 4, 'r', 0.65]],
   },
 };
+
+/* Time signatures. A beat is a quarter note in 4/4 and 3/4 (4 steps of a
+ * 16th) and a dotted quarter in 6/8 (6 steps: three 8th notes). The speed
+ * (BPM) counts beats: in 6/8, the two big beats of each bar.
+ *   METERS[id] = { beats: beats per bar, spb: steps per beat }
+ *   METER_IDS  ['4/4', '3/4', '6/8']
+ *   styleMeter(styleId) -> the style's usual time signature ('4/4' for all 8)
+ *   patternFor(styleId, meter) -> { swing, drums, comp, bass } in that time
+ *     signature: the style's own patterns in 4/4; in 3/4 a waltz feel and in
+ *     6/8 a rocking 8th-note feel, in the style's colour (Jazz keeps its ride
+ *     and walking bass, Ballad its broken chords, soft styles a rim click).
+ */
+export const METERS = { '4/4': { beats: 4, spb: 4 }, '3/4': { beats: 3, spb: 4 }, '6/8': { beats: 2, spb: 6 } };
+export const METER_IDS = Object.keys(METERS);
+export const styleMeter = (styleId) => STYLES[styleId].meter || '4/4';
+
+const SOFT = new Set(['ballad', 'lofi', 'bossa']);
+export function patternFor(styleId, meter) {
+  const st = STYLES[styleId];
+  if (meter === '4/4' || !METERS[meter]) return { swing: st.swing, drums: st.drums, comp: st.comp, bass: st.bass };
+  const soft = SOFT.has(styleId), jazz = styleId === 'jazz', back = soft ? 'rim' : 'snare';
+  if (meter === '3/4') {
+    const eighths3 = [0, 2, 4, 6, 8, 10].map((s) => [s, s % 4 ? 0.25 : 0.4]);
+    return {
+      swing: st.swing,
+      drums: jazz
+        ? { ride: [[0, 0.55], [4, 0.5], [6, 0.35], [8, 0.5]], hat: [[4, 0.3], [8, 0.3]], kick: [[0, 0.3]] }
+        : { kick: [[0, 0.85]], [back]: [[4, 0.45], [8, 0.45]], hat: eighths3 },
+      comp: st.comp.arp
+        ? { arp: true, steps: [[0, 0.7], [2, 0.5], [4, 0.55], [6, 0.5], [8, 0.55], [10, 0.5]] }
+        : styleId === 'lofi' ? [[0, 12, 0.5]] : [[0, 4, 0.7], [4, 3, 0.5], [8, 3, 0.5]],
+      bass: jazz ? [[0, 4, 'r', 0.85], [4, 4, '3', 0.7], [8, 4, 'a', 0.7]] : [[0, 8, 'r', 0.85], [8, 4, '5', 0.65]],
+    };
+  }
+  // 6/8: two big beats of three 8th notes each (steps 0-5 and 6-11).
+  const eighths6 = [0, 2, 4, 6, 8, 10].map((s) => [s, s % 6 ? 0.25 : 0.4]);
+  return {
+    swing: 0,
+    drums: jazz
+      ? { ride: [[0, 0.55], [4, 0.35], [6, 0.5], [10, 0.35]], hat: [[6, 0.3]], kick: [[0, 0.3]] }
+      : { kick: [[0, 0.85], [10, 0.4]], [back]: [[6, 0.6]], hat: eighths6 },
+    comp: st.comp.arp || soft
+      ? { arp: true, steps: [[0, 0.7], [2, 0.45], [4, 0.5], [6, 0.6], [8, 0.45], [10, 0.5]] }
+      : [[0, 6, 0.7], [6, 6, 0.55]],
+    bass: [[0, 6, 'r', 0.85], [6, 4, '5', 0.65], [10, 2, jazz ? 'a' : 'r', 0.55]],
+  };
+}

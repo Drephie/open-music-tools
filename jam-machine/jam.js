@@ -10,6 +10,7 @@
  *         quality from QUALITIES ('maj', 'min', '7', 'sus4'...) with
  *   semi  its root, half steps above the key's note (B♭ in C = 10)
  *   lock  true: kept by New chords and by dragging
+ *   beats how long it lasts, in beats (1..16); none = one bar
  * 'T' and 'S' chords follow a change of Major/Minor (I V vi IV becomes
  * i v VI iv); the others keep their notes.
  *
@@ -48,8 +49,9 @@
  *   duplicateSection(sections, i) -> a copy of section i right after it
  *   moveSection(sections, i, by) -> section i moved by -1 or +1
  *   toFile(state) -> text; fromFile(text, instruments) -> state | null
+ *   chordBeats(chord, meter) -> its length in beats ('4/4', '3/4', '6/8')
  *     the .omt file (Open Music Tools), version 2: { style, key, newKey,
- *     bpm, sections: [{ type, chords }], sound: { instrument,
+ *     bpm, meter, sections: [{ type, chords }], sound: { instrument,
  *     kit: 'acoustic' | 'synth', chords|drums|bass: { on, vol } } }.
  *     newKey { tonic: 0..11 | null, mode: 'maj' | 'min' | null }: the key and
  *     mode New chords uses (null = random). A version 1 file (one list of
@@ -57,9 +59,12 @@
  *   rngFrom(seed) -> a repeatable random function (tests)
  */
 import { spellOnLetter, keyRootName, tonicLetterIdx, voiceChord } from '../shared/theory.js';
-import { STYLES, STYLE_IDS } from './styles.js';
+import { STYLES, STYLE_IDS, METERS, METER_IDS } from './styles.js';
 
-export { STYLES, STYLE_IDS };
+export { STYLES, STYLE_IDS, METERS, METER_IDS };
+export { patternFor, styleMeter } from './styles.js';
+export const MAX_BEATS = 16;
+export const chordBeats = (chord, meter) => chord.beats || (METERS[meter] || METERS['4/4']).beats;
 export const MAX_BARS = 64;
 export const MAX_SECTIONS = 24;
 export const MAJOR = [0, 2, 4, 5, 7, 9, 11];
@@ -266,11 +271,11 @@ export function moveSection(sections, i, by) {
 // --- THE .omt FILE ---
 const PARTS = ['chords', 'drums', 'bass'];
 const KITS = ['acoustic', 'synth'];
-const chordOut = (c) => (c.q === 'T' || c.q === 'S' ? { step: c.step, q: c.q, lock: !!c.lock } : { step: c.step, semi: c.semi, q: c.q, lock: !!c.lock });
+const chordOut = (c) => ({ ...(c.q === 'T' || c.q === 'S' ? { step: c.step, q: c.q } : { step: c.step, semi: c.semi, q: c.q }), lock: !!c.lock, ...(c.beats ? { beats: c.beats } : {}) });
 export function toFile(s) {
   return JSON.stringify({
     format: 'open-music-tools', tool: 'jam-machine', version: 2,
-    style: s.style, key: { tonic: s.key.tonic, mode: s.key.mode }, newKey: { tonic: s.newKey.tonic, mode: s.newKey.mode }, bpm: s.bpm,
+    style: s.style, key: { tonic: s.key.tonic, mode: s.key.mode }, newKey: { tonic: s.newKey.tonic, mode: s.newKey.mode }, bpm: s.bpm, meter: s.meter,
     sections: s.sections.map((x) => ({ type: x.type, chords: x.chords.map(chordOut) })),
     sound: { instrument: s.sound.instrument, kit: s.sound.kit, ...Object.fromEntries(PARTS.map((p) => [p, { on: !!s.sound[p].on, vol: s.sound[p].vol }])) },
   }, null, 1);
@@ -287,9 +292,12 @@ export function fromFile(text, instruments) {
     const chords = [];
     for (const c of list) {
       if (!c || !int(c.step, 0, 6)) return null;
-      if (c.q === 'T' || c.q === 'S') chords.push({ step: c.step, q: c.q, lock: c.lock === true });
-      else if (Object.hasOwn(QUALITIES, c.q) && int(c.semi, 0, 11)) chords.push({ step: c.step, semi: c.semi, q: c.q, lock: c.lock === true });
+      let x;
+      if (c.q === 'T' || c.q === 'S') x = { step: c.step, q: c.q, lock: c.lock === true };
+      else if (Object.hasOwn(QUALITIES, c.q) && int(c.semi, 0, 11)) x = { step: c.step, semi: c.semi, q: c.q, lock: c.lock === true };
       else return null;
+      if (c.beats !== undefined) { if (!int(c.beats, 1, MAX_BEATS)) return null; x.beats = c.beats; }
+      chords.push(x);
     }
     return chords;
   };
@@ -317,5 +325,6 @@ export function fromFile(text, instruments) {
   const newKey = d.version === 1
     ? { tonic: d.keyFixed === true ? d.key.tonic : null, mode: d.modeFixed === true ? d.key.mode : null }
     : { tonic: int(nk.tonic, 0, 11) ? nk.tonic : null, mode: ['maj', 'min'].includes(nk.mode) ? nk.mode : null };
-  return { style: d.style, key: { tonic: d.key.tonic, mode: d.key.mode }, newKey, bpm: d.bpm, sections, sound };
+  const meter = METER_IDS.includes(d.meter) ? d.meter : '4/4';
+  return { style: d.style, key: { tonic: d.key.tonic, mode: d.key.mode }, newKey, bpm: d.bpm, meter, sections, sound };
 }

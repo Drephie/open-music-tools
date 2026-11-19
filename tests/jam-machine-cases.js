@@ -2,7 +2,7 @@
  * shared by tests/jam-machine.html and tests/tools/run-jam-machine-test.js.
  * checkJam(jam) -> [{ section, checked, failed, examples }]
  */
-export function checkJam(jam) {
+export function checkJam(jam, band) {
   const out = [];
   const check = (section, items, fn) => {
     const row = { section, checked: 0, failed: 0, examples: [] };
@@ -135,10 +135,10 @@ export function checkJam(jam) {
   check('Save and Open give back exactly the same jam', seeds.slice(0, 100), (seed) => {
     const rng = jam.rngFrom(seed), style = STYLE_IDS[seed % 8], key = jam.randomKey(style, rng);
     const chords = jam.newProgression({ style, key, length: 1 + (seed % 20), rng }).map((c) => ({ ...c, lock: rng() < 0.4 }));
-    chords.push({ step: 6, semi: 10, q: 'maj', lock: true });
+    chords.push({ step: 6, semi: 10, q: 'maj', lock: true, beats: 1 + (seed % 16) });
     const sections = [{ type: jam.SECTION_TYPES[seed % 6], chords }];
     if (seed % 2) sections.push({ type: 'chorus', chords: chords.slice(0, 3).map((c) => ({ ...c, lock: false })) });
-    const s = { style, key, newKey: { tonic: seed % 3 ? null : seed % 12, mode: seed % 5 ? null : 'min' }, bpm: 40 + (seed % 201), sections,
+    const s = { style, key, newKey: { tonic: seed % 3 ? null : seed % 12, mode: seed % 5 ? null : 'min' }, bpm: 40 + (seed % 201), meter: jam.METER_IDS[seed % 3], sections,
       sound: { instrument: instruments[seed % 7], kit: seed % 4 ? 'acoustic' : 'synth', chords: { on: true, vol: seed % 101 }, drums: { on: seed % 2 === 0, vol: 80 }, bass: { on: false, vol: 0 } } };
     const back = jam.fromFile(jam.toFile(s), instruments);
     if (JSON.stringify(back) !== JSON.stringify(s)) return `seed ${seed}: ${JSON.stringify(back)}`;
@@ -150,7 +150,7 @@ export function checkJam(jam) {
     { ...good, tool: 'intervle' }, { ...good, version: 3 }, { ...good, style: 'polka' }, { ...good, bpm: 300 }, { ...good, bpm: '100' },
     { ...good, key: { tonic: 12, mode: 'maj' } }, { ...good, key: { tonic: 0, mode: 'dorian' } }, sec([]), { ...good, sections: [] },
     sec([{ step: 7, q: 'T' }]), sec([{ step: 0, q: 'xyz', semi: 0 }]), sec([{ step: 0, q: 'maj' }]),
-    sec(Array(65).fill({ step: 0, q: 'T' })), sec([{ step: 0, q: 'toString', semi: 0 }]), { ...good, sections: [{ type: 'solo', chords: [{ step: 0, q: 'T' }] }] },
+    sec(Array(65).fill({ step: 0, q: 'T' })), sec([{ step: 0, q: 'T', beats: 0 }]), sec([{ step: 0, q: 'T', beats: 17 }]), sec([{ step: 0, q: 'T', beats: 2.5 }]), sec([{ step: 0, q: 'toString', semi: 0 }]), { ...good, sections: [{ type: 'solo', chords: [{ step: 0, q: 'T' }] }] },
     { ...good, sections: Array(25).fill({ type: 'verse', chords: [{ step: 0, q: 'T' }] }) }, { ...good, version: 1 },
   ];
   check('Broken or other files are refused', bad, (b) => {
@@ -189,6 +189,48 @@ export function checkJam(jam) {
     if (!Number.isInteger(h.step) || h.step < 0 || h.step > 15 || !(h.len > 0) || h.step + h.len > 16 || !(h.vel > 0 && h.vel <= 1)) return `${h.id} ${h.part} ${h.step} ${h.len} ${h.vel}`;
     if (h.swing && h.step % 2) return `${h.id} ${h.part}: step ${h.step} falls between swung 8ths`;
     if (h.note && !['r', '5', '8', '3', '6', 'b7', 'a'].includes(h.note)) return `${h.id}: bass note ${h.note}`;
+  });
+  const { patternFor, METERS, METER_IDS } = jam;
+  const meterPatterns = [];
+  for (const id of STYLE_IDS) for (const m of METER_IDS) {
+    const p = patternFor(id, m), steps = METERS[m].beats * METERS[m].spb;
+    const comp = p.comp.arp ? p.comp.steps.map(([s, v]) => [s, 1, v]) : p.comp;
+    for (const [voice, hits] of Object.entries(p.drums)) hits.forEach(([s, v]) => meterPatterns.push({ id, m, steps, what: voice, s, len: 1, v, swing: p.swing }));
+    comp.forEach(([s, len, v]) => meterPatterns.push({ id, m, steps, what: 'comp', s, len, v, swing: p.swing }));
+    p.bass.forEach(([s, len, n, v]) => meterPatterns.push({ id, m, steps, what: 'bass ' + n, s, len, v, swing: p.swing }));
+  }
+  check('Every style in 4/4, 3/4 and 6/8: hits inside the bar, swung only on 8th notes', meterPatterns, (h) => {
+    if (!Number.isInteger(h.s) || h.s < 0 || h.s + h.len > h.steps || !(h.v > 0 && h.v <= 1)) return `${h.id} ${h.m} ${h.what} ${h.s}+${h.len}`;
+    if (h.swing && h.m !== '6/8' && h.s % 2) return `${h.id} ${h.m}: ${h.what} at ${h.s} between swung 8ths`;
+  });
+  if (band) {
+    // A song with chords of 4, 2, 2, 3 and 1 beats, played step by step as the band does.
+    const songs = [];
+    for (const id of STYLE_IDS) for (const m of METER_IDS) songs.push({ id, m });
+    check('Chords of any length: each starts with its chord and bass note, nothing rings past its end, the drums keep the bar', songs, ({ id, m }) => {
+      const { beats, spb } = METERS[m], pattern = patternFor(id, m), barSteps = beats * spb;
+      const lengths = [4, 2, 2, 3, 1], key = { tonic: 0, mode: 'maj' };
+      const chords = lengths.map((b, i) => ({ step: [0, 4, 5, 3, 1][i], q: 'T', beats: b }));
+      const parts = { chords: { on: true }, drums: { on: true }, bass: { on: true } };
+      let g = 0, kicks = [];
+      for (let ci = 0; ci < chords.length; ci++) {
+        const notes = jam.chordNotes(chords[ci], key, null), steps = chords[ci].beats * spb;
+        for (let k = 0; k < steps; k++, g++) {
+          const ev = band.stepEvents({ pattern, spb, barStep: g % barSteps, stepInChord: k, chordSteps: steps, notes, next: notes, parts });
+          if (k === 0) {
+            if (!ev.some((e) => e.part === 'chords' && e.at < 0.01) && !pattern.comp.arp) return `${id} ${m}: chord ${ci} doesn't sound when it starts`;
+            if (!ev.some((e) => e.part === 'bass' && e.midi === notes.bass && e.at < 0.01)) return `${id} ${m}: no root in the bass at chord ${ci}`;
+          }
+          for (const e of ev) if (e.dur !== undefined && e.at + e.dur > steps - k + 0.01) return `${id} ${m}: ${e.part} rings ${(e.at + e.dur - (steps - k)).toFixed(2)} steps into the next chord`;
+          ev.filter((e) => e.voice === 'kick').forEach(() => kicks.push(g % barSteps));
+        }
+      }
+      const want = (pattern.drums.kick || []).map(([s]) => s);
+      if (kicks.some((s) => !want.includes(s))) return `${id} ${m}: kick on step ${kicks.find((s) => !want.includes(s))}`;
+    });
+  }
+  check('Chord lengths: a whole bar unless set', [['4/4', 4], ['3/4', 3], ['6/8', 2]], ([m, n]) => {
+    if (jam.chordBeats({ step: 0, q: 'T' }, m) !== n || jam.chordBeats({ step: 0, q: 'T', beats: 3 }, m) !== 3) return m;
   });
   check('Speeds as in the spec', [['pop', 100], ['ballad', 70], ['rock', 120], ['blues', 80], ['jazz', 120], ['bossa', 130], ['reggae', 75], ['lofi', 80]], ([id, bpm]) => {
     if (STYLES[id].bpm !== bpm) return `${id}: ${STYLES[id].bpm}`;

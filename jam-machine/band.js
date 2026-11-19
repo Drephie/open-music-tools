@@ -2,64 +2,81 @@
  * Uses the Tone.js global (14.8.49) and a rack from shared/sound.js for the
  * chords. Two drum kits: 'acoustic', six recorded hits in ./drums/ (from
  * Virtuosity Drums by Versilian Studios and Karoryfer Samples, CC0; loaded
- * from our own files), and 'synth', made here from Tone's own synths. Until
- * the acoustic kit has loaded, the synth drums play. The bass is a Tone synth.
+ * from our own files), and 'synth', made here from Tone's own synths (each
+ * drum its own synth, so two drums can sound at the same moment). Until the
+ * acoustic kit has loaded, the synth drums play. The bass is a Tone synth.
  *
  *   const band = createBand(rack)
- *   band.start(source, { onBar, onBeat })
- *     source: functions read again at every bar, so a change is heard from
- *     the next bar: chords(), key(), style(), bpm(), instrument(), kit(),
- *     parts() -> { chords|drums|bass: { on, vol 0..100 } }, countIn()
- *     onBar(index, time): a new bar starts (index into chords(); -1 = the
- *     count-in bar); onBeat(beat 0..3, index, time). Both at audio time:
- *     draw with Tone.Draw.schedule(fn, time).
+ *   band.start(source)
+ *     source: functions read again as the music goes, so a change is heard
+ *     from the next chord (chords, sounds) or the next bar (style, time
+ *     signature, speed): chords(), key(), style(), meter(), bpm(),
+ *     instrument(), kit(), parts() -> { chords|drums|bass: { on, vol } },
+ *     countIn(); onChord(index): a chord starts (index into chords(); -1 =
+ *     the count-in bar); onBeat(beat, index): each beat of it (0 = its
+ *     first). Both are drawn in time with the sound (Tone.Draw).
  *   band.stop()      silence at once (held notes released)
  *   band.setVolumes(parts)  the volumes at once (also while stopped)
  *   band.preview(chordNotes, instrument)  one chord, to hear a choice
  *   band.playing()   true between start and stop
- *   band.barEvents(styleId, snapshot) -> [{ part, step, at, dur, ... }]
- *     what one bar plays (for tests: at and dur in beats, swing included)
+ *
+ *   stepEvents(ctx) -> what one 16th-note step plays (pure; for tests)
+ *     ctx: { pattern (styles.js patternFor), spb, barStep, stepInChord,
+ *     chordSteps, notes, next, parts }. Events: { part, voice?, at, dur?,
+ *     vel, midis? | midi? }, at and dur in steps from this step (swing
+ *     included). Pattern hits play the chord sounding now, cut off where it
+ *     ends; a chord that starts between the pattern's hits is played (and its
+ *     root in the bass) right where it starts.
  *
  * Levels: 80% is each part's normal level; a part's volume follows hearing
  * (gain²). A last limiter at -1 dB on Tone.Destination keeps the three parts
  * together from ever clipping.
  */
 import { midiToFreq } from '../shared/theory.js';
-import { STYLES } from './styles.js';
-import { chordNotes } from './jam.js';
+import { METERS, patternFor } from './styles.js';
+import { chordNotes, chordBeats } from './jam.js';
 
-const BASS_NOTE = { r: 0, 8: 12 };
+function bassMidi(n, notes, next) {
+  const b = notes.bass;
+  if (n === '5') return b + (notes.fifth ?? 7);
+  if (n === '3') return b + (notes.third ?? 4);
+  if (n === '6') return b + 9;
+  if (n === 'b7') return b + (notes.seventh ?? 10);
+  if (n === '8') return b + 12;
+  if (n === 'a') { const target = next ? next.bass : b; return target === b ? b + 7 : target + (target > b ? -1 : 1); }
+  return b;
+}
 
-// Everything one bar plays, in beats from the bar's start (swing included).
-export function barEvents(styleId, snap) {
-  const st = STYLES[styleId], out = [];
-  const at = (step) => step / 4 + (st.swing && step % 4 === 2 ? st.swing / 6 : 0);
-  const dur = (step, len) => at(step + len) - at(step);
-  if (snap.countIn) {
-    for (const s of [0, 4, 8, 12]) out.push({ part: 'drums', voice: 'rim', step: s, at: at(s), vel: 0.7 });
-    return out;
-  }
-  const { parts, notes, next } = snap;
-  if (parts.drums.on) for (const [voice, hits] of Object.entries(st.drums)) for (const [s, v] of hits) out.push({ part: 'drums', voice, step: s, at: at(s), vel: v });
+export function stepEvents({ pattern, spb, barStep, stepInChord, chordSteps, notes, next, parts }) {
+  const out = [];
+  const swing = spb === 4 && pattern.swing ? pattern.swing : 0;
+  // Swung 8ths: the off-beat 8th (step 2 of each beat) comes later. Positions in steps from the bar's start.
+  const pos = (s) => s + (swing && s % 4 === 2 ? (swing * 4) / 6 : 0);
+  const at = (s) => pos(s) - barStep;
+  const left = chordSteps - stepInChord;   // steps until this chord ends
+  const span = (s, len) => Math.min(pos(s + len) - pos(s), left - at(s));
+  const starts = stepInChord === 0;
+
+  if (parts.drums.on) for (const [voice, hits] of Object.entries(pattern.drums)) for (const [s, v] of hits) if (s === barStep) out.push({ part: 'drums', voice, at: at(s), vel: v });
+
   if (parts.chords.on) {
-    if (st.comp.arp) {
-      st.comp.steps.forEach(([s, v], k) => out.push({ part: 'chords', step: s, at: at(s), dur: Math.min(dur(s, 4), 4 - at(s)), vel: v, midis: [notes.upper[k % notes.upper.length]] }));
+    if (pattern.comp.arp) {
+      pattern.comp.steps.forEach(([s, v], k) => {
+        if (s === barStep) out.push({ part: 'chords', at: at(s), dur: Math.min(spb * 1.5, left - at(s)), vel: v, midis: [notes.upper[k % notes.upper.length]] });
+      });
+      if (starts && !pattern.comp.steps.some(([s]) => s === barStep)) out.push({ part: 'chords', at: 0, dur: Math.min(spb, left), vel: 0.6, midis: [notes.upper[0]] });
     } else {
-      for (const [s, len, v] of st.comp) out.push({ part: 'chords', step: s, at: at(s), dur: dur(s, len) * 0.92, vel: v, midis: notes.upper });
+      const hit = pattern.comp.find(([s]) => s === barStep);
+      if (hit) out.push({ part: 'chords', at: at(hit[0]), dur: span(hit[0], hit[1]) * 0.92, vel: hit[2], midis: notes.upper });
+      else if (starts) out.push({ part: 'chords', at: 0, dur: Math.min(left, spb * 2) * 0.92, vel: 0.65, midis: notes.upper });
     }
   }
   if (parts.bass.on) {
-    for (const [s, len, n, v] of st.bass) {
-      let midi = notes.bass + (BASS_NOTE[n] ?? 0);
-      if (n === '5') midi = notes.bass + (notes.fifth ?? 7);
-      if (n === '3') midi = notes.bass + (notes.third ?? 4);
-      if (n === '6') midi = notes.bass + 9;
-      if (n === 'b7') midi = notes.bass + (notes.seventh ?? 10);
-      if (n === 'a') { const target = next ? next.bass : notes.bass; midi = target === notes.bass ? notes.bass + 7 : target + (target > notes.bass ? -1 : 1); }
-      out.push({ part: 'bass', step: s, at: at(s), dur: dur(s, len) * 0.9, vel: v, midi });
-    }
+    const hit = pattern.bass.find(([s]) => s === barStep);
+    if (hit) out.push({ part: 'bass', at: at(hit[0]), dur: span(hit[0], hit[1]) * 0.9, vel: hit[3], midi: starts ? notes.bass : bassMidi(hit[2], notes, next) });
+    else if (starts) out.push({ part: 'bass', at: 0, dur: Math.min(left, spb * 2) * 0.9, vel: 0.8, midi: notes.bass });
   }
-  return out;
+  return out.filter((e) => e.dur === undefined || e.dur > 0.2);
 }
 
 export function createBand(rack) {
@@ -78,6 +95,9 @@ export function createBand(rack) {
   const hatFilter = new Tone.Filter(8000, 'highpass').connect(drumBus);
   const hat = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.035, sustain: 0 } }).connect(hatFilter);
   hat.volume.value = -16;
+  const rideFilter = new Tone.Filter(5200, 'bandpass').connect(drumBus);
+  const ride = new Tone.NoiseSynth({ noise: { type: 'pink' }, envelope: { attack: 0.001, decay: 0.32, sustain: 0 } }).connect(rideFilter);
+  ride.volume.value = -9;
   const rim = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.001, decay: 0.045, sustain: 0, release: 0.02 } }).connect(drumBus);
   rim.volume.value = -10;
 
@@ -97,12 +117,15 @@ export function createBand(rack) {
     baseUrl: new URL('drums/', import.meta.url).href,
     release: 0.3,
   }).connect(drumBus);
+  // A synth can't start twice at the same moment: a second hit is skipped, the music never stops.
+  const safe = (fn) => (t, v) => { try { fn(t, v); } catch { /* two hits at once on one synth */ } };
   const hit = {
-    ride: (t, v) => hat.triggerAttackRelease(0.09, t, v * 0.8),
-    kick: (t, v) => kick.triggerAttackRelease('C2', 0.3, t, v),
-    snare: (t, v) => { snare.triggerAttackRelease(0.15, t, v); snareBody.triggerAttackRelease('G3', 0.08, t, v); },
-    hat: (t, v) => hat.triggerAttackRelease(0.03, t, v),
-    rim: (t, v) => rim.triggerAttackRelease('C6', 0.04, t, v),
+    kick: safe((t, v) => kick.triggerAttackRelease('C2', 0.3, t, v)),
+    snare: safe((t, v) => { snare.triggerAttackRelease(0.15, t, v); snareBody.triggerAttackRelease('G3', 0.08, t, v); }),
+    hat: safe((t, v) => hat.triggerAttackRelease(0.03, t, v)),
+    open: safe((t, v) => hat.triggerAttackRelease(0.2, t, v)),
+    ride: safe((t, v) => ride.triggerAttackRelease(0.3, t, v)),
+    rim: safe((t, v) => rim.triggerAttackRelease('C6', 0.04, t, v)),
   };
 
   const dbOf = (vol) => (vol <= 0 ? -Infinity : 40 * Math.log10(vol / 80));   // gain²: 80% = 0 dB
@@ -112,38 +135,53 @@ export function createBand(rack) {
     bassBus.volume.value = dbOf(parts.bass.vol);
   }
 
-  let repeatId = null, source = null, step = 0, index = -1, snap = null, prevUpper = null, lastInstrument = null;
+  // The song moves one 16th note at a time. A chord lasts its beats; the drums
+  // keep their own bars, so a 2-beat chord doesn't upset the beat.
+  let repeatId = null, source = null, bar = null, barStep = 0, counting = false;
+  let index = -1, stepInChord = 0, chord = null, prevUpper = null;
   function newBar(time) {
+    const meter = METERS[source.meter()] ? source.meter() : '4/4';
+    bar = { meter, ...METERS[meter], pattern: patternFor(source.style(), meter), parts: source.parts(), kit: source.kit() };
+    // The speed counts beats; Tone counts quarter notes (a 6/8 beat is a dotted quarter).
+    Tone.Transport.bpm.setValueAtTime(source.bpm() * bar.spb / 4, time);
+  }
+  function newChord() {
     const chords = source.chords(), key = source.key();
-    if (step === 0 && source.countIn()) { snap = { countIn: true, kit: source.kit() }; index = -1; return; }   // a bar of sticks, then the first chord
     index = index + 1 >= chords.length || index < 0 ? 0 : index + 1;
     const notes = chordNotes(chords[index], key, prevUpper);
     prevUpper = notes.upper;
-    const next = chordNotes(chords[(index + 1) % chords.length], key, notes.upper);
-    lastInstrument = source.instrument();
-    snap = { style: source.style(), parts: source.parts(), kit: source.kit(), notes, next, instrument: rack.instruments[lastInstrument] || rack.instruments.piano };
-    Tone.Transport.bpm.setValueAtTime(source.bpm(), time);
+    chord = {
+      notes, steps: chordBeats(chords[index], bar.meter) * bar.spb,
+      next: chordNotes(chords[(index + 1) % chords.length], key, notes.upper),
+      instrument: rack.instruments[source.instrument()] || rack.instruments.piano,
+    };
+    stepInChord = 0;
   }
   function tick(time) {
-    const s = step % 16;
-    if (s === 0) {
-      newBar(time);
-      const i = index;
-      if (source.onBar) Tone.Draw.schedule(() => source.onBar(i), time);
-    }
-    if (s % 4 === 0 && source.onBeat) { const i = index, b = s / 4; Tone.Draw.schedule(() => source.onBeat(b, i), time); }
-    const beat = 60 / Tone.Transport.bpm.value;
-    for (const e of barEvents(snap.countIn ? 'pop' : snap.style, snap)) {
-      if (e.step !== s) continue;
-      const t = time + (e.at - s / 4) * beat;
-      if (e.part === 'drums') {
-        if (snap.kit === 'acoustic' && acoustic.loaded) acoustic.triggerAttack(KIT_NOTE[e.voice], t, e.vel * KIT_GAIN[e.voice]);
-        else hit[e.voice](t, e.vel);
+    if (barStep === 0) newBar(time);
+    const stepTime = 60 / Tone.Transport.bpm.value / 4;
+    if (counting) {   // a bar of drum sticks on the beats, then the first chord
+      if (barStep % bar.spb === 0) hit.rim(time, 0.7);
+    } else {
+      if (!chord || stepInChord >= chord.steps) {
+        newChord();
+        const i = index;
+        if (source.onChord) Tone.Draw.schedule(() => source.onChord(i), time);
       }
-      else if (e.part === 'bass') bass.triggerAttackRelease(midiToFreq(e.midi), e.dur * beat, t, e.vel);
-      else snap.instrument.triggerAttackRelease(e.midis.map(midiToFreq), e.dur * beat, t, e.vel);
+      if (stepInChord % bar.spb === 0 && source.onBeat) { const i = index, b = stepInChord / bar.spb; Tone.Draw.schedule(() => source.onBeat(b, i), time); }
+      const events = stepEvents({ pattern: bar.pattern, spb: bar.spb, barStep, stepInChord, chordSteps: chord.steps, notes: chord.notes, next: chord.next, parts: bar.parts });
+      for (const e of events) {
+        const t = time + e.at * stepTime;
+        if (e.part === 'drums') {
+          if (bar.kit === 'acoustic' && acoustic.loaded) acoustic.triggerAttack(KIT_NOTE[e.voice], t, e.vel * KIT_GAIN[e.voice]);
+          else hit[e.voice](t, e.vel);
+        } else if (e.part === 'bass') bass.triggerAttackRelease(midiToFreq(e.midi), e.dur * stepTime, t, e.vel);
+        else chord.instrument.triggerAttackRelease(e.midis.map(midiToFreq), e.dur * stepTime, t, e.vel);
+      }
+      stepInChord++;
     }
-    step++;
+    barStep++;
+    if (barStep >= bar.beats * bar.spb) { barStep = 0; counting = false; }
   }
 
   function stop() {
@@ -160,9 +198,12 @@ export function createBand(rack) {
   function start(src) {
     stop();
     source = src;
-    step = 0; index = -1; prevUpper = null;
+    barStep = 0; index = -1; chord = null; prevUpper = null;
+    counting = !!src.countIn();
+    if (counting && src.onChord) src.onChord(-1);
     setVolumes(src.parts());
-    Tone.Transport.bpm.value = src.bpm();
+    const meter = METERS[src.meter()] || METERS['4/4'];
+    Tone.Transport.bpm.value = src.bpm() * meter.spb / 4;
     repeatId = Tone.Transport.scheduleRepeat((time) => { if (source) tick(time); }, '16n', 0);
     Tone.Transport.start('+0.05');
   }
@@ -172,5 +213,5 @@ export function createBand(rack) {
     inst.triggerAttackRelease(notes.upper.map(midiToFreq), 1.2, Tone.now() + 0.02, 0.7);
   }
 
-  return { start, stop, setVolumes, preview, playing: () => source !== null, barEvents };
+  return { start, stop, setVolumes, preview, playing: () => source !== null };
 }

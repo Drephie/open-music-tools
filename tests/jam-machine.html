@@ -27,13 +27,14 @@
 <script type="module">
   
   import * as jam from '../jam-machine/jam.js';
+  import * as band from '../jam-machine/band.js';
   import { checkJam } from './jam-machine-cases.js';
 
   const rows = document.getElementById('rows');
   const summary = document.getElementById('summary');
   let failed = 0, total = 0;
   try {
-    for (const row of checkJam(jam)) {
+    for (const row of checkJam(jam, band)) {
       total++;
       if (row.failed) failed++;
       const tr = document.createElement('tr');

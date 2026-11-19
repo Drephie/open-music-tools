@@ -35,6 +35,14 @@ These win over anything above.
 - **Drums:** a choice in Sounds between **Acoustic kit** (real recorded drums: Virtuosity Drums by Versilian Studios and Karoryfer Samples, CC0, credited in About; 6 hits, 430 KB, our own files) and **Synth drums** (the made-up ones). Acoustic kit first *(Claude's pick)*.
 - Copy chords and the .omt file keep the sections.
 
+## Third round (Drephie, 2026-11-19)
+
+- **Time signature** under Advanced: 4/4, 3/4 or 6/8; each style starts in its usual one (4/4 for all 8). 3/4 plays a waltz feel and 6/8 a rocking 8th-note feel in the style's colour. In 6/8 the speed counts the two big beats of a bar *(Claude's pick)*.
+- **Chord length:** each chord's window has Length (− 4 beats +), 1 to 16 beats; a whole bar unless changed. The beat lines under a chord show its length. The drums keep their bars whatever the chords do.
+- **Sections** can be dragged to change the song's order (hold a name on a phone).
+- Synth drums in Jazz fixed (the ride and the hi-hat now have their own synths).
+- Bigger chords: four or fewer show as two big cards a row on phones and big cards on computers; stronger labels.
+
 ## Not in this version
 
 Two chords in one bar, or one chord over two bars; downloading as audio or MIDI; a keyboard or guitar shapes for the chords; your own drum patterns; more styles (Funk, Gospel, Folk, Waltz); melodies (never made by the tool).

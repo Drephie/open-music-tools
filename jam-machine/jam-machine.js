@@ -16,7 +16,7 @@ import { createModalManager } from '../shared/ui/modal.js';
 import { accidentalHtml, prettyName } from '../shared/ui/accidentals.js';
 import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
-import { STYLES, STYLE_IDS, MAX_BARS, MAX_SECTIONS, SECTION_TYPES, chordLabel, chordNotes, keyName, randomKey, newProgression, nextChord, suggestions, changeMode, moveChord, sameChord, toFile, fromFile, nextSectionType, sectionNumbers, duplicateSection, moveSection } from './jam.js';
+import { STYLES, STYLE_IDS, METER_IDS, MAX_BEATS, chordBeats, styleMeter, MAX_BARS, MAX_SECTIONS, SECTION_TYPES, chordLabel, chordNotes, keyName, randomKey, newProgression, nextChord, suggestions, changeMode, moveChord, sameChord, toFile, fromFile, nextSectionType, sectionNumbers, duplicateSection, moveSection } from './jam.js';
 import { createBand } from './band.js';
 import { JAM_STRINGS } from './strings.js';
 
@@ -61,7 +61,7 @@ const tf = (key, vars) => t(key).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? va
 
 // --- THE JAM (in memory only): a song of sections, each with its chords ---
 // newKey: the key and mode New chords uses (null = random).
-const jam = { style: settings.style, key: null, newKey: { tonic: null, mode: null }, bpm: STYLES[settings.style].bpm, sections: [], cur: 0 };
+const jam = { style: settings.style, key: null, newKey: { tonic: null, mode: null }, bpm: STYLES[settings.style].bpm, meter: styleMeter(settings.style), sections: [], cur: 0 };
 jam.key = randomKey(jam.style);
 jam.sections = [{ type: 'verse', chords: newProgression({ style: jam.style, key: jam.key, length: STYLES[jam.style].bars }) }];
 const section = () => jam.sections[jam.cur];
@@ -75,6 +75,7 @@ const plainName = (c) => { const l = label(c); return prettyName(l.root) + (solf
 // The chord's note big, its kind smaller after it (Am7: A, then m7).
 const nameHtml = (c) => { const l = label(c); return accidentalHtml(l.root) + (l.suffix ? `<span class="sfx">${l.suffix.replace('♭', accidentalHtml('b'))}</span>` : ''); };
 const numeral = (c) => label(c).numeral.replace(/^b/, '♭').replace(/^#/, '♯');
+const beatsText = (n) => (n === 1 ? t('beat1') : tf('beatsN', { n }));
 const keyTitle = () => tf('keyTitle', { key: prettyName(keyName(jam.key, solfege())), mode: t(jam.key.mode === 'maj' ? 'modeMaj' : 'modeMin') });
 
 // --- SOUND ---
@@ -111,9 +112,9 @@ async function play() {
   }
   if (!wantPlay) return;
   band.start({
-    chords: songChords, key: () => jam.key, style: () => jam.style, bpm: () => jam.bpm,
+    chords: songChords, key: () => jam.key, style: () => jam.style, meter: () => jam.meter, bpm: () => jam.bpm,
     instrument: () => settings.instrument, kit: () => settings.kit, parts: () => settings.parts, countIn: () => settings.countIn,
-    onBar: (i) => { playingBar = i; lightBars(0); renderSections(); },
+    onChord: (i) => { playingBar = i; lightBars(0); renderSections(); },
     onBeat: (b, i) => { playingBar = i; lightBars(b); },
   });
   keepScreenAwake(true);
@@ -174,6 +175,7 @@ function renderAdvanced() {
   [...modeSeg.children].forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
   $('bars-num').textContent = chords().length;
   $('divide-btn').hidden = jam.sections.length > 1;
+  [...$('meter-seg').children].forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.meter === jam.meter)));
   renderSpeed();
 }
 function renderSpeed() {
@@ -185,14 +187,17 @@ function renderSpeed() {
 function renderBars() {
   barsEl.innerHTML = '';
   barsEl.classList.toggle('many', chords().length > 4);
+  barsEl.classList.toggle('few', chords().length <= 4);
   chords().forEach((c, i) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'bar' + (c.lock ? ' locked' : '');
     b.dataset.i = i;
     const name = plainName(c);
-    b.innerHTML = `<span class="bar-num" aria-hidden="true">${i + 1}</span>${c.lock ? '<svg class="bar-lock" aria-hidden="true"><use href="#i-lock"/></svg>' : ''}<span class="bar-name${name.length > 7 ? ' long' : ''}">${nameHtml(c)}</span><span class="bar-deg">${numeral(c)}</span><span class="beats" aria-hidden="true"><i></i><i></i><i></i><i></i></span>`;
-    b.setAttribute('aria-label', tf('barAria', { n: i + 1, name }) + ` (${numeral(c)})` + (c.lock ? ', ' + t('lockedAria') : ''));
+    b.innerHTML = `<span class="bar-num" aria-hidden="true">${i + 1}</span>${c.lock ? '<svg class="bar-lock" aria-hidden="true"><use href="#i-lock"/></svg>' : ''}<span class="bar-name${name.length > 7 ? ' long' : ''}">${nameHtml(c)}</span><span class="bar-deg">${numeral(c)}</span><span class="beats" aria-hidden="true">${'<i></i>'.repeat(chordBeats(c, jam.meter))}</span>`;
+    const nb = chordBeats(c, jam.meter);
+    b.classList.toggle('short', nb < 3);
+    b.setAttribute('aria-label', tf('barAria', { n: i + 1, name }) + ` (${numeral(c)}), ${beatsText(nb)}` + (c.lock ? ', ' + t('lockedAria') : ''));
     barsEl.appendChild(b);
   });
   $('add-bar').hidden = chords().length >= MAX_BARS;
@@ -221,14 +226,10 @@ function renderSections() {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'sec' + (at && at.section === i ? ' playing' : '');
+    b.dataset.i = i;
     b.textContent = sectionName(i);
     b.setAttribute('aria-pressed', String(i === jam.cur));
     if (at && at.section === i) b.setAttribute('aria-description', t('secPlaying'));
-    b.addEventListener('click', () => {
-      if (i === jam.cur) { openSection(b); return; }
-      jam.cur = i;
-      renderAll();
-    });
     sectionsEl.appendChild(b);
   });
   if (jam.sections.length < MAX_SECTIONS) {
@@ -298,11 +299,13 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 function shapeBeats() {
   barsEl.querySelectorAll('.bar').forEach((bar) => {
     const beats = bar.querySelector('.beats');
+    if (!beats.dataset.n) beats.dataset.n = beats.children.length;
+    const n = +beats.dataset.n;
     const w = bar.clientWidth, h = bar.clientHeight;
     const R = Math.min(parseFloat(getComputedStyle(bar).borderBottomLeftRadius) || 0, w / 2, h / 2);
     const round = R >= Math.min(w, h) / 2 - 1;
     if (!round) {
-      if (beats.classList.contains('arc')) { beats.classList.remove('arc'); beats.innerHTML = '<i></i><i></i><i></i><i></i>'; }
+      if (beats.classList.contains('arc')) { beats.classList.remove('arc'); beats.innerHTML = '<i></i>'.repeat(+beats.dataset.n); }
       return;
     }
     // The bottom of the box, 7 px inside its edge: an arc on the left, a straight part (pills), an arc on the right.
@@ -316,9 +319,9 @@ function shapeBeats() {
     const probe = document.createElementNS(SVG_NS, 'path');
     probe.setAttribute('d', d);
     svg.appendChild(probe);
-    const len = probe.getTotalLength(), q = len / 4, gap = Math.min(9, q * 0.3);   // round line ends add 2 px each side
+    const len = probe.getTotalLength(), q = len / n, gap = Math.min(9, q * 0.3);   // round line ends add 2 px each side
     probe.remove();
-    for (let k = 0; k < 4; k++) {
+    for (let k = 0; k < n; k++) {
       const p = document.createElementNS(SVG_NS, 'path');
       p.setAttribute('d', d);
       p.setAttribute('stroke-dasharray', `${q - gap} ${len}`);
@@ -377,6 +380,7 @@ function setStyle(id) {
   const was = jam.style;
   jam.style = id;
   jam.bpm = STYLES[id].bpm;
+  jam.meter = styleMeter(id);
   settings.style = id;
   save();
   let length = chords().length;
@@ -431,6 +435,8 @@ keySelect.addEventListener('change', () => { jam.newKey.tonic = keySelect.value 
   renderAdvanced();
   setupCustomSelects();
 }));
+$('meter-seg').innerHTML = METER_IDS.map((m) => `<button type="button" data-meter="${m}">${m}</button>`).join('');
+[...$('meter-seg').children].forEach((b) => b.addEventListener('click', () => { jam.meter = b.dataset.meter; renderAdvanced(); renderBars(); }));
 const setBpm = (v) => { jam.bpm = clampBpm(v); renderSpeed(); };
 holdRepeat($('slower'), () => setBpm(jam.bpm - 1));
 holdRepeat($('faster'), () => setBpm(jam.bpm + 1));
@@ -506,6 +512,7 @@ function renderChordModal() {
   };
   fill(fitList, fit);
   fill(moreList, more);
+  $('beats-num').textContent = beatsText(chordBeats(c, jam.meter));
   lockBtn.querySelector('use').setAttribute('href', c.lock ? '#i-unlock' : '#i-lock');
   lockBtn.querySelector('span').textContent = t(c.lock ? 'unlock' : 'lock');
   lockBtn.setAttribute('aria-pressed', String(!!c.lock));
@@ -523,6 +530,17 @@ function pickChord(s) {
   renderBars();
   if (!isPlaying() && rack) band.preview(chordNotes(chords()[editing], jam.key), settings.instrument);   // hear the choice
 }
+// How long the chord lasts, in beats (a whole bar unless changed).
+function setBeats(by) {
+  const c = chords()[editing];
+  if (!c) return;
+  const n = Math.max(1, Math.min(MAX_BEATS, chordBeats(c, jam.meter) + by));
+  c.beats = n;
+  renderChordModal();
+  renderBars();
+}
+holdRepeat($('fewer-beats'), () => setBeats(-1));
+holdRepeat($('more-beats'), () => setBeats(1));
 lockBtn.addEventListener('click', () => {
   const c = chords()[editing];
   if (!c) return;
@@ -537,64 +555,92 @@ $('remove-btn').addEventListener('click', () => {
   renderBars();
 });
 
-// --- DRAG TO MOVE: a mouse drags at once; a finger holds 0.3 s first, so a swipe still scrolls ---
-let drag = null, noClickUntil = 0;
-barsEl.addEventListener('pointerdown', (e) => {
-  const bar = e.target.closest('.bar');
-  if (!bar || e.button > 0) return;
-  drag = { from: +bar.dataset.i, id: e.pointerId, x: e.clientX, y: e.clientY, bar, active: false, over: -1, mouse: e.pointerType === 'mouse' };
-  if (!drag.mouse) { drag.timer = setTimeout(() => lift(e.clientX, e.clientY), 300); }
-});
-function lift(x, y) {
-  if (!drag || drag.active) return;
-  if (chords()[drag.from].lock) { drag = null; noClickUntil = performance.now() + 500; return; }   // locked chords stay put
-  drag.active = true;
-  const r = drag.bar.getBoundingClientRect();
-  const ghost = drag.bar.cloneNode(true);
-  ghost.classList.add('drag-ghost');
-  ghost.classList.remove('dragging', 'on');
-  ghost.style.width = r.width + 'px';
-  ghost.style.height = r.height + 'px';
-  document.body.appendChild(ghost);
-  drag.ghost = ghost;
-  drag.bar.classList.add('dragging');
-  document.body.classList.add('drag-on');
-  moveGhost(x, y);
-  try { navigator.vibrate && navigator.vibrate(10); } catch { /* not supported */ }
-}
-function moveGhost(x, y) {
-  drag.ghost.style.left = x + 'px';
-  drag.ghost.style.top = y + 'px';
-  const el = document.elementFromPoint(x, y);
-  const over = el && el.closest ? el.closest('#bars .bar') : null;
-  drag.over = over ? +over.dataset.i : drag.over;
-  [...barsEl.children].forEach((b, i) => b.classList.toggle('drop', i === drag.over && i !== drag.from));
-}
-window.addEventListener('pointermove', (e) => {
-  if (!drag || e.pointerId !== drag.id) return;
-  if (drag.active) { moveGhost(e.clientX, e.clientY); return; }
-  if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 8) {
-    if (drag.mouse) lift(e.clientX, e.clientY);
-    else { clearTimeout(drag.timer); drag = null; }   // a swipe: let the page scroll
+// --- DRAG TO MOVE (chords and sections): a mouse drags at once; a finger holds
+// 0.3 s first, so a swipe still scrolls the page. A tap does the item's own thing.
+function draggable(container, selector, { canLift, onDrop, onTap }) {
+  let drag = null, noClickUntil = 0;
+  const items = () => [...container.querySelectorAll(selector)];
+  container.addEventListener('pointerdown', (e) => {
+    const el = e.target.closest(selector);
+    if (!el || e.button > 0) return;
+    drag = { from: +el.dataset.i, id: e.pointerId, x: e.clientX, y: e.clientY, el, active: false, over: -1, mouse: e.pointerType === 'mouse' };
+    if (!drag.mouse) drag.timer = setTimeout(() => lift(e.clientX, e.clientY), 300);
+  });
+  function lift(x, y) {
+    if (!drag || drag.active) return;
+    if (!canLift(drag.from)) { drag = null; noClickUntil = performance.now() + 500; return; }   // locked chords stay put
+    drag.active = true;
+    const r = drag.el.getBoundingClientRect();
+    const ghost = drag.el.cloneNode(true);
+    ghost.classList.add('drag-ghost');
+    ghost.classList.remove('dragging', 'on');
+    ghost.style.width = r.width + 'px';
+    ghost.style.height = r.height + 'px';
+    document.body.appendChild(ghost);
+    drag.ghost = ghost;
+    drag.el.classList.add('dragging');
+    document.body.classList.add('drag-on');
+    move(x, y);
+    try { navigator.vibrate && navigator.vibrate(10); } catch { /* not supported */ }
   }
-});
-function endDrag(commit) {
-  if (!drag) return;
-  clearTimeout(drag.timer);
-  if (drag.active) {
-    drag.ghost.remove();
+  function move(x, y) {
+    drag.ghost.style.left = x + 'px';
+    drag.ghost.style.top = y + 'px';
+    const hit = document.elementFromPoint(x, y);
+    const over = hit && hit.closest ? hit.closest(selector) : null;
+    if (over && container.contains(over)) drag.over = +over.dataset.i;
+    items().forEach((b) => b.classList.toggle('drop', +b.dataset.i === drag.over && drag.over !== drag.from));
+  }
+  window.addEventListener('pointermove', (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (drag.active) { move(e.clientX, e.clientY); return; }
+    if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 8) {
+      if (drag.mouse) lift(e.clientX, e.clientY);
+      else { clearTimeout(drag.timer); drag = null; }   // a swipe: let the page scroll
+    }
+  });
+  function end(commit) {
+    if (!drag) return;
+    clearTimeout(drag.timer);
+    const d = drag;
+    drag = null;
+    if (!d.active) return;
+    d.ghost.remove();
+    d.el.classList.remove('dragging');
     document.body.classList.remove('drag-on');
     noClickUntil = performance.now() + 400;
-    if (commit && drag.over >= 0 && drag.over !== drag.from) setChords(moveChord(chords(), drag.from, drag.over));
-    drag = null;
-    renderBars();
-    return;
+    onDrop(d.from, commit && d.over >= 0 ? d.over : d.from);
   }
-  drag = null;
+  window.addEventListener('pointerup', () => end(true));
+  window.addEventListener('pointercancel', () => end(false));
+  container.addEventListener('touchmove', (e) => { if (drag && drag.active) e.preventDefault(); }, { passive: false });
+  container.addEventListener('click', (e) => {
+    const el = e.target.closest(selector);
+    if (!el || performance.now() < noClickUntil) return;
+    onTap(+el.dataset.i, el);
+  });
+  return { cancel: () => end(false) };
 }
-window.addEventListener('pointerup', () => endDrag(true));
-window.addEventListener('pointercancel', () => endDrag(false));
-barsEl.addEventListener('touchmove', (e) => { if (drag && drag.active) e.preventDefault(); }, { passive: false });
+
+const barDrag = draggable(barsEl, '.bar', {
+  canLift: (i) => !chords()[i].lock,
+  onDrop: (from, to) => { if (to !== from) setChords(moveChord(chords(), from, to)); renderBars(); },
+  onTap: (i, el) => openChord(i, el),
+});
+// Sections: drag a name to change the song's order; the section on screen goes with it.
+draggable(sectionsEl, '.sec[data-i]', {
+  canLift: () => jam.sections.length > 1,
+  onDrop: (from, to) => {
+    if (to !== from) {
+      const cur = jam.sections[jam.cur], [moved] = jam.sections.splice(from, 1);
+      jam.sections.splice(to, 0, moved);
+      jam.cur = jam.sections.indexOf(cur);
+    }
+    renderAll();
+  },
+  onTap: (i, el) => { if (i === jam.cur) openSection(el); else { jam.cur = i; renderAll(); } },
+});
+
 // Right-click (a mouse) locks or unlocks a chord; a finger's long press is for dragging.
 let lastPointer = 'mouse';
 barsEl.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType; }, true);
@@ -602,16 +648,12 @@ barsEl.addEventListener('contextmenu', (e) => {
   e.preventDefault();
   const bar = e.target.closest('.bar');
   if (!bar || lastPointer !== 'mouse') return;
-  endDrag(false);
+  barDrag.cancel();
   const c = chords()[+bar.dataset.i];
   c.lock = !c.lock;
   renderBars();
 });
-barsEl.addEventListener('click', (e) => {
-  const bar = e.target.closest('.bar');
-  if (!bar || performance.now() < noClickUntil) return;
-  openChord(+bar.dataset.i, bar);
-});
+sectionsEl.addEventListener('contextmenu', (e) => e.preventDefault());
 // Keyboard: Alt + arrow moves the focused chord.
 barsEl.addEventListener('keydown', (e) => {
   const bar = e.target.closest('.bar');
@@ -633,8 +675,9 @@ function toast(text) {
   toastTimer = setTimeout(() => { toastEl.textContent = ''; }, 2500);
 }
 $('copy-btn').addEventListener('click', async () => {
-  const parts = jam.sections.length < 2 ? [chords().map(plainName).join(' ')] : jam.sections.map((x, i) => `${sectionName(i)}: ${x.chords.map(plainName).join(' ')}`);
-  const line = [t('style_' + jam.style), keyTitle(), tf('keyMeta', { bpm: jam.bpm }), ...parts].join(' · ');
+  const bar = (list) => list.map((c) => plainName(c) + (c.beats && c.beats !== chordBeats({}, jam.meter) ? ` (${c.beats})` : '')).join(' ');
+  const parts = jam.sections.length < 2 ? [bar(chords())] : jam.sections.map((x, i) => `${sectionName(i)}: ${bar(x.chords)}`);
+  const line = [t('style_' + jam.style), keyTitle(), tf('keyMeta', { bpm: jam.bpm }), jam.meter, ...parts].join(' · ');
   let ok = false;
   try { await navigator.clipboard.writeText(line); ok = true; } catch { /* no clipboard API on plain http */ }
   if (!ok) {   // the older way, which also works on the http test link
@@ -668,7 +711,7 @@ fileInput.addEventListener('change', async () => {
   let s = null;
   try { s = file.size < 200000 ? fromFile(await file.text(), INSTRUMENTS) : null; } catch { s = null; }
   if (!s) { toast(t('badFile')); return; }
-  Object.assign(jam, { style: s.style, key: s.key, newKey: s.newKey, bpm: s.bpm, sections: s.sections, cur: 0 });
+  Object.assign(jam, { style: s.style, key: s.key, newKey: s.newKey, bpm: s.bpm, meter: s.meter, sections: s.sections, cur: 0 });
   settings.style = s.style;
   settings.instrument = s.sound.instrument;
   settings.kit = s.sound.kit;

@@ -74,6 +74,10 @@
               <button id="more-bars" class="round-btn plus" data-i18n-aria="moreBars" aria-label="One bar more">+</button>
             </div>
           </div>
+          <div class="adv-line">
+            <span id="meter-label" class="adv-label" data-i18n="meter">Time signature</span>
+            <div id="meter-seg" class="seg meter-seg" role="group" aria-labelledby="meter-label"></div>
+          </div>
           <button id="divide-btn" class="btn divide-btn" data-i18n="divide">Divide into sections</button>
           <div class="control-group">
             <span id="speed-label" class="sr-label" data-i18n="speed">Speed</span>
@@ -132,6 +136,14 @@
     <div id="fit-list" class="choice-grid"></div>
     <p class="group-label" data-i18n="more">More chords</p>
     <div id="more-list" class="choice-grid"></div>
+    <div class="adv-line">
+      <span id="beats-label" class="adv-label" data-i18n="chordLen">Length</span>
+      <div class="stepper" role="group" aria-labelledby="beats-label">
+        <button id="fewer-beats" class="round-btn" data-i18n-aria="fewerBeats" aria-label="One beat shorter">−</button>
+        <span id="beats-num" class="step-num beats-num" aria-live="polite">4 beats</span>
+        <button id="more-beats" class="round-btn plus" data-i18n-aria="moreBeats" aria-label="One beat longer">+</button>
+      </div>
+    </div>
     <div class="chord-actions">
       <button id="lock-btn" class="btn"><svg aria-hidden="true"><use href="#i-lock"/></svg><span></span></button>
       <button id="remove-btn" class="btn"><svg aria-hidden="true"><use href="#i-trash"/></svg><span data-i18n="remove">Remove</span></button>

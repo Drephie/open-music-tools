@@ -42,6 +42,7 @@ export const JAM_STRINGS = {
     sec_intro: "Intro", sec_verse: "Verse", sec_prechorus: "Pre-chorus", sec_chorus: "Chorus", sec_bridge: "Bridge", sec_outro: "Outro", secPlaying: "playing",
     kit: "Drums", kitAcoustic: "Acoustic kit", kitSynth: "Synth drums",
     fileTitle: "Copy, save or open", fileHint: "A saved .omt file keeps the whole jam: sections, chords, key, speed and sounds. It stays on your device; open it here again any time.",
+    meter: "Time signature", chordLen: "Length", fewerBeats: "One beat shorter", moreBeats: "One beat longer", beat1: "1 beat", beatsN: "{n} beats",
     loading: "Loading sounds…", loadFailed: "The sounds didn't load. Check your connection and press Play again.",
   },
   es: {
@@ -74,6 +75,7 @@ export const JAM_STRINGS = {
     sec_intro: "Intro", sec_verse: "Estrofa", sec_prechorus: "Pre-estribillo", sec_chorus: "Estribillo", sec_bridge: "Puente", sec_outro: "Final", secPlaying: "sonando",
     kit: "Batería", kitAcoustic: "Batería acústica", kitSynth: "Batería sintética",
     fileTitle: "Copiar, guardar o abrir", fileHint: "Un archivo .omt guardado conserva toda la jam: secciones, acordes, tonalidad, velocidad y sonidos. Se queda en tu dispositivo; ábrelo aquí cuando quieras.",
+    meter: "Compás", chordLen: "Duración", fewerBeats: "Un tiempo menos", moreBeats: "Un tiempo más", beat1: "1 tiempo", beatsN: "{n} tiempos",
     loading: "Cargando sonidos…", loadFailed: "Los sonidos no se cargaron. Revisa tu conexión y pulsa Tocar otra vez.",
   },
   it: {
@@ -106,6 +108,7 @@ export const JAM_STRINGS = {
     sec_intro: "Intro", sec_verse: "Strofa", sec_prechorus: "Pre-ritornello", sec_chorus: "Ritornello", sec_bridge: "Bridge", sec_outro: "Finale", secPlaying: "in riproduzione",
     kit: "Batteria", kitAcoustic: "Batteria acustica", kitSynth: "Batteria sintetica",
     fileTitle: "Copia, salva o apri", fileHint: "Un file .omt salvato conserva tutta la jam: sezioni, accordi, tonalità, velocità e suoni. Resta sul tuo dispositivo; riaprilo qui quando vuoi.",
+    meter: "Metro", chordLen: "Durata", fewerBeats: "Un tempo in meno", moreBeats: "Un tempo in più", beat1: "1 tempo", beatsN: "{n} tempi",
     loading: "Caricamento dei suoni…", loadFailed: "I suoni non si sono caricati. Controlla la connessione e premi di nuovo Suona.",
   },
 };

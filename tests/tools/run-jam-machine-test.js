@@ -7,10 +7,11 @@
  */
 
 import * as jam from '../../jam-machine/jam.js';
+import * as band from '../../jam-machine/band.js';
 import { checkJam } from '../jam-machine-cases.js';
 
 let failed = 0;
-for (const row of checkJam(jam)) {
+for (const row of checkJam(jam, band)) {
   print(`${row.failed ? 'FAIL' : 'pass'}  ${row.section}: ${row.checked} checked, ${row.failed} failed`);
   row.examples.forEach(e => print('      ' + e));
   if (row.failed) failed++;

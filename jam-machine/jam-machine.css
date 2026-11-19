@@ -29,7 +29,7 @@
 .sections { display: flex; flex-wrap: wrap; gap: 6px; }
 .sections[hidden] { display: none; }
 .sec {
-  position: relative; min-height: 40px; padding: 4px 14px; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control);
+  position: relative; min-height: 44px; padding: 4px 16px; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control);
   background: var(--color-panel); color: var(--color-text); font: 700 14px/1.1 var(--font-main); cursor: pointer;
   transition: background 0.15s, color 0.15s, transform 0.1s;
 }
@@ -52,7 +52,7 @@
 .key-title::first-letter { text-transform: uppercase; }
 /* Drawn sharps and flats (the themes' fonts have none): raised beside the letter. */
 :is(.bar-name, .choice b, .key-title, #chord-title) .acc { width: 0.34em; height: 0.56em; vertical-align: 0.34em; margin: 0 0.03em; stroke-width: 1px; }
-.key-meta { font: 700 14px var(--font-main); color: var(--color-text-inactive); }
+.key-meta { font: 700 15px var(--font-main); color: color-mix(in srgb, var(--color-text) 75%, transparent); }
 .chev { width: 18px; height: 18px; align-self: center; color: var(--color-text-inactive); transition: transform 0.2s; }
 .key-btn[aria-expanded="true"] .chev { transform: rotate(180deg); }
 #file-btn { flex: none; }
@@ -68,7 +68,7 @@
 .advanced { display: grid; gap: var(--space-2); padding: 10px var(--space-3); border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-panel); background: var(--color-panel); }
 .advanced[hidden] { display: none; }
 .adv-line { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2) var(--space-3); min-height: 44px; }
-.adv-line > label, .adv-label { flex: 1 1 8em; min-width: 0; font-size: 14px; font-weight: 700; color: var(--color-text-inactive); line-height: 1.2; }
+.adv-line > label, .adv-label { flex: 1 1 8em; min-width: 0; font-size: 15px; font-weight: 700; color: color-mix(in srgb, var(--color-text) 82%, transparent); line-height: 1.2; }
 .adv-line .custom-select { flex: 0 1 170px; min-width: 130px; }
 .adv-line .seg { flex: 1 1 210px; }
 .control-group { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
@@ -85,6 +85,9 @@
 .stepper { display: flex; align-items: center; gap: var(--space-2); }
 .step-num { min-width: 2.2ch; text-align: center; font: var(--title-weight) 24px/1 var(--font-num); color: var(--color-title); font-variant-numeric: tabular-nums; }
 .stepper .round-btn { width: 44px; height: 44px; }
+.beats-num { min-width: 6ch; font-size: 18px; }
+#chord-modal .adv-line { padding: 2px 0; }
+.meter-seg { flex: 0 1 210px; }
 .divide-btn { min-height: 44px; padding: 6px 12px; font-size: 15px; }
 .divide-btn[hidden] { display: none; }
 
@@ -97,6 +100,15 @@
   transition: background 0.12s, color 0.12s, border-color 0.12s, transform 0.15s, opacity 0.15s;
 }
 .bars.many .bar, .jm.adv-open .bar { height: clamp(58px, 9dvh, 80px); }
+/* Four chords or fewer: two big cards a row, so the chords are the page's main thing. */
+.bars.few { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.bars.few .bar { height: clamp(84px, 15dvh, 124px); gap: 4px; }
+.bars.few .bar-name { font-size: clamp(32px, 11vw, 46px); }
+.bars.few .bar-deg { font-size: 15px; }
+.bars.few .beats { left: 16px; right: 16px; bottom: 9px; gap: 6px; }
+.bars.few .bar-num { top: 8px; left: 11px; font-size: 12px; }
+.bars.few .bar-lock { top: 8px; right: 10px; width: 17px; height: 17px; }
+.jm.adv-open .bars.few .bar { height: clamp(70px, 11dvh, 96px); }
 .sr-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .bar-num { position: absolute; top: 5px; left: 8px; font: 700 11px/1 var(--font-main); color: var(--color-text-inactive); }
 .bar-name { max-width: 100%; font: var(--title-weight) clamp(22px, 7vw, 34px)/1 var(--font-display); letter-spacing: var(--title-spacing); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -189,11 +201,16 @@ body[data-theme="pink"] :is(.sec, .choice, .seg button):not([aria-pressed="true"
   .advanced[hidden] { display: grid; }
   .key-btn { pointer-events: none; }
   .key-btn .chev, .actions .sounds-btn { display: none; }
-  .key-title { font-size: 26px; }
+  .key-title { font-size: 30px; }
   .mixer-panel { display: block; order: 9; }
   .actions { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); }
-  .bar, .bars.many .bar { height: 96px; }
-  .bar-name { font-size: 38px; }
+  .bar, .bars.many .bar { height: 104px; }
+  .bar-name { font-size: 40px; }
+  .bars.few { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .bars.few .bar, .jm.adv-open .bars.few .bar { height: 150px; }
+  .bars.few .bar-name { font-size: 54px; }
+  .actions .btn { min-height: 60px; font-size: 18px; }
+  .col-main { gap: var(--space-5); }
   .bar-name.long { font-size: 32px; }
 }
 @media (prefers-reduced-motion: reduce) {
