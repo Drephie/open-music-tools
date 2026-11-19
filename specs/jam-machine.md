@@ -42,6 +42,7 @@ These win over anything above.
 - **Sections** can be dragged to change the song's order (hold a name on a phone).
 - Synth drums in Jazz fixed (the ride and the hi-hat now have their own synths).
 - **Bars that aren't full:** when a section's chords don't add up to whole bars, the last chord gets a dashed outline with the missing beats drawn dashed, and a notice says how many beats are missing (the beat drifts each time it loops) with **Fill the bar**, which gives the last chord the missing beats (Drephie).
+- **A chord is as wide as it is long** (2 beats = half a 4/4 bar; two bars a row on phones, four on computers); a short one never gets narrower than its name needs. Inside a card nothing sits on anything else: bar number and lock, name, step, beat lines, one under the other; a chord shorter than a bar shows its note over its kind (La♭ over maj7) (Drephie).
 - Bigger chords: four or fewer show as two big cards a row on phones and big cards on computers; stronger labels.
 
 ## Not in this version
@@ -58,7 +59,7 @@ Copy chords, Save to a file, Open a file: three small buttons by the key's name.
 
 ## Layout
 
-**Phone, upright,** one screen at 375 × 667 with 4 to 8 bars; more bars, or Advanced open with more than 4, scroll a little. Mock-up: `specs/mockups/jam-machine.html`.
+**Phone, upright,** one screen at 375 × 667 with up to 4 chords; more chords, or Advanced open, scroll a little (two bars a row, so a chord's width shows its length). Mock-up: `specs/mockups/jam-machine.html`.
 Header (house, Jam Machine, About, Settings) · the 8 styles as buttons, 4 per row · the key and speed as text ("C major · 100 BPM") with three small buttons: Copy chords, Save to a file, Open a file · the chords, 4 per row: a big name (Am), its number in the key under it (vi), the bar number in the corner, a lock mark when locked; the one playing is filled, with 4 beat lines that light up · **Add a bar** (a dashed row) · New chords and Sounds side by side · **Play** full width (the main button, turns into Stop) · **Advanced** (a row that opens): Key, Major/Minor, speed − 100 + Tap with the tempo word (Andante).
 **Computer:** two columns: styles, Advanced and the Sounds mixer always open on the left; the chords, New chords and Play on the right. Keys: Space = Play/Stop, N = New chords *(Claude's pick)*.
 

@@ -73,7 +73,7 @@ const sectionName = (i) => { const n = sectionNumbers(jam.sections)[i]; return t
 const label = (c) => chordLabel(c, jam.key, solfege());
 const plainName = (c) => { const l = label(c); return prettyName(l.root) + (solfege() && l.suffix ? ' ' : '') + l.suffix; };
 // The chord's note big, its kind smaller after it (Am7: A, then m7).
-const nameHtml = (c) => { const l = label(c); return accidentalHtml(l.root) + (l.suffix ? `<span class="sfx">${l.suffix.replace('♭', accidentalHtml('b'))}</span>` : ''); };
+const nameHtml = (c) => { const l = label(c); return `<span class="root">${accidentalHtml(l.root)}</span>` + (l.suffix ? `<span class="sfx">${l.suffix.replace('♭', accidentalHtml('b'))}</span>` : ''); };
 const numeral = (c) => label(c).numeral.replace(/^b/, '♭').replace(/^#/, '♯');
 const beatsText = (n) => (n === 1 ? t('beat1') : tf('beatsN', { n }));
 const keyTitle = () => tf('keyTitle', { key: prettyName(keyName(jam.key, solfege())), mode: t(jam.key.mode === 'maj' ? 'modeMaj' : 'modeMin') });
@@ -188,14 +188,19 @@ function renderBars() {
   barsEl.innerHTML = '';
   barsEl.classList.toggle('many', chords().length > 4);
   barsEl.classList.toggle('few', chords().length <= 4);
+  // One column per beat: four bars a row on computers, two on phones (so a short chord still looks short).
+  const cols = METERS[jam.meter].beats * (matchMedia('(min-width: 900px)').matches ? 4 : 2);
+  barsEl.style.setProperty('--cols', cols);
   chords().forEach((c, i) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'bar' + (c.lock ? ' locked' : '');
     b.dataset.i = i;
     const name = plainName(c);
-    b.innerHTML = `<span class="bar-num" aria-hidden="true">${i + 1}</span>${c.lock ? '<svg class="bar-lock" aria-hidden="true"><use href="#i-lock"/></svg>' : ''}<span class="bar-name${name.length > 7 ? ' long' : ''}">${nameHtml(c)}</span><span class="bar-deg">${numeral(c)}</span><span class="beats" aria-hidden="true">${'<i></i>'.repeat(chordBeats(c, jam.meter))}</span>`;
+    b.innerHTML = `<span class="bar-top"><span class="bar-num" aria-hidden="true">${i + 1}</span>${c.lock ? '<svg class="bar-lock" aria-hidden="true"><use href="#i-lock"/></svg>' : ''}</span><span class="bar-name">${nameHtml(c)}</span><span class="bar-deg">${numeral(c)}</span><span class="beats" aria-hidden="true">${'<i></i>'.repeat(chordBeats(c, jam.meter))}</span>`;
     const nb = chordBeats(c, jam.meter);
+    b.style.setProperty('--span', Math.min(nb, cols));
+    b.classList.toggle('narrow', nb < METERS[jam.meter].beats);   // shorter than a bar
     b.classList.toggle('short', nb < 3);
     b.setAttribute('aria-label', tf('barAria', { n: i + 1, name }) + ` (${numeral(c)}), ${beatsText(nb)}` + (c.lock ? ', ' + t('lockedAria') : ''));
     barsEl.appendChild(b);
@@ -290,15 +295,25 @@ $('later-btn').addEventListener('click', () => moveSec(1));
 // A chord name that doesn't fit its box gets smaller (Dmaj7 in a wide theme font).
 function fitNames() {
   shapeBeats();
+  // Measured from the parts themselves: a centred overflow spills both ways, which scrollWidth can't see.
+  const tooBig = (el) => {
+    const kids = [...el.children].filter((k) => k.getBoundingClientRect().width);
+    if (!kids.length || el === $('key-title')) return el.scrollWidth > el.clientWidth + 1;
+    const r = kids.map((k) => k.getBoundingClientRect()), stacked = getComputedStyle(el).flexDirection === 'column';
+    const w = stacked ? Math.max(...r.map((q) => q.width)) : r.reduce((n, q) => n + q.width, 0);
+    const h = stacked ? r.reduce((n, q) => n + q.height, 0) : Math.max(...r.map((q) => q.height));
+    return w > el.clientWidth + 0.5 || h > el.clientHeight + 0.5;
+  };
   [...barsEl.querySelectorAll('.bar-name'), $('key-title')].forEach((el) => {
     el.style.fontSize = '';
-    for (let size = parseFloat(getComputedStyle(el).fontSize); el.scrollWidth > el.clientWidth + 1 && size > 12; ) {
+    for (let size = parseFloat(getComputedStyle(el).fontSize); tooBig(el) && size > 11; ) {
       size *= 0.92;
       el.style.fontSize = size + 'px';
     }
   });
 }
 window.addEventListener('resize', fitNames);
+matchMedia('(min-width: 900px)').addEventListener('change', () => renderBars());
 
 // In a theme with fully round boxes (Soft Pink: circles and pills) the four beat
 // lines follow the curve of the box's bottom instead of a straight line that
@@ -311,17 +326,21 @@ function shapeBeats() {
     const n = +beats.dataset.n;
     const w = bar.clientWidth, h = bar.clientHeight;
     const R = Math.min(parseFloat(getComputedStyle(bar).borderBottomLeftRadius) || 0, w / 2, h / 2);
-    const round = R >= Math.min(w, h) / 2 - 1;
+    const round = R >= Math.min(w, h) / 2 - 1 && !bar.classList.contains('narrow');   // short chords keep straight lines under the name
     if (!round) {
       if (beats.classList.contains('arc')) { beats.classList.remove('arc'); beats.innerHTML = '<i></i>'.repeat(+beats.dataset.n); }
       return;
     }
-    // The bottom of the box, 7 px inside its edge: an arc on the left, a straight part (pills), an arc on the right.
-    const ri = R - 7, cy = h - R, a = (50 * Math.PI) / 180;
+    // The beat lines' own strip (they never cover anything else): the round box's bottom curve, drawn
+    // inside that strip: an arc on the left, a straight part (pills), an arc on the right.
+    const br = bar.getBoundingClientRect(), sr = beats.getBoundingClientRect();
+    const sx = sr.left - br.left - bar.clientLeft, sy = sr.top - br.top - bar.clientTop, sh = sr.height;
+    const cy = h - R, ri = Math.min(R - 6, sy + sh - 3 - cy);
+    const a = Math.min((50 * Math.PI) / 180, Math.acos(Math.max(-1, Math.min(1, 1 - (sh - 5) / ri))));
     const pt = (cx, ang) => `${(cx + ri * Math.cos(ang)).toFixed(2)} ${(cy + ri * Math.sin(ang)).toFixed(2)}`;
     const d = `M${pt(R, Math.PI / 2 + a)} A${ri} ${ri} 0 0 0 ${pt(R, Math.PI / 2)} L${pt(w - R, Math.PI / 2)} A${ri} ${ri} 0 0 0 ${pt(w - R, Math.PI / 2 - a)}`;
     const svg = document.createElementNS(SVG_NS, 'svg');
-    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    svg.setAttribute('viewBox', `${sx} ${sy} ${sr.width} ${sh}`);
     beats.classList.add('arc');
     beats.replaceChildren(svg);
     const probe = document.createElementNS(SVG_NS, 'path');
