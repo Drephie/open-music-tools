@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Analysis trial: record band songs</title>
+  <!-- Records test songs from the Jam Machine's own band (exact chords, BPM and
+       key are known), for the Phase 4 analysis trial. Needs the song server
+       (tests/tools/song-server.py, launch config "song-server") to save them
+       into tests/analysis-songs/ (not published). Takes about 4 minutes. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" integrity="sha384-c6Uo4N9c3SOEigMVzP6IshUG1wQ5uMp3xeoQFiHWAQ86joWdgyajkvopySyKy/Z6" crossorigin="anonymous"></script>
+  <style>body { font: 15px/1.5 system-ui, sans-serif; margin: 16px; } button { font-size: 18px; padding: 10px 18px; } pre { white-space: pre-wrap; }</style>
+</head>
+<body>
+  <h1>Record band songs</h1>
+  <button id="go">Record all</button>
+  <pre id="log"></pre>
+  <script type="module">
+    import { startAudio, createRack } from '../../shared/sound.js';
+    import { createBand } from '../../jam-machine/band.js';
+    import { parseNumeral, chordLabel, resolve } from '../../jam-machine/jam.js';
+    import { METERS } from '../../jam-machine/styles.js';
+
+    const NOTE = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+    // Each song: style, key, bpm, bars as numerals in that key. A second key
+    // (keyChangeAt, key2) is written as chords borrowed in the first key, so
+    // the band plays them as they are.
+    const SONGS = [
+      { id: 'band-pop-G-100', style: 'pop', key: { tonic: 7, mode: 'maj' }, bpm: 100, prog: 'I V vi IV', times: 4, instrument: 'piano' },
+      { id: 'band-rock-Em-140', style: 'rock', key: { tonic: 4, mode: 'min' }, bpm: 140, prog: 'i VI III VII', times: 4, instrument: 'piano' },
+      { id: 'band-ballad-Bb-72', style: 'ballad', key: { tonic: 10, mode: 'maj' }, bpm: 72, prog: 'I vi IV V', times: 3, instrument: 'piano' },
+      { id: 'band-jazz-C-120', style: 'jazz', key: { tonic: 0, mode: 'maj' }, bpm: 120, prog: 'ii7 V7 Imaj7 vi7', times: 4, instrument: 'epiano' },
+      { id: 'band-reggae-A-80', style: 'reggae', key: { tonic: 9, mode: 'maj' }, bpm: 80, prog: 'I IV I V', times: 3, instrument: 'organ' },
+      { id: 'band-keychange-C-D-110', style: 'pop', key: { tonic: 0, mode: 'maj' }, bpm: 110, prog: 'I vi IV V', times: 2, key2: { tonic: 2, mode: 'maj' }, instrument: 'piano' },
+    ];
+    const log = (s) => { document.getElementById('log').textContent += s + '\n'; };
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    function chordsFor(song) {
+      const one = song.prog.split(' ').map((t) => parseNumeral(t, song.key.mode));
+      let chords = [];
+      for (let i = 0; i < song.times; i++) chords = chords.concat(one.map((c) => ({ ...c })));
+      const truthKeys = chords.map(() => song.key);
+      if (song.key2) {
+        // The same progression in key2, written as fixed chords in key 1.
+        const shift = (song.key2.tonic - song.key.tonic + 12) % 12;
+        for (let i = 0; i < song.times; i++) {
+          for (const c of one) {
+            const r = resolve(c, song.key2.mode);
+            chords.push({ step: c.step, q: r.quality, semi: (r.semi + shift) % 12 });
+            truthKeys.push(song.key2);
+          }
+        }
+      }
+      return { chords, truthKeys };
+    }
+
+    async function onsetOf(blob) {
+      const buf = await new AudioContext().decodeAudioData(await blob.arrayBuffer());
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) if (Math.abs(d[i]) > 0.02) return i / buf.sampleRate;
+      return 0;
+    }
+
+    document.getElementById('go').onclick = async () => {
+      await startAudio();
+      log('Loading sounds…');
+      const rack = await createRack();
+      const band = createBand(rack);
+      await sleep(4000); // the acoustic kit
+      const recorder = new Tone.Recorder();
+      Tone.Destination.connect(recorder);
+      const truth = [];
+      for (const song of SONGS) {
+        const { chords, truthKeys } = chordsFor(song);
+        const barDur = 60 / song.bpm * 4;
+        log(`${song.id}: ${chords.length} bars, ${(chords.length * barDur).toFixed(1)} s`);
+        recorder.start();
+        await sleep(300);
+        let bars = 0, last = -1;
+        band.start({
+          chords: () => chords, key: () => song.key, style: () => song.style, meter: () => '4/4',
+          bpm: () => song.bpm, instrument: () => song.instrument, kit: () => 'acoustic',
+          parts: () => ({ chords: { on: true, vol: 80 }, drums: { on: true, vol: 80 }, bass: { on: true, vol: 80 } }),
+          countIn: () => false,
+          onChord: (i) => { if (i !== last) { bars++; last = i; } },
+        });
+        await sleep(chords.length * barDur * 1000 - 150);
+        band.stop();
+        await sleep(2500);
+        const blob = await recorder.stop();
+        const t0 = await onsetOf(blob);
+        const key = (k) => `${NOTE[k.tonic]} ${k.mode === 'maj' ? 'major' : 'minor'}`;
+        const keys = [];
+        truthKeys.forEach((k, i) => { if (!keys.length || keys[keys.length - 1][2] !== key(k)) keys.push([t0 + i * barDur, 0, key(k)]); });
+        keys.forEach((k, i) => { k[1] = i + 1 < keys.length ? keys[i + 1][0] : t0 + chords.length * barDur; });
+        const entry = {
+          id: song.id, file: song.id + '.webm', source: 'Recorded from the Jam Machine (our own band)',
+          bpm: song.bpm, key: key(song.key), keys: keys.map((k) => [+k[0].toFixed(3), +k[1].toFixed(3), k[2]]),
+          chords: chords.map((c, i) => {
+            const lab = chordLabel(c, song.key);
+            return [+(t0 + i * barDur).toFixed(3), +(t0 + (i + 1) * barDur).toFixed(3), lab.root + ':' + (lab.suffix || 'maj')];
+          }),
+        };
+        truth.push(entry);
+        await fetch('../analysis-songs/' + entry.file, { method: 'PUT', body: blob });
+        log(`  saved, first sound at ${t0.toFixed(3)} s, ${bars} chords heard`);
+      }
+      await fetch('../analysis-songs/band.json', { method: 'PUT', body: JSON.stringify(truth, null, 1) });
+      log('Done.');
+    };
+  </script>
+</body>
+</html>

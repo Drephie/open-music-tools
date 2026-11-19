@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Analysis trial: Essentia.js</title>
+  <!-- Phase 4 trial: Essentia.js 0.1.3 (AGPL-3.0, jsDelivr) on the test songs
+       in tests/analysis-songs/ (GuitarSet clips, CC BY 4.0, and songs recorded
+       from the Jam Machine; not published: see make-band-songs.html and
+       tests/analysis-songs/README.md). Scores BPM, key and chords against the
+       known answers. Open from the local server; nothing is uploaded. -->
+  <style>
+    body { font: 14px/1.45 system-ui, sans-serif; margin: 16px; }
+    table { border-collapse: collapse; margin: 8px 0 16px; } td, th { border: 1px solid #bbb; padding: 3px 7px; text-align: left; vertical-align: top; }
+    .ok { background: #d8f5d8; } .half { background: #fff2c4; } .bad { background: #f8d4d4; }
+    pre { white-space: pre-wrap; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Analysis trial: Essentia.js</h1>
+  <p id="status">Loading Essentia.js…</p>
+  <table id="out"><tr><th>Song</th><th>BPM (true → found)</th><th>Key (true → found)</th><th>Chords right (maj/min)</th><th>Keys over time</th><th>Time</th></tr></table>
+  <pre id="log"></pre>
+  <script type="module">
+    import Essentia from 'https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.es.js';
+    import { EssentiaWASM } from 'https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.es.js';
+
+    const SR = 44100;
+    const $ = (id) => document.getElementById(id);
+    const log = (s) => { $('log').textContent += s + '\n'; };
+    const PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+    const NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+    const rootPc = (s) => { let p = PC[s[0].toUpperCase()]; for (const c of s.slice(1)) { if (c === '#') p++; else if (c === 'b') p--; else break; } return (p + 12) % 12; };
+
+    // A chord label reduced to { pc, cls: 'maj' | 'min' } or null (not scored:
+    // diminished, half-diminished, sus, no chord).
+    function reduceTruth(label) {
+      const [root, q0 = 'maj'] = label.split(':');
+      const q = q0.split('/')[0];
+      if (/^(hdim|dim|ø|°|sus|m7b5)/.test(q) || root === 'N') return null;
+      const min = /^(min|m(?!aj))/.test(q);
+      return { pc: rootPc(root), cls: min ? 'min' : 'maj' };
+    }
+    function reduceFound(name) {
+      const m = /^([A-G][#b]?)(.*)$/.exec(name || '');
+      if (!m) return null;
+      return { pc: rootPc(m[1]), cls: /^m(?!aj)/.test(m[2]) ? 'min' : 'maj' };
+    }
+    const keyOf = (s) => { const [t, m] = s.split(' '); return { pc: rootPc(t), mode: /^min/.test(m) ? 'minor' : 'major' }; };
+    const keyText = (k) => `${NAMES[k.pc]} ${k.mode}`;
+
+    async function load(file) {
+      const data = await (await fetch('../analysis-songs/' + file)).arrayBuffer();
+      const tmp = await new AudioContext().decodeAudioData(data);
+      const off = new OfflineAudioContext(1, Math.ceil(tmp.duration * SR), SR);
+      const src = off.createBufferSource(); src.buffer = tmp; src.connect(off.destination); src.start();
+      return (await off.startRendering()).getChannelData(0);
+    }
+
+    function bpmScore(t, f) {
+      const r = f / t;
+      if (Math.abs(r - 1) <= 0.04) return 'ok';
+      if ([0.5, 2, 1 / 3, 3, 2 / 3, 1.5].some((x) => Math.abs(r / x - 1) <= 0.04)) return 'half';
+      return 'bad';
+    }
+
+    const main = async () => {
+      const essentia = new Essentia(EssentiaWASM);
+      $('status').textContent = `Essentia ${essentia.version} ready. Analysing…`;
+      const songs = [...await (await fetch('../analysis-songs/guitarset.json')).json(), ...await (await fetch('../analysis-songs/band.json')).json().catch(() => [])];
+      const totals = { bpm: 0, bpm2: 0, key: 0, chordRight: 0, chordAll: 0, n: 0 };
+      for (const song of songs) {
+        const t0 = performance.now();
+        const audio = await load(song.file);
+        if (song.file.endsWith('.webm')) {
+          // Band songs: the first chord starts at the first loud sound (10% of the peak).
+          let peak = 0; for (const x of audio) peak = Math.max(peak, Math.abs(x));
+          let i = 0; while (Math.abs(audio[i]) < 0.1 * peak) i++;
+          const shift = i / SR - song.chords[0][0];
+          for (const c of song.chords) { c[0] += shift; c[1] += shift; }
+          for (const k of song.keys || []) { k[0] += shift; k[1] += shift; }
+          log(`${song.id}: first chord at ${(i / SR).toFixed(3)} s`);
+        }
+        const vec = essentia.arrayToVector(audio);
+        const rhythm = essentia.RhythmExtractor2013(vec, 208, 'multifeature', 40);
+        const key = essentia.KeyExtractor(vec, true, 4096, 4096, 12, 3500, 60, 25, 0.2, 'bgate', SR, 0.0001, 440, 'cosine', 'hann');
+        const tonal = essentia.TonalExtractor(vec, 4096, 2048, 440);
+        const chordsVec = tonal.chords_progression;
+        const chords = []; for (let i = 0; i < chordsVec.size(); i++) chords.push(chordsVec.get(i));
+        // Keys over time: KeyExtractor on 10 s windows every 2.5 s.
+        const winKeys = [];
+        for (let s = 0; s + 10 * SR <= audio.length; s += 2.5 * SR) {
+          const w = essentia.arrayToVector(audio.subarray(s, s + 10 * SR));
+          const k = essentia.KeyExtractor(w, true, 4096, 4096, 12, 3500, 60, 25, 0.2, 'bgate', SR, 0.0001, 440, 'cosine', 'hann');
+          winKeys.push(`${(s / SR + 5).toFixed(1)}s ${k.key} ${k.scale}`);
+          w.delete && w.delete();
+        }
+        const ms = performance.now() - t0;
+        // Chords, sampled every 0.1 s over the known chords.
+        const hop = 2048 / SR;
+        let right = 0, all = 0;
+        for (const [a, b, label] of song.chords) {
+          const truth = reduceTruth(label);
+          if (!truth) continue;
+          for (let t = a + 0.05; t < b; t += 0.1) {
+            const f = reduceFound(chords[Math.min(chords.length - 1, Math.floor(t / hop))]);
+            all++; if (f && f.pc === truth.pc && f.cls === truth.cls) right++;
+          }
+        }
+        // Diagnostic: the same score with the found chords moved earlier or later.
+        const shifted = [];
+        for (let sh = -1.5; sh <= 1.51; sh += 0.25) {
+          let r = 0, n = 0;
+          for (const [a, b, label] of song.chords) {
+            const truth = reduceTruth(label); if (!truth) continue;
+            for (let t = a + 0.05; t < b; t += 0.1) { const f = reduceFound(chords[Math.max(0, Math.min(chords.length - 1, Math.floor((t + sh) / hop)))]); n++; if (f && f.pc === truth.pc && f.cls === truth.cls) r++; }
+          }
+          shifted.push(`${sh.toFixed(2)}:${Math.round(100 * r / n)}`);
+        }
+        const trueKey = keyOf(song.key), foundKey = { pc: rootPc(key.key), mode: key.scale };
+        const keyOk = trueKey.pc === foundKey.pc && trueKey.mode === foundKey.mode;
+        const bs = bpmScore(song.bpm, rhythm.bpm);
+        totals.n++; totals.bpm += bs === 'ok'; totals.bpm2 += bs !== 'bad'; totals.key += keyOk; totals.chordRight += right; totals.chordAll += all;
+        const row = $('out').insertRow();
+        row.innerHTML = `<td>${song.id}</td><td class="${bs}">${song.bpm} → ${rhythm.bpm.toFixed(1)} (conf ${rhythm.confidence.toFixed(2)})</td>`
+          + `<td class="${keyOk ? 'ok' : 'bad'}">${keyText(trueKey)} → ${keyText(foundKey)} (${key.strength.toFixed(2)})</td>`
+          + `<td class="${right / all > 0.7 ? 'ok' : right / all > 0.5 ? 'half' : 'bad'}">${Math.round(100 * right / all)}% <small>(found: ${[...new Set(chords)].slice(0, 12).join(' ')}; key ${tonal.chords_key} ${tonal.chords_scale})</small></td>`
+          + `<td><small>${(song.keys || []).map((k) => k[2] + ' from ' + k[0].toFixed(1) + 's').join(', ')}<br>${winKeys.join(' · ')}</small></td>`
+          + `<td>${(ms / 1000).toFixed(1)} s for ${(audio.length / SR).toFixed(0)} s</td>`;
+        vec.delete && vec.delete();
+        window.results = window.results || [];
+        window.results.push({ id: song.id, bpm: song.bpm, found: rhythm.bpm, conf: rhythm.confidence, key: song.key, foundKey: keyText(foundKey), chordPct: Math.round(100 * right / all), shifted: shifted.join(' '), perChord: song.chords.slice(0, 8).map(([a, b, l]) => l + '=' + chords[Math.floor((a + b) / 2 / hop)] + '/' + chords[Math.floor((a * 0.75 + b * 0.25) / hop)]).join(' '), winKeys, ms: Math.round(ms) });
+      }
+      $('status').textContent = `Done: BPM right ${totals.bpm}/${totals.n} (with half/double ${totals.bpm2}/${totals.n}), key right ${totals.key}/${totals.n}, chords right ${Math.round(100 * totals.chordRight / totals.chordAll)}% of the time.`;
+      window.done = true;
+    };
+    main().catch((e) => { $('status').textContent = 'Error: ' + e; console.error(e); });
+  </script>
+</body>
+</html>

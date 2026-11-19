@@ -1,1 +1,4 @@
 .DS_Store
+# test songs for the analysis trial (fetched or recorded locally, not published)
+tests/analysis-songs/*
+!tests/analysis-songs/README.md
