@@ -24,11 +24,13 @@
  *     'asl' (American Sign Language): thumb touching the little finger's tip
  *     with index, middle, ring up = 6; thumb touching the ring finger's tip
  *     with index, middle, little up = 7.
- *   handTilt(points, prev = 0) -> 1 | 0 | -1  the hand's sideways lean from
- *     upright (wrist to middle knuckle; leaning towards the camera doesn't
- *     count): 1 = fingers towards the picture's +x side (the person's left,
- *     facing the camera), -1 the other way. Past 35° counts as leaning, back
- *     under 20° as upright again.
+ *   palmFacing(points, side, prev = 0) -> 1 | 0 | -1  which way the hand
+ *     faces: 1 = palm towards the camera, -1 = back of the hand, 0 = edge-on
+ *     (sideways, like a karate chop). side ('Left' | 'Right') is which hand
+ *     it is: a left palm and a right back look alike, so it can't be told
+ *     from the points alone. Turned less than about 57° from facing the
+ *     camera counts as facing it, more than about 70° as sideways; between
+ *     the two it stays as it was. Tilting or leaning the hand changes nothing.
  *   heightBand(y, prev = 0) -> 1 | 0 | -1  where a hand is up the picture:
  *     y is the picture `landmarks` y (0 top, 1 bottom) of the middle knuckle;
  *     top third 1, bottom third -1, with a margin before it changes back.
@@ -94,11 +96,13 @@ export function chordNumber(f, p, sixSeven = 'rock') {
   return countFingers(f);
 }
 
-export function handTilt(p, prev = 0) {
-  const [dx, dy, dz] = sub(p[9], p[0]);
-  // Sideways lean only: leaning towards the camera (y into z) doesn't count.
-  const deg = Math.atan2(dx, Math.hypot(dy, dz)) * 180 / Math.PI;
-  return Math.abs(deg) > (Math.sign(deg) === prev ? 20 : 35) ? Math.sign(deg) : 0;
+export function palmFacing(p, side, prev = 0) {
+  // The palm's normal (wrist, index knuckle, little knuckle): its z part,
+  // towards or away from the camera, is how squarely the palm or back faces it.
+  const a = sub(p[5], p[0]), b = sub(p[17], p[0]);
+  const n = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const s = (n[2] / (len(n) || 1e-9)) * (side === 'Left' ? 1 : -1);
+  return Math.abs(s) > (Math.sign(s) === prev ? 0.35 : 0.55) ? Math.sign(s) : 0;
 }
 
 export function heightBand(y, prev = 0) {

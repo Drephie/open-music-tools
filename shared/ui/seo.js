@@ -50,18 +50,18 @@ export const SEO = {
   "chordigits": {
     "en": {
       "title": "Chordigits – Count Chords on Your Fingers (I to VII) | Open Music Tools",
-      "desc": "Chordigits: hold up one to seven fingers in front of your camera to play chords I to VII of any key, and tilt your hand for major or minor. Free, in your browser; nothing is uploaded.",
-      "about": "Chordigits is a free online chord instrument: hold up fingers in front of your camera to play the chords of a key by number, from I to VII, and tilt your hand to switch between major and minor. A simple way to learn chord numbers."
+      "desc": "Chordigits: hold up one to seven fingers in front of your camera to play chords I to VII of any key, and show your palm or the back of your hand for major or minor. Free, in your browser; nothing is uploaded.",
+      "about": "Chordigits is a free online chord instrument: hold up fingers in front of your camera to play the chords of a key by number, from I to VII, and show your palm or the back of your hand to switch between major and minor. A simple way to learn chord numbers."
     },
     "es": {
       "title": "Chordigits – Cuenta acordes con los dedos (I a VII) | Open Music Tools",
-      "desc": "Chordigits: levanta de uno a siete dedos delante de la cámara para tocar los acordes I a VII de cualquier tonalidad, e inclina la mano para mayor o menor. Gratis, en el navegador; nada se sube.",
-      "about": "Chordigits es un instrumento de acordes gratis y online: levanta los dedos delante de la cámara para tocar los acordes de una tonalidad por número, del I al VII, e inclina la mano para cambiar entre mayor y menor. Una forma sencilla de aprender los grados de los acordes."
+      "desc": "Chordigits: levanta de uno a siete dedos delante de la cámara para tocar los acordes I a VII de cualquier tonalidad, y muestra la palma o el dorso de la mano para mayor o menor. Gratis, en el navegador; nada se sube.",
+      "about": "Chordigits es un instrumento de acordes gratis y online: levanta los dedos delante de la cámara para tocar los acordes de una tonalidad por número, del I al VII, y muestra la palma o el dorso de la mano para cambiar entre mayor y menor. Una forma sencilla de aprender los grados de los acordes."
     },
     "it": {
       "title": "Chordigits – Conta gli accordi con le dita (I–VII) | Open Music Tools",
-      "desc": "Chordigits: alza da uno a sette dita davanti alla fotocamera per suonare gli accordi dal I al VII di qualsiasi tonalità, e inclina la mano per maggiore o minore. Gratis, nel browser; niente viene caricato.",
-      "about": "Chordigits è uno strumento di accordi gratuito e online: alza le dita davanti alla fotocamera per suonare gli accordi di una tonalità per numero, dal I al VII, e inclina la mano per passare da maggiore a minore. Un modo semplice per imparare i gradi degli accordi."
+      "desc": "Chordigits: alza da uno a sette dita davanti alla fotocamera per suonare gli accordi dal I al VII di qualsiasi tonalità, e mostra il palmo o il dorso della mano per maggiore o minore. Gratis, nel browser; niente viene caricato.",
+      "about": "Chordigits è uno strumento di accordi gratuito e online: alza le dita davanti alla fotocamera per suonare gli accordi di una tonalità per numero, dal I al VII, e mostra il palmo o il dorso della mano per passare da maggiore a minore. Un modo semplice per imparare i gradi degli accordi."
     }
   },
   "piano": {

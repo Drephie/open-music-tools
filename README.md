@@ -14,7 +14,7 @@ Made by Drephie ([Instagram](https://instagram.com/drephie), [TikTok](https://ww
 - **Pitch Detector**: the line your voice draws as you sing
 - **Pitch Training**: warm-ups to hear, sing back and see the notes you sang in tune
 - **Choordination**: play chords with your hands in front of the camera
-- **Chordigits**: count chords on your fingers in front of the camera, tilt for major or minor
+- **Chordigits**: count chords on your fingers in front of the camera, palm or back of the hand for major or minor
 
 - **Jam Machine**: a backing band (chords, drums and bass) in eight styles to play and sing over
 

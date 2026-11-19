@@ -1,10 +1,11 @@
 /* chordigits/chordigits.js: count chords on your fingers in front of the camera.
  * The number hand shows I to VII (shared/hands.js) and its height the octave;
- * the other hand's tilt picks major or minor and its fingers the colour.
+ * the other hand shows its palm (major), its back (minor) or its edge (the
+ * key's own chord), and its fingers the colour.
  * Without the camera, the numbers and choices are buttons and keys.
  * Spec: specs/chordigits.md. */
 import { parseKey, keyRootName, keyChordNames, getChordInfo, voiceChord, keyTonicMidi, chordNumeral } from '../shared/theory.js';
-import { readFingers, countFingers, chordNumber, handTilt, heightBand, createSteady } from '../shared/hands.js';
+import { readFingers, countFingers, chordNumber, palmFacing, heightBand, createSteady } from '../shared/hands.js';
 import { startAudio, createRack, INSTRUMENTS } from '../shared/sound.js';
 import { LANGUAGES, mergeStrings, createI18n } from '../shared/ui/i18n.js';
 import { HUB_STRINGS } from '../shared/ui/strings.js';
@@ -268,7 +269,7 @@ function status(k) { statusKey = k; statusEl.textContent = k ? t(k) : ''; }
 // Each hand's reading is one number, held steady (createSteady), so a chord
 // changes only once both hands are still:
 //   number hand: 0 = fist, else chord number + 10 * (height band + 1)
-//   other hand:  10 * (tilt + 1) + colour
+//   other hand:  10 * (palm or back + 1) + colour
 const numberSteady = createSteady(), typeSteady = createSteady();
 let handsPlaying = false, hands = [], lastVideoTime = -1, frameAt = 0, frame = 0;
 const memory = { Left: {}, Right: {} };
@@ -281,10 +282,14 @@ function readHands(nowMs) {
   frameAt = nowMs;
   const res = handLandmarker.detectForVideo(video, nowMs);
   const sides = res.handednesses || res.handedness || [];
-  hands = (res.landmarks || []).map((lm, i) => {
-    // MediaPipe's labels assume a mirrored picture; the camera's isn't.
+  const all = res.landmarks || [];
+  hands = all.map((lm, i) => {
+    // MediaPipe's labels assume a mirrored picture; the camera's isn't. With
+    // two hands, where they are decides (your left is the picture's +x side):
+    // a label can flip when the back of a hand faces the camera.
     const raw = sides[i]?.[0]?.categoryName;
-    const side = raw === 'Left' ? 'Right' : raw === 'Right' ? 'Left' : (lm[0].x > 0.5 ? 'Left' : 'Right');
+    const side = all.length === 2 ? (lm[0].x > all[1 - i][0].x ? 'Left' : 'Right')
+      : raw === 'Left' ? 'Right' : raw === 'Right' ? 'Left' : (lm[0].x > 0.5 ? 'Left' : 'Right');
     const world = res.worldLandmarks?.[i];
     if (!world) return { lm, side, code: null };
     const m = memory[side];
@@ -294,8 +299,8 @@ function readHands(nowMs) {
       m.band = heightBand(lm[9].y, m.band);
       return { lm, side, code: n ? n + 10 * (m.band + 1) : 0 };
     }
-    m.tilt = handTilt(world, m.tilt);
-    return { lm, side, code: 10 * (m.tilt + 1) + COLOR_OF_COUNT[countFingers(m.fingers)] };
+    m.facing = palmFacing(world, side, m.facing);
+    return { lm, side, code: 10 * (m.facing + 1) + COLOR_OF_COUNT[countFingers(m.fingers)] };
   });
   if (faceLandmarker && settings.brow && ++frame % 2 === 0) readBrows(nowMs);
 }
@@ -330,9 +335,9 @@ function tick(nowMs) {
     handsPlaying = true;
     degree = Math.min(numberNow % 10, names.length) - 1;
     handOctave = Math.floor(numberNow / 10) - 1;
-    const tc = typeNow == null ? 10 : typeNow;
-    quality = Math.floor(tc / 10) - 1;
-    color = tc % 10;
+    const tc = typeNow == null ? 10 : typeNow, q = Math.floor(tc / 10) - 1, c = tc % 10;
+    // Lit at once even when the chord stays the same (IV is F sideways or palm).
+    if (q !== quality || c !== color) { quality = q; color = c; lightUp(); }
   }
   if (settings.brow && face.present && calib.done) {
     if (!sustainBrow && face.brow > browThreshold) sustainBrow = true;
@@ -447,7 +452,7 @@ function draw() {
       const n = h.code % 10, band = Math.floor(h.code / 10) - 1;
       text = n ? (numerals[n - 1] || String(n)) + (band > 0 ? ' ↑' : band < 0 ? ' ↓' : '') : ''; // a fist: nothing
     } else {
-      // Only what changes the chord: major or minor when tilted, and the colour.
+      // Only what changes the chord: major (palm) or minor (back), and the colour.
       const q = Math.floor(h.code / 10) - 1, c = h.code % 10;
       text = [q ? t(KIND_WORD[q]) : '', c ? t(COLOR_WORD[c]) : ''].filter(Boolean).join(' · ');
     }

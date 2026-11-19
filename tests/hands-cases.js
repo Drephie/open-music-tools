@@ -193,24 +193,29 @@ export function checkHands(H, T) {
     }
   }
 
-  // 4. Tilt: upright, leaning left or right, whatever the hand shows.
+  // 4. Palm or back towards the camera, or sideways. A made-up hand's palm
+  // faces +z (away from the camera, z grows away): turned 0° it shows its
+  // back, 180° its palm, 90° its edge.
   {
-    const r = row('Tilt: upright (within 15°) reads 0, leaning 50° or more reads +1 or -1 by side, even turned 30° or leaning 30° towards the camera, either hand, any fingers; no flip-flop between 24° and 29° (the hand itself leans about 5°)');
+    const r = row('Palm or back: palm towards the camera reads +1, back -1, edge-on 0, either hand, any fingers, turned up to 40° off, tilted or leaning 20°; no flip-flop turning between 62° and 66° off');
     const shapes = [SHAPES[0][1], SHAPES[12][1], SHAPES[3][1], SHAPES[6][1]]; // fist, open, 1, 2
-    for (const shape of shapes) for (const mirror of [false, true]) for (const yaw of [-30, 0, 30]) for (const pitch of [-30, 0, 30]) {
-      for (const [roll, want] of [[0, 0], [15, 0], [-15, 0], [-50, 1], [-70, 1], [50, -1], [70, -1]]) {
+    for (const shape of shapes) for (const mirror of [false, true]) for (const roll of [-40, 0, 40]) for (const pitch of [-20, 0, 20]) {
+      for (const [yaw, want] of [[180, 1], [140, 1], [-140, 1], [0, -1], [40, -1], [-40, -1], [90, 0], [75, 0], [-90, 0], [-105, 0]]) {
         const p = place(makeHand(shape), { roll, yaw, pitch, mirror, jitter: 0.02, rand });
-        const got = H.handTilt(p);
+        const got = H.palmFacing(p, mirror ? 'Left' : 'Right');
         r.checked++;
-        if (got !== want) fail(r, `roll ${roll}° yaw ${yaw}° pitch ${pitch}°${mirror ? ' left hand' : ''}: ${got}, expected ${want}`);
+        if (got !== want) fail(r, `turned ${yaw}° roll ${roll}° pitch ${pitch}°${mirror ? ' left hand' : ''}: ${got}, expected ${want}`);
       }
     }
-    for (const [start, startWant] of [[0, 0], [-50, 1]]) {
-      let prev = H.handTilt(place(makeHand(shapes[1]), { roll: start, rand }));
-      for (let i = 0; i < 12; i++) {
-        prev = H.handTilt(place(makeHand(shapes[1]), { roll: i % 2 ? -24 : -29, rand }), prev);
-        r.checked++;
-        if (prev !== startWant) { fail(r, `from roll ${start}°, wobble ${i}: ${prev}`); break; }
+    for (const [start, startWant, wobble] of [[180, 1, [118, 114]], [0, -1, [62, 66]], [90, 0, [118, 114]], [90, 0, [62, 66]]]) {
+      for (const mirror of [false, true]) {
+        const side = mirror ? 'Left' : 'Right';
+        let prev = H.palmFacing(place(makeHand(shapes[1]), { yaw: start, mirror, rand }), side);
+        for (let i = 0; i < 12; i++) {
+          prev = H.palmFacing(place(makeHand(shapes[1]), { yaw: wobble[i % 2], mirror, rand }), side, prev);
+          r.checked++;
+          if (prev !== startWant) { fail(r, `from ${start}°${mirror ? ' left hand' : ''}, wobble ${i}: ${prev}`); break; }
+        }
       }
     }
   }

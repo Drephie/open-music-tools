@@ -1,20 +1,21 @@
 # Chordigits: spec
 
-**Status:** redesign approved by Drephie, 2026-11-04. Drephie's camera test (2026-11-04): the design works; the thumb misfired on I and II, so it now counts only with two or more other fingers; Drephie's re-test: it works. The first version (approved 2026-11-04) was Choordination with a new way to play; Drephie found it looked like Choordination and the donuts useless. This version takes ideas from Eric Wei's Gesture Synth (tilt for major or minor, hand height for the octave, a soft gliding synth) without copying it, and looks like the hub's other tools. Items marked *(Claude's pick)* weren't asked: say if you want them changed.
+**Status:** redesign approved by Drephie, 2026-11-04. Drephie's camera test (2026-11-04): the design works; the thumb misfired on I and II, so it now counts only with two or more other fingers; Drephie's re-test: it works. The first version (approved 2026-11-04) was Choordination with a new way to play; Drephie found it looked like Choordination and the donuts useless. This version takes ideas from Eric Wei's Gesture Synth (hand height for the octave, a soft gliding synth; at first also tilt for major or minor) without copying it, and looks like the hub's other tools. Items marked *(Claude's pick)* weren't asked: say if you want them changed.
 
 ## What it is for
 
-Play the chords of a song with your hands in front of the camera: one hand counts the chord's number in the key (I to VII), the other tilts for major or minor and adds colour. For singers who accompany themselves, and for learning how chords are numbered in a key.
+Play the chords of a song with your hands in front of the camera: one hand counts the chord's number in the key (I to VII), the other shows its palm or its back for major or minor and adds colour. For singers who accompany themselves, and for learning how chords are numbered in a key.
 
 ## What it does
 
 - **Number hand** (right; left with "Left-handed"): how many fingers you hold up is the chord's number in the key. 1 to 5 fingers: I to V, counted any way; the thumb counts only with two or more other fingers (thumb + 2 = III, open hand = V), so a thumb that pops out beside one finger doesn't turn I into II *(after Drephie's camera test, 2026-11-04)*. **🤙** (thumb and little finger) is VI, **🤘** (index and little finger) is VII. A fist, or no hand, is silence. Setting **Six and seven**: or sign language (thumb touches the little finger = VI, the ring finger = VII).
 - **Height of the number hand = octave:** hand in the top third of the picture plays an octave higher, the bottom third an octave lower.
-- **Other hand, tilt = major or minor:**
-  - upright: the chord as the key has it (in C: C, Dm, Em, F, G, Am, B°);
-  - tilted to your left: major (D in C); tilted to your right: minor (Fm in C).
-  - no hand: as upright.
-- **Other hand, fingers = colour:** fist or open hand: the plain chord; 1 finger: 7th; 2: sus4; 3: add9. With tilt: tilted right + 1 finger = minor 7th (Dm7); tilted left + 1 finger = 7th (D7); upright + 1 finger = the key's own 7th (G7 on V, Cmaj7 on I).
+- **Other hand, palm or back = major or minor** *(Drephie, 2026-11-19: tilting wasn't good)*:
+  - palm towards the camera: major (D in C); back of the hand: minor (Fm in C);
+  - sideways, edge-on like a karate chop: the chord as the key has it (in C: C, Dm, Em, F, G, Am, B°) *(Claude's pick, asked by Drephie: keeps every chord playable)*;
+  - no hand: as sideways.
+  - With two hands in view, which is which comes from where they are (your left hand on your left), since the camera's guess can flip on the back of a hand.
+- **Other hand, fingers = colour:** fist or open hand: the plain chord; 1 finger: 7th; 2: sus4; 3: add9. With the palm or back: back + 1 finger = minor 7th (Dm7); palm + 1 finger = 7th (D7); sideways + 1 finger = the key's own 7th (G7 on V, Cmaj7 on I).
 - **Playing:** hold the fingers still for about a fifth of a second and the chord sounds; it rings while you hold it. A new chord only once both hands are still. A fist or taking the hand away stops it; close and open to repeat.
 - **Dreamy, the new sound** (the default here; also added to the Piano's and Choordination's sound lists): a soft synth, each note three slightly detuned copies of a warm wave, a slow fade-in, a long fade-out, a soft filter and some reverb (our own, built on Gesture Synth's idea). **Glide** (on by default, Dreamy only): each chord slides smoothly into the next. The other sounds stay: piano, electric piano, synth, pad, organ, harp.
 - **Without the camera:** tap and hold a number to play it; tap major or minor (on and off; neither is the key's own chord), and plain / 7th / sus4 / add9. Keyboard: 1–7 hold to play, W and E for major and minor (again to go back), A S D F for plain / 7th / sus4 / add9, Space to sustain *(Claude's pick: holding a number plays, like a keyboard instrument)*. Chromatic (12 notes) only without the camera.
@@ -22,14 +23,14 @@ Play the chords of a song with your hands in front of the camera: one hand count
 
 ## Not in this version
 
-Choordination's donuts, watermark and Menu button; the "Kinds of chord" list (the tilt and colour fingers replace it); head-tilt one-hand modes; ♭ and ♯ chords by hand height (Drephie didn't pick it); Gesture Synth's tutorial songs, strings and horns.
+Choordination's donuts, watermark and Menu button; the "Kinds of chord" list (palm or back and the colour fingers replace it); head-tilt one-hand modes; ♭ and ♯ chords by hand height (Drephie didn't pick it); Gesture Synth's tutorial songs, strings and horns.
 
 ## Look and layout
 
 Full-screen camera, as in Gesture Synth, in the hub's themes and fonts, with the parts of our other tools on top:
 - **Top:** "CHORDIGITS" big, in capitals, on the left, as Choordination's name (Drephie: it shows in the videos people post); a tap on it opens About, as on Choordination *(no separate About button)*; on the right the home, record, How to play (?) and Settings buttons.
 - **Centre top:** the chord name big in the theme's title font, its number (V7) and notes under it.
-- **Next to each hand:** what the camera reads: the number by one hand (↑ or ↓ for the octave; nothing for a fist), and by the other only what changes the chord: major or minor when tilted, and the colour.
+- **Next to each hand:** what the camera reads: the number by one hand (↑ or ↓ for the octave; nothing for a fist), and by the other only what changes the chord: major (palm) or minor (back), and the colour.
 - **Bottom:** a bar with the seven numbers (I ii iii IV V vi vii°, each with its chord name), lit while playing, and two small rows of choices: major / minor (on and off), and plain / 7th / sus4 / add9 *(Drephie: "as in the key" was superfluous)*, lit by the hands or tapped. Patreon and @drephie links small under it.
 - **The camera starts at once** *(Drephie, 2026-11-04)*. Only if it or the hand tracking fails, a card says what happened, with "Play without the camera" (main button) and "Retry". How to play opens by itself on the first visit, then from the ? button. Until a first tap or key, a line says to tap for sound (browsers start sound only then).
 - **Each theme's look on the camera, as in Choordination** *(Drephie, 2026-11-04)*: the picture faded into the page colour and coloured by the theme (Rouge red, Retro CRT green, Monochrome grey, Retrosnap sepia…), inside the theme's frame (Rouge's dark red vignette, Retrosnap's instant-photo border, Monochrome's black bars). Support on Patreon and @drephie sit free in the bottom corners, with no bar.
@@ -41,7 +42,7 @@ Full-screen camera, as in Gesture Synth, in the hub's themes and fonts, with the
 
 ## Wording (English)
 
-How to play: "Right hand: how many fingers = the chord's number. 🤙 is VI, 🤘 is VII. Higher or lower = octave. A fist stops." "Left hand: tilt left for major, right for minor, upright for the key's own chord. 1 finger adds a 7th, 2 a sus4, 3 an add9." "Hold still for a moment to play." Spanish and Italian at build time; Drephie checks them.
+How to play: "Right hand: how many fingers = the chord's number. 🤙 is VI, 🤘 is VII. Higher or lower = octave. A fist stops." "Left hand: palm towards the camera for major, back of the hand for minor, sideways (like a karate chop) for the key's own chord. 1 finger adds a 7th, 2 a sus4, 3 an add9." "Hold still for a moment to play." Spanish and Italian at build time; Drephie checks them.
 
 ## Remembered
 
@@ -49,7 +50,7 @@ Theme and language (hub-wide), sound, glide, six and seven, hand layout *(Claude
 
 ## Built on
 
-Its own page on `shared/ui/page.css` and `page.js` (no longer a copy of Choordination's page). `shared/hands.js` (fingers, plus tilt and height, tested), `shared/theory.js` (two more chord kinds: major add9 and minor add9), `shared/sound.js` (Dreamy and glide), MediaPipe hand and face tracking 0.10.3.
+Its own page on `shared/ui/page.css` and `page.js` (no longer a copy of Choordination's page). `shared/hands.js` (fingers, plus palm or back and height, tested), `shared/theory.js` (two more chord kinds: major add9 and minor add9), `shared/sound.js` (Dreamy and glide), MediaPipe hand and face tracking 0.10.3.
 
 ## Privacy and credits
 
@@ -57,5 +58,5 @@ Camera and microphone stay on the device. Salamander Grand Piano (CC BY 3.0), Me
 
 ## How we check it
 
-**Claude:** tilt, height and fingers on made-up hands; Dreamy's level against the other sounds (no clipping); tap and keyboard play; 7 themes × 3 languages × phone sizes; all test pages.
-**Drephie, with the camera and ears:** a hand checklist (counts, 🤙 🤘, tilt both ways, height, colour fingers, both hands at once) and the Dreamy sound with and without glide.
+**Claude:** palm or back, height and fingers on made-up hands; Dreamy's level against the other sounds (no clipping); tap and keyboard play; 7 themes × 3 languages × phone sizes; all test pages.
+**Drephie, with the camera and ears:** a hand checklist (counts, 🤙 🤘, palm, back and sideways, height, colour fingers, both hands at once) and the Dreamy sound with and without glide.
