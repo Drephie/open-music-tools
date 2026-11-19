@@ -195,6 +195,7 @@ function renderBars() {
 }
 // A chord name that doesn't fit its box gets smaller (Dmaj7 in a wide theme font).
 function fitNames() {
+  shapeBeats();
   barsEl.querySelectorAll('.bar-name').forEach((el) => {
     el.style.fontSize = '';
     for (let size = parseFloat(getComputedStyle(el).fontSize); el.scrollWidth > el.clientWidth + 1 && size > 12; ) {
@@ -204,14 +205,54 @@ function fitNames() {
   });
 }
 window.addEventListener('resize', fitNames);
+
+// In a theme with fully round boxes (Soft Pink: circles and pills) the four beat
+// lines follow the curve of the box's bottom instead of a straight line that
+// the round edge would cut off. Other themes keep the straight lines.
+const SVG_NS = 'http://www.w3.org/2000/svg';
+function shapeBeats() {
+  barsEl.querySelectorAll('.bar').forEach((bar) => {
+    const beats = bar.querySelector('.beats');
+    const w = bar.clientWidth, h = bar.clientHeight;
+    const R = Math.min(parseFloat(getComputedStyle(bar).borderBottomLeftRadius) || 0, w / 2, h / 2);
+    const round = R >= Math.min(w, h) / 2 - 1;
+    if (!round) {
+      if (beats.classList.contains('arc')) { beats.classList.remove('arc'); beats.innerHTML = '<i></i><i></i><i></i><i></i>'; }
+      return;
+    }
+    // The bottom of the box, 7 px inside its edge: an arc on the left, a straight part (pills), an arc on the right.
+    const ri = R - 7, cy = h - R, a = (50 * Math.PI) / 180;
+    const pt = (cx, ang) => `${(cx + ri * Math.cos(ang)).toFixed(2)} ${(cy + ri * Math.sin(ang)).toFixed(2)}`;
+    const d = `M${pt(R, Math.PI / 2 + a)} A${ri} ${ri} 0 0 0 ${pt(R, Math.PI / 2)} L${pt(w - R, Math.PI / 2)} A${ri} ${ri} 0 0 0 ${pt(w - R, Math.PI / 2 - a)}`;
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    beats.classList.add('arc');
+    beats.replaceChildren(svg);
+    const probe = document.createElementNS(SVG_NS, 'path');
+    probe.setAttribute('d', d);
+    svg.appendChild(probe);
+    const len = probe.getTotalLength(), q = len / 4, gap = Math.min(9, q * 0.3);   // round line ends add 2 px each side
+    probe.remove();
+    for (let k = 0; k < 4; k++) {
+      const p = document.createElementNS(SVG_NS, 'path');
+      p.setAttribute('d', d);
+      p.setAttribute('stroke-dasharray', `${q - gap} ${len}`);
+      p.setAttribute('stroke-dashoffset', String(-(k * q + gap / 2)));
+      svg.appendChild(p);
+    }
+  });
+  lightBars(isPlaying() ? lastBeat : -1);
+}
 if (document.fonts) document.fonts.ready.then(fitNames);
 // The bar playing is filled; its beat lines light up one by one.
+let lastBeat = -1;
 function lightBars(beat) {
+  lastBeat = beat;
   [...barsEl.children].forEach((b, i) => {
     const on = beat >= 0 && i === playingBar;
     b.classList.toggle('on', on);
     if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
-    b.querySelectorAll('.beats i').forEach((d, j) => d.classList.toggle('lit', on && j <= beat));
+    b.querySelectorAll('.beats > i, .beats path').forEach((d, j) => d.classList.toggle('lit', on && j <= beat));
   });
 }
 

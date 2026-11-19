@@ -86,6 +86,10 @@
 .bar.on :is(.bar-num, .bar-deg) { color: color-mix(in srgb, var(--color-text-pinched) 70%, transparent); }
 .bar.on .bar-lock { color: var(--color-text-pinched); }
 .beats i.lit { opacity: 0.9; }
+.beats.arc { inset: 0; display: block; }
+.beats.arc svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.beats.arc path { fill: none; stroke: currentColor; stroke-width: 4; stroke-linecap: round; opacity: 0.16; }
+.beats.arc path.lit { opacity: 0.9; }
 .bar.locked { box-shadow: inset 0 0 0 1px var(--color-right); }
 .bar.dragging { opacity: 0.35; }
 .bar.drop { box-shadow: inset 0 0 0 3px var(--color-right); }
