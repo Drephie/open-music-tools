@@ -23,7 +23,11 @@
  *                     saved yet comes from `saved` (the tool's own settings
  *                     from before the hub shared them: { theme, lang }), and
  *                     is then passed on to the hub; else 'rouge' and
- *                     English (Drephie, 2026-11-04).
+ *                     the browser's own language when it is one of ours,
+ *                     else English (browserLang; Drephie, 2026-11-19).
+ *   browserLang()     'en', 'es' or 'it' from the browser's language list
+ *                     (navigator.languages), read on the device: nothing is
+ *                     sent anywhere and nothing is saved.
  *   saveLook(changes) saves { theme } and/or { lang } for every tool
  *   watchLook(apply)  calls apply({ theme, lang }) when another tab changes
  *                     them, and when the browser's Back or Forward button
@@ -100,8 +104,17 @@ export function loadLook(saved = {}) {
   if (Object.keys(passOn).length) saveLook(passOn);
   return {
     theme: validTheme(hub.theme) ? hub.theme : passOn.theme || 'rouge',
-    lang: validLang(hub.lang) ? hub.lang : passOn.lang || 'en',
+    lang: validLang(hub.lang) ? hub.lang : passOn.lang || browserLang(),
   };
+}
+export function browserLang() {
+  let list = [];
+  try { list = navigator.languages?.length ? navigator.languages : [navigator.language]; } catch { /* no navigator */ }
+  for (const tag of list) {
+    const lang = String(tag || '').slice(0, 2).toLowerCase();
+    if (validLang(lang)) return lang;
+  }
+  return 'en';
 }
 export function saveLook(changes) {
   saveSettings(LOOK_KEY, { ...loadSettings(LOOK_KEY), ...changes });
