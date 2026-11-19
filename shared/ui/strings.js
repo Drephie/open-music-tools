@@ -43,7 +43,7 @@ export const HUB_STRINGS = {
     // Themes (shared/ui/themes.css)
     theme: "Tema", themeLiquid: "Cristal Líquido", themeY2k: "Cyber Y2K", themePink: "Rosa Suave", themeBw: "Monocromo", themeRetro: "CRT Retro", themeRouge: "Rouge", themeSnap: "Retrosnap",
     // Instrument rack (shared/sound.js INSTRUMENTS)
-    inst: "Instrumento", instPiano: "Piano de Cola", instEpiano: "Piano Eléctrico Clásico", instEsynth: "Sinte Eléctrico", instPad: "Pad Analógico Suave", instOrgan: "Órgano Cálido", instHarp: "Arpa de Ensueño", instDreamy: "Sinte Soñador",
+    inst: "Instrumento", instPiano: "Piano de cola", instEpiano: "Piano eléctrico clásico", instEsynth: "Sintetizador eléctrico", instPad: "Pad analógico suave", instOrgan: "Órgano cálido", instHarp: "Arpa de ensueño", instDreamy: "Sintetizador soñador",
     // Metronome sounds (shared/transport.js CLICK_SOUNDS)
     metClick: "Clic", metBeep: "Bip", metWood: "Madera", metHat: "Hi-hat",
     camLook: "Imagen de la cámara", camBrightness: "Brillo", camContrast: "Contraste", camSaturation: "Saturación", camHue: "Matiz", camNoise: "Ruido", camReset: "Restablecer la imagen",
@@ -63,7 +63,7 @@ export const HUB_STRINGS = {
     // Themes (shared/ui/themes.css)
     theme: "Tema", themeLiquid: "Vetro Liquido", themeY2k: "Cyber Y2K", themePink: "Rosa Tenue", themeBw: "Monocromatico", themeRetro: "CRT Retrò", themeRouge: "Rouge", themeSnap: "Retrosnap",
     // Instrument rack (shared/sound.js INSTRUMENTS)
-    inst: "Strumento", instPiano: "Pianoforte a Coda", instEpiano: "Piano Elettrico Classico", instEsynth: "Synth Elettrico", instPad: "Pad Analogico Morbido", instOrgan: "Organo Caldo", instHarp: "Arpa da Sogno", instDreamy: "Synth Sognante",
+    inst: "Strumento", instPiano: "Pianoforte a coda", instEpiano: "Piano elettrico classico", instEsynth: "Synth elettrico", instPad: "Pad analogico morbido", instOrgan: "Organo caldo", instHarp: "Arpa da sogno", instDreamy: "Synth sognante",
     // Metronome sounds (shared/transport.js CLICK_SOUNDS)
     metClick: "Clic", metBeep: "Bip", metWood: "Legno", metHat: "Hi-hat",
     camLook: "Immagine della fotocamera", camBrightness: "Luminosità", camContrast: "Contrasto", camSaturation: "Saturazione", camHue: "Tinta", camNoise: "Rumore", camReset: "Ripristina l'immagine",

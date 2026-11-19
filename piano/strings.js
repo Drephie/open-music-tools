@@ -48,7 +48,7 @@ export const PIANO_STRINGS = {
     supportTitle: "Apoya el Piano",
     supportBody: "¿Te gusta tocarlo? ¡Ayuda a que estas herramientas musicales sigan gratis, sin anuncios y creciendo!",
     sound: "Sonido",
-    sndPiano: "Piano de cola", sndEpiano: "Piano eléctrico", sndEsynth: "Sintetizador", sndPad: "Pad", sndOrgan: "Órgano", sndHarp: "Arpa", sndDreamy: "Sinte soñador",
+    sndPiano: "Piano de cola", sndEpiano: "Piano eléctrico", sndEsynth: "Sintetizador", sndPad: "Pad", sndOrgan: "Órgano", sndHarp: "Arpa", sndDreamy: "Sintetizador soñador",
     keys: "Teclas en pantalla", keysFewer: "Menos teclas, más grandes", keysMore: "Más teclas, más pequeñas",
     flip: "Girar el piano",
     modeGroup: "Cómo suena una tecla", modeHold: "Mantener", modeRing: "Resonar", modeDrone: "Bordón",

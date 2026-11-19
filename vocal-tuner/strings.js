@@ -43,7 +43,7 @@ export const TUNER_STRINGS = {
     low: "{n} cents bajo", high: "{n} cents alto", low1: "1 cent bajo", high1: "1 cent alto", inTune: "Afinado",
     names: "Nombres de las notas", namesSolfege: "Do Re Mi", namesLetters: "C D E",
     movement: "Movimiento", calm: "Tranquilo", quick: "Rápido (muestra el vibrato)",
-    tolerance: "Afinado a menos de", tolNormal: "10 cents", tolHard: "5 cents (difícil)", centHint: "Un cent es la centésima parte de medio tono.",
+    tolerance: "Afinado a menos de", tolNormal: "10 cents", tolHard: "5 cents (difícil)", centHint: "Un cent es la centésima parte de un semitono.",
     errInsecure: "El micrófono solo funciona en una página segura. Abre el afinador vocal desde su dirección https.",
     errUnsupported: "Este navegador no puede usar el micrófono. Prueba con un Safari, Chrome o Firefox reciente.",
     errDenied: "El micrófono está bloqueado. Toca el icono junto a la dirección web (en un iPhone: aA y luego Ajustes del sitio web), pon el micrófono en Permitir y pulsa Empezar a escuchar.",

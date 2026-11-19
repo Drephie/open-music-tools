@@ -8,7 +8,7 @@
 const ABOUT_CREDITS = {
   en: 'Piano sound: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> by Alexander Holm, licensed under <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
   es: 'Sonido de piano: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> de Alexander Holm, con licencia <a href="https://creativecommons.org/licenses/by/3.0/deed.es" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
-  it: 'Suono del pianoforte: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> di Alexander Holm, con licenza <a href="https://creativecommons.org/licenses/by/3.0/deed.it" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
+  it: 'Suono di pianoforte: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> di Alexander Holm, con licenza <a href="https://creativecommons.org/licenses/by/3.0/deed.it" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
 };
 const CHORDS = { ch_sus2: 'sus2', ch_sus4: 'sus4', ch_7: '7', ch_maj7: 'maj7', ch_m7: 'm7', ch_6: '6', ch_9: '9' };
 
@@ -43,7 +43,7 @@ export const INTERVLE_STRINGS = {
     aboutCredits: ABOUT_CREDITS.es,
     aboutKeys: "En el ordenador: Espacio toca el reto, las teclas numéricas responden (como en los botones), o escribe tu respuesta (\"m3\", \"Mi\", \"E\", \"Fa#m7\") y pulsa Intro.",
     supportTitle: "Apoya Intervle",
-    supportBody: "¿Te gusta tu reto de oído diario? ¡Ayuda a que estas herramientas sigan siendo gratis, sin anuncios y creciendo!",
+    supportBody: "¿Te gusta tu reto de oído diario? ¡Ayuda a que estas herramientas musicales sigan gratis, sin anuncios y creciendo!",
     modesAria: "Modos", easy: "Fácil", medium: "Medio", hard: "Difícil",
     backToday: "Volver a hoy",
     askEasy: "¿Qué distancia hay entre las dos notas?", askMedium: "La primera nota que suena es {note}. ¿Qué nota viene después?", askHard: "La primera nota que suena es {note}. ¿Qué acorde viene después?", rootAria: "La nota del acorde", typeGroupAria: "El tipo de acorde",
@@ -57,16 +57,16 @@ export const INTERVLE_STRINGS = {
     names: "Nombres de las notas", namesSolfege: "Do Re Mi", namesLetters: "C D E",
     loading: "Cargando el sonido del piano…", loadFailed: "El sonido del piano no se cargó. Revisa tu conexión y pulsa Tocar de nuevo.",
     ...CHORDS,
-    chw_sus2: "2.ª suspendida", chw_sus4: "4.ª suspendida", chw_7: "séptima de dominante", chw_maj7: "séptima mayor", chw_m7: "séptima menor", chw_6: "sexta", chw_9: "novena",
+    chw_sus2: "2.ª suspendida", chw_sus4: "4.ª suspendida", chw_7: "séptima de dominante", chw_maj7: "séptima mayor", chw_m7: "menor séptima", chw_6: "sexta", chw_9: "novena",
   },
   it: {
     title: "Intervle",
     aboutTitle: "Informazioni su Intervle",
-    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracciamento, niente viene caricato: tutto funziona nel tuo browser.<br><br>Tre giochi d\'orecchio al giorno, uguali per tutti, con 3 tentativi ciascuno. <strong>Facile</strong>: quanto sono distanti due note (l\'<strong>intervallo</strong>, contato in semitoni: da un tasto del pianoforte al successivo)? <strong>Medio</strong>: conosci la prima nota; di\' qual è la seconda. <strong>Difficile</strong>: conosci la prima nota; poi arriva un accordo intero: scegli la sua nota e il suo tipo (es. Fa♯m7). Non ci arrivi? <strong>Suggerimento</strong> suona l\'accordo una nota alla volta. Un gioco nuovo ogni mezzanotte.',
+    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, niente viene caricato: tutto funziona nel tuo browser.<br><br>Tre giochi d\'orecchio al giorno, uguali per tutti, con 3 tentativi ciascuno. <strong>Facile</strong>: quanto sono distanti due note (l\'<strong>intervallo</strong>, contato in semitoni: da un tasto del pianoforte al successivo)? <strong>Medio</strong>: conosci la prima nota; di\' qual è la seconda. <strong>Difficile</strong>: conosci la prima nota; poi arriva un accordo intero: scegli la sua nota e il suo tipo (es. Fa♯m7). Non ci arrivi? <strong>Suggerimento</strong> suona l\'accordo una nota alla volta. Un gioco nuovo ogni mezzanotte.',
     aboutCredits: ABOUT_CREDITS.it,
     aboutKeys: "Al computer: Spazio suona il gioco, i tasti numerici rispondono (come sui pulsanti), oppure scrivi la risposta (\"m3\", \"Mi\", \"E\", \"Fa#m7\") e premi Invio.",
     supportTitle: "Sostieni Intervle",
-    supportBody: "Ti piace il tuo gioco d'orecchio quotidiano? Aiuta questi strumenti a restare gratuiti, senza pubblicità e a crescere!",
+    supportBody: "Ti piace il tuo gioco d'orecchio quotidiano? Aiutaci a mantenere questi strumenti musicali gratuiti, senza pubblicità e in crescita!",
     modesAria: "Modalità", easy: "Facile", medium: "Medio", hard: "Difficile",
     backToday: "Torna a oggi",
     askEasy: "Quanto sono distanti le due note?", askMedium: "La prima nota suonata è {note}. Quale nota viene dopo?", askHard: "La prima nota suonata è {note}. Quale accordo viene dopo?", rootAria: "La nota dell'accordo", typeGroupAria: "Il tipo di accordo",
@@ -80,7 +80,7 @@ export const INTERVLE_STRINGS = {
     names: "Nomi delle note", namesSolfege: "Do Re Mi", namesLetters: "C D E",
     loading: "Caricamento del suono del pianoforte…", loadFailed: "Il suono del pianoforte non si è caricato. Controlla la connessione, poi premi di nuovo Suona.",
     ...CHORDS,
-    chw_sus2: "seconda sospesa", chw_sus4: "quarta sospesa", chw_7: "settima di dominante", chw_maj7: "settima maggiore", chw_m7: "settima minore", chw_6: "sesta", chw_9: "nona",
+    chw_sus2: "seconda sospesa", chw_sus4: "quarta sospesa", chw_7: "settima di dominante", chw_maj7: "settima maggiore", chw_m7: "minore settima", chw_6: "sesta", chw_9: "nona",
   },
 };
 

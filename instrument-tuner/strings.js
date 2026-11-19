@@ -61,7 +61,7 @@ export const TUNER_STRINGS = {
     plainMuchLow: "Muy baja", plainMuchHigh: "Muy alta",
     inTune: "Afinada", inTuneNote: "Afinada", allTuned: "Todas las cuerdas afinadas",
     names: "Nombres de las notas", namesSolfege: "Do Re Mi", namesLetters: "C D E",
-    tolerance: "Afinada a menos de", tolNormal: "5 cents", tolHard: "2 cents (difícil)", centHint: "Un cent es la centésima parte de medio tono.",
+    tolerance: "Afinada a menos de", tolNormal: "5 cents", tolHard: "2 cents (difícil)", centHint: "Un cent es la centésima parte de un semitono.",
     inst_guitar: "Guitarra", inst_bass: "Bajo", inst_ukulele: "Ukelele", inst_violin: "Violín, mandolina", inst_viola: "Viola", inst_cello: "Violonchelo", inst_chromatic: "Cualquier nota (cromático)",
     tun_standard: "Estándar", tun_dropD: "Drop D", tun_halfDown: "Medio tono abajo", tun_dadgad: "DADGAD", tun_openG: "Sol abierto", tun_openD: "Re abierto",
     tun_bass4: "4 cuerdas", tun_bass5: "5 cuerdas", tun_lowG: "Sol grave", tun_baritone: "Barítono",
