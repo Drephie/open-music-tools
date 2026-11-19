@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Jam Machine (mock-up)</title>
+  <link rel="stylesheet" href="../../shared/fonts/fonts.css">
+  <link rel="stylesheet" href="../../shared/ui/themes.css">
+  <link rel="stylesheet" href="../../shared/ui/select.css">
+  <link rel="stylesheet" href="../../shared/ui/page.css">
+  <style>
+    /* Mock-up only: the look of the Jam Machine on the hub's own theme. No sound. */
+    .jm { width: 100%; max-width: 1040px; margin: 0 auto; display: grid; gap: var(--space-4); }
+    .label { font-size: 13px; font-weight: 700; color: var(--color-text-inactive); margin: 0 0 var(--space-2); }
+    .styles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .style {
+      min-height: 44px; padding: 4px; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control);
+      background: var(--color-panel); color: var(--color-text); font: 700 13.5px/1.05 var(--font-main); cursor: pointer;
+    }
+    .style[aria-pressed="true"] { background: var(--color-left); border-color: var(--color-left); color: var(--color-text-pinched); }
+    .key-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: var(--space-3); align-items: start; }
+    .key-row .control-group { gap: 0 !important; }
+    .side { display: grid; gap: var(--space-3); }
+    .jm { gap: var(--space-3) !important; }
+    .seg { display: flex; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); overflow: hidden; }
+    .seg button { flex: 1 1 0; min-width: 0; min-height: 44px; border: 0; background: transparent; color: var(--color-text); font: 700 14px var(--font-main); cursor: pointer; }
+    .seg button + button { border-left: 1px solid var(--border-panel); }
+    .seg button[aria-pressed="true"] { background: var(--color-left); color: var(--color-text-pinched); }
+    .tempo { display: flex; align-items: center; gap: var(--space-3); }
+    .bpm { flex: 1; text-align: center; font: var(--title-weight) 34px/1 var(--font-num); color: var(--color-title); font-variant-numeric: tabular-nums; }
+    .bpm small { display: block; font: 700 12px var(--font-main); color: var(--color-text-inactive); margin-top: 4px; }
+    .tempo .btn { min-height: 48px; padding: 0 16px; }
+
+    .sheet-tools { display: flex; gap: 4px; }
+    .sheet-tools .icon-btn svg { width: 19px; height: 19px; }
+    .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .sheet-title { margin: 0; font: var(--title-weight) 22px/1.1 var(--font-display); color: var(--color-title); text-transform: var(--title-transform); letter-spacing: var(--title-spacing); }
+    .sheet-meta { font-size: 13px; font-weight: 700; color: var(--color-text-inactive); }
+    .bars { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .bar {
+      position: relative; aspect-ratio: 1 / 0.95; padding: 10px 6px 14px; border: var(--border-width) solid var(--border-panel);
+      border-radius: var(--radius-control); background: var(--color-panel); color: var(--color-text); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; overflow: hidden;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+    .bar:active { transform: scale(0.97); }
+    .bar .num { position: absolute; top: 7px; left: 9px; font: 700 11px var(--font-main); color: var(--color-text-inactive); }
+    .bar .name { font: var(--title-weight) clamp(26px, 8vw, 40px)/1 var(--font-display); letter-spacing: var(--title-spacing); }
+    .bar .deg { font: 700 14px var(--font-num); color: var(--color-text-inactive); }
+    .bar .lock { position: absolute; top: 6px; right: 6px; width: 16px; height: 16px; color: var(--color-right); }
+    .bar .beats { position: absolute; left: 10px; right: 10px; bottom: 7px; display: flex; gap: 4px; }
+    .bar .beats i { flex: 1; height: 4px; border-radius: 2px; background: currentColor; opacity: 0.18; }
+    .bar.on { background: var(--color-left); border-color: var(--color-left); color: var(--color-text-pinched); }
+    .bar.on .num, .bar.on .deg { color: color-mix(in srgb, var(--color-text-pinched) 70%, transparent); }
+    .bar.on .lock { color: var(--color-text-pinched); }
+    .bar .beats i.lit { opacity: 0.9; }
+    .add { grid-column: 1 / -1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px; border: var(--border-width) dashed var(--border-panel); border-radius: var(--radius-control); background: transparent; color: var(--color-text-inactive); font: 700 14px var(--font-main); cursor: pointer; }
+    .add svg { width: 18px; height: 18px; }
+
+    .actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-2); }
+    .actions .play { grid-column: 1 / -1; grid-row: 2; min-height: 52px; }
+    .actions .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 6px; font-size: 15px; white-space: nowrap; }
+    .actions svg { width: 20px; height: 20px; flex: none; }
+    .play { font-size: 18px !important; }
+    .files { display: flex; justify-content: center; gap: var(--space-4); flex-wrap: wrap; }
+    .link-btn { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; color: var(--color-text); font: 700 14px var(--font-main); cursor: pointer; padding: 0 4px; }
+    .link-btn svg { width: 18px; height: 18px; color: var(--color-right); }
+
+    .mixer { display: grid; gap: var(--space-1); }
+    .mix-row { display: grid; grid-template-columns: 64px auto minmax(0, 1fr) 40px; align-items: center; gap: var(--space-3); min-height: 48px; }
+    .mix-row b { font-size: 15px; }
+    .mix-row .pct { font: 700 13px var(--font-num); color: var(--color-text-inactive); text-align: right; font-variant-numeric: tabular-nums; }
+    .switch { width: 46px; height: 28px; border-radius: 14px; border: 0; padding: 3px; background: var(--color-left); cursor: pointer; display: flex; justify-content: flex-end; }
+    .switch::after { content: ''; width: 22px; height: 22px; border-radius: 50%; background: var(--color-text-pinched); }
+    .switch[aria-checked="false"] { background: color-mix(in srgb, var(--color-text) 25%, transparent); justify-content: flex-start; }
+    .switch[aria-checked="false"]::after { background: var(--color-text); }
+
+    .side .mixer-card { display: none; }
+    .mock-note { text-align: center; font-size: 12px; color: var(--color-text-inactive); }
+    .mock-themes { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+    .mock-themes button { min-height: 32px; padding: 0 10px; border-radius: 16px; border: 1px solid var(--border-panel); background: transparent; color: var(--color-text); font: 600 12px var(--font-main); cursor: pointer; }
+
+    /* Computer: controls on the left, the chord sheet on the right, the mixer always in view. */
+    @media (min-width: 900px) {
+      .jm { grid-template-columns: 340px minmax(0, 1fr); align-items: start; gap: var(--space-5); }
+      .side { display: grid; gap: var(--space-3); }
+    .jm { gap: var(--space-3) !important; }
+      .side .mixer-card { display: block; }
+      .sounds-btn { display: none !important; }
+      .actions { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); }
+      .actions .play { grid-column: 2; grid-row: 1; }
+      .bar { aspect-ratio: 1 / 0.8; }
+      .bar .name { font-size: 44px; }
+    }
+  </style>
+</head>
+<body data-theme="rouge">
+  <svg style="position:absolute;width:0;height:0" aria-hidden="true">
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2.5" fill="currentColor"/></symbol>
+    <symbol id="i-dice" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/></g><g fill="currentColor"><circle cx="8.5" cy="8.5" r="1.6"/><circle cx="15.5" cy="15.5" r="1.6"/><circle cx="12" cy="12" r="1.6"/></g></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 4v16M12 4v16M18 4v16"/></g><g fill="currentColor"><rect x="3" y="13" width="6" height="3.5" rx="1.5"/><rect x="9" y="7" width="6" height="3.5" rx="1.5"/><rect x="15" y="11" width="6" height="3.5" rx="1.5"/></g></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></g></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/></g></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></g></symbol>
+    <symbol id="i-open" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3.5 7.5a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></g></symbol>
+  </svg>
+  <div id="theme-frame" aria-hidden="true"></div>
+  <div class="page">
+    <header class="tool-header">
+      <a class="icon-btn home-btn" href="../../" aria-label="Home: all the tools">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>
+      </a>
+      <h1 class="tool-title">Jam Machine</h1>
+      <div class="header-actions">
+        <button class="icon-btn" aria-label="About"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg></button>
+        <button class="icon-btn" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+      </div>
+    </header>
+
+    <main class="jm">
+      <div class="side">
+        <div>
+          <div class="styles" id="styles" role="group" aria-label="Style"></div>
+        </div>
+        <div class="key-row">
+          <div class="control-group">
+            <p class="label">Key</p>
+            <div class="custom-select"><select aria-label="Key"><option>Auto · C</option><option>C</option><option>D♭</option><option>D</option><option>E♭</option><option>E</option><option>F</option><option>G</option><option>A</option><option>B♭</option></select></div>
+          </div>
+          <div>
+            <p class="label">Major or minor</p>
+            <div class="seg" id="mode"><button aria-pressed="true">Auto</button><button aria-pressed="false">Major</button><button aria-pressed="false">Minor</button></div>
+          </div>
+        </div>
+        <div>
+          <p class="label">Speed</p>
+          <div class="tempo">
+            <button class="round-btn" aria-label="Slower">−</button>
+            <div class="bpm"><span id="bpm">100</span><small>BPM · Andante</small></div>
+            <button class="round-btn plus" aria-label="Faster">+</button>
+            <button class="btn">Tap</button>
+          </div>
+        </div>
+        <section class="panel mixer-card" aria-label="Sounds">
+          <div class="mixer" id="mixer-side"></div>
+        </section>
+      </div>
+
+      <div class="side">
+        <div class="sheet-head">
+          <h2 class="sheet-title">C major</h2>
+          <span class="sheet-tools"><button class="icon-btn" aria-label="Copy chords"><svg aria-hidden="true"><use href="#i-copy"/></svg></button><button class="icon-btn" aria-label="Save to a file"><svg aria-hidden="true"><use href="#i-save"/></svg></button><button class="icon-btn" aria-label="Open a file"><svg aria-hidden="true"><use href="#i-open"/></svg></button></span>
+        </div>
+        <div class="bars" id="bars"></div>
+        <div class="actions">
+          <button class="btn"><svg aria-hidden="true"><use href="#i-dice"/></svg>New chords</button>
+          <button class="btn btn-primary play" id="play"><svg aria-hidden="true"><use href="#i-stop"/></svg><span>Stop</span></button>
+          <button class="btn sounds-btn"><svg aria-hidden="true"><use href="#i-sliders"/></svg>Sounds</button>
+        </div>
+      </div>
+    </main>
+
+    <div>
+      <p class="mock-note">Mock-up: no sound. Try the themes:</p>
+      <div class="mock-themes" id="themes"></div>
+    </div>
+  </div>
+
+  <div id="sounds-modal" class="centered-modal has-dropdowns" role="dialog" aria-modal="true" aria-labelledby="sounds-title" style="display:none">
+    <div class="modal-header"><h2 id="sounds-title">Sounds</h2><button class="close-btn" aria-label="Close">×</button></div>
+    <div class="mixer" id="mixer-modal"></div>
+  </div>
+
+  <script type="module">
+    import { setupCustomSelects } from '../../shared/ui/select.js';
+    const styles = ['Pop', 'Ballad', 'Rock', 'Blues', 'Jazz', 'Bossa nova', 'Reggae', 'Lo-fi'];
+    document.getElementById('styles').innerHTML = styles.map((s, i) => `<button class="style" aria-pressed="${i === 0}">${s}</button>`).join('');
+    const chords = [['C', 'I'], ['G', 'V'], ['Am', 'vi', true], ['F', 'IV']];
+    const bars = document.getElementById('bars');
+    bars.innerHTML = chords.map(([n, d, locked], i) => `<button class="bar" data-i="${i}"><span class="num">${i + 1}</span>${locked ? '<svg class="lock" aria-hidden="true"><use href="#i-lock"/></svg>' : ''}<span class="name">${n}</span><span class="deg">${d}</span><span class="beats"><i></i><i></i><i></i><i></i></span></button>`).join('')
+      + '<button class="add"><svg aria-hidden="true"><use href="#i-plus"/></svg>Add a bar</button>';
+    const mixer = (sound) => `
+      ${sound ? '' : ''}<div class="control-group"><label>Chord sound</label><div class="custom-select"><select><option>Piano</option><option>E-piano</option><option>Synth</option><option>Pad</option><option>Organ</option><option>Harp</option><option>Dreamy</option></select></div></div>
+      ${['Chords', 'Drums', 'Bass'].map(p => `<div class="mix-row"><b>${p}</b><button class="switch" role="switch" aria-checked="true" aria-label="${p} on"></button><input type="range" class="range" value="80" style="--fill:80%" aria-label="${p} volume"><span class="pct">80%</span></div>`).join('')}`;
+    document.getElementById('mixer-side').innerHTML = mixer();
+    document.getElementById('mixer-modal').innerHTML = mixer();
+    document.querySelectorAll('.switch').forEach(s => s.onclick = () => s.setAttribute('aria-checked', s.getAttribute('aria-checked') === 'true' ? 'false' : 'true'));
+    document.querySelectorAll('.range').forEach(r => r.oninput = () => { r.style.setProperty('--fill', r.value + '%'); r.nextElementSibling.textContent = r.value + '%'; });
+    for (const group of ['#styles', '#mode']) document.querySelectorAll(group + ' button').forEach(b => b.onclick = () => { document.querySelectorAll(group + ' button').forEach(x => x.setAttribute('aria-pressed', x === b)); });
+    const modal = document.getElementById('sounds-modal');
+    document.querySelector('.sounds-btn').onclick = () => { modal.style.display = 'flex'; };
+    modal.querySelector('.close-btn').onclick = () => { modal.style.display = 'none'; };
+    const themes = { rouge: 'Rouge', liquid: 'Liquid Glass', bw: 'Monochrome', retro: 'Retro CRT', snap: 'Retrosnap', pink: 'Soft Pink', y2k: 'Y2K' };
+    const t = document.getElementById('themes');
+    t.innerHTML = Object.entries(themes).map(([k, v]) => `<button data-t="${k}">${v}</button>`).join('');
+    t.onclick = e => { if (e.target.dataset.t) document.body.dataset.theme = e.target.dataset.t; };
+    const q = new URLSearchParams(location.search).get('theme'); if (q) document.body.dataset.theme = q;
+    setupCustomSelects();
+    /* A pretend loop: the lit bar and its beats move at 100 BPM. */
+    let step = 0, playing = true; const play = document.getElementById('play');
+    play.onclick = () => { playing = !playing; play.innerHTML = `<svg aria-hidden="true"><use href="#i-${playing ? 'stop' : 'play'}"/></svg><span>${playing ? 'Stop' : 'Play'}</span>`; if (!playing) draw(-1); };
+    function draw(s) {
+      bars.querySelectorAll('.bar').forEach((b, i) => {
+        const on = s >= 0 && Math.floor(s / 4) % 4 === i; b.classList.toggle('on', on);
+        b.querySelectorAll('.beats i').forEach((d, j) => d.classList.toggle('lit', on && j <= s % 4));
+      });
+    }
+    draw(0);
+    setInterval(() => { if (playing) draw(++step); }, 600);
+  </script>
+</body>
+</html>
