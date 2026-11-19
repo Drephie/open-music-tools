@@ -20,6 +20,8 @@ import { DETECTOR_STRINGS } from '../../pitch-detector/strings.js';
 import { TRAINING_STRINGS } from '../../pitch-training/strings.js';
 import { LEGAL_STRINGS } from '../../legal/strings.js';
 import { JAM_STRINGS } from '../../jam-machine/strings.js';
+import { CHORDIGITS_STRINGS } from '../../chordigits/strings.js';
+import { INTERVLE_STRINGS } from '../../intervle/strings.js';
 
 const PAGES = [
   ['index.html', HUB_PAGE_STRINGS],
@@ -31,6 +33,8 @@ const PAGES = [
   ['pitch-detector/index.html', DETECTOR_STRINGS],
   ['pitch-training/index.html', TRAINING_STRINGS],
   ['jam-machine/index.html', JAM_STRINGS],
+  ['chordigits/index.html', CHORDIGITS_STRINGS],
+  ['intervle/index.html', INTERVLE_STRINGS],
   ['privacy/index.html', LEGAL_STRINGS],
   ['terms/index.html', LEGAL_STRINGS],
 ];
