@@ -3,8 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Chordigits</title>
-  <meta name="description" content="Chordigits: count chords on your fingers, I to VII, in front of your camera; tilt for major or minor. A free, open-source music tool that runs in your browser; nothing is uploaded.">
+  <!-- What search engines and link previews show. The same texts in Spanish and Italian are in shared/ui/seo.js: change both. -->
+  <title>Chordigits – Count Chords on Your Fingers (I to VII) | Open Music Tools</title>
+  <meta name="description" content="Chordigits: hold up one to seven fingers in front of your camera to play chords I to VII of any key, and tilt your hand for major or minor. Free, in your browser; nothing is uploaded.">
+  <link rel="alternate" hreflang="en" href="https://openmusictools.org/chordigits/">
+  <link rel="alternate" hreflang="es" href="https://openmusictools.org/chordigits/?lang=es">
+  <link rel="alternate" hreflang="it" href="https://openmusictools.org/chordigits/?lang=it">
+  <link rel="alternate" hreflang="x-default" href="https://openmusictools.org/chordigits/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Open Music Tools">
+  <meta property="og:title" content="Chordigits – Count Chords on Your Fingers (I to VII) | Open Music Tools">
+  <meta property="og:description" content="Chordigits: hold up one to seven fingers in front of your camera to play chords I to VII of any key, and tilt your hand for major or minor. Free, in your browser; nothing is uploaded.">
+  <meta property="og:url" content="https://openmusictools.org/chordigits/">
+  <meta property="og:image" content="https://openmusictools.org/chordigits/share.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="es_ES">
+  <meta property="og:locale:alternate" content="it_IT">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Chordigits", "url": "https://openmusictools.org/chordigits/", "description": "Chordigits is a free online chord instrument: hold up fingers in front of your camera to play the chords of a key by number, from I to VII, and tilt your hand to switch between major and minor. A simple way to learn chord numbers.", "image": "https://openmusictools.org/chordigits/share.png", "applicationCategory": "MultimediaApplication", "operatingSystem": "Any (runs in a web browser)", "browserRequirements": "Requires a modern web browser with JavaScript", "isAccessibleForFree": true, "inLanguage": ["en", "es", "it"], "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "license": "https://www.gnu.org/licenses/agpl-3.0.html", "creator": {"@type": "Person", "@id": "https://openmusictools.org/#drephie", "name": "Drephie", "jobTitle": "Singer and vocal coach", "url": "https://openmusictools.org/", "sameAs": ["https://www.tiktok.com/@itsnotdre", "https://instagram.com/drephie", "https://patreon.com/drephie", "https://github.com/Drephie"]}, "isPartOf": {"@type": "WebSite", "@id": "https://openmusictools.org/#website", "name": "Open Music Tools", "url": "https://openmusictools.org/"}}</script>
   <meta name="theme-color" content="#0f1419">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="manifest" href="manifest.json">
@@ -27,6 +45,7 @@
   <div class="page">
     <header class="tool-header">
       <h1 class="tool-title"><button id="title-btn" class="title-btn" data-i18n-aria="aboutTitle" aria-label="About Chordigits"><span data-i18n="title">Chordigits</span></button></h1>
+      <p id="seo-about" class="visually-hidden">Chordigits is a free online chord instrument: hold up fingers in front of your camera to play the chords of a key by number, from I to VII, and tilt your hand to switch between major and minor. A simple way to learn chord numbers.</p>
       <div class="header-actions">
         <a class="icon-btn home-btn" href="../" data-i18n-aria="home" aria-label="Home: all the tools">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg>

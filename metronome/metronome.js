@@ -309,7 +309,6 @@ watchLook((look) => {
 
 function applyLanguage() {
   i18n.apply();
-  document.title = t('title');
   startLabel.textContent = t(playing ? 'stop' : 'start');
   renderDots();
   showTempoName();

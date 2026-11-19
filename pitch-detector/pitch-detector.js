@@ -478,7 +478,6 @@ function showLevel(dt) {
 
 function applyLanguage() {
   i18n.apply();
-  document.title = t('title');
   fillKeys();
   showKey();
   showButtons();

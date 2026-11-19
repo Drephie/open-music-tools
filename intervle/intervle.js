@@ -429,7 +429,6 @@ function renderNames() {
 
 function applyLanguage() {
   i18n.apply();
-  document.title = t('title');
   renderNames();
   render();
   setBusy(playBtn.classList.contains('busy'));

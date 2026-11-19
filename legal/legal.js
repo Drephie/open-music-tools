@@ -49,7 +49,6 @@ function setLanguage(lang) {
   look.lang = lang;
   langSelect.value = lang;
   i18n.apply();
-  document.title = `${t(page === 'terms' ? 'tTitle' : 'pTitle')} – Open Music Tools`;
   $('updated').textContent = t('legalUpdated').replace('{updated}', LEGAL_DETAILS.updated);
   $('todo-note').hidden = !anyTodo;
   setupCustomSelects();

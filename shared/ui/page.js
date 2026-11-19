@@ -25,6 +25,9 @@
  *                     is then passed on to the hub; else 'rouge' and
  *                     the browser's own language when it is one of ours,
  *                     else English (browserLang; Drephie, 2026-11-19).
+ *                     An address with ?lang=es or ?lang=it (urlLang in
+ *                     i18n.js: the language pages search engines list) wins
+ *                     for that page, without being saved.
  *   browserLang()     'en', 'es' or 'it' from the browser's language list
  *                     (navigator.languages), read on the device: nothing is
  *                     sent anywhere and nothing is saved.
@@ -52,6 +55,8 @@
  *
  * Only settings go in localStorage, never people's work (see CLAUDE.md).
  */
+
+import { urlLang } from './i18n.js';
 
 export const THEMES = [
   ['rouge', 'themeRouge'], ['liquid', 'themeLiquid'], ['bw', 'themeBw'], ['retro', 'themeRetro'], ['snap', 'themeSnap'],
@@ -104,7 +109,7 @@ export function loadLook(saved = {}) {
   if (Object.keys(passOn).length) saveLook(passOn);
   return {
     theme: validTheme(hub.theme) ? hub.theme : passOn.theme || 'rouge',
-    lang: validLang(hub.lang) ? hub.lang : passOn.lang || browserLang(),
+    lang: urlLang() || (validLang(hub.lang) ? hub.lang : passOn.lang || browserLang()),
   };
 }
 export function browserLang() {
@@ -118,6 +123,14 @@ export function browserLang() {
 }
 export function saveLook(changes) {
   saveSettings(LOOK_KEY, { ...loadSettings(LOOK_KEY), ...changes });
+  // A language picked by hand replaces the one the address asked for.
+  if (changes.lang && urlLang()) {
+    try {
+      const url = new URL(location.href);
+      url.searchParams.delete('lang');
+      history.replaceState(history.state, '', url);
+    } catch { /* no history: the address keeps it */ }
+  }
 }
 export function watchLook(apply) {
   window.addEventListener('storage', (e) => { if (e.key === LOOK_KEY || e.key === null) apply(loadLook()); });

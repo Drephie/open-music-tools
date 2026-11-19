@@ -449,7 +449,6 @@ function showChoices() {
 
 function applyLanguage() {
   i18n.apply();
-  document.title = t('title');
   fillTunings();
   showButton();
   showChoices();

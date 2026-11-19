@@ -569,7 +569,6 @@ $('reset-yes').addEventListener('click', () => {
 
 function applyLanguage() {
   i18n.apply();
-  document.title = t('title');
   renderHome();
   renderNames();
   if (session && document.body.dataset.screen === 'quiz') renderQuiz();

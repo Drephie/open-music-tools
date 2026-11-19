@@ -695,7 +695,6 @@ function showLevel(dt) {
 
 function applyLanguage() {
   i18n.apply();
-  document.title = t('title');
   fillExercises();
   showButtons();
   showChoices();

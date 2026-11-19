@@ -1,6 +1,9 @@
 /* shared/ui/i18n.js: translations for en, es and it.
  *
  *   LANGUAGES  ['en', 'es', 'it']
+ *   urlLang()  'es' or 'it' (or 'en') when the address asks for it with ?lang=…,
+ *              else null: the language addresses search engines list
+ *              (hreflang, sitemap.xml). Not saved.
  *   mergeStrings(...dicts)  { en, es, it } dictionaries merged per language;
  *     later ones win. Usually mergeStrings(HUB_STRINGS, TOOL_STRINGS).
  *   const { t, interp, apply } = createI18n({ strings, getLang, vars })
@@ -8,12 +11,22 @@
  *     interp(str)    replaces {name} with vars.name (e.g. {repo}, {patreon})
  *     apply()        sets <html lang>, fills every [data-i18n] element's
  *                    innerHTML with interp(t(key)) and every [data-i18n-aria]
- *                    element's aria-label with t(key)
+ *                    element's aria-label with t(key), then the page's search
+ *                    texts and canonical link (applySeo in seo.js)
  *
  * Strings may contain HTML (links, <strong>); they are trusted, never user input.
  */
 
+import { applySeo } from './seo.js';
+
 export const LANGUAGES = ['en', 'es', 'it'];
+
+export function urlLang() {
+  try {
+    const lang = new URLSearchParams(location.search).get('lang');
+    return LANGUAGES.includes(lang) ? lang : null;
+  } catch { return null; }
+}
 
 export function mergeStrings(...dicts) {
   const out = {};
@@ -41,6 +54,7 @@ export function createI18n({ strings, getLang, vars = {} }) {
     document.querySelectorAll('[data-i18n-aria]').forEach(el => {
       el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
     });
+    applySeo(getLang(), urlLang());
   };
   return { t, interp, apply };
 }

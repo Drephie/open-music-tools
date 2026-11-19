@@ -1,0 +1,8 @@
+# Open Music Tools: every page may be read by search engines.
+# Test pages and the planning notes are left out of search results.
+User-agent: *
+Disallow: /tests/
+Disallow: /specs/
+Disallow: /docs/
+
+Sitemap: https://openmusictools.org/sitemap.xml

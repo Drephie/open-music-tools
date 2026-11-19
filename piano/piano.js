@@ -671,7 +671,6 @@ watchLook((look) => {
 
 function applyLanguage() {
   i18n.apply();
-  document.title = t('title');
   if (!loadingEl.hidden) loadingEl.textContent = t(rackLoading ? 'loading' : 'loadFailed');
   showNotation();   // Do/C may follow the language
   showModeHint();

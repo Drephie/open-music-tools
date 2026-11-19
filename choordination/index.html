@@ -3,14 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Choordination Studio</title>
-  <meta name="description" content="Choordination turns your webcam hand gestures into chords — a free, open-source, on-device browser instrument for singers and music-theory learners.">
-  <meta property="og:title" content="Choordination Studio">
-  <meta property="og:description" content="Turn hand gestures into chords, right in your browser. Free, open source, 100% on-device.">
+  <!-- What search engines and link previews show. The same texts in Spanish and Italian are in shared/ui/seo.js: change both. -->
+  <title>Choordination – Play Chords with Hand Gestures | Open Music Tools</title>
+  <meta name="description" content="Choordination by Drephie: play chords with your hands in front of your webcam. A free hand-tracking chord instrument in your browser for singers and songwriters. Nothing leaves your device.">
+  <link rel="alternate" hreflang="en" href="https://openmusictools.org/choordination/">
+  <link rel="alternate" hreflang="es" href="https://openmusictools.org/choordination/?lang=es">
+  <link rel="alternate" hreflang="it" href="https://openmusictools.org/choordination/?lang=it">
+  <link rel="alternate" hreflang="x-default" href="https://openmusictools.org/choordination/">
   <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Choordination Studio">
-  <meta name="twitter:description" content="Turn hand gestures into chords, right in your browser. Free, open source, 100% on-device.">
+  <meta property="og:site_name" content="Open Music Tools">
+  <meta property="og:title" content="Choordination – Play Chords with Hand Gestures | Open Music Tools">
+  <meta property="og:description" content="Choordination by Drephie: play chords with your hands in front of your webcam. A free hand-tracking chord instrument in your browser for singers and songwriters. Nothing leaves your device.">
+  <meta property="og:url" content="https://openmusictools.org/choordination/">
+  <meta property="og:image" content="https://openmusictools.org/choordination/share.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="es_ES">
+  <meta property="og:locale:alternate" content="it_IT">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Choordination", "url": "https://openmusictools.org/choordination/", "description": "Choordination is a free online chord instrument by Drephie: show your hands to the camera and your gestures play chords, so you can accompany yourself while you sing. The hand tracking runs on your device, on phone or computer, and you can record yourself playing.", "image": "https://openmusictools.org/choordination/share.png", "applicationCategory": "MultimediaApplication", "operatingSystem": "Any (runs in a web browser)", "browserRequirements": "Requires a modern web browser with JavaScript", "isAccessibleForFree": true, "inLanguage": ["en", "es", "it"], "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "license": "https://www.gnu.org/licenses/agpl-3.0.html", "creator": {"@type": "Person", "@id": "https://openmusictools.org/#drephie", "name": "Drephie", "jobTitle": "Singer and vocal coach", "url": "https://openmusictools.org/", "sameAs": ["https://www.tiktok.com/@itsnotdre", "https://instagram.com/drephie", "https://patreon.com/drephie", "https://github.com/Drephie"]}, "isPartOf": {"@type": "WebSite", "@id": "https://openmusictools.org/#website", "name": "Open Music Tools", "url": "https://openmusictools.org/"}}</script>
   <meta name="theme-color" content="#0f1419">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="manifest" href="manifest.json">
@@ -350,6 +362,7 @@
 
 <div id="container" role="main">
   <h1 class="visually-hidden">Choordination</h1>
+  <p id="seo-about" class="visually-hidden">Choordination is a free online chord instrument by Drephie: show your hands to the camera and your gestures play chords, so you can accompany yourself while you sing. The hand tracking runs on your device, on phone or computer, and you can record yourself playing.</p>
   <div id="media-wrapper">
     <video id="webcam" autoplay playsinline muted></video>
     <div id="cam-noise" aria-hidden="true"></div>

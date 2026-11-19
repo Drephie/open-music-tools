@@ -608,7 +608,6 @@ onChange(browSelect, (v) => { settings.brow = v === 'on'; sustainBrow = false; h
 
 function applyLanguage() {
   i18n.apply();
-  document.title = t('title');
   howToPlay();
   keyContext();
   keyOptions();

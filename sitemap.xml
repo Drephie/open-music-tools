@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://openmusictools.org/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/choordination/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/choordination/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/choordination/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/choordination/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/choordination/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/choordination/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/choordination/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/choordination/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/choordination/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/choordination/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/choordination/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/choordination/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/choordination/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/choordination/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/choordination/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/chordigits/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/chordigits/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/chordigits/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/chordigits/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/chordigits/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/chordigits/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/chordigits/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/chordigits/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/chordigits/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/chordigits/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/chordigits/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/chordigits/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/chordigits/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/chordigits/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/chordigits/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/piano/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/piano/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/piano/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/piano/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/piano/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/piano/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/piano/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/piano/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/piano/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/piano/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/piano/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/piano/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/piano/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/piano/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/piano/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/ear-trainer/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/ear-trainer/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/ear-trainer/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/ear-trainer/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/ear-trainer/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/ear-trainer/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/ear-trainer/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/ear-trainer/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/ear-trainer/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/ear-trainer/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/ear-trainer/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/ear-trainer/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/ear-trainer/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/ear-trainer/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/ear-trainer/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/intervle/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/intervle/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/intervle/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/intervle/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/intervle/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/intervle/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/intervle/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/intervle/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/intervle/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/intervle/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/intervle/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/intervle/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/intervle/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/intervle/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/intervle/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/jam-machine/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/jam-machine/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/jam-machine/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/jam-machine/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/jam-machine/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/jam-machine/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/jam-machine/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/jam-machine/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/jam-machine/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/jam-machine/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/jam-machine/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/jam-machine/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/jam-machine/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/jam-machine/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/jam-machine/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/metronome/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/metronome/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/metronome/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/metronome/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/metronome/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/metronome/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/metronome/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/metronome/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/metronome/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/metronome/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/metronome/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/metronome/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/metronome/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/metronome/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/metronome/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/vocal-tuner/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/vocal-tuner/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/vocal-tuner/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/vocal-tuner/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/vocal-tuner/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/vocal-tuner/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/vocal-tuner/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/vocal-tuner/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/vocal-tuner/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/vocal-tuner/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/vocal-tuner/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/vocal-tuner/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/vocal-tuner/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/vocal-tuner/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/vocal-tuner/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/instrument-tuner/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/instrument-tuner/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/instrument-tuner/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/instrument-tuner/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/instrument-tuner/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/instrument-tuner/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/instrument-tuner/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/instrument-tuner/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/instrument-tuner/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/instrument-tuner/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/instrument-tuner/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/instrument-tuner/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/instrument-tuner/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/instrument-tuner/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/instrument-tuner/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/pitch-detector/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/pitch-detector/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/pitch-detector/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/pitch-detector/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/pitch-detector/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/pitch-detector/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/pitch-detector/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/pitch-detector/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/pitch-detector/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/pitch-detector/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/pitch-detector/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/pitch-detector/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/pitch-detector/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/pitch-detector/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/pitch-detector/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/pitch-training/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/pitch-training/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/pitch-training/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/pitch-training/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/pitch-training/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/pitch-training/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/pitch-training/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/pitch-training/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/pitch-training/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/pitch-training/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/pitch-training/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/pitch-training/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/pitch-training/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/pitch-training/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/pitch-training/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/privacy/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/privacy/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/privacy/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/privacy/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/privacy/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/privacy/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/privacy/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/privacy/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/privacy/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/privacy/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/privacy/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/privacy/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/terms/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/terms/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/terms/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/terms/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/terms/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/terms/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/terms/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/terms/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/terms/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/terms/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/terms/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/terms/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/terms/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/terms/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/terms/"/>
+  </url>
+</urlset>

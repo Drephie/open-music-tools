@@ -104,7 +104,6 @@ function setLanguage(lang) {
   langSelect.value = lang;
   showFlag();
   i18n.apply();
-  document.title = t('title');
   setupCustomSelects();   // labels and option texts changed
   queueFit();
 }
