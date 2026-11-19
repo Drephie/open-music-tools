@@ -8,13 +8,15 @@
  *
  *   const band = createBand(rack)
  *   band.start(source)
- *     source: functions read again as the music goes, so a change is heard
- *     from the next chord (chords, sounds) or the next bar (style, time
- *     signature, speed): chords(), key(), style(), meter(), bpm(),
+ *     source: functions read again as the music goes (and at once on
+ *     band.update()): chords(), key(), style(), meter(), bpm(),
  *     instrument(), kit(), parts() -> { chords|drums|bass: { on, vol } },
  *     countIn(); onChord(index): a chord starts (index into chords(); -1 =
  *     the count-in bar); onBeat(beat, index): each beat of it (0 = its
  *     first). Both are drawn in time with the sound (Tone.Draw).
+ *   band.update()    hear a change at once, mid-chord too: the chord playing now
+ *                    (changed, moved, longer or shorter), the style, sounds,
+ *                    parts and speed; a new time signature starts a new bar
  *   band.stop()      silence at once (held notes released)
  *   band.setVolumes(parts)  the volumes at once (also while stopped)
  *   band.preview(chordNotes, instrument)  one chord, to hear a choice
@@ -145,20 +147,58 @@ export function createBand(rack) {
     // The speed counts beats; Tone counts quarter notes (a 6/8 beat is a dotted quarter).
     Tone.Transport.bpm.setValueAtTime(source.bpm() * bar.spb / 4, time);
   }
+  let upperBefore = null;   // the chord before this one, for smooth chords when it is worked out again
   function newChord() {
-    const chords = source.chords(), key = source.key();
+    const chords = source.chords();
     index = index + 1 >= chords.length || index < 0 ? 0 : index + 1;
-    const notes = chordNotes(chords[index], key, prevUpper);
-    prevUpper = notes.upper;
-    chord = {
+    upperBefore = prevUpper;
+    chord = readChord(chords);
+    prevUpper = chord.notes.upper;
+    stepInChord = 0;
+  }
+  function readChord(chords) {
+    const key = source.key(), notes = chordNotes(chords[index], key, upperBefore);
+    return {
       notes, steps: chordBeats(chords[index], bar.meter) * bar.spb,
       next: chordNotes(chords[(index + 1) % chords.length], key, notes.upper),
       instrument: rack.instruments[source.instrument()] || rack.instruments.piano,
     };
-    stepInChord = 0;
+  }
+
+  // A change while it plays: heard now, not when the chord or the bar ends.
+  let meterChanged = false;
+  function update() {
+    if (!source || !bar) return;
+    const meter = METERS[source.meter()] ? source.meter() : '4/4';
+    if (meter !== bar.meter) meterChanged = true;
+    bar.pattern = patternFor(source.style(), bar.meter);
+    bar.parts = source.parts();
+    bar.kit = source.kit();
+    Tone.Transport.bpm.value = source.bpm() * bar.spb / 4;
+    setVolumes(bar.parts);
+    if (counting || !chord) return;
+    const chords = source.chords();
+    if (index >= chords.length) { chord = null; index = -1; return; }   // its chord was removed: the next tick starts from the top
+    const was = chord;
+    chord = readChord(chords);
+    prevUpper = chord.notes.upper;
+    const left = chord.steps - stepInChord;
+    const same = was.notes.upper.join() === chord.notes.upper.join() && was.instrument === chord.instrument;
+    if (same || left <= 0) return;
+    // A different chord (or sound): let go of the old one and play the new one for what is left of it.
+    const now = Tone.now() + 0.02, stepTime = 60 / Tone.Transport.bpm.value / 4;
+    try { was.instrument.releaseAll(now); } catch { /* not playing */ }
+    if (bar.parts.chords.on) chord.instrument.triggerAttackRelease(chord.notes.upper.map(midiToFreq), left * stepTime * 0.92, now, 0.6);
+    if (bar.parts.bass.on && was.notes.bass !== chord.notes.bass) bass.triggerAttackRelease(midiToFreq(chord.notes.bass), Math.min(left, bar.spb * 2) * stepTime * 0.9, now, 0.75);
   }
   function tick(time) {
-    if (barStep === 0) newBar(time);
+    if (meterChanged) {   // a new time signature: a new bar now, and the chord's length counted in its beats
+      meterChanged = false;
+      barStep = 0;
+      newBar(time);
+      const chords = source.chords();
+      if (chord && index < chords.length) chord = readChord(chords);
+    } else if (barStep === 0) newBar(time);
     const stepTime = 60 / Tone.Transport.bpm.value / 4;
     if (counting) {   // a bar of drum sticks on the beats, then the first chord
       if (barStep % bar.spb === 0) hit.rim(time, 0.7);
@@ -213,5 +253,5 @@ export function createBand(rack) {
     inst.triggerAttackRelease(notes.upper.map(midiToFreq), 1.2, Tone.now() + 0.02, 0.7);
   }
 
-  return { start, stop, setVolumes, preview, playing: () => source !== null };
+  return { start, stop, update, setVolumes, preview, playing: () => source !== null };
 }

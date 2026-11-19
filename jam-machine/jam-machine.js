@@ -179,6 +179,7 @@ function renderAdvanced() {
   renderSpeed();
 }
 function renderSpeed() {
+  liveUpdate();
   $('bpm').textContent = jam.bpm;
   $('tempo-word').textContent = 'BPM · ' + tempoMarking(jam.bpm);
   renderHead();
@@ -215,9 +216,12 @@ function renderBars() {
   const lastBar = barsEl.lastElementChild;
   if (missing && lastBar) { lastBar.classList.add('short-bar'); lastBar.style.setProperty('--missing', missing); }
   $('bars-num').textContent = chords().length;
-  lightBars(isPlaying() ? 0 : -1);
+  lightBars(isPlaying() ? lastBeat : -1);
   fitNames();
+  liveUpdate();
 }
+// While it plays, every change is heard at once (band.update), not when the chord or bar ends.
+function liveUpdate() { if (isPlaying()) band.update(); }
 
 // --- SECTIONS: a row of names; tap one to see its chords, tap it again for its window ---
 // The bar playing, as a section and a bar in it.
@@ -491,8 +495,8 @@ function renderMixers() {
       }).join('');
     const sel = mixer.querySelector('select');
     sel.value = settings.instrument;
-    sel.addEventListener('change', () => { settings.instrument = sel.value; save(); syncMixers(); });
-    mixer.querySelectorAll('.kit-seg button').forEach((b) => b.addEventListener('click', () => { settings.kit = b.dataset.kit; save(); syncMixers(); }));
+    sel.addEventListener('change', () => { settings.instrument = sel.value; save(); syncMixers(); liveUpdate(); });
+    mixer.querySelectorAll('.kit-seg button').forEach((b) => b.addEventListener('click', () => { settings.kit = b.dataset.kit; save(); syncMixers(); liveUpdate(); }));
     mixer.querySelectorAll('.mix-row').forEach((row) => {
       const p = row.dataset.part, sw = row.querySelector('.switch'), range = row.querySelector('.range');
       sw.addEventListener('click', () => { settings.parts[p].on = !settings.parts[p].on; partsChanged(); });
@@ -520,6 +524,7 @@ function syncMixers() {
 }
 function partsChanged() {
   save();
+  liveUpdate();
   syncMixers();
   if (band) band.setVolumes(settings.parts);
 }
