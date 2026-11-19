@@ -65,6 +65,8 @@ Every visible string and every `aria-label` goes through i18n, in English, Spani
 
 Add every new file to `APP_SHELL` in `/sw.js` and bump `CACHE_NAME` whenever a cached file changes. On the home page (`index.html`), move the tool's card up from "Coming soon" to the finished tools (its `<div class="tool-card soon">` becomes `<a class="tool-card" href="<tool>/">`) and update its description in `hub/strings.js` in all three languages. Update `ROADMAP.md` (status, shared engines, open decisions), and the spec when Drephie changes something.
 
+For search engines, give the page the same `<head>` block as the Metronome's (search title, description, hreflang addresses, share picture, schema.org WebApplication), add the tool's texts in en/es/it to `shared/ui/seo.js`, a `#seo-about` line after its `<h1>`, a `share.jpg` (1200×630, in the look of the others) and its three addresses to `sitemap.xml`. Don't set `document.title` in the tool's code: `seo.js` does it.
+
 ## 7. Checks in the built-in browser
 
 - Start the `hub` server from `.claude/launch.json` (`hub-8001` when port 8000 is taken by another session). The pane caches files: `fetch(url, { cache: 'reload' })` each changed file, then reload.

@@ -39,6 +39,7 @@ Free, open-source music tools that build musical literacy and help people make t
 - **Every user-facing string goes through the i18n dictionary** in English, Spanish and Italian (`data-i18n` attributes and `t()`, from `shared/ui/i18n.js`). `{repo}` and `{patreon}` are interpolated, and missing keys fall back to English. Strings every tool uses live in `shared/ui/strings.js`; a tool's own strings stay in the tool.
 - **Check the license of every third-party sound, sample, font or model before adding it**, and credit it in the tool's About window when the license asks (e.g. the Salamander piano, CC BY 3.0).
 - **Spell notes correctly for the key** (`spellOnLetter` in `shared/theory.js`), and support both letter names and solfège.
+- **Search engines:** each page's `<head>` has its search title and description, the language addresses (`?lang=es`, `?lang=it` with hreflang), the share picture (`share.jpg`, 1200×630) and a schema.org description; the same texts in es/it are in `shared/ui/seo.js`, and a tool's `#seo-about` line is read by screen readers and search engines. Never hide text from people only for Google. A new tool gets all of these, plus its addresses in `sitemap.xml`.
 
 ## Working here
 
