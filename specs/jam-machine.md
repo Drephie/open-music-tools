@@ -1,6 +1,6 @@
 # Jam Machine: spec
 
-**Status:** approved by Drephie, 2026-11-19. Mock-up: `specs/mockups/jam-machine.html`.
+**Status:** approved by Drephie, 2026-11-19; built the same day (Beta). Also *(Claude's picks)*: picking a chord in the Change window plays it; on a computer Alt + arrow moves the focused chord. Mock-up: `specs/mockups/jam-machine.html`.
 Items marked *(Claude's pick)* weren't answered: say if you want them changed.
 
 ## What it is for
@@ -37,7 +37,7 @@ Copy chords, Save to a file, Open a file: three small buttons by the key's name.
 
 ## Layout
 
-**Phone, upright,** one screen at 375 × 667 with 4 to 8 bars; more bars scroll. Mock-up: `specs/mockups/jam-machine.html`.
+**Phone, upright,** one screen at 375 × 667 with 4 to 8 bars; more bars, or Advanced open with more than 4, scroll a little. Mock-up: `specs/mockups/jam-machine.html`.
 Header (house, Jam Machine, About, Settings) · the 8 styles as buttons, 4 per row · the key and speed as text ("C major · 100 BPM") with three small buttons: Copy chords, Save to a file, Open a file · the chords, 4 per row: a big name (Am), its number in the key under it (vi), the bar number in the corner, a lock mark when locked; the one playing is filled, with 4 beat lines that light up · **Add a bar** (a dashed row) · New chords and Sounds side by side · **Play** full width (the main button, turns into Stop) · **Advanced** (a row that opens): Key, Major/Minor, speed − 100 + Tap with the tempo word (Andante).
 **Computer:** two columns: styles, Advanced and the Sounds mixer always open on the left; the chords, New chords and Play on the right. Keys: Space = Play/Stop, N = New chords *(Claude's pick)*.
 
