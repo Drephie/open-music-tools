@@ -136,25 +136,45 @@ export function checkJam(jam) {
     const rng = jam.rngFrom(seed), style = STYLE_IDS[seed % 8], key = jam.randomKey(style, rng);
     const chords = jam.newProgression({ style, key, length: 1 + (seed % 20), rng }).map((c) => ({ ...c, lock: rng() < 0.4 }));
     chords.push({ step: 6, semi: 10, q: 'maj', lock: true });
-    const s = { style, key, keyFixed: seed % 3 === 0, modeFixed: seed % 5 === 0, bpm: 40 + (seed % 201), chords,
-      sound: { instrument: instruments[seed % 7], chords: { on: true, vol: seed % 101 }, drums: { on: seed % 2 === 0, vol: 80 }, bass: { on: false, vol: 0 } } };
+    const sections = [{ type: jam.SECTION_TYPES[seed % 6], chords }];
+    if (seed % 2) sections.push({ type: 'chorus', chords: chords.slice(0, 3).map((c) => ({ ...c, lock: false })) });
+    const s = { style, key, newKey: { tonic: seed % 3 ? null : seed % 12, mode: seed % 5 ? null : 'min' }, bpm: 40 + (seed % 201), sections,
+      sound: { instrument: instruments[seed % 7], kit: seed % 4 ? 'acoustic' : 'synth', chords: { on: true, vol: seed % 101 }, drums: { on: seed % 2 === 0, vol: 80 }, bass: { on: false, vol: 0 } } };
     const back = jam.fromFile(jam.toFile(s), instruments);
     if (JSON.stringify(back) !== JSON.stringify(s)) return `seed ${seed}: ${JSON.stringify(back)}`;
   });
-  const good = JSON.parse(jam.toFile({ style: 'pop', key: { tonic: 0, mode: 'maj' }, bpm: 100, chords: [{ step: 0, q: 'T' }], sound: { instrument: 'piano', chords: { on: true, vol: 80 }, drums: { on: true, vol: 80 }, bass: { on: true, vol: 80 } } }));
+  const good = JSON.parse(jam.toFile({ style: 'pop', key: { tonic: 0, mode: 'maj' }, newKey: { tonic: null, mode: null }, bpm: 100, sections: [{ type: 'verse', chords: [{ step: 0, q: 'T' }] }], sound: { instrument: 'piano', kit: 'acoustic', chords: { on: true, vol: 80 }, drums: { on: true, vol: 80 }, bass: { on: true, vol: 80 } } }));
+  const sec = (chords) => ({ ...good, sections: [{ type: 'verse', chords }] });
   const bad = [
     'not a file', '', '{}', '[]', 'null',
-    { ...good, tool: 'intervle' }, { ...good, version: 2 }, { ...good, style: 'polka' }, { ...good, bpm: 300 }, { ...good, bpm: '100' },
-    { ...good, key: { tonic: 12, mode: 'maj' } }, { ...good, key: { tonic: 0, mode: 'dorian' } }, { ...good, chords: [] },
-    { ...good, chords: [{ step: 7, q: 'T' }] }, { ...good, chords: [{ step: 0, q: 'xyz', semi: 0 }] }, { ...good, chords: [{ step: 0, q: 'maj' }] },
-    { ...good, chords: Array(65).fill({ step: 0, q: 'T' }) }, { ...good, chords: [{ step: 0, q: 'toString', semi: 0 }] },
+    { ...good, tool: 'intervle' }, { ...good, version: 3 }, { ...good, style: 'polka' }, { ...good, bpm: 300 }, { ...good, bpm: '100' },
+    { ...good, key: { tonic: 12, mode: 'maj' } }, { ...good, key: { tonic: 0, mode: 'dorian' } }, sec([]), { ...good, sections: [] },
+    sec([{ step: 7, q: 'T' }]), sec([{ step: 0, q: 'xyz', semi: 0 }]), sec([{ step: 0, q: 'maj' }]),
+    sec(Array(65).fill({ step: 0, q: 'T' })), sec([{ step: 0, q: 'toString', semi: 0 }]), { ...good, sections: [{ type: 'solo', chords: [{ step: 0, q: 'T' }] }] },
+    { ...good, sections: Array(25).fill({ type: 'verse', chords: [{ step: 0, q: 'T' }] }) }, { ...good, version: 1 },
   ];
   check('Broken or other files are refused', bad, (b) => {
     if (jam.fromFile(typeof b === 'string' ? b : JSON.stringify(b), instruments) !== null) return `accepted ${JSON.stringify(b).slice(0, 80)}`;
   });
-  check('A file with odd sounds still opens, with the usual sounds', [{ ...good, sound: { instrument: 'banjo', drums: { on: 'yes', vol: 500 } } }, { ...good, sound: undefined }], (f) => {
+  check('A file with odd sounds still opens, with the usual sounds', [{ ...good, sound: { instrument: 'banjo', kit: 'tabla', drums: { on: 'yes', vol: 500 } } }, { ...good, sound: undefined }], (f) => {
     const s = jam.fromFile(JSON.stringify(f), instruments);
-    if (!s || s.sound.instrument !== 'piano' || s.sound.drums.vol !== 80 || s.sound.drums.on !== true || s.sound.bass.vol !== 80) return JSON.stringify(s && s.sound);
+    if (!s || s.sound.instrument !== 'piano' || s.sound.kit !== 'acoustic' || s.sound.drums.vol !== 80 || s.sound.drums.on !== true || s.sound.bass.vol !== 80) return JSON.stringify(s && s.sound);
+  });
+  check('A first-version file (one list of chords) opens as one Verse', [1], () => {
+    const v1 = { format: 'open-music-tools', tool: 'jam-machine', version: 1, style: 'rock', key: { tonic: 4, mode: 'min' }, keyFixed: true, bpm: 90, chords: [{ step: 0, q: 'T', lock: true }, { step: 6, semi: 10, q: 'maj' }], sound: { instrument: 'organ' } };
+    const s = jam.fromFile(JSON.stringify(v1), instruments);
+    if (!s || s.newKey.tonic !== 4 || s.newKey.mode !== null || s.sections.length !== 1 || s.sections[0].type !== 'verse' || s.sections[0].chords.length !== 2 || !s.sections[0].chords[0].lock) return JSON.stringify(s);
+  });
+  check('Sections: numbers when a part comes twice, duplicate, move', [1], () => {
+    const v = { type: 'verse', chords: [{ step: 0, q: 'T' }] }, c = { type: 'chorus', chords: [{ step: 3, q: 'T' }] };
+    if (jam.sectionNumbers([v, c, v, { type: 'bridge', chords: [] }]).join() !== '1,,2,') return 'numbers ' + jam.sectionNumbers([v, c, v]);
+    const d = jam.duplicateSection([v, c], 0);
+    if (d.length !== 3 || d[1].type !== 'verse' || d[1].chords === v.chords || d[1].chords[0] === v.chords[0]) return 'duplicate is not a copy';
+    d[1].chords[0].step = 5;
+    if (v.chords[0].step !== 0) return 'changing the copy changed the original';
+    const m = jam.moveSection([v, c], 0, 1);
+    if (m[0] !== c || m[1] !== v || jam.moveSection([v, c], 0, -1)[0] !== v) return 'move';
+    if (jam.nextSectionType('verse') !== 'chorus' || jam.nextSectionType('intro') !== 'verse') return 'next type';
   });
 
   const pattern = [];

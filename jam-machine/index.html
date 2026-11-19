@@ -49,22 +49,32 @@
 
     <main class="jm">
       <div class="col col-side">
-        <div id="styles" class="styles" role="group" data-i18n-aria="styleAria" aria-label="Style"></div>
+        <div class="control-group style-group">
+          <label for="style-select" data-i18n="styleAria">Style</label>
+          <div class="custom-select"><select id="style-select"></select></div>
+        </div>
         <section id="advanced" class="advanced" data-i18n-aria="advancedAria" aria-label="Key and speed" hidden>
-          <div class="adv-row">
-            <div class="control-group">
-              <label for="key-select" data-i18n="key">Key</label>
-              <div class="custom-select"><select id="key-select"></select></div>
-            </div>
-            <div class="control-group">
-              <span id="mode-label" class="group-label" data-i18n="majorMinor">Major or minor</span>
-              <div id="mode-seg" class="seg" role="group" aria-labelledby="mode-label">
-                <button type="button" data-mode="random" data-i18n="random">Random</button>
-                <button type="button" data-mode="maj" data-i18n="major">Major</button>
-                <button type="button" data-mode="min" data-i18n="minor">Minor</button>
-              </div>
+          <div class="adv-line">
+            <label for="key-select" data-i18n="newKey">Key for New chords</label>
+            <div class="custom-select"><select id="key-select"></select></div>
+          </div>
+          <div class="adv-line">
+            <span id="mode-label" class="adv-label" data-i18n="newMode">Major or minor for New chords</span>
+            <div id="mode-seg" class="seg" role="group" aria-labelledby="mode-label">
+              <button type="button" data-mode="random" data-i18n="random">Random</button>
+              <button type="button" data-mode="maj" data-i18n="major">Major</button>
+              <button type="button" data-mode="min" data-i18n="minor">Minor</button>
             </div>
           </div>
+          <div class="adv-line">
+            <span id="bars-label" class="adv-label" data-i18n="bars">Bars</span>
+            <div class="stepper" role="group" aria-labelledby="bars-label">
+              <button id="fewer-bars" class="round-btn" data-i18n-aria="fewerBars" aria-label="One bar fewer">−</button>
+              <span id="bars-num" class="step-num">4</span>
+              <button id="more-bars" class="round-btn plus" data-i18n-aria="moreBars" aria-label="One bar more">+</button>
+            </div>
+          </div>
+          <button id="divide-btn" class="btn divide-btn" data-i18n="divide">Divide into sections</button>
           <div class="control-group">
             <span id="speed-label" class="sr-label" data-i18n="speed">Speed</span>
             <div class="tempo" role="group" aria-labelledby="speed-label">
@@ -82,17 +92,19 @@
 
       <div class="col col-main">
         <div class="sheet-head">
+          <div class="transpose" role="group" data-i18n-aria="keyAria" aria-label="Key">
+            <button id="key-down" class="round-btn" data-i18n-aria="keyDown" aria-label="Key down a half step">−</button>
+            <span id="key-title" class="key-title" aria-live="polite"></span>
+            <button id="key-up" class="round-btn plus" data-i18n-aria="keyUp" aria-label="Key up a half step">+</button>
+          </div>
           <button id="adv-btn" class="key-btn" aria-expanded="false" aria-controls="advanced">
-            <span id="key-title" class="key-title"></span><span id="key-meta" class="key-meta"></span><svg class="chev" aria-hidden="true"><use href="#i-chevron"/></svg>
+            <span id="key-meta" class="key-meta"></span><svg class="chev" aria-hidden="true"><use href="#i-chevron"/></svg>
           </button>
-          <span class="sheet-tools">
-            <button id="copy-btn" class="icon-btn" data-i18n-aria="copy" aria-label="Copy chords"><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
-            <button id="save-btn" class="icon-btn" data-i18n-aria="save" aria-label="Save to a file"><svg aria-hidden="true"><use href="#i-save"/></svg></button>
-            <button id="open-btn" class="icon-btn" data-i18n-aria="open" aria-label="Open a file"><svg aria-hidden="true"><use href="#i-open"/></svg></button>
-          </span>
+          <button id="file-btn" class="icon-btn" data-i18n-aria="fileTitle" aria-label="Copy, save or open"><svg aria-hidden="true"><use href="#i-open"/></svg></button>
           <span id="toast" class="toast" role="status"></span>
           <input id="file-input" type="file" hidden>
         </div>
+        <div id="sections" class="sections" role="group" data-i18n-aria="sectionsAria" aria-label="Song sections" hidden></div>
         <div id="bars" class="bars" role="group" data-i18n-aria="barsAria" aria-label="The chords, one per bar"></div>
         <button id="add-bar" class="add-bar"><svg aria-hidden="true"><use href="#i-plus"/></svg><span data-i18n="addBar">Add a bar</span></button>
         <p id="loading" class="loading" role="status" hidden></p>
@@ -125,6 +137,34 @@
       <button id="remove-btn" class="btn"><svg aria-hidden="true"><use href="#i-trash"/></svg><span data-i18n="remove">Remove</span></button>
     </div>
     <p class="about-small" data-i18n="dragHint"></p>
+  </div>
+
+  <div id="file-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="file-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="file-title" data-i18n="fileTitle">Copy, save or open</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <div class="file-actions">
+      <button id="copy-btn" class="btn"><svg aria-hidden="true"><use href="#i-copy"/></svg><span data-i18n="copy">Copy chords</span></button>
+      <button id="save-btn" class="btn"><svg aria-hidden="true"><use href="#i-save"/></svg><span data-i18n="save">Save to a file</span></button>
+      <button id="open-btn" class="btn"><svg aria-hidden="true"><use href="#i-open"/></svg><span data-i18n="open">Open a file</span></button>
+    </div>
+    <p class="about-small" data-i18n="fileHint"></p>
+  </div>
+
+  <div id="section-modal" class="centered-modal" role="dialog" aria-modal="true" aria-labelledby="section-title" tabindex="-1" style="display:none">
+    <div class="modal-header">
+      <h2 id="section-title">Verse</h2>
+      <button class="close-btn" data-i18n-aria="closeAria" aria-label="Close">×</button>
+    </div>
+    <p id="secname-label" class="group-label" data-i18n="secName">Name</p>
+    <div id="type-list" class="choice-grid types" role="group" aria-labelledby="secname-label"></div>
+    <div class="section-actions">
+      <button id="dup-btn" class="btn" data-i18n="duplicate">Duplicate</button>
+      <button id="del-btn" class="btn" data-i18n="deleteSection">Delete</button>
+      <button id="earlier-btn" class="btn" data-i18n="moveEarlier">Move earlier</button>
+      <button id="later-btn" class="btn" data-i18n="moveLater">Move later</button>
+    </div>
   </div>
 
   <div id="sounds-modal" class="centered-modal has-dropdowns" role="dialog" aria-modal="true" aria-labelledby="sounds-title" tabindex="-1" style="display:none">

@@ -16,7 +16,7 @@
  *               half step (bVII in C major = B♭). After the number: 7 (a 7th:
  *               G7 on a major chord, Dm7 on a minor one), maj7, ø7 (m7♭5),
  *               ° (dim), sus2, sus4, 6, 9, add9.
- *   drums       { kick, snare, hat, rim }: lists of [step, velocity 0..1],
+ *   drums       { kick, snare, hat, ride, rim }: lists of [step, velocity 0..1],
  *               step 0..15 = 16th notes of a 4/4 bar
  *   comp        how the chords play: [step, length in steps, velocity];
  *               { arp: true } plays the chord's notes one by one instead
@@ -67,7 +67,7 @@ export const STYLES = {
     bpm: 120, swing: 1, majorChance: 0.7, sevenths: true, bars: 4,
     major: ['ii7 V7 Imaj7 Imaj7', 'Imaj7 vi7 ii7 V7', 'iii7 vi7 ii7 V7', 'Imaj7 IVmaj7 iii7 vi7', 'ii7 V7 iii7 vi7', 'Imaj7 I7 IVmaj7 iv7', 'Imaj7 VI7 ii7 V7', 'IVmaj7 iv7 iii7 VI7'],
     minor: ['iiø7 V7 i7 i7', 'i7 iv7 iiø7 V7', 'i7 VImaj7 iiø7 V7', 'i7 i7 iv7 V7', 'iv7 VII7 IIImaj7 VImaj7', 'i7 iv7 VII7 IIImaj7'],
-    drums: { hat: [[0, 0.55], [4, 0.6], [6, 0.4], [8, 0.55], [12, 0.6], [14, 0.4]], kick: [[0, 0.35], [8, 0.3]], rim: [[4, 0.3], [12, 0.3]] },
+    drums: { ride: [[0, 0.55], [4, 0.6], [6, 0.4], [8, 0.55], [12, 0.6], [14, 0.4]], hat: [[4, 0.35], [12, 0.35]], kick: [[0, 0.35], [8, 0.3]] },
     comp: [[0, 3, 0.6], [6, 2, 0.55], [14, 2, 0.45]],
     bass: [[0, 4, 'r', 0.85], [4, 4, '3', 0.7], [8, 4, '5', 0.75], [12, 4, 'a', 0.7]],
   },

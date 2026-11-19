@@ -37,6 +37,7 @@ The code is licensed under the [GNU Affero General Public License v3.0](LICENSE)
 Other people's work used here, under their own licenses:
 
 - Piano sound: [Salamander Grand Piano](https://archive.org/details/SalamanderGrandPianoV3) by Alexander Holm, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)
+- Jam Machine's acoustic drums: [Virtuosity Drums](https://github.com/sfzinstruments/virtuosity_drums) by Versilian Studios and Karoryfer Samples, [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) (six hits, trimmed, in `jam-machine/drums/`)
 - [Tone.js](https://tonejs.github.io/) 14.8.49, MIT License
 - [MediaPipe](https://ai.google.dev/edge/mediapipe) tasks-vision 0.10.3 and its hand and face models, Apache License 2.0
 - Fonts: Familjen Grotesk, Rajdhani, Sora, Roundo, Nunito, Archivo, Azeret Mono, JetBrains Mono, Literata, Epilogue, Red Hat Display and Asap, from Fontshare's open-source shelf, SIL Open Font License 1.1 (`shared/fonts/`)

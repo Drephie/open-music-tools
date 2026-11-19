@@ -13,7 +13,7 @@
  * 'T' and 'S' chords follow a change of Major/Minor (I V vi IV becomes
  * i v VI iv); the others keep their notes.
  *
- *   STYLE_IDS, STYLES (./styles.js), QUALITIES, MAX_BARS (64), MAJOR, MINOR
+ *   STYLE_IDS, STYLES (./styles.js), QUALITIES, MAX_BARS (64 per section), MAX_SECTIONS (24), MAJOR, MINOR
  *   parseNumeral(token, mode) -> chord   ('bVII', 'ii7', 'Imaj7', 'iiø7'...)
  *   resolve(chord, mode) -> { step, semi, quality }
  *   chordLabel(chord, key, solfege) -> { name: 'F#m7' | 'Fa# m7', root: 'F#', suffix: 'm7', numeral: 'vi7' }
@@ -40,9 +40,20 @@
  *   moveChord(prog, from, to) -> chords; locked ones keep their place, the
  *     others move around them (dragging)
  *   sameChord(a, b, mode) -> true when they sound the same
+ *   SECTION_TYPES  'intro', 'verse', 'prechorus', 'chorus', 'bridge', 'outro'
+ *   A song is a list of sections { type, chords }, played top to bottom.
+ *   nextSectionType(type) -> the usual next part (verse -> chorus...)
+ *   sectionNumbers(sections) -> [n | null]: 1, 2... when a type comes more
+ *     than once (Verse 1, Chorus, Verse 2), else null
+ *   duplicateSection(sections, i) -> a copy of section i right after it
+ *   moveSection(sections, i, by) -> section i moved by -1 or +1
  *   toFile(state) -> text; fromFile(text, instruments) -> state | null
- *     the .omt file (Open Music Tools): { style, key, keyFixed, modeFixed,
- *     bpm, chords, sound: { instrument, chords|drums|bass: { on, vol } } }
+ *     the .omt file (Open Music Tools), version 2: { style, key, newKey,
+ *     bpm, sections: [{ type, chords }], sound: { instrument,
+ *     kit: 'acoustic' | 'synth', chords|drums|bass: { on, vol } } }.
+ *     newKey { tonic: 0..11 | null, mode: 'maj' | 'min' | null }: the key and
+ *     mode New chords uses (null = random). A version 1 file (one list of
+ *     chords, keyFixed/modeFixed) opens as one Verse.
  *   rngFrom(seed) -> a repeatable random function (tests)
  */
 import { spellOnLetter, keyRootName, tonicLetterIdx, voiceChord } from '../shared/theory.js';
@@ -50,6 +61,7 @@ import { STYLES, STYLE_IDS } from './styles.js';
 
 export { STYLES, STYLE_IDS };
 export const MAX_BARS = 64;
+export const MAX_SECTIONS = 24;
 export const MAJOR = [0, 2, 4, 5, 7, 9, 11];
 export const MINOR = [0, 2, 3, 5, 7, 8, 10];
 const scale = (mode) => (mode === 'min' ? MINOR : MAJOR);
@@ -225,14 +237,42 @@ export function moveChord(prog, from, to) {
   return out;
 }
 
+// --- SECTIONS ---
+export const SECTION_TYPES = ['intro', 'verse', 'prechorus', 'chorus', 'bridge', 'outro'];
+const NEXT = { intro: 'verse', verse: 'chorus', prechorus: 'chorus', chorus: 'verse', bridge: 'chorus', outro: 'verse' };
+export const nextSectionType = (type) => NEXT[type] || 'verse';
+export function sectionNumbers(sections) {
+  const seen = {};
+  return sections.map((x) => {
+    if (sections.filter((y) => y.type === x.type).length < 2) return null;
+    seen[x.type] = (seen[x.type] || 0) + 1;
+    return seen[x.type];
+  });
+}
+const copyChords = (chords) => chords.map((c) => ({ ...c }));
+export function duplicateSection(sections, i) {
+  const out = sections.slice();
+  out.splice(i + 1, 0, { type: sections[i].type, chords: copyChords(sections[i].chords) });
+  return out;
+}
+export function moveSection(sections, i, by) {
+  const j = i + by;
+  if (j < 0 || j >= sections.length) return sections.slice();
+  const out = sections.slice();
+  [out[i], out[j]] = [out[j], out[i]];
+  return out;
+}
+
 // --- THE .omt FILE ---
 const PARTS = ['chords', 'drums', 'bass'];
+const KITS = ['acoustic', 'synth'];
+const chordOut = (c) => (c.q === 'T' || c.q === 'S' ? { step: c.step, q: c.q, lock: !!c.lock } : { step: c.step, semi: c.semi, q: c.q, lock: !!c.lock });
 export function toFile(s) {
   return JSON.stringify({
-    format: 'open-music-tools', tool: 'jam-machine', version: 1,
-    style: s.style, key: { tonic: s.key.tonic, mode: s.key.mode }, keyFixed: !!s.keyFixed, modeFixed: !!s.modeFixed, bpm: s.bpm,
-    chords: s.chords.map((c) => (c.q === 'T' || c.q === 'S' ? { step: c.step, q: c.q, lock: !!c.lock } : { step: c.step, semi: c.semi, q: c.q, lock: !!c.lock })),
-    sound: { instrument: s.sound.instrument, ...Object.fromEntries(PARTS.map((p) => [p, { on: !!s.sound[p].on, vol: s.sound[p].vol }])) },
+    format: 'open-music-tools', tool: 'jam-machine', version: 2,
+    style: s.style, key: { tonic: s.key.tonic, mode: s.key.mode }, newKey: { tonic: s.newKey.tonic, mode: s.newKey.mode }, bpm: s.bpm,
+    sections: s.sections.map((x) => ({ type: x.type, chords: x.chords.map(chordOut) })),
+    sound: { instrument: s.sound.instrument, kit: s.sound.kit, ...Object.fromEntries(PARTS.map((p) => [p, { on: !!s.sound[p].on, vol: s.sound[p].vol }])) },
   }, null, 1);
 }
 
@@ -240,21 +280,42 @@ export function fromFile(text, instruments) {
   let d;
   try { d = JSON.parse(text); } catch { return null; }
   const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi;
-  if (!d || d.format !== 'open-music-tools' || d.tool !== 'jam-machine' || !int(d.version, 1, 1)) return null;
-  if (!STYLE_IDS.includes(d.style) || !d.key || !int(d.key.tonic, 0, 11) || !['maj', 'min'].includes(d.key.mode)) return null;
-  if (!int(d.bpm, 40, 240) || !Array.isArray(d.chords) || d.chords.length < 1 || d.chords.length > MAX_BARS) return null;
-  const chords = [];
-  for (const c of d.chords) {
-    if (!c || !int(c.step, 0, 6)) return null;
-    if (c.q === 'T' || c.q === 'S') chords.push({ step: c.step, q: c.q, lock: c.lock === true });
-    else if (Object.hasOwn(QUALITIES, c.q) && int(c.semi, 0, 11)) chords.push({ step: c.step, semi: c.semi, q: c.q, lock: c.lock === true });
-    else return null;
+  if (!d || d.format !== 'open-music-tools' || d.tool !== 'jam-machine' || !int(d.version, 1, 2)) return null;
+  if (!STYLE_IDS.includes(d.style) || !d.key || !int(d.key.tonic, 0, 11) || !['maj', 'min'].includes(d.key.mode) || !int(d.bpm, 40, 240)) return null;
+  const readChords = (list) => {
+    if (!Array.isArray(list) || list.length < 1 || list.length > MAX_BARS) return null;
+    const chords = [];
+    for (const c of list) {
+      if (!c || !int(c.step, 0, 6)) return null;
+      if (c.q === 'T' || c.q === 'S') chords.push({ step: c.step, q: c.q, lock: c.lock === true });
+      else if (Object.hasOwn(QUALITIES, c.q) && int(c.semi, 0, 11)) chords.push({ step: c.step, semi: c.semi, q: c.q, lock: c.lock === true });
+      else return null;
+    }
+    return chords;
+  };
+  let sections;
+  if (d.version === 1) {
+    const chords = readChords(d.chords);
+    if (!chords) return null;
+    sections = [{ type: 'verse', chords }];
+  } else {
+    if (!Array.isArray(d.sections) || d.sections.length < 1 || d.sections.length > MAX_SECTIONS) return null;
+    sections = [];
+    for (const x of d.sections) {
+      const chords = x && SECTION_TYPES.includes(x.type) ? readChords(x.chords) : null;
+      if (!chords) return null;
+      sections.push({ type: x.type, chords });
+    }
   }
   const s = d.sound || {};
-  const sound = { instrument: instruments.includes(s.instrument) ? s.instrument : instruments[0] };
+  const sound = { instrument: instruments.includes(s.instrument) ? s.instrument : instruments[0], kit: KITS.includes(s.kit) ? s.kit : 'acoustic' };
   for (const p of PARTS) {
     const x = s[p] || {};
     sound[p] = { on: x.on !== false, vol: int(x.vol, 0, 100) ? x.vol : 80 };
   }
-  return { style: d.style, key: { tonic: d.key.tonic, mode: d.key.mode }, keyFixed: d.keyFixed === true, modeFixed: d.modeFixed === true, bpm: d.bpm, chords, sound };
+  const nk = d.newKey || {};
+  const newKey = d.version === 1
+    ? { tonic: d.keyFixed === true ? d.key.tonic : null, mode: d.modeFixed === true ? d.key.mode : null }
+    : { tonic: int(nk.tonic, 0, 11) ? nk.tonic : null, mode: ['maj', 'min'].includes(nk.mode) ? nk.mode : null };
+  return { style: d.style, key: { tonic: d.key.tonic, mode: d.key.mode }, newKey, bpm: d.bpm, sections, sound };
 }

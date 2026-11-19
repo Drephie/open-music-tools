@@ -1,8 +1,10 @@
 /* jam-machine/jam-machine.js: the Jam Machine's screen (spec: specs/jam-machine.md).
  * The rules are in ./jam.js, the styles in ./styles.js, the sound in ./band.js.
- * This file: styles, the chords (tap to change, hold and drag to move),
- * New chords, Play, Advanced (key, major or minor, speed), Sounds, Copy,
- * Save and Open (.omt files), settings, windows and keyboard shortcuts.
+ * This file: the style menu, the key (− and + transpose the song), sections
+ * (Verse, Chorus...), the chords (tap to change, right-click to lock, hold and
+ * drag to move), New chords, Play, Advanced (the key and mode for New chords,
+ * bars, speed), Sounds (chord sound, drum kit, parts), Copy, Save and Open
+ * (.omt files), settings, windows and keyboard shortcuts.
  * The chords are never stored on the site: only settings are.
  */
 import { startAudio, createRack, INSTRUMENTS } from '../shared/sound.js';
@@ -14,7 +16,7 @@ import { createModalManager } from '../shared/ui/modal.js';
 import { accidentalHtml, prettyName } from '../shared/ui/accidentals.js';
 import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
-import { STYLES, STYLE_IDS, MAX_BARS, chordLabel, chordNotes, keyName, randomKey, newProgression, nextChord, suggestions, changeMode, moveChord, sameChord, toFile, fromFile } from './jam.js';
+import { STYLES, STYLE_IDS, MAX_BARS, MAX_SECTIONS, SECTION_TYPES, chordLabel, chordNotes, keyName, randomKey, newProgression, nextChord, suggestions, changeMode, moveChord, sameChord, toFile, fromFile, nextSectionType, sectionNumbers, duplicateSection, moveSection } from './jam.js';
 import { createBand } from './band.js';
 import { JAM_STRINGS } from './strings.js';
 
@@ -37,6 +39,7 @@ function readSettings() {
   return {
     style: STYLE_IDS.includes(s.style) ? s.style : 'pop',
     instrument: INSTRUMENTS.includes(s.instrument) ? s.instrument : 'piano',
+    kit: ['acoustic', 'synth'].includes(s.kit) ? s.kit : 'acoustic',
     parts,
     countIn: s.countIn === true,
     advOpen: s.advOpen === true,
@@ -45,7 +48,7 @@ function readSettings() {
 }
 const settings = readSettings();
 Object.assign(settings, loadLook(loadSettings(SETTINGS_KEY)));   // theme and language: the hub's one choice
-const save = () => saveSettings(SETTINGS_KEY, { style: settings.style, instrument: settings.instrument, parts: settings.parts, countIn: settings.countIn, advOpen: settings.advOpen, solfege: settings.solfege });
+const save = () => saveSettings(SETTINGS_KEY, { style: settings.style, instrument: settings.instrument, kit: settings.kit, parts: settings.parts, countIn: settings.countIn, advOpen: settings.advOpen, solfege: settings.solfege });
 const solfege = () => (settings.solfege === null ? settings.lang !== 'en' : settings.solfege);
 
 const i18n = createI18n({
@@ -56,10 +59,16 @@ const i18n = createI18n({
 const { t } = i18n;
 const tf = (key, vars) => t(key).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
 
-// --- THE JAM (in memory only) ---
-const jam = { style: settings.style, key: null, keyFixed: false, modeFixed: false, bpm: STYLES[settings.style].bpm, chords: [] };
+// --- THE JAM (in memory only): a song of sections, each with its chords ---
+// newKey: the key and mode New chords uses (null = random).
+const jam = { style: settings.style, key: null, newKey: { tonic: null, mode: null }, bpm: STYLES[settings.style].bpm, sections: [], cur: 0 };
 jam.key = randomKey(jam.style);
-jam.chords = newProgression({ style: jam.style, key: jam.key, length: STYLES[jam.style].bars });
+jam.sections = [{ type: 'verse', chords: newProgression({ style: jam.style, key: jam.key, length: STYLES[jam.style].bars }) }];
+const section = () => jam.sections[jam.cur];
+const chords = () => section().chords;
+const setChords = (list) => { section().chords = list; };
+const songChords = () => jam.sections.flatMap((x) => x.chords);
+const sectionName = (i) => { const n = sectionNumbers(jam.sections)[i]; return t('sec_' + jam.sections[i].type) + (n ? ' ' + n : ''); };
 
 const label = (c) => chordLabel(c, jam.key, solfege());
 const plainName = (c) => { const l = label(c); return prettyName(l.root) + (solfege() && l.suffix ? ' ' : '') + l.suffix; };
@@ -102,9 +111,9 @@ async function play() {
   }
   if (!wantPlay) return;
   band.start({
-    chords: () => jam.chords, key: () => jam.key, style: () => jam.style, bpm: () => jam.bpm,
-    instrument: () => settings.instrument, parts: () => settings.parts, countIn: () => settings.countIn,
-    onBar: (i) => { playingBar = i; lightBars(0); },
+    chords: songChords, key: () => jam.key, style: () => jam.style, bpm: () => jam.bpm,
+    instrument: () => settings.instrument, kit: () => settings.kit, parts: () => settings.parts, countIn: () => settings.countIn,
+    onBar: (i) => { playingBar = i; lightBars(0); renderSections(); },
     onBeat: (b, i) => { playingBar = i; lightBars(b); },
   });
   keepScreenAwake(true);
@@ -115,6 +124,7 @@ function stop() {
   playingBar = -1;
   setPlayBtn(false);
   lightBars(-1);
+  renderSections();
   keepScreenAwake(false);
 }
 const togglePlay = () => (wantPlay ? stop() : play());
@@ -137,24 +147,18 @@ async function keepScreenAwake(on) {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && wantPlay) keepScreenAwake(true); });
 
 // --- SCREEN ---
-const stylesEl = $('styles'), barsEl = $('bars'), advEl = $('advanced'), advBtn = $('adv-btn');
+const styleSelect = $('style-select'), barsEl = $('bars'), advEl = $('advanced'), advBtn = $('adv-btn'), sectionsEl = $('sections');
 function renderStyles() {
-  stylesEl.innerHTML = '';
-  for (const id of STYLE_IDS) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'style';
-    b.textContent = t('style_' + id);
-    b.setAttribute('aria-pressed', String(id === jam.style));
-    b.addEventListener('click', () => setStyle(id));
-    stylesEl.appendChild(b);
-  }
+  styleSelect.innerHTML = STYLE_IDS.map((id) => `<option value="${id}">${t('style_' + id)}</option>`).join('');
+  styleSelect.value = jam.style;
 }
+styleSelect.addEventListener('change', () => setStyle(styleSelect.value));
 
 function renderHead() {
   $('key-title').innerHTML = tf('keyTitle', { key: accidentalHtml(keyName(jam.key, solfege())), mode: t(jam.key.mode === 'maj' ? 'modeMaj' : 'modeMin') });
   $('key-meta').textContent = tf('keyMeta', { bpm: jam.bpm });
-  advBtn.setAttribute('aria-label', `${keyTitle()}, ${tf('keyMeta', { bpm: jam.bpm })}. ${t('advanced')}`);
+  fitNames();
+  advBtn.setAttribute('aria-label', `${tf('keyMeta', { bpm: jam.bpm })}. ${t('advanced')}`);
 }
 
 const keySelect = $('key-select'), modeSeg = $('mode-seg');
@@ -163,11 +167,13 @@ function renderAdvanced() {
   document.querySelector('.jm').classList.toggle('adv-open', settings.advOpen);
   advBtn.setAttribute('aria-expanded', String(settings.advOpen));
   const opts = [`<option value="random">${t('random')}</option>`];
-  for (let tonic = 0; tonic < 12; tonic++) opts.push(`<option value="${tonic}">${prettyName(keyName({ tonic, mode: jam.key.mode }, solfege()))}</option>`);
+  for (let tonic = 0; tonic < 12; tonic++) opts.push(`<option value="${tonic}">${prettyName(keyName({ tonic, mode: jam.newKey.mode || jam.key.mode }, solfege()))}</option>`);
   keySelect.innerHTML = opts.join('');
-  keySelect.value = jam.keyFixed ? String(jam.key.tonic) : 'random';
-  const mode = jam.modeFixed ? jam.key.mode : 'random';
+  keySelect.value = jam.newKey.tonic === null ? 'random' : String(jam.newKey.tonic);
+  const mode = jam.newKey.mode || 'random';
   [...modeSeg.children].forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+  $('bars-num').textContent = chords().length;
+  $('divide-btn').hidden = jam.sections.length > 1;
   renderSpeed();
 }
 function renderSpeed() {
@@ -178,8 +184,8 @@ function renderSpeed() {
 
 function renderBars() {
   barsEl.innerHTML = '';
-  barsEl.classList.toggle('many', jam.chords.length > 4);
-  jam.chords.forEach((c, i) => {
+  barsEl.classList.toggle('many', chords().length > 4);
+  chords().forEach((c, i) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'bar' + (c.lock ? ' locked' : '');
@@ -189,14 +195,93 @@ function renderBars() {
     b.setAttribute('aria-label', tf('barAria', { n: i + 1, name }) + ` (${numeral(c)})` + (c.lock ? ', ' + t('lockedAria') : ''));
     barsEl.appendChild(b);
   });
-  $('add-bar').hidden = jam.chords.length >= MAX_BARS;
+  $('add-bar').hidden = chords().length >= MAX_BARS;
+  $('bars-num').textContent = chords().length;
   lightBars(isPlaying() ? 0 : -1);
   fitNames();
 }
+
+// --- SECTIONS: a row of names; tap one to see its chords, tap it again for its window ---
+// The bar playing, as a section and a bar in it.
+function playingAt() {
+  if (playingBar < 0) return null;
+  let i = playingBar;
+  for (let k = 0; k < jam.sections.length; k++) {
+    if (i < jam.sections[k].chords.length) return { section: k, bar: i };
+    i -= jam.sections[k].chords.length;
+  }
+  return null;
+}
+function renderSections() {
+  sectionsEl.hidden = jam.sections.length < 2;
+  if (sectionsEl.hidden) return;
+  const at = isPlaying() ? playingAt() : null;
+  sectionsEl.innerHTML = '';
+  jam.sections.forEach((x, i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'sec' + (at && at.section === i ? ' playing' : '');
+    b.textContent = sectionName(i);
+    b.setAttribute('aria-pressed', String(i === jam.cur));
+    if (at && at.section === i) b.setAttribute('aria-description', t('secPlaying'));
+    b.addEventListener('click', () => {
+      if (i === jam.cur) { openSection(b); return; }
+      jam.cur = i;
+      renderAll();
+    });
+    sectionsEl.appendChild(b);
+  });
+  if (jam.sections.length < MAX_SECTIONS) {
+    const add = document.createElement('button');
+    add.type = 'button';
+    add.className = 'sec add-sec';
+    add.setAttribute('aria-label', t('addSection'));
+    add.innerHTML = '<svg aria-hidden="true"><use href="#i-plus"/></svg>';
+    add.addEventListener('click', () => addSection());
+    sectionsEl.appendChild(add);
+  }
+}
+function addSection(type = nextSectionType(section().type)) {
+  const length = STYLES[jam.style].bars === 12 ? 12 : 4;
+  jam.sections.splice(jam.cur + 1, 0, { type, chords: newProgression({ style: jam.style, key: jam.key, length }) });
+  jam.cur++;
+  renderAll();
+}
+$('divide-btn').addEventListener('click', () => addSection());
+
+const sectionModal = $('section-modal'), typeList = $('type-list');
+function renderSectionModal() {
+  $('section-title').textContent = sectionName(jam.cur);
+  typeList.innerHTML = '';
+  for (const type of SECTION_TYPES) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'choice';
+    b.innerHTML = `<b></b>`;
+    b.querySelector('b').textContent = t('sec_' + type);
+    b.setAttribute('aria-pressed', String(section().type === type));
+    b.addEventListener('click', () => { section().type = type; renderSectionModal(); renderSections(); });
+    typeList.appendChild(b);
+  }
+  $('earlier-btn').disabled = jam.cur === 0;
+  $('later-btn').disabled = jam.cur === jam.sections.length - 1;
+  $('dup-btn').disabled = jam.sections.length >= MAX_SECTIONS;
+}
+function openSection(opener) { renderSectionModal(); modals.open(sectionModal, opener); }
+$('dup-btn').addEventListener('click', () => { jam.sections = duplicateSection(jam.sections, jam.cur); jam.cur++; modals.hideAll(); renderAll(); });
+$('del-btn').addEventListener('click', () => {
+  jam.sections.splice(jam.cur, 1);
+  jam.cur = Math.min(jam.cur, jam.sections.length - 1);
+  modals.hideAll();
+  renderAll();
+});
+const moveSec = (by) => { const to = jam.cur + by; jam.sections = moveSection(jam.sections, jam.cur, by); jam.cur = Math.max(0, Math.min(jam.sections.length - 1, to)); renderSectionModal(); renderSections(); };
+$('earlier-btn').addEventListener('click', () => moveSec(-1));
+$('later-btn').addEventListener('click', () => moveSec(1));
 // A chord name that doesn't fit its box gets smaller (Dmaj7 in a wide theme font).
 function fitNames() {
   shapeBeats();
-  barsEl.querySelectorAll('.bar-name').forEach((el) => {
+  [...barsEl.querySelectorAll('.bar-name'), $('key-title')].forEach((el) => {
     el.style.fontSize = '';
     for (let size = parseFloat(getComputedStyle(el).fontSize); el.scrollWidth > el.clientWidth + 1 && size > 12; ) {
       size *= 0.92;
@@ -243,32 +328,49 @@ function shapeBeats() {
   });
   lightBars(isPlaying() ? lastBeat : -1);
 }
-if (document.fonts) document.fonts.ready.then(fitNames);
+// Fit again once a theme's font has loaded (it can be wider than the stand-in) or the boxes change size.
+if (document.fonts) { document.fonts.ready.then(fitNames); document.fonts.addEventListener('loadingdone', fitNames); }
+let fitWidth = 0;
+if (window.ResizeObserver) new ResizeObserver(() => { if (barsEl.clientWidth !== fitWidth) { fitWidth = barsEl.clientWidth; fitNames(); } }).observe(barsEl);
 // The bar playing is filled; its beat lines light up one by one.
 let lastBeat = -1;
 function lightBars(beat) {
   lastBeat = beat;
+  const at = beat >= 0 ? playingAt() : null;
   [...barsEl.children].forEach((b, i) => {
-    const on = beat >= 0 && i === playingBar;
+    const on = !!at && at.section === jam.cur && i === at.bar;
     b.classList.toggle('on', on);
     if (on) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
     b.querySelectorAll('.beats > i, .beats path').forEach((d, j) => d.classList.toggle('lit', on && j <= beat));
   });
 }
 
+function renderAll() {
+  renderAdvanced();
+  renderSections();
+  renderBars();
+}
 function render() {
   renderStyles();
-  renderAdvanced();
-  renderBars();
+  renderAll();
   renderMixers();
 }
 
 // --- NEW CHORDS, STYLES ---
-function newChords(length = jam.chords.length) {
-  const anyLock = jam.chords.some((c, i) => i < length && c.lock);
-  if (!anyLock) jam.key = randomKey(jam.style, Math.random, { key: jam.key, keyFixed: jam.keyFixed, modeFixed: jam.modeFixed });   // locked chords keep the key
-  jam.chords = newProgression({ style: jam.style, key: jam.key, length, prog: jam.chords });
-  render();
+// New chords: only the section on screen. One section and nothing locked: a new key too
+// (random, or the Key for New chords). Several sections: they keep one key, which only
+// changes when a Key or Major/Minor for New chords is picked.
+function setSongKey(key) {
+  if (key.mode !== jam.key.mode) jam.sections.forEach((x) => { x.chords = changeMode(x.chords, key.mode); });
+  jam.key = key;
+}
+function newChords(length = chords().length) {
+  const anyLock = chords().some((c, i) => i < length && c.lock);
+  const opts = { key: { tonic: jam.newKey.tonic ?? jam.key.tonic, mode: jam.newKey.mode ?? jam.key.mode }, keyFixed: jam.newKey.tonic !== null, modeFixed: jam.newKey.mode !== null };
+  if (jam.sections.length === 1 && !anyLock) jam.key = randomKey(jam.style, Math.random, opts);
+  else if (!anyLock) setSongKey(opts.key);
+  setChords(newProgression({ style: jam.style, key: jam.key, length, prog: chords() }));
+  renderAll();
 }
 function setStyle(id) {
   if (id === jam.style) return;
@@ -277,40 +379,61 @@ function setStyle(id) {
   jam.bpm = STYLES[id].bpm;
   settings.style = id;
   save();
-  let length = jam.chords.length;
+  let length = chords().length;
   if (STYLES[id].bars === 12) length = 12;
-  else if (STYLES[was].bars === 12 && length === 12) length = Math.max(4, ...jam.chords.map((c, i) => (c.lock ? i + 1 : 0)));
+  else if (STYLES[was].bars === 12 && length === 12) length = Math.max(4, ...chords().map((c, i) => (c.lock ? i + 1 : 0)));
+  renderSpeed();
   newChords(length);
 }
 $('new-btn').addEventListener('click', () => newChords());
-$('add-bar').addEventListener('click', () => {
-  if (jam.chords.length >= MAX_BARS) return;
-  jam.chords.push(nextChord(jam.style, jam.key, jam.chords[jam.chords.length - 1]));
+function addBar() {
+  if (chords().length >= MAX_BARS) return;
+  chords().push(nextChord(jam.style, jam.key, chords()[chords().length - 1]));
   renderBars();
-});
+}
+function removeBar() {
+  if (chords().length <= 1) return;
+  chords().pop();
+  renderBars();
+}
+$('add-bar').addEventListener('click', addBar);
+
+// Holding − or + keeps going, faster and faster; a tap or a key press is one step.
+function holdRepeat(btn, step) {
+  let timer = null, held = false;
+  const stopIt = () => { clearTimeout(timer); timer = null; };
+  btn.addEventListener('pointerdown', (e) => {
+    if (e.button > 0) return;
+    held = true;
+    step();
+    let delay = 420;
+    const go = () => { timer = setTimeout(() => { step(); delay = Math.max(45, delay * 0.82); go(); }, delay); };
+    go();
+  });
+  ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach((ev) => btn.addEventListener(ev, stopIt));
+  btn.addEventListener('contextmenu', (e) => e.preventDefault());
+  btn.addEventListener('click', () => { if (held) { held = false; return; } step(); });
+}
+holdRepeat($('more-bars'), addBar);
+holdRepeat($('fewer-bars'), removeBar);
+
+// --- THE KEY AT THE TOP: − and + move the whole song a half step ---
+const transpose = (by) => { jam.key = { ...jam.key, tonic: (jam.key.tonic + by + 12) % 12 }; renderHead(); renderBars(); if (modals.current() === chordModal) renderChordModal(); };
+$('key-down').addEventListener('click', () => transpose(-1));
+$('key-up').addEventListener('click', () => transpose(1));
 
 // --- ADVANCED: key, major or minor, speed ---
 advBtn.addEventListener('click', () => { settings.advOpen = !settings.advOpen; save(); renderAdvanced(); });
-keySelect.addEventListener('change', () => {
-  if (keySelect.value === 'random') jam.keyFixed = false;
-  else { jam.keyFixed = true; jam.key = { ...jam.key, tonic: +keySelect.value }; }   // the same chords, in the new key
-  renderHead();
-  renderBars();
-});
+// Key and Major/Minor for New chords: they wait for the next New chords.
+keySelect.addEventListener('change', () => { jam.newKey.tonic = keySelect.value === 'random' ? null : +keySelect.value; });
 [...modeSeg.children].forEach((b) => b.addEventListener('click', () => {
-  const m = b.dataset.mode;
-  if (m === 'random') jam.modeFixed = false;
-  else {
-    jam.modeFixed = true;
-    if (m !== jam.key.mode) { jam.chords = changeMode(jam.chords, m); jam.key = { ...jam.key, mode: m }; }   // the same steps: I V vi IV -> i v VI iv
-  }
+  jam.newKey.mode = b.dataset.mode === 'random' ? null : b.dataset.mode;
   renderAdvanced();
   setupCustomSelects();
-  renderBars();
 }));
 const setBpm = (v) => { jam.bpm = clampBpm(v); renderSpeed(); };
-$('slower').addEventListener('click', () => setBpm(jam.bpm - 1));
-$('faster').addEventListener('click', () => setBpm(jam.bpm + 1));
+holdRepeat($('slower'), () => setBpm(jam.bpm - 1));
+holdRepeat($('faster'), () => setBpm(jam.bpm + 1));
 const tapTempo = createTapTempo();
 $('tap').addEventListener('pointerdown', () => { const bpm = tapTempo.tap(); if (bpm) setBpm(bpm); });
 $('tap').addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); const bpm = tapTempo.tap(); if (bpm) setBpm(bpm); } });
@@ -320,6 +443,7 @@ function renderMixers() {
   document.querySelectorAll('.mixer').forEach((mixer, n) => {
     const id = 'inst-select-' + n;
     mixer.innerHTML = `<div class="control-group"><label for="${id}">${t('chordSound')}</label><div class="custom-select"><select id="${id}">${INSTRUMENTS.map((i) => `<option value="${i}">${t(INST_KEYS[i])}</option>`).join('')}</select></div></div>` +
+      `<div class="control-group"><span class="group-label" id="kit-label-${n}">${t('kit')}</span><div class="seg kit-seg" role="group" aria-labelledby="kit-label-${n}"><button type="button" data-kit="acoustic">${t('kitAcoustic')}</button><button type="button" data-kit="synth">${t('kitSynth')}</button></div></div>` +
       PARTS.map((p) => {
         const x = settings.parts[p], name = t(PART_KEYS[p]);
         return `<div class="mix-row${x.on ? '' : ' off'}" data-part="${p}"><span class="mix-name" aria-hidden="true">${name}</span><button class="switch" role="switch" aria-checked="${x.on}" aria-label="${tf('onAria', { part: name })}"></button><input type="range" class="range" min="0" max="100" step="1" value="${x.vol}" style="--fill:${x.vol}%" aria-label="${tf('volAria', { part: name })}"><span class="pct" aria-hidden="true">${x.vol}%</span></div>`;
@@ -327,12 +451,14 @@ function renderMixers() {
     const sel = mixer.querySelector('select');
     sel.value = settings.instrument;
     sel.addEventListener('change', () => { settings.instrument = sel.value; save(); syncMixers(); });
+    mixer.querySelectorAll('.kit-seg button').forEach((b) => b.addEventListener('click', () => { settings.kit = b.dataset.kit; save(); syncMixers(); }));
     mixer.querySelectorAll('.mix-row').forEach((row) => {
       const p = row.dataset.part, sw = row.querySelector('.switch'), range = row.querySelector('.range');
       sw.addEventListener('click', () => { settings.parts[p].on = !settings.parts[p].on; partsChanged(); });
       range.addEventListener('input', () => { settings.parts[p].vol = +range.value; if (!settings.parts[p].on && +range.value > 0) settings.parts[p].on = true; partsChanged(); });
     });
   });
+  syncMixers();
   setupCustomSelects();
 }
 // Both mixers (window and computer panel) show the same; the band hears it at once.
@@ -340,6 +466,7 @@ function syncMixers() {
   document.querySelectorAll('.mixer').forEach((mixer) => {
     const sel = mixer.querySelector('select');
     if (sel.value !== settings.instrument) { sel.value = settings.instrument; setupCustomSelects(); }
+    mixer.querySelectorAll('.kit-seg button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.kit === settings.kit)));
     mixer.querySelectorAll('.mix-row').forEach((row) => {
       const x = settings.parts[row.dataset.part], range = row.querySelector('.range');
       row.classList.toggle('off', !x.on);
@@ -360,7 +487,7 @@ function partsChanged() {
 const chordModal = $('chord-modal'), fitList = $('fit-list'), moreList = $('more-list'), lockBtn = $('lock-btn');
 let editing = -1;
 function renderChordModal() {
-  const c = jam.chords[editing];
+  const c = chords()[editing];
   if (!c) return;
   $('chord-title').innerHTML = tf('changeTitle', { n: editing + 1, name: nameHtml(c) });
   const { fit, more } = suggestions(jam.style, jam.key);
@@ -382,7 +509,7 @@ function renderChordModal() {
   lockBtn.querySelector('use').setAttribute('href', c.lock ? '#i-unlock' : '#i-lock');
   lockBtn.querySelector('span').textContent = t(c.lock ? 'unlock' : 'lock');
   lockBtn.setAttribute('aria-pressed', String(!!c.lock));
-  $('remove-btn').disabled = jam.chords.length <= 1;
+  $('remove-btn').disabled = chords().length <= 1;
 }
 function openChord(i, opener) {
   editing = i;
@@ -390,22 +517,22 @@ function openChord(i, opener) {
   modals.open(chordModal, opener);
 }
 function pickChord(s) {
-  const old = jam.chords[editing];
-  jam.chords[editing] = { ...s, lock: !!old.lock };
+  const old = chords()[editing];
+  chords()[editing] = { ...s, lock: !!old.lock };
   renderChordModal();
   renderBars();
-  if (!isPlaying() && rack) band.preview(chordNotes(jam.chords[editing], jam.key), settings.instrument);   // hear the choice
+  if (!isPlaying() && rack) band.preview(chordNotes(chords()[editing], jam.key), settings.instrument);   // hear the choice
 }
 lockBtn.addEventListener('click', () => {
-  const c = jam.chords[editing];
+  const c = chords()[editing];
   if (!c) return;
   c.lock = !c.lock;
   renderChordModal();
   renderBars();
 });
 $('remove-btn').addEventListener('click', () => {
-  if (jam.chords.length <= 1) return;
-  jam.chords.splice(editing, 1);
+  if (chords().length <= 1) return;
+  chords().splice(editing, 1);
   modals.hideAll();
   renderBars();
 });
@@ -420,7 +547,7 @@ barsEl.addEventListener('pointerdown', (e) => {
 });
 function lift(x, y) {
   if (!drag || drag.active) return;
-  if (jam.chords[drag.from].lock) { drag = null; noClickUntil = performance.now() + 500; return; }   // locked chords stay put
+  if (chords()[drag.from].lock) { drag = null; noClickUntil = performance.now() + 500; return; }   // locked chords stay put
   drag.active = true;
   const r = drag.bar.getBoundingClientRect();
   const ghost = drag.bar.cloneNode(true);
@@ -458,7 +585,7 @@ function endDrag(commit) {
     drag.ghost.remove();
     document.body.classList.remove('drag-on');
     noClickUntil = performance.now() + 400;
-    if (commit && drag.over >= 0 && drag.over !== drag.from) jam.chords = moveChord(jam.chords, drag.from, drag.over);
+    if (commit && drag.over >= 0 && drag.over !== drag.from) setChords(moveChord(chords(), drag.from, drag.over));
     drag = null;
     renderBars();
     return;
@@ -468,7 +595,18 @@ function endDrag(commit) {
 window.addEventListener('pointerup', () => endDrag(true));
 window.addEventListener('pointercancel', () => endDrag(false));
 barsEl.addEventListener('touchmove', (e) => { if (drag && drag.active) e.preventDefault(); }, { passive: false });
-barsEl.addEventListener('contextmenu', (e) => e.preventDefault());
+// Right-click (a mouse) locks or unlocks a chord; a finger's long press is for dragging.
+let lastPointer = 'mouse';
+barsEl.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType; }, true);
+barsEl.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  const bar = e.target.closest('.bar');
+  if (!bar || lastPointer !== 'mouse') return;
+  endDrag(false);
+  const c = chords()[+bar.dataset.i];
+  c.lock = !c.lock;
+  renderBars();
+});
 barsEl.addEventListener('click', (e) => {
   const bar = e.target.closest('.bar');
   if (!bar || performance.now() < noClickUntil) return;
@@ -480,9 +618,9 @@ barsEl.addEventListener('keydown', (e) => {
   if (!bar || !e.altKey || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
   e.preventDefault();
   const from = +bar.dataset.i, to = from + (e.key === 'ArrowLeft' ? -1 : 1);
-  jam.chords = moveChord(jam.chords, from, to);
+  setChords(moveChord(chords(), from, to));
   renderBars();
-  const now = [...barsEl.children][Math.max(0, Math.min(jam.chords.length - 1, to))];
+  const now = [...barsEl.children][Math.max(0, Math.min(chords().length - 1, to))];
   if (now) now.focus();
 });
 
@@ -495,7 +633,8 @@ function toast(text) {
   toastTimer = setTimeout(() => { toastEl.textContent = ''; }, 2500);
 }
 $('copy-btn').addEventListener('click', async () => {
-  const line = [t('style_' + jam.style), keyTitle(), tf('keyMeta', { bpm: jam.bpm }), jam.chords.map(plainName).join(' ')].join(' · ');
+  const parts = jam.sections.length < 2 ? [chords().map(plainName).join(' ')] : jam.sections.map((x, i) => `${sectionName(i)}: ${x.chords.map(plainName).join(' ')}`);
+  const line = [t('style_' + jam.style), keyTitle(), tf('keyMeta', { bpm: jam.bpm }), ...parts].join(' · ');
   let ok = false;
   try { await navigator.clipboard.writeText(line); ok = true; } catch { /* no clipboard API on plain http */ }
   if (!ok) {   // the older way, which also works on the http test link
@@ -510,7 +649,7 @@ $('copy-btn').addEventListener('click', async () => {
   toast(t(ok ? 'copied' : 'copyFailed'));
 });
 $('save-btn').addEventListener('click', () => {
-  const text = toFile({ ...jam, sound: { instrument: settings.instrument, ...settings.parts } });
+  const text = toFile({ ...jam, sound: { instrument: settings.instrument, kit: settings.kit, ...settings.parts } });
   const keyPart = keyName(jam.key, false).replace('#', 'sharp') + '-' + (jam.key.mode === 'maj' ? 'major' : 'minor');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([text], { type: 'application/octet-stream' }));
@@ -521,6 +660,7 @@ $('save-btn').addEventListener('click', () => {
 });
 const fileInput = $('file-input');
 $('open-btn').addEventListener('click', () => fileInput.click());
+$('file-btn').addEventListener('click', (e) => modals.open(fileModal, e.currentTarget));
 fileInput.addEventListener('change', async () => {
   const file = fileInput.files && fileInput.files[0];
   fileInput.value = '';
@@ -528,20 +668,22 @@ fileInput.addEventListener('change', async () => {
   let s = null;
   try { s = file.size < 200000 ? fromFile(await file.text(), INSTRUMENTS) : null; } catch { s = null; }
   if (!s) { toast(t('badFile')); return; }
-  Object.assign(jam, { style: s.style, key: s.key, keyFixed: s.keyFixed, modeFixed: s.modeFixed, bpm: s.bpm, chords: s.chords });
+  Object.assign(jam, { style: s.style, key: s.key, newKey: s.newKey, bpm: s.bpm, sections: s.sections, cur: 0 });
   settings.style = s.style;
   settings.instrument = s.sound.instrument;
+  settings.kit = s.sound.kit;
   for (const p of PARTS) settings.parts[p] = { ...s.sound[p] };
   save();
   if (band) band.setVolumes(settings.parts);
+  modals.hideAll();
   render();
   toast(t('opened'));
 });
 
 // --- SETTINGS, ABOUT, SOUNDS AND PATREON WINDOWS ---
-const settingsModal = $('settings-modal'), aboutModal = $('about-modal'), soundsModal = $('sounds-modal'), supportModal = $('support-modal');
+const settingsModal = $('settings-modal'), aboutModal = $('about-modal'), soundsModal = $('sounds-modal'), supportModal = $('support-modal'), fileModal = $('file-modal');
 const modals = createModalManager({
-  modals: [settingsModal, aboutModal, soundsModal, chordModal, supportModal],
+  modals: [settingsModal, aboutModal, soundsModal, chordModal, sectionModal, fileModal, supportModal],
   escapeAction: (m) => (m === supportModal && support.locked() ? 'ignore' : 'hide'),
 });
 closeOnBackdrop(modals);
@@ -580,6 +722,7 @@ function applyLanguage() {
   setPlayBtn(wantPlay);
   if (!loadingEl.hidden) loadingEl.textContent = t(rackLoading ? 'loading' : 'loadFailed');
   if (modals.current() === chordModal) renderChordModal();
+  if (modals.current() === sectionModal) renderSectionModal();
   setupCustomSelects();
 }
 

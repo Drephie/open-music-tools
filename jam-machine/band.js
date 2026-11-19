@@ -1,12 +1,14 @@
 /* jam-machine/band.js: the Jam Machine's band (spec: specs/jam-machine.md).
  * Uses the Tone.js global (14.8.49) and a rack from shared/sound.js for the
- * chords; the drums and the bass are made here from Tone's own synths (no
- * samples, nothing fetched).
+ * chords. Two drum kits: 'acoustic', six recorded hits in ./drums/ (from
+ * Virtuosity Drums by Versilian Studios and Karoryfer Samples, CC0; loaded
+ * from our own files), and 'synth', made here from Tone's own synths. Until
+ * the acoustic kit has loaded, the synth drums play. The bass is a Tone synth.
  *
  *   const band = createBand(rack)
  *   band.start(source, { onBar, onBeat })
  *     source: functions read again at every bar, so a change is heard from
- *     the next bar: chords(), key(), style(), bpm(), instrument(),
+ *     the next bar: chords(), key(), style(), bpm(), instrument(), kit(),
  *     parts() -> { chords|drums|bass: { on, vol 0..100 } }, countIn()
  *     onBar(index, time): a new bar starts (index into chords(); -1 = the
  *     count-in bar); onBeat(beat 0..3, index, time). Both at audio time:
@@ -87,7 +89,16 @@ export function createBand(rack) {
   }).connect(bassBus);
   bass.volume.value = -8;
 
+  // The acoustic kit: one recorded hit per drum, louder or softer with the velocity.
+  const KIT_NOTE = { kick: 'C2', snare: 'D2', rim: 'C#2', hat: 'F#2', open: 'A#2', ride: 'D#3' };
+  const KIT_GAIN = { kick: 1, snare: 0.7, rim: 0.55, hat: 0.4, open: 0.35, ride: 0.42 };
+  const acoustic = new Tone.Sampler({
+    urls: { C2: 'kick.wav', D2: 'snare.wav', 'C#2': 'rim.wav', 'F#2': 'hat.wav', 'A#2': 'hat-open.wav', 'D#3': 'ride.wav' },
+    baseUrl: new URL('drums/', import.meta.url).href,
+    release: 0.3,
+  }).connect(drumBus);
   const hit = {
+    ride: (t, v) => hat.triggerAttackRelease(0.09, t, v * 0.8),
     kick: (t, v) => kick.triggerAttackRelease('C2', 0.3, t, v),
     snare: (t, v) => { snare.triggerAttackRelease(0.15, t, v); snareBody.triggerAttackRelease('G3', 0.08, t, v); },
     hat: (t, v) => hat.triggerAttackRelease(0.03, t, v),
@@ -104,13 +115,13 @@ export function createBand(rack) {
   let repeatId = null, source = null, step = 0, index = -1, snap = null, prevUpper = null, lastInstrument = null;
   function newBar(time) {
     const chords = source.chords(), key = source.key();
-    if (step === 0 && source.countIn()) { snap = { countIn: true }; index = -1; return; }   // a bar of sticks, then the first chord
+    if (step === 0 && source.countIn()) { snap = { countIn: true, kit: source.kit() }; index = -1; return; }   // a bar of sticks, then the first chord
     index = index + 1 >= chords.length || index < 0 ? 0 : index + 1;
     const notes = chordNotes(chords[index], key, prevUpper);
     prevUpper = notes.upper;
     const next = chordNotes(chords[(index + 1) % chords.length], key, notes.upper);
     lastInstrument = source.instrument();
-    snap = { style: source.style(), parts: source.parts(), notes, next, instrument: rack.instruments[lastInstrument] || rack.instruments.piano };
+    snap = { style: source.style(), parts: source.parts(), kit: source.kit(), notes, next, instrument: rack.instruments[lastInstrument] || rack.instruments.piano };
     Tone.Transport.bpm.setValueAtTime(source.bpm(), time);
   }
   function tick(time) {
@@ -125,7 +136,10 @@ export function createBand(rack) {
     for (const e of barEvents(snap.countIn ? 'pop' : snap.style, snap)) {
       if (e.step !== s) continue;
       const t = time + (e.at - s / 4) * beat;
-      if (e.part === 'drums') hit[e.voice](t, e.vel);
+      if (e.part === 'drums') {
+        if (snap.kit === 'acoustic' && acoustic.loaded) acoustic.triggerAttack(KIT_NOTE[e.voice], t, e.vel * KIT_GAIN[e.voice]);
+        else hit[e.voice](t, e.vel);
+      }
       else if (e.part === 'bass') bass.triggerAttackRelease(midiToFreq(e.midi), e.dur * beat, t, e.vel);
       else snap.instrument.triggerAttackRelease(e.midis.map(midiToFreq), e.dur * beat, t, e.vel);
     }
