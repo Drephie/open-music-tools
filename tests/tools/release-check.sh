@@ -16,7 +16,8 @@ check() { if [ -z "$2" ]; then pass "$1"; else fail "$1: $(echo "$2" | head -12 
 
 # The files that go online: everything in git except the tests, specs, notes and
 # files GitHub Pages only reads. choordination/sw.js only removes itself from old installs.
-SITE=$(git ls-files | grep -vE '^(tests|specs|\.claude)/|\.md$|^(LICENSE|CNAME|\.nojekyll|\.gitignore)$|^shared/fonts/OFL-|^choordination/sw\.js$')
+# robots.txt, sitemap.xml and the share pictures are for search engines and link previews: not cached offline.
+SITE=$(git ls-files | grep -vE '^(tests|specs|\.claude)/|\.md$|^(LICENSE|CNAME|\.nojekyll|\.gitignore|robots\.txt|sitemap\.xml)$|/share\.jpg$|^shared/fonts/OFL-|^choordination/sw\.js$')
 TEXT=$(echo "$SITE" | grep -E '\.(html|js|css|json|svg)$')
 
 echo "== Tests (JavaScriptCore)"

@@ -11,7 +11,7 @@
  *                       (urlLang). createI18n's apply() calls it.
  *
  * Each page's <head> has the English texts too, plus the language addresses
- * (hreflang), the share picture (share.png) and the schema.org description:
+ * (hreflang), the share picture (share.jpg) and the schema.org description:
  * change a text here and there. sitemap.xml lists every page in every language.
  */
 
