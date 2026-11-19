@@ -102,7 +102,7 @@ export const TRAINING_STRINGS = {
     graphAria: "Las notas que hay que cantar como barras, las agudas arriba, con la línea de tu voz encima. Pulsa las teclas del piano a la izquierda para oír una nota.",
     names: "Nombres de las notas", namesSolfege: "Do Re Mi", namesLetters: "C D E",
     hearing: "Escucha", hearListen: "Escuchar y luego cantar", hearAlong: "Cantar a la vez (auriculares)",
-    view: "Vista", viewWhole: "Entera", viewScroll: "Desplazable",
+    view: "Vista", viewWhole: "Entera", viewScroll: "Se mueve",
     tol: "Afinada a menos de", tolNormal: "25 cents", tolPrecise: "10 cents",
     far: "Cuánto sube", farHint: "semitonos",
     sens: "Sensibilidad del micrófono", sensLow: "Baja", sensNormal: "Normal", sensHigh: "Alta",
