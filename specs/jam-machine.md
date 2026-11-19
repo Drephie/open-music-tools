@@ -23,6 +23,18 @@ A backing band to play and sing over: pick a style, get a chord progression (the
 - **Copy chords:** copies one line, e.g. "Pop · C major · 100 BPM · C G Am F".
 - **Save to a file / Open a file:** saves the whole jam (style, key, speed, chords and locks, sounds and volumes) as one **.omt** file (Open Music Tools) on your device. Open it later in the Jam Machine to get it back exactly. The file never leaves your device.
 
+## Second round (Drephie, 2026-11-19, after trying it)
+
+These win over anything above.
+- **Style** is a dropdown (Pop first), not 8 buttons.
+- **Key at the top** ("D major") with **− and +** beside it: they move the whole song a half step (transpose). Under Advanced, **Key for New chords** and **Major or minor for New chords** (Random, or one you pick) only decide the key of the next New chords; they don't change the chords already there.
+- **Right-click a chord** (mouse) locks or unlocks it.
+- **Holding − or +** keeps changing the speed (and the number of bars).
+- **Advanced** also has **Bars** (− 4 +) for the section you're on, and **Divide into sections**.
+- **Sections** (Intro, Verse, Pre-chorus, Chorus, Bridge, Outro): a row of section names above the chords; tap one to see and change its chords. New chords and Bars change only that section. The song plays every section top to bottom, then loops; the section playing is marked. Tap the section you're on again for its window: name, **Duplicate** (a copy right after it, e.g. Verse 2, changed on its own), move earlier or later, delete. "+" adds a section. With two or more sections, New chords keeps the song's key unless a Key for New chords is picked *(Claude's pick: so the sections stay in one key)*.
+- **Drums:** a choice in Sounds between **Acoustic kit** (real recorded drums: Virtuosity Drums by Versilian Studios and Karoryfer Samples, CC0, credited in About; 6 hits, 430 KB, our own files) and **Synth drums** (the made-up ones). Acoustic kit first *(Claude's pick)*.
+- Copy chords and the .omt file keep the sections.
+
 ## Not in this version
 
 Two chords in one bar, or one chord over two bars; downloading as audio or MIDI; a keyboard or guitar shapes for the chords; your own drum patterns; more styles (Funk, Gospel, Folk, Waltz); melodies (never made by the tool).
