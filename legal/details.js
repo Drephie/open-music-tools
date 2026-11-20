@@ -12,5 +12,5 @@ export const LEGAL_DETAILS = {
   email: 'nicoliandrea@mail.com',      // a public address people can write to
   taxInfo: '',                          // tax or company number if you have one (e.g. "VAT: …"); '' to leave out
   governingLaw: { en: 'Italy', es: 'Italia', it: 'Italia' },
-  updated: '2026-11-14',                // the date the texts were last changed
+  updated: '2026-11-20',                // the date the texts were last changed
 };
