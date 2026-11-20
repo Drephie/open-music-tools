@@ -5,7 +5,7 @@
  * square (--card-h). The flagships (li.featured: Choordination, Chordigits) are
  * first and bigger: two columns by two rows each. On phones the flagship is a full-width card
  * and the other tools are one grouped list (rows split by thin lines), so names
- * and descriptions stay readable. .beta-badge: a "Beta" tag on a card.
+ * and descriptions stay readable. .beta-badge: a "Beta" (or "Alpha") tag on a card.
  * The home page is a document that scrolls, so it keeps the phone's
  * pull-to-refresh and bounce (page.css turns them off for the tools).
  */
