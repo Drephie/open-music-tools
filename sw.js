@@ -16,7 +16,7 @@
  * Bump CACHE_NAME whenever a cached file changes. Add each new tool's files
  * to APP_SHELL. Bump CDN_CACHE only when a pinned CDN version changes.
  */
-const CACHE_NAME = 'open-music-tools-v54';
+const CACHE_NAME = 'open-music-tools-v55';
 const CDN_CACHE = 'open-music-tools-cdn-v1';
 const APP_SHELL = [
   './',
@@ -31,6 +31,12 @@ const APP_SHELL = [
   'shared/offline.js',
   'shared/pitch.js',
   'shared/pitch-worklet.js',
+  'shared/analysis.js',
+  'shared/analysis-rules.js',
+  'shared/analysis-worker.js',
+  'shared/vendor/essentia/essentia-wasm.web.js',
+  'shared/vendor/essentia/essentia-wasm.web.wasm',
+  'shared/vendor/essentia/essentia.js-core.umd.min.js',
   'shared/wave.js',
   'shared/hands.js',
   'shared/camera-look.js',
@@ -96,6 +102,12 @@ const APP_SHELL = [
   'intervle/puzzles.js',
   'intervle/strings.js',
   'intervle/favicon.svg',
+  'bpm-key-finder/',
+  'bpm-key-finder/index.html',
+  'bpm-key-finder/bpm-key-finder.css',
+  'bpm-key-finder/bpm-key-finder.js',
+  'bpm-key-finder/strings.js',
+  'bpm-key-finder/favicon.svg',
   'jam-machine/',
   'jam-machine/index.html',
   'jam-machine/jam-machine.css',

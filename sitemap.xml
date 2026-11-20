@@ -148,6 +148,27 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/jam-machine/"/>
   </url>
   <url>
+    <loc>https://openmusictools.org/bpm-key-finder/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/bpm-key-finder/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/bpm-key-finder/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/bpm-key-finder/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/bpm-key-finder/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/bpm-key-finder/?lang=es</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/bpm-key-finder/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/bpm-key-finder/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/bpm-key-finder/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/bpm-key-finder/"/>
+  </url>
+  <url>
+    <loc>https://openmusictools.org/bpm-key-finder/?lang=it</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/bpm-key-finder/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/bpm-key-finder/?lang=es"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://openmusictools.org/bpm-key-finder/?lang=it"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://openmusictools.org/bpm-key-finder/"/>
+  </url>
+  <url>
     <loc>https://openmusictools.org/metronome/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://openmusictools.org/metronome/"/>
     <xhtml:link rel="alternate" hreflang="es" href="https://openmusictools.org/metronome/?lang=es"/>

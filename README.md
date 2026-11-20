@@ -17,8 +17,9 @@ Made by Drephie ([Instagram](https://instagram.com/drephie), [TikTok](https://ww
 - **Chordigits**: count chords on your fingers in front of the camera, palm or back of the hand for major or minor
 
 - **Jam Machine**: a backing band (chords, drums and bass) in eight styles to play and sing over
+- **BPM & Key Finder**: the speed and the key of a song file, or of what the microphone or another tab plays
 
-Coming later: BPM Finder, Chord Finder and Practice Player.
+Coming later: Chord Finder and Practice Player.
 
 ## Privacy
 
@@ -40,6 +41,7 @@ Other people's work used here, under their own licenses:
 - Jam Machine's acoustic drums: [Virtuosity Drums](https://github.com/sfzinstruments/virtuosity_drums) by Versilian Studios and Karoryfer Samples, [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) (six hits, trimmed, in `jam-machine/drums/`)
 - [Tone.js](https://tonejs.github.io/) 14.8.49, MIT License
 - [MediaPipe](https://ai.google.dev/edge/mediapipe) tasks-vision 0.10.3 and its hand and face models, Apache License 2.0
+- [Essentia.js](https://essentia.upf.edu/) 0.1.3 by the Music Technology Group, Universitat Pompeu Fabra, AGPL-3.0 (a copy in `shared/vendor/essentia/`, used by the BPM & Key Finder)
 - Fonts: Familjen Grotesk, Rajdhani, Sora, Roundo, Nunito, Archivo, Azeret Mono, JetBrains Mono, Literata, Epilogue, Red Hat Display and Asap, from Fontshare's open-source shelf, SIL Open Font License 1.1 (`shared/fonts/`)
 
 ## Support

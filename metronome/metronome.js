@@ -1,6 +1,7 @@
 /* metronome/metronome.js: the Metronome (spec: specs/metronome.md).
  * Sound and timing come from shared/transport.js; this file is the screen:
  * tempo controls, beat dots, settings, windows and keyboard shortcuts.
+ * ?bpm=96 in the address sets the tempo (the BPM & Key Finder's Open in Metronome).
  */
 import { clampBpm, CLICK_SOUNDS, createClicks, startMetronome, createTapTempo, tempoMarking } from '../shared/transport.js';
 import { LANGUAGES, mergeStrings, createI18n } from '../shared/ui/i18n.js';
@@ -36,6 +37,11 @@ function readSettings() {
   };
 }
 const settings = readSettings();
+// Opened at a speed from another tool (the BPM & Key Finder: ?bpm=96): use it, and keep it.
+{
+  const fromUrl = parseInt(new URLSearchParams(location.search).get('bpm'), 10);
+  if (Number.isFinite(fromUrl)) settings.bpm = clampBpm(fromUrl);
+}
 // Theme and language are one choice for the whole hub; what this tool saved before is passed on.
 Object.assign(settings, loadLook(loadSettings(SETTINGS_KEY)));
 const save = () => saveSettings(SETTINGS_KEY, settings);

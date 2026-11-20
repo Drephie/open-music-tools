@@ -132,6 +132,23 @@ export const SEO = {
       "about": "Jam Machine crea basi musicali gratuite e online: scegli uno stile e una tonalità e suona giri di accordi con batteria e basso, per esercitarti, improvvisare, cantare o scrivere canzoni."
     }
   },
+  "bpm-key-finder": {
+    "en": {
+      "title": "BPM & Key Finder – Find a Song's Tempo and Key | Open Music Tools",
+      "desc": "Find the BPM and the key of any song on your device, free. Choose a file, or listen with the microphone or to another tab; check the tempo with clicks over the song. Nothing is uploaded.",
+      "about": "Find the tempo in BPM and the key of a song you have, on your own device: choose a song or video file, or listen with the microphone or to another browser tab. Check the tempo with a click on every beat, halve or double it, or tap along."
+    },
+    "es": {
+      "title": "Detector de BPM y tonalidad – Tempo y tono de una canción | Open Music Tools",
+      "desc": "Encuentra gratis los BPM y la tonalidad de cualquier canción en tu dispositivo. Elige un archivo, o escucha con el micrófono u otra pestaña; comprueba el tempo con clics sobre la canción. No se sube nada.",
+      "about": "Encuentra el tempo en BPM y la tonalidad de una canción que tengas, en tu propio dispositivo: elige un archivo de audio o vídeo, o escucha con el micrófono u otra pestaña del navegador. Comprueba el tempo con un clic en cada pulso, divídelo o duplícalo, o márcalo tú."
+    },
+    "it": {
+      "title": "Trova BPM e tonalità – Tempo e tonalità di una canzone | Open Music Tools",
+      "desc": "Trova gratis i BPM e la tonalità di qualsiasi canzone sul tuo dispositivo. Scegli un file, o ascolta con il microfono o un'altra scheda; controlla il tempo con i clic sulla canzone. Niente viene caricato.",
+      "about": "Trova il tempo in BPM e la tonalità di una canzone che hai, sul tuo dispositivo: scegli un file audio o video, o ascolta con il microfono o un'altra scheda del browser. Controlla il tempo con un clic su ogni battito, dimezzalo o raddoppialo, o battilo tu."
+    }
+  },
   "metronome": {
     "en": {
       "title": "Online Metronome – Free, with Tap Tempo | Open Music Tools",

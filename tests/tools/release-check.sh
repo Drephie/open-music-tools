@@ -17,11 +17,13 @@ check() { if [ -z "$2" ]; then pass "$1"; else fail "$1: $(echo "$2" | head -12 
 # The files that go online: everything in git except the tests, specs, notes and
 # files GitHub Pages only reads. choordination/sw.js only removes itself from old installs.
 # robots.txt, sitemap.xml and the share pictures are for search engines and link previews: not cached offline.
-SITE=$(git ls-files | grep -vE '^(tests|specs|\.claude)/|\.md$|^(LICENSE|CNAME|\.nojekyll|\.gitignore|robots\.txt|sitemap\.xml)$|/share\.jpg$|^shared/fonts/OFL-|^choordination/sw\.js$')
-TEXT=$(echo "$SITE" | grep -E '\.(html|js|css|json|svg)$')
+SITE=$(git ls-files | grep -vE '^(tests|specs|\.claude)/|\.md$|^(LICENSE|CNAME|\.nojekyll|\.gitignore|robots\.txt|sitemap\.xml)$|/share\.jpg$|^shared/fonts/OFL-|^shared/vendor/[^/]+/LICENSE$|^choordination/sw\.js$')
+# Third-party code kept as it came (shared/vendor/, credited in README.md) is left out of the
+# address checks: its license comments name http addresses that are never loaded.
+TEXT=$(echo "$SITE" | grep -E '\.(html|js|css|json|svg)$' | grep -v '^shared/vendor/')
 
 echo "== Tests (JavaScriptCore)"
-for t in theory ear-trainer pitch instrument-tuner pitch-detector pitch-training hands intervle jam-machine strings; do
+for t in theory ear-trainer pitch instrument-tuner pitch-detector pitch-training hands intervle jam-machine bpm-key-finder strings; do
   case $t in strings) f=tests/tools/run-strings-check.js ;; *) f=tests/tools/run-$t-test.js ;; esac
   if out=$("$JSC" -m "$f" 2>&1); then pass "$f"; else fail "$f: $(echo "$out" | grep -E 'FAIL|Error' | head -5 | tr '\n' ' ')"; fi
 done
@@ -73,7 +75,7 @@ check "CNAME is openmusictools.org, .nojekyll is there" "$( [ "$(cat CNAME 2>/de
 PIANO_PAGES=$(for f in $(echo "$TEXT" | grep -E '/[a-z-]+\.js$|^(choordination|chordigits)/index\.html$'); do grep -l -E "from ['\"]\.\./shared/sound\.js['\"]|shared/sound\.js" "$f"; done | grep -v '^shared/' | cut -d/ -f1 | sort -u)
 check "Salamander piano credited where it plays ($(echo $PIANO_PAGES))" "$(for d in $PIANO_PAGES; do grep -q -s 'Salamander' "$d/strings.js" "$d/index.html" || echo "$d"; done)"
 check "every font has its OFL license" "$(for w in shared/fonts/*.woff2; do n=$(basename "$w" | sed -E 's/\.woff2$//; s/-//g'); [ -f "shared/fonts/OFL-$n.txt" ] || echo "$w"; done)"
-check "README credits Salamander, Tone.js, MediaPipe and the fonts" "$(for w in Salamander Tone.js MediaPipe 'Open Font License'; do grep -q "$w" README.md || echo "$w"; done)"
+check "README credits Salamander, Tone.js, MediaPipe, Essentia.js and the fonts" "$(for w in Salamander Tone.js MediaPipe Essentia.js 'Open Font License'; do grep -q "$w" README.md || echo "$w"; done)"
 
 echo "== Links between pages"
 missing_links() {
