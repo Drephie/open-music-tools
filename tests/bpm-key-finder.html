@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BPM &amp; Key Finder tests</title>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { margin: 0 auto; padding: 16px; max-width: 900px; background: Canvas; color: CanvasText; }
+    h1 { font-size: 1.4rem; }
+    #summary { font-size: 1.2rem; font-weight: 700; }
+    .pass { color: green; } .fail { color: #d22; } .skip { color: GrayText; }
+    table { border-collapse: collapse; width: 100%; }
+    td, th { text-align: left; padding: 4px 8px; border-bottom: 1px solid GrayText; vertical-align: top; }
+    pre { white-space: pre-wrap; word-break: break-word; font-size: 12px; margin: 4px 0 0; }
+  </style>
+</head>
+<body>
+  <h1>BPM &amp; Key Finder tests</h1>
+  <p id="summary">Running…</p>
+  <table>
+    <thead><tr><th>Check</th><th>Checked</th><th>Result</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <p>The rules (<code>shared/analysis-rules.js</code>; also from the terminal: <code>tools/run-bpm-key-finder-test.js</code>), then the whole engine (<code>shared/analysis.js</code> with Essentia.js in its worker) on made-up sound whose answer is known: silence, noise, a drum beat with no notes, and a piano-like chord loop. Then, only where they are on this computer, the trial songs in <code>tests/analysis-songs/</code> (never published): 12 free songs and Drephie's 5. A BPM counts when it, its half or its double is within 4%.</p>
+
+<script type="module">
+  import * as rules from '../shared/analysis-rules.js';
+  import { analyse, toMono, decodeFile } from '../shared/analysis.js';
+  import { checkRules } from './bpm-key-finder-cases.js';
+
+  const rows = document.getElementById('rows');
+  let failed = 0;
+  const show = (row) => {
+    const tr = document.createElement('tr');
+    const cls = row.skip ? 'skip' : row.failed ? 'fail' : 'pass';
+    tr.innerHTML = `<td>${row.section}${row.examples.length ? `<pre>${row.examples.join('\n')}</pre>` : ''}</td><td>${row.checked}</td><td class="${cls}">${row.skip ? 'skipped' : row.failed ? row.failed + ' failed' : 'pass'}</td>`;
+    rows.appendChild(tr);
+    if (row.failed) failed++;
+  };
+  checkRules(rules).forEach(show);
+
+  const SR = 44100;
+  // Made-up sound: a drum loop from the Jam Machine's recorded hits (kick,
+  // snare, hi-hat; no notes) and a chord loop (C Am F G, one chord per bar,
+  // plucked tones with harmonics) at a known BPM.
+  const hits = {};
+  async function loadHits() {
+    for (const n of ['kick', 'snare', 'hat']) hits[n] = await toMono(await decodeFile(new Blob([await (await fetch('../jam-machine/drums/' + n + '.wav')).arrayBuffer()])));
+  }
+  function made({ bpm, seconds, drums = true, chords = null }) {
+    const out = new Float32Array(seconds * SR), beat = 60 / bpm;
+    const add = (s, t, g) => { const o = Math.floor(t * SR); for (let i = 0; i < s.length && o + i < out.length; i++) out[o + i] += s[i] * g; };
+    if (drums) for (let t = 0, i = 0; t < seconds; t += beat / 2, i++) { add(hits.hat, t, 0.4); if (i % 4 === 0) add(hits.kick, t, 0.9); if (i % 4 === 2) add(hits.snare, t, 0.8); }
+    if (chords) {
+      const bar = beat * 4;
+      for (let b = 0; b * bar < seconds; b++) {
+        const notes = chords[b % chords.length];
+        for (let k = 0; k < 4; k++) {
+          const s0 = Math.floor((b * bar + k * beat) * SR);
+          for (const m of notes) {
+            const f = 440 * Math.pow(2, (m - 69) / 12);
+            for (let j = 0; j < beat * SR && s0 + j < out.length; j++) {
+              const e = Math.exp(-j / (0.25 * SR)) * 0.08;
+              out[s0 + j] += e * (Math.sin(2 * Math.PI * f * j / SR) + 0.5 * Math.sin(4 * Math.PI * f * j / SR) + 0.25 * Math.sin(6 * Math.PI * f * j / SR));
+            }
+          }
+        }
+      }
+    }
+    return out;
+  }
+  const C = [48, 60, 64, 67], Am = [45, 60, 64, 69], F = [41, 60, 65, 69], G = [43, 59, 62, 67];
+  const near = (found, want) => [1, 0.5, 2].some((x) => Math.abs(found * x / want - 1) <= 0.04);
+  const keyName = (k) => k ? `${rules.keyLabel(k).root} ${k.mode === 'maj' ? 'major' : 'minor'}` : 'none';
+
+  async function engineRow() {
+    await loadHits();
+    const row = { section: 'The engine on made-up sound (silence, noise, drums only, chords)', checked: 0, failed: 0, examples: [] };
+    const cases = [
+      ['silence', new Float32Array(20 * SR), (r) => r.reason === 'silent'],
+      ['too short', made({ bpm: 120, seconds: 6 }), (r) => r.reason === 'short'],
+      ['noise', Float32Array.from({ length: 20 * SR }, () => (Math.random() * 2 - 1) * 0.3), (r) => !r.beat && !r.key],
+      ['drums at 120, no notes', made({ bpm: 120, seconds: 30 }), (r) => r.beat && near(r.beat.bpm, 120) && !r.key],
+      ['C Am F G at 96 with drums', made({ bpm: 96, seconds: 40, chords: [C, Am, F, G] }), (r) => r.beat && near(r.beat.bpm, 96) && keyName(r.key && r.key.key) === 'C major'],
+    ];
+    for (const [label, samples, ok] of cases) {
+      row.checked++;
+      const r = await analyse(samples);
+      const said = `${label}: ${r.reason || ''} BPM ${r.beat ? r.beat.bpm.toFixed(1) : 'none'}, key ${keyName(r.key && r.key.key)} ${r.measured ? JSON.stringify(r.measured, (k, v) => typeof v === 'number' ? +v.toFixed(2) : v) : ''}`;
+      if (!ok(r)) { row.failed++; row.examples.push(said); } else row.examples.push('ok ' + said);
+    }
+    show(row);
+  }
+
+  const DREPHIE = [['drephie-1.wav', 122.5, 'B major'], ['drephie-2.wav', 117, 'F# minor'], ['drephie-3.wav', 79, 'D major'], ['drephie-4.wav', 75.5, 'C major'], ['drephie-5.wav', 118, 'A minor']];
+  async function songsRow() {
+    const list = [];
+    for (const f of ['guitarset.json', 'band.json']) {
+      try { for (const s of await (await fetch('analysis-songs/' + f)).json()) list.push([s.file, s.bpm, s.key.replace(/^(\w[#b]?) (major|minor)$/, '$1 $2')]); } catch { /* not here */ }
+    }
+    list.push(...DREPHIE);
+    const row = { section: 'Trial songs on this computer: BPM (or ½, ×2) and key', checked: 0, failed: 0, examples: [] };
+    let bpmOk = 0, keyOk = 0;
+    for (const [file, bpm, key] of list) {
+      const res = await fetch('analysis-songs/' + file);
+      if (!res.ok) continue;
+      row.checked++;
+      const buf = await decodeFile(new Blob([await res.arrayBuffer()]));
+      const t0 = performance.now();
+      const r = await analyse(await toMono(buf));
+      const kb = r.beat && near(r.beat.bpm, bpm), kk = r.key && rules.sameKey(r.key.key, rules.parseKey(key.split(' ')[0], key.split(' ')[1]));
+      const kAlt = r.key && r.key.alt && rules.sameKey(r.key.alt, rules.parseKey(key.split(' ')[0], key.split(' ')[1]));
+      bpmOk += !!kb; keyOk += !!kk;
+      row.examples.push(`${kb ? 'ok ' : 'NO '} ${kk ? 'ok ' : kAlt ? 'alt' : 'NO '} ${file}: ${bpm} -> ${r.beat ? r.beat.bpm.toFixed(1) : 'none'}${r.beat && r.beat.range.changes ? ` (changes ${r.beat.range.low}-${r.beat.range.high})` : ''}; ${key} -> ${keyName(r.key && r.key.key)}${r.key && r.key.alt ? ' or ' + keyName(r.key.alt) : ''}${r.key && r.key.changes.length ? ' changes: ' + r.key.changes.map((c) => keyName(c.key) + ' at ' + rules.formatTime(c.time)).join(', ') : ''} (${((performance.now() - t0) / 1000).toFixed(1)} s) ${JSON.stringify(r.measured, (k, v) => typeof v === 'number' ? +v.toFixed(2) : v)}`);
+    }
+    // Drephie's 5 must all be right (BPM with ½/×2, key); the free songs are a record, not a pass/fail.
+    for (const [file] of DREPHIE) {
+      const line = row.examples.find((e) => e.includes(' ' + file + ':'));
+      if (line && line.slice(0, 7).includes('NO')) row.failed++;
+    }
+    if (!row.checked) row.skip = true;
+    row.section += row.checked ? ` — BPM ${bpmOk}/${row.checked}, key ${keyOk}/${row.checked} (Drephie's 5 must pass)` : ' (no songs on this computer)';
+    show(row);
+  }
+
+  await engineRow();
+  await songsRow();
+  document.getElementById('summary').textContent = failed ? `FAIL: ${failed} checks failed` : 'PASS';
+  document.getElementById('summary').className = failed ? 'fail' : 'pass';
+  window.testsDone = true;
+</script>
+</body>
+</html>
