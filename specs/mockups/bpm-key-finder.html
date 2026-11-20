@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>BPM &amp; Key Finder (mock-up)</title>
+  <link rel="stylesheet" href="../../shared/fonts/fonts.css">
+  <link rel="stylesheet" href="../../shared/ui/themes.css">
+  <link rel="stylesheet" href="../../shared/ui/select.css">
+  <link rel="stylesheet" href="../../shared/ui/page.css">
+  <style>
+    [hidden] { display: none !important; }
+    /* Mock-up only: the look of the BPM Finder on the hub's own theme. No sound, no analysis. */
+    .mock-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; margin: 0 0 var(--space-3); font-size: 13px; color: var(--color-text-inactive); }
+    .mock-bar select, .mock-bar button { font: inherit; min-height: 32px; }
+    .bf { width: 100%; max-width: 980px; margin: 0 auto; display: grid; gap: var(--space-4); align-content: start; }
+    @media (min-width: 820px) { .bf.has-song { grid-template-columns: minmax(0, 1fr) minmax(300px, 1fr); align-items: start; } }
+
+    .pick { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); text-align: center; padding: var(--space-6) var(--space-4); }
+    .pick svg.note { width: 72px; height: 72px; color: var(--color-right); }
+    .pick .btn { min-height: 64px; padding: 0 32px; font-size: 20px; }
+    .pick p { margin: 0; color: var(--color-text-inactive); font-size: 14px; max-width: 30ch; }
+
+    .answer { display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--space-2); }
+    .file { margin: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; color: var(--color-text-inactive); }
+    .bpm { font: 800 clamp(76px, 24vw, 128px)/1 var(--font-num); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; color: var(--color-text); }
+    .unit { font-size: 14px; font-weight: 700; letter-spacing: 0.12em; color: var(--color-text-inactive); }
+    .tempo-name { margin: 4px 0 0; font-size: 16px; } .tempo-name strong { color: var(--color-right); }
+    .alts { display: flex; gap: var(--space-3); margin-top: var(--space-2); }
+    .alts .btn { min-width: 104px; min-height: 48px; padding: 0 20px; font-size: 17px; font-variant-numeric: tabular-nums; }
+    .note-change { margin: var(--space-2) 0 0; font-size: 14px; color: var(--color-text-inactive); max-width: 34ch; }
+
+    .player { display: grid; gap: var(--space-3); }
+    .pos-row { display: flex; align-items: center; gap: var(--space-3); }
+    .beat { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--color-left); }
+    .beat.lit { background: var(--color-right); border-color: var(--color-right); box-shadow: 0 0 14px color-mix(in srgb, var(--color-right) 70%, transparent); }
+    .pos-row .range { flex: 1; min-width: 0; }
+    .times { font-size: 13px; font-variant-numeric: tabular-nums; color: var(--color-text-inactive); white-space: nowrap; }
+    .big-row { display: flex; gap: var(--space-3); }
+    .big-btn { flex: 1; min-height: 64px; font-size: 20px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+    .big-btn svg { width: 22px; height: 22px; }
+
+    .switch { flex: none; width: 48px; height: 30px; padding: 3px; border: 0; border-radius: 15px; cursor: pointer; background: color-mix(in srgb, var(--color-text) 25%, transparent); display: flex; position: relative; }
+    .switch::after { content: ''; width: 24px; height: 24px; border-radius: 50%; background: var(--color-text); transition: transform 0.15s; }
+    .switch[aria-checked="true"] { background: var(--color-left); }
+    .switch[aria-checked="true"]::after { background: var(--color-text-pinched); transform: translateX(18px); }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) 0; border-top: 1px solid color-mix(in srgb, var(--border-panel) 50%, transparent); }
+    .row b { font-weight: 700; }
+    .vol { display: grid; gap: var(--space-2); padding: var(--space-3) 0 0; border-top: 1px solid color-mix(in srgb, var(--border-panel) 50%, transparent); }
+    .vol-head { display: flex; justify-content: space-between; }
+    .actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+    .actions .btn { flex: 1 1 160px; min-height: 52px; }
+  </style>
+</head>
+<body data-theme="rouge">
+  <div id="theme-frame" aria-hidden="true"></div>
+  <div class="page">
+    <div class="mock-bar">
+      Mock-up ·
+      <select id="theme"></select>
+      <button id="state">Show: after a song</button>
+    </div>
+    <header class="tool-header">
+      <a class="icon-btn home-btn" href="../../" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5.5h4V20"/></svg></a>
+      <h1 class="tool-title">BPM &amp; Key Finder</h1>
+      <div class="header-actions">
+        <button class="icon-btn" aria-label="About"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r="0.6" fill="currentColor"/></svg></button>
+        <button class="icon-btn" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></button>
+      </div>
+    </header>
+
+    <main id="before" class="bf">
+      <section class="panel pick">
+        <svg class="note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+        <button class="btn btn-primary">Choose a song</button>
+        <p>Nothing is uploaded: the song stays on your device.</p>
+        <p class="computer-only">Or drop a song file here.</p>
+      </section>
+    </main>
+
+    <main id="after" class="bf has-song" hidden>
+      <section class="panel answer">
+        <p class="file">My song – live at the church hall (rehearsal take 3).mp3</p>
+        <div class="bpm">96</div>
+        <div class="unit">BPM</div>
+        <p class="tempo-name"><strong>Andante</strong>: at a walking pace</p>
+        <div class="alts">
+          <button class="btn">½ 48</button>
+          <button class="btn">×2 192</button>
+        </div>
+        <p class="note-change">The tempo changes in this song (about 92 to 101).</p>
+      </section>
+      <section class="panel player">
+        <div class="pos-row">
+          <span class="beat lit" aria-hidden="true"></span>
+          <input class="range" type="range" min="0" max="195" value="42" style="--fill:21%" aria-label="Song position">
+          <span class="times">0:42 / 3:15</span>
+        </div>
+        <div class="big-row">
+          <button class="btn btn-primary big-btn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></svg>Play</button>
+          <button class="btn big-btn">Tap</button>
+        </div>
+        <div class="row"><b>Clicks</b><button class="switch" role="switch" aria-checked="true" aria-label="Clicks"></button></div>
+        <div class="row"><b>Click sound</b><div class="custom-select" style="min-width:150px"><select><option>Wood</option><option>Click</option><option>Beep</option><option>Hi-hat</option></select></div></div>
+        <div class="vol">
+          <div class="vol-head"><b>Click volume</b><span>100%</span></div>
+          <input class="range" type="range" min="0" max="200" value="100" style="--fill:50%" aria-label="Click volume">
+        </div>
+        <div class="actions">
+          <button class="btn">Open in Metronome</button>
+          <button class="btn">Another song</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="tool-footer">
+      <a class="support-link" href="#">Support on Patreon</a>
+      <span class="legal-links"><a href="#">Privacy</a><a href="#">Terms</a></span>
+      <span class="designer-credit">Designed by <a href="#">@drephie</a></span>
+    </footer>
+  </div>
+  <script type="module">
+    import { THEMES } from '../../shared/ui/page.js';
+    import { setupCustomSelects } from '../../shared/ui/select.js';
+    const sel = document.getElementById('theme');
+    sel.innerHTML = THEMES.map(([id, k]) => `<option value="${id}">${k.slice(5)}</option>`).join('');
+    sel.onchange = () => { document.body.dataset.theme = sel.value; };
+    const btn = document.getElementById('state');
+    btn.onclick = () => {
+      const after = document.getElementById('after').hidden;
+      document.getElementById('after').hidden = !after; document.getElementById('before').hidden = after;
+      btn.textContent = after ? 'Show: before a song' : 'Show: after a song';
+    };
+    document.querySelectorAll('.switch').forEach((s) => s.onclick = () => s.setAttribute('aria-checked', s.getAttribute('aria-checked') === 'true' ? 'false' : 'true'));
+    setupCustomSelects();
+    setInterval(() => document.querySelector('.beat').classList.toggle('lit'), 312);
+  </script>
+</body>
+</html>

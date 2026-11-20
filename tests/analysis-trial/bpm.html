@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Analysis trial: BPM of any song</title>
+  <!-- BPM of songs in tests/analysis-songs/ with no known answer: ?files=a.webm,b.mp3 -->
+  <style>body { font: 14px/1.5 system-ui, sans-serif; margin: 16px; } pre { white-space: pre-wrap; }</style>
+</head>
+<body>
+  <pre id="log">Loading…</pre>
+  <script type="module">
+    import Essentia from 'https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia.js-core.es.js';
+    import { EssentiaWASM } from 'https://cdn.jsdelivr.net/npm/essentia.js@0.1.3/dist/essentia-wasm.es.js';
+    const SR = 44100, out = document.getElementById('log');
+    const essentia = new Essentia(EssentiaWASM);
+    out.textContent = '';
+    window.results = [];
+    for (const file of new URLSearchParams(location.search).get('files').split(',')) {
+      const t0 = performance.now();
+      const tmp = await new AudioContext().decodeAudioData(await (await fetch('../analysis-songs/' + file)).arrayBuffer());
+      const off = new OfflineAudioContext(1, Math.ceil(tmp.duration * SR), SR);
+      const src = off.createBufferSource(); src.buffer = tmp; src.connect(off.destination); src.start();
+      const audio = (await off.startRendering()).getChannelData(0);
+      const r = essentia.RhythmExtractor2013(essentia.arrayToVector(audio), 208, 'multifeature', 40);
+      const iv = essentia.vectorToArray(r.bpmIntervals).map((s) => 60 / s).filter((b) => b > 30 && b < 300).sort((a, b) => a - b);
+      const q = (p) => iv[Math.floor(p * (iv.length - 1))];
+      const vec = essentia.arrayToVector(audio);
+      const keyArgs = [true, 4096, 4096, 12, 3500, 60, 25, 0.2];
+      const keys = {};
+      for (const prof of ['bgate', 'edma', 'temperley']) { const k = essentia.KeyExtractor(vec, ...keyArgs, prof, SR, 0.0001, 440, 'cosine', 'hann'); keys[prof] = `${k.key} ${k.scale} (${k.strength.toFixed(2)})`; }
+      const win = [];
+      for (let s = 0; s + 20 * SR <= audio.length; s += 20 * SR) { const k = essentia.KeyExtractor(essentia.arrayToVector(audio.subarray(s, s + 20 * SR)), ...keyArgs, 'bgate', SR, 0.0001, 440, 'cosine', 'hann'); win.push(`${Math.round(s / SR)}s ${k.key}${k.scale === 'minor' ? 'm' : ''}`); }
+      const res = { keys, keyOverTime: win.join(' '), file, seconds: Math.round(tmp.duration), bpm: +r.bpm.toFixed(1), half: +(r.bpm / 2).toFixed(1), double: +(r.bpm * 2).toFixed(1), confidence: +r.confidence.toFixed(2), beatRange10to90: [+q(0.1).toFixed(0), +q(0.9).toFixed(0)], ms: Math.round(performance.now() - t0) };
+      window.results.push(res);
+      out.textContent += JSON.stringify(res) + '\n';
+    }
+    window.done = true;
+  </script>
+</body>
+</html>

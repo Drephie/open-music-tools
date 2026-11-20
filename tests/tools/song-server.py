@@ -9,7 +9,7 @@ SONGS = os.path.join(ROOT, 'tests', 'analysis-songs')
 class Handler(http.server.SimpleHTTPRequestHandler):
     def do_PUT(self):
         name = self.path.rsplit('/', 1)[-1]
-        if not self.path.startswith('/tests/analysis-songs/') or not re.fullmatch(r'[\w.-]+\.(webm|wav|json)', name):
+        if not self.path.startswith('/tests/analysis-songs/') or not re.fullmatch(r'[\w.-]+\.(webm|wav|mp3|json)', name):
             self.send_error(403); return
         n = int(self.headers.get('Content-Length', 0))
         with open(os.path.join(SONGS, name), 'wb') as f: f.write(self.rfile.read(n))
