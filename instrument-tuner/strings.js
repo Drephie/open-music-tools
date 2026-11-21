@@ -85,7 +85,7 @@ export const TUNER_STRINGS = {
     idle: "Tocca per iniziare e suona",
     waiting: "In attesa del microfono…",
     play: "Suona una corda", playNote: "Suona una nota", playString: "Suona la corda {note}",
-    stringsAria: "Corde: toccane una per restarci, di nuovo per trovarle da solo",
+    stringsAria: "Corde: toccane una per accordare solo quella, toccala di nuovo per tornare al riconoscimento automatico",
     stringAria: "Corda {note}",
     low: "Calante di {n} cent · tendi", high: "Crescente di {n} cent · allenta", low1: "Calante di 1 cent · tendi", high1: "Crescente di 1 cent · allenta",
     muchLow: "Troppo calante · tendi", muchHigh: "Troppo crescente · allenta",

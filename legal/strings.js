@@ -156,7 +156,7 @@ export const LEGAL_STRINGS = {
     pStore: "Alcune cose sono salvate nella memoria locale del tuo browser, solo sul tuo dispositivo, perché gli strumenti conservino ciò che hai scelto:",
     pStore1: "il tuo tema e la tua lingua, usati da tutti gli strumenti;",
     pStore2: "le impostazioni di ogni strumento (per esempio volume, tempo, strumento, nomi delle note);",
-    pStore3: "i risultati dei giochi: le stelle e i record di Orecchio musicale, i tentativi e le serie di Intervle;",
+    pStore3: "i risultati dei giochi: le stelle e i record di Ear Training, i tentativi e le serie di Intervle;",
     pStore4: "quando è stato mostrato per l'ultima volta l'avviso di Patreon, perché non compaia troppo spesso;",
     pStore5: "una copia dei file del sito (la cache del browser), perché gli strumenti si aprano più in fretta e funzionino offline.",
     pStoreEnd: "Niente di tutto questo viene inviato a noi o a qualcun altro. Puoi cancellarlo quando vuoi eliminando i dati di questo sito nel browser. Non salviamo la tua musica, le tue registrazioni né nulla di ciò che crei.",
