@@ -120,7 +120,7 @@ function lessonTitle(ex, i) {
 }
 
 const homeEl = $('home'), quizEl = $('quiz'), doneEl = $('done'), courseEl = $('course'), learnEl = $('learn'), modeTabs = $('mode-tabs');
-const tabs = [...document.querySelectorAll('.tab')];
+const tabs = [...document.querySelectorAll('.tab[data-ex]')];   // the three exercises (not Course | Practice)
 const homePanel = $('home-panel'), pathEl = $('path');
 const lessonNum = $('lesson-num'), lessonTitleEl = $('lesson-title'), startBtn = $('start-btn');
 const bestLabel = $('best-label');
@@ -261,7 +261,7 @@ function showScreen(name) {
   if (hadFocus && !active.checkVisibility?.()) {
     if (name === 'quiz') hearBtn.focus();
     else if (name === 'learn') $('learn-go').focus();
-    else if (name === 'home' || name === 'course') document.querySelector('.tab[aria-selected="true"]:not([hidden])')?.focus();
+    else if (name === 'home' || name === 'course') (courseOn() ? modeTabs : homeEl).querySelector('.tab[aria-selected="true"]')?.focus();
   }
 }
 // The lessons screen: the course or practice (course on), or the first version's tabs.
@@ -606,6 +606,7 @@ function renderModeTabs() {
   });
 }
 function selectView(view, focus = false) {
+  if (view === 'course' && settings.course.view !== 'course') scrollToNext = true;
   settings.course.view = view;
   save();
   showHome();
@@ -660,7 +661,7 @@ function renderCourse() {
       const inside = l.type === 'check' ? icon('trophy') : stars[i] ? icon('check') : String(['meet', 'practise', 'mix'].indexOf(l.type) + 1);
       html.push(`<div class="node-row" style="--x:${offset}"><button type="button" class="${cls}" data-i="${i}" aria-label="${label}"${open ? '' : ' aria-disabled="true"'}>`
         + `<span class="node-circle">${inside}</span><span class="node-stars">${stars[i] ? starsHtml(stars[i]) : ''}</span></button>`
-        + (isNext ? `<span class="node-start" aria-hidden="true">${t('start')}: ${name}</span>` : '') + '</div>');
+        + (isNext ? `<span class="node-start" aria-hidden="true">${t('start')}</span>` : '') + '</div>');
     });
   });
   pathEl2.innerHTML = html.join('');

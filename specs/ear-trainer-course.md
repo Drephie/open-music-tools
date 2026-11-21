@@ -16,7 +16,7 @@ The same tool, now a small course in the style of Duolingo: many short steps tha
   
   Each section ends with a **Checkpoint** (a trophy on the path): 8 questions from the whole section.
 - **A lesson is always 8 questions** (1–2 minutes). No fail: a wrong answer shows the right one (Compare, as today), then comes back at the end of the lesson until you get it right. **Stars from first tries:** 3 for 8 of 8 or 7 of 8, 2 for 5–6, 1 for less *(Claude's pick)*. Best stars are kept; any lesson can be redone.
-- **Kinds of question:** Which is it? (as today); **Higher or lower?**; **Same or different?**; **Pick the one**; for melodies, **tap the steps in order** (1, 3, 2); for progressions, **which chord comes next?** (I, IV, V or vi).
+- **Kinds of question:** Which is it? (as today); **Higher or lower?**; **Same or different?**; **Pick the one**; for melodies, **tap the steps in order** (1, 3, 2), with an Undo button; for progressions, **which is the last chord?** (I, IV, V or vi) *(at build time: the last chord of 2 to 4 heard)*.
 - **Skip ahead** *(Claude's pick)*: a section's Checkpoint can be taken at any time. 7 of 8 right at the first try and the whole section counts as done, so musicians aren't held back.
 - **Daily streak:** a flame with the number of days in a row with at least one lesson. **One rest day a week**: one missed day doesn't break it *(Claude's pick)*.
 - **Daily goal:** a ring that fills. 1, 2, 3 or 5 lessons a day, **2 by default** *(Claude's pick)*. A review, a streak game or 8 free-practice answers count as a lesson too.
@@ -53,7 +53,7 @@ Hearts or failing a lesson; points (XP) and leaderboards; building an interval o
 
 ## Wording (English, main labels)
 
-Course, Practice, Start, Got it, Continue, Review, Practise my mistakes, Checkpoint, Skip ahead?, Day {n}!, Goal reached!, {n} in a row!, Higher or lower?, Same or different?, Which one is the {name}?, Tap the steps in order, Which chord comes next?, Unit done!, Section done!. Section names as above. Claude writes the Learn cards, section and unit names in en/es/it (about 50 short texts), using the 2026-11-22 terms (semitono, sfida a filotto, menor séptima / minore settima); Drephie checks them.
+Course, Practice, Start, Got it, Continue, Review, Practise my mistakes, Checkpoint, Skip ahead?, Day {n}!, Goal reached!, {n} in a row!, Higher or lower?, Same or different?, Which one is the {name}?, Tap the steps in order, Which is the last chord?, Unit done!, Section done!. Section names as above. Claude writes the Learn cards, section and unit names in en/es/it (about 50 short texts), using the 2026-11-22 terms (semitono, sfida a filotto, menor séptima / minore settima); Drephie checks them.
 
 ## Remembered
 

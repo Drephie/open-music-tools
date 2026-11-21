@@ -201,7 +201,8 @@ body[data-theme="bw"] .answer.bad .answer-name { text-decoration: line-through; 
 .mode-tabs[hidden] { display: none; }
 .course-bar {
   position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 14px; padding: 8px 4px;
-  background: var(--bg-page); font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 17px; color: var(--color-text);
+  margin: 0 -8px; padding-left: 12px; padding-right: 8px; border-radius: 0 0 var(--radius-control) var(--radius-control);
+  background: color-mix(in srgb, var(--bg-page) 45%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 17px; color: var(--color-text);
 }
 .streak, .goal { display: inline-flex; align-items: center; gap: 5px; }
 .streak .flame { width: 24px; height: 24px; }
