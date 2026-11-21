@@ -220,18 +220,18 @@ export const SEO = {
   "pitch-training": {
     "en": {
       "title": "Pitch Training – Singing Exercises to Sing in Tune | Open Music Tools",
-      "desc": "Free online singing exercises by vocal coach Drephie: the piano plays a vocal warm-up over a beat, you sing it back, and you see which notes you sang in tune. Nothing is recorded.",
-      "about": "Free vocal warm-ups and singing exercises by vocal coach Drephie: listen to the piano, sing each exercise back, and see note by note where you were in tune, to train your pitch and sing better."
+      "desc": "Free online singing exercises: the piano plays a vocal warm-up over a beat, you sing it back, and you see which notes you sang in tune. Nothing is recorded.",
+      "about": "Free vocal warm-ups and singing exercises: listen to the piano, sing each exercise back, and see note by note where you were in tune, to train your pitch and sing better."
     },
     "es": {
       "title": "Pitch Training – Ejercicios para cantar afinado | Open Music Tools",
-      "desc": "Ejercicios de canto online y gratis de la profesora de canto Drephie: el piano toca un calentamiento vocal sobre un ritmo, tú lo cantas y ves qué notas cantaste afinadas. Nada se graba.",
-      "about": "Calentamientos vocales y ejercicios de canto gratis de la profesora de canto Drephie: escucha el piano, canta cada ejercicio y mira nota a nota dónde estabas afinado, para entrenar la afinación y cantar mejor."
+      "desc": "Ejercicios de canto online y gratis: el piano toca un calentamiento vocal sobre un ritmo, tú lo cantas y ves qué notas cantaste afinadas. Nada se graba.",
+      "about": "Calentamientos vocales y ejercicios de canto gratis: escucha el piano, canta cada ejercicio y mira nota a nota dónde estabas afinado, para entrenar la afinación y cantar mejor."
     },
     "it": {
       "title": "Pitch Training – Esercizi per cantare intonati | Open Music Tools",
-      "desc": "Esercizi di canto online e gratuiti della vocal coach Drephie: il pianoforte suona un vocalizzo su una base, tu lo ricanti e vedi quali note hai cantato intonate. Niente viene registrato.",
-      "about": "Vocalizzi ed esercizi di canto gratuiti della vocal coach Drephie: ascolta il pianoforte, ricanta ogni esercizio e guarda nota per nota dove eri intonato, per allenare l’intonazione e cantare meglio."
+      "desc": "Esercizi di canto online e gratuiti: il pianoforte suona un vocalizzo su una base, tu lo ricanti e vedi quali note hai cantato intonate. Niente viene registrato.",
+      "about": "Vocalizzi ed esercizi di canto gratuiti: ascolta il pianoforte, ricanta ogni esercizio e guarda nota per nota dove eri intonato, per allenare l’intonazione e cantare meglio."
     }
   },
   "privacy": {
