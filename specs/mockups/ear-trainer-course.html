@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Ear Trainer course (mock-up)</title>
+  <link rel="stylesheet" href="../../shared/fonts/fonts.css">
+  <link rel="stylesheet" href="../../shared/ui/themes.css">
+  <link rel="stylesheet" href="../../shared/ui/page.css">
+  <style>
+    /* Mock-up only (specs/ear-trainer-course.md): four phone screens, no sound. */
+    body { padding: 16px; }
+    .phones { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; }
+    .phone { width: 375px; max-width: 100%; height: 667px; border: 2px solid var(--border-panel); border-radius: 28px; overflow: hidden; background: var(--bg-page); display: flex; flex-direction: column; position: relative; }
+    .cap { text-align: center; font: 700 13px var(--font-main); color: var(--color-text-inactive); margin: 6px 0 0; }
+    .hdr { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 6px; }
+    .hdr h1 { margin: 0; font: var(--title-weight) 22px/1 var(--font-display); color: var(--color-title); text-transform: var(--title-transform); letter-spacing: var(--title-spacing); }
+    .hdr span { color: var(--color-text-inactive); font-size: 18px; }
+    .tabs { display: flex; margin: 4px 16px 0; border: var(--border-width) solid var(--border-panel); border-radius: var(--radius-control); overflow: hidden; }
+    .tabs b { flex: 1; text-align: center; padding: 9px 0; font: 700 14px var(--font-main); color: var(--color-text); }
+    .tabs b.on { background: var(--color-left); color: var(--color-text-pinched); }
+    .bar { display: flex; align-items: center; gap: 12px; padding: 10px 16px; font: 700 15px var(--font-main); color: var(--color-text); }
+    .flame { color: var(--color-star); font-size: 20px; }
+    .ring { width: 30px; height: 30px; border-radius: 50%; background: conic-gradient(var(--color-good) 50%, color-mix(in srgb, var(--color-text) 15%, transparent) 0); display: grid; place-items: center; }
+    .ring::after { content: ''; width: 20px; height: 20px; border-radius: 50%; background: var(--bg-page); }
+    .review { margin-left: auto; padding: 6px 12px; border-radius: 16px; border: var(--border-width) solid var(--color-right); color: var(--color-right); font-size: 13px; }
+    .path { flex: 1; overflow: hidden; padding: 0 16px; }
+    .band { margin: 8px 0; padding: 10px 14px; border-radius: var(--radius-control); background: var(--color-left); color: var(--color-text-pinched); font: 700 14px var(--font-main); }
+    .band small { display: block; font-weight: 600; opacity: 0.8; }
+    .node { width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center; margin: 10px 0 2px; font: 700 20px var(--font-num); background: var(--color-panel); border: var(--border-width) solid var(--border-panel); color: var(--color-text); position: relative; }
+    .node.done { background: var(--color-primary); color: var(--color-primary-text); border-color: var(--color-primary); }
+    .node.next { box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-right) 30%, transparent); }
+    .node.lock { opacity: 0.35; }
+    .row { display: flex; align-items: center; gap: 12px; }
+    .stars { font-size: 12px; color: var(--color-star); letter-spacing: 1px; }
+    .start { padding: 10px 18px; border-radius: var(--radius-control); background: var(--color-primary); color: var(--color-primary-text); font: 700 15px var(--font-main); }
+    .body { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .top { display: flex; align-items: center; gap: 12px; padding: 14px 16px 0; color: var(--color-text); font-weight: 700; }
+    .prog { flex: 1; height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--color-text) 15%, transparent); overflow: hidden; }
+    .prog i { display: block; height: 100%; width: 37%; background: var(--color-good); }
+    h2 { margin: 6px 0 0; font: var(--title-weight) 24px/1.15 var(--font-display); color: var(--color-title); text-align: center; }
+    p.t { margin: 0; text-align: center; color: var(--color-text); font-size: 16px; line-height: 1.4; }
+    .snd { display: flex; gap: 10px; justify-content: center; }
+    .btn2 { flex: 1; min-height: 58px; border-radius: var(--radius-control); border: var(--border-width) solid var(--border-panel); background: var(--color-panel); color: var(--color-text); font: 700 16px var(--font-main); display: grid; place-items: center; text-align: center; }
+    .btn2.good { background: var(--color-good); color: var(--color-good-text); border-color: var(--color-good); }
+    .big { min-height: 54px; border-radius: var(--radius-control); background: var(--color-primary); color: var(--color-primary-text); font: 700 17px var(--font-main); display: grid; place-items: center; margin-top: auto; }
+    .hear { min-height: 70px; border-radius: var(--radius-control); border: var(--border-width) solid var(--color-right); color: var(--color-right); font: 700 18px var(--font-main); display: grid; place-items: center; }
+    .line { text-align: center; color: var(--color-good); font-weight: 700; }
+    .combo { text-align: center; color: var(--color-star); font-weight: 700; font-size: 14px; }
+    .end-stars { text-align: center; font-size: 46px; color: var(--color-star); letter-spacing: 6px; margin-top: 30px; }
+    .stats { display: flex; gap: 10px; }
+    .stat { flex: 1; padding: 12px 6px; border-radius: var(--radius-control); border: var(--border-width) solid var(--border-panel); text-align: center; color: var(--color-text); font: 700 20px var(--font-num); }
+    .stat small { display: block; font: 600 12px var(--font-main); color: var(--color-text-inactive); margin-top: 4px; }
+    .themes { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 16px; }
+    .themes button { min-height: 32px; padding: 0 10px; border-radius: 16px; border: 1px solid var(--border-panel); background: transparent; color: var(--color-text); font: 600 12px var(--font-main); cursor: pointer; }
+  </style>
+</head>
+<body data-theme="rouge">
+  <div class="themes" id="themes"></div>
+  <div class="phones">
+    <div>
+      <div class="phone">
+        <div class="hdr"><span>⌂</span><h1>Ear Trainer</h1><span>ⓘ ⚙</span></div>
+        <div class="tabs"><b class="on">Course</b><b>Practice</b></div>
+        <div class="bar"><span class="flame">🔥</span>5 <span class="ring"></span>1 / 2 <span class="review">Review 4</span></div>
+        <div class="path">
+          <div class="band">Section 2 · Intervals going up<small>Unit 3: the 4th</small></div>
+          <div class="row" style="margin-left:40px"><div class="node done">✓</div><span class="stars">★★★</span></div>
+          <div class="row" style="margin-left:120px"><div class="node done">✓</div><span class="stars">★★☆</span></div>
+          <div class="row" style="margin-left:60px"><div class="node next">3</div><span class="start">Start: Mix</span></div>
+          <div class="band" style="opacity:.75">Unit 4: the major 2nd</div>
+          <div class="row" style="margin-left:150px"><div class="node lock">1</div></div>
+          <div class="row" style="margin-left:80px"><div class="node lock">2</div></div>
+        </div>
+      </div>
+      <p class="cap">Course path</p>
+    </div>
+    <div>
+      <div class="phone">
+        <div class="top"><span>✕</span><div class="prog"><i style="width:0"></i></div></div>
+        <div class="body">
+          <h2>New: the perfect 4th</h2>
+          <p class="t">5 half steps. It sounds open and strong, like the start of a wedding march.</p>
+          <div class="snd"><div class="btn2">▶ Up<br><small>Do → Fa</small></div><div class="btn2">▶ Down<br><small>Fa → Do</small></div></div>
+          <p class="t" style="font-size:14px;color:var(--color-text-inactive)">Compare it with the 5th you know:</p>
+          <div class="snd"><div class="btn2">▶ 4th</div><div class="btn2">▶ 5th</div></div>
+          <div class="big">Got it</div>
+        </div>
+      </div>
+      <p class="cap">Learn card (start of a unit)</p>
+    </div>
+    <div>
+      <div class="phone">
+        <div class="top"><span>✕</span><div class="prog"><i></i></div><span>3 / 8</span></div>
+        <div class="body">
+          <h2>Which one is the 4th?</h2>
+          <div class="hear">▶ Hear both again</div>
+          <div class="snd"><div class="btn2 good">First</div><div class="btn2">Second</div></div>
+          <p class="line">Right! The first was the 4th (5 half steps).</p>
+          <p class="combo">3 in a row!</p>
+          <div class="big">Next</div>
+        </div>
+      </div>
+      <p class="cap">Pick the one</p>
+    </div>
+    <div>
+      <div class="phone">
+        <div class="body">
+          <div class="end-stars">★★★</div>
+          <h2>Unit done!</h2>
+          <p class="t">7 of 8 at first try</p>
+          <div class="stats"><div class="stat">🔥 6<small>Day 6!</small></div><div class="stat">2 / 2<small>Goal reached!</small></div></div>
+          <div class="big">Continue</div>
+        </div>
+      </div>
+      <p class="cap">End of a lesson (sparkles not shown)</p>
+    </div>
+  </div>
+  <script>
+    const list = ['glass', 'rouge', 'pink', 'retro', 'bw', 'snap', 'y2k'];
+    const box = document.getElementById('themes');
+    for (const id of list) { const b = document.createElement('button'); b.textContent = id; b.onclick = () => (document.body.dataset.theme = id); box.append(b); }
+  </script>
+</body>
+</html>
