@@ -16,7 +16,7 @@
  * Bump CACHE_NAME whenever a cached file changes. Add each new tool's files
  * to APP_SHELL. Bump CDN_CACHE only when a pinned CDN version changes.
  */
-const CACHE_NAME = 'open-music-tools-v62';
+const CACHE_NAME = 'open-music-tools-v63';
 const CDN_CACHE = 'open-music-tools-cdn-v1';
 const APP_SHELL = [
   './',
@@ -92,6 +92,8 @@ const APP_SHELL = [
   'ear-trainer/ear-trainer.css',
   'ear-trainer/ear-trainer.js',
   'ear-trainer/questions.js',
+  'ear-trainer/course.js',
+  'ear-trainer/course-strings.js',
   'ear-trainer/strings.js',
   'ear-trainer/favicon.svg',
   'intervle/',

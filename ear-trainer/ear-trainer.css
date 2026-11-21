@@ -1,8 +1,9 @@
 /* ear-trainer/ear-trainer.css: the Ear Trainer's layout. Page parts (header,
  * panels, buttons, windows, footer) come from shared/ui/page.css.
- * Three screens in <main>: #home (tabs, lesson path, cards), #quiz (a
- * question) and #done (end of a lesson or a game); body[data-screen] says
- * which one shows. Right and wrong use --color-good / --color-bad, stars
+ * Screens in <main>: #home (tabs, lesson path, cards), #quiz (a
+ * question), #done (end of a lesson or a game), and for the course (Beta)
+ * #course (the path) and #learn (a Learn card); body[data-screen] says
+ * which one shows, body[data-course] whether the course is on. Right and wrong use --color-good / --color-bad, stars
  * --color-star (shared/ui/themes.css).
  */
 
@@ -196,10 +197,92 @@ body[data-theme="bw"] .answer.bad .answer-name { text-decoration: line-through; 
 .reset-actions { display: flex; gap: 8px; }
 .reset-actions .btn { flex: 1; min-height: 44px; padding: 8px; font-size: 14px; }
 
+/* --- The course (Beta): Course | Practice tabs, the streak and goal bar, the winding path --- */
+.mode-tabs[hidden] { display: none; }
+.course-bar {
+  position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 14px; padding: 8px 4px;
+  background: var(--bg-page); font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 17px; color: var(--color-text);
+}
+.streak, .goal { display: inline-flex; align-items: center; gap: 5px; }
+.streak .flame { width: 24px; height: 24px; }
+.streak.cold .flame { color: var(--color-text-inactive); }
+.goal-ring {
+  flex: none; width: 24px; height: 24px; border-radius: 50%;
+  background: conic-gradient(var(--color-good) var(--p, 0%), color-mix(in srgb, var(--color-text) 18%, transparent) 0);
+  -webkit-mask: radial-gradient(circle, transparent 6.5px, #000 7px); mask: radial-gradient(circle, transparent 6.5px, #000 7px);
+}
+.goal { --p: 0%; }
+.goal .goal-ring { background: conic-gradient(var(--color-good) var(--p), color-mix(in srgb, var(--color-text) 18%, transparent) 0); }
+.review-btn {
+  margin-left: auto; min-height: 40px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 20px;
+  border: var(--border-width) solid var(--color-right); background: transparent; color: var(--color-right); font: 700 14px var(--font-main); cursor: pointer;
+}
+.review-btn[hidden] { display: none; }
+.review-btn svg { width: 17px; height: 17px; }
+.course-path { display: flex; flex-direction: column; align-items: center; padding-bottom: 16px; }
+.sec-band {
+  align-self: stretch; margin: 14px 0 4px; padding: 10px 14px; border-radius: var(--radius-control);
+  background: var(--color-left); color: var(--color-text-pinched); display: flex; flex-direction: column; gap: 2px;
+}
+.sec-num { font-size: 12px; font-weight: 600; opacity: 0.85; }
+.sec-name { font-family: var(--font-display); font-size: 19px; line-height: 1.15; font-weight: var(--title-weight); text-transform: var(--title-transform); letter-spacing: var(--title-spacing); }
+.unit-name { align-self: stretch; margin: 12px 0 0; text-align: center; font-size: 14px; font-weight: 700; color: var(--color-text-inactive); }
+.node-row { position: relative; width: 64px; transform: translateX(calc(var(--x, 0) * 62px)); display: flex; justify-content: center; }
+.node { position: relative; display: flex; flex-direction: column; align-items: center; padding: 6px 2px 10px; border: 0; background: none; cursor: pointer; touch-action: manipulation; color: var(--color-text); font-family: var(--font-main); }
+.node-circle {
+  box-sizing: border-box; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center;
+  font: 700 20px/1 var(--font-num); border: 2px solid var(--border-panel); background: var(--color-panel); color: var(--color-btn-text);
+  transition: transform 0.15s;
+}
+.node-circle svg { width: 24px; height: 24px; }
+.node:active .node-circle { transform: scale(0.94); }
+.node.done .node-circle { background: var(--color-left); border-color: var(--color-left); color: var(--color-text-pinched); }
+.node.next .node-circle { border-color: var(--color-right); color: var(--color-right); border-width: 3px; animation: glow 1.8s ease-in-out infinite; }
+.node.locked { cursor: default; }
+.node.locked .node-circle { border-color: color-mix(in srgb, var(--border-panel) 45%, transparent); background: transparent; color: var(--color-text-inactive); }
+.node.check .node-circle { width: 66px; height: 66px; border-radius: 22px; }
+.node.check:not(.done) .node-circle { color: var(--color-star); border-color: color-mix(in srgb, var(--color-star) 60%, transparent); background: var(--color-panel); }
+.node:focus-visible { outline: none; }
+.node:focus-visible .node-circle { outline: 2px solid var(--color-right); outline-offset: 3px; }
+.node-stars { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); display: flex; filter: drop-shadow(0 0 1.5px var(--bg-page)) drop-shadow(0 0 1px var(--bg-page)); }
+.node-stars .star { width: 14px; height: 14px; }
+.node-start {
+  position: absolute; left: calc(100% + 4px); top: 50%; transform: translateY(-60%); white-space: nowrap; pointer-events: none;
+  padding: 7px 12px; border-radius: var(--radius-control); background: var(--color-primary); color: var(--color-primary-text); font: 700 14px var(--font-main);
+}
+.node-row[style*="--x:1"] .node-start { left: auto; right: calc(100% + 4px); }
+
+/* The Learn card */
+.learn-kicker { flex: 1; font-size: 13px; font-weight: 700; color: var(--color-text-inactive); }
+.learn-panel { display: flex; flex-direction: column; gap: 14px; padding-top: 20px; padding-bottom: 20px; }
+.learn-title { margin: 0; text-align: center; font-family: var(--font-display); font-size: 26px; line-height: 1.15; font-weight: var(--title-weight); color: var(--color-title); text-transform: var(--title-transform); letter-spacing: var(--title-spacing); text-wrap: balance; }
+.learn-text { margin: 0; text-align: center; font-size: 17px; line-height: 1.45; text-wrap: pretty; }
+.learn-demos { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+.demo-btn { min-height: 56px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; }
+.demo-btn svg { width: 18px; height: 18px; flex: none; color: var(--color-right); }
+.learn-go { min-height: 52px; font-size: 18px; margin-top: 6px; }
+
+/* New kinds of question */
+.answers[data-ex="numbers"] .answer { min-height: 54px; font-family: var(--font-num); font-size: 22px; font-weight: 700; }
+.answers[data-ex="words"] .answer { min-height: 58px; font-size: 17px; }
+.fb-main .slot { display: inline-block; min-width: 1.4em; padding: 0 4px; border-bottom: 2px solid var(--border-panel); font-family: var(--font-num); font-size: 22px; }
+.undo-btn { min-height: 40px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border: 0; background: none; color: var(--color-right); font: 700 15px var(--font-main); cursor: pointer; }
+.undo-btn svg { width: 16px; height: 16px; transform: scaleX(-1) rotate(-30deg); }
+.combo { margin-left: 6px; padding: 2px 8px; border-radius: 12px; background: color-mix(in srgb, var(--color-star) 22%, transparent); color: var(--color-text); font-size: 14px; }
+.done-stats { display: flex; gap: 10px; width: 100%; max-width: 360px; }
+.done-stats[hidden] { display: none; }
+.done-stat {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 6px 8px;
+  border-radius: var(--radius-control); border: var(--border-width) solid var(--border-panel); font-weight: 700; font-size: 15px; line-height: 1.2;
+}
+.done-stat .flame { width: 24px; height: 24px; flex: none; }
+.home-panel[hidden] { display: none; }
+
 @media (hover: hover) and (pointer: fine) {
   :is(.tab, .card-btn, .chip, .seg button):hover:not([aria-selected="true"]):not([aria-pressed="true"]) { background: var(--color-hover); color: var(--color-hover-text); }
   .answer:not(.after):hover { background: var(--color-hover); color: var(--color-hover-text); }
-  .step:not(.locked):hover .step-circle { transform: scale(1.06); }
+  .step:not(.locked):hover .step-circle, .node:not(.locked):hover .node-circle { transform: scale(1.06); }
+  .review-btn:hover { background: var(--color-hover); color: var(--color-hover-text); }
 }
 @media (min-width: 700px) {
   .answers { grid-template-columns: repeat(var(--cols-wide, 3), minmax(0, 1fr)); }
@@ -214,7 +297,9 @@ body[data-theme="bw"] :is(.flame, .heart:not(.lost)) { color: var(--color-text);
 /* Phones: everything on one screen; line heights pinned (theme fonts differ a lot in height). */
 @media (max-width: 600px) {
   /* A question has the whole screen, as in the spec's mock-up: × and the progress on top. */
-  body[data-screen="quiz"] .tool-header { display: none; }
+  body[data-screen="quiz"] .tool-header, body[data-screen="learn"] .tool-header { display: none; }
+  .learn-title { font-size: 23px; }
+  .learn-text { font-size: 16px; }
   .screen { gap: 10px; }
   .home-panel, .quiz-panel { gap: 8px; }
   .tab { font-size: 14px; line-height: 1.1; }
@@ -235,7 +320,7 @@ body[data-theme="bw"] :is(.flame, .heart:not(.lost)) { color: var(--color-text);
 
 /* Reduce motion: the next lesson keeps a still ring, stars and answers appear without moving. */
 @media (prefers-reduced-motion: reduce) {
-  .step.next .step-circle { animation: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-right) 30%, transparent); }
+  .step.next .step-circle, .node.next .node-circle { animation: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-right) 30%, transparent); }
   .done-stars .star, .pop, .shake, .burst span { animation: none; }
   .answer:active:not(.after), .card-btn:active, .step[aria-pressed="true"] .step-circle, .step:active .step-circle, :is(.tab, .seg button, .chip):active { transform: none; }
 }

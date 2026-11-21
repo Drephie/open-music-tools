@@ -47,6 +47,8 @@
  *   noteReviewRight(list, q) -> the list after a right review answer: a mix-up
  *                            leaves after 2
  *   REVIEW_MIN               3
+ *   progChord(T, n)          the chord on step n (1, 4, 5, 6) of the key on T
+ *   homeChord, cadence, scaleSteps, degreePlaces (from questions.js), for the screen
  */
 import {
   ANSWERS, makeQuestion, eventsLength, cadence, homeChord, scaleSteps, degreePlaces,
@@ -230,7 +232,7 @@ function buildSections() {
       unit('prog6', [{ label: label('demoI_vi'), events: progEvents(60, [1, 6]) }, { label: label('demoI_IV'), events: progEvents(60, [1, 4]) }],
         [prog([[1, 6], [1, 4]], [4, 6])], [prog([[1, 4], [1, 5], [1, 6]], [4, 5, 6])], [prog([[1, 5, 6], [1, 4, 6], [1, 6, 4], [1, 6, 5]], [4, 5, 6])]),
       unit('prog145', [{ label: label('demoProg'), events: progEvents(60, [1, 4, 5, 1]) }, { label: label('demoProg'), events: progEvents(60, [1, 5, 1, 4]) }],
-        [prog([[1, 4, 5, 1], [1, 4, 1, 5]], [1, 5])], [prog(PROG_ENDS_145, [1, 4, 5])], [prog(PROG_ENDS_145, [1, 4, 5, 6])]),
+        [prog([[1, 4, 5, 1], [1, 4, 1, 5]], [1, 5])], [prog(PROG_ENDS_145, [1, 4, 5])], [prog([...PROG_ENDS_145, [1, 5, 6], [1, 4, 6]], [1, 4, 5, 6])]),
       unit('progpop', [{ label: label('demoProg'), events: progEvents(60, [1, 5, 6, 4]) }, { label: label('demoProg'), events: progEvents(60, [1, 6, 4, 5]) }],
         [prog([[1, 5, 6, 4], [1, 6, 4, 5]], [4, 5])], [prog(PROG_POP, [1, 4, 5, 6])], [prog([...PROG_POP, ...PROG_ENDS_145], [1, 4, 5, 6])]),
     ], check: [prog([...PROG_POP, ...PROG_ENDS_145], [1, 4, 5, 6])] },
@@ -321,14 +323,20 @@ export function makeCourseQuestion(pool, { prev = null, random = Math.random, an
   if (kind === 'melody') {
     const mode = pool.mode || 'major';
     const T = pickInt(55, 66, random);
-    let steps = answer;
-    if (!steps) {
-      steps = [];
+    const tune = () => {
+      const out = [];
       for (let i = 0; i < pool.length; i++) {
         let d = pick(pool.answers, random);
-        if (i > 0 && d === steps[i - 1]) d = pick(pool.answers.filter((x) => x !== d), random);
-        steps.push(d);
+        if (i > 0 && d === out[i - 1]) d = pick(pool.answers.filter((x) => x !== d), random);
+        out.push(d);
       }
+      return out;
+    };
+    let steps = answer;
+    if (!steps) {
+      steps = tune();
+      // Not the same tune twice in a row.
+      if (prev && prev.kind === 'melody' && steps.join() === prev.answer.join()) steps = tune();
     }
     const notes = steps.map((d) => T + scaleSteps(mode)[d - 1]);
     const events = [...cadence(T, mode), ...notes.map((n, i) => ({ at: 3.0 + i * 0.7, notes: [n], dur: i === notes.length - 1 ? 1.3 : 0.65 }))];
@@ -352,7 +360,7 @@ export function isRight(q, entered) {
 
 // The pitch class a melody step or progression chord stands for, for tests.
 export const melodyStepNote = (q, i) => q.root + scaleSteps(q.mode)[q.answer[i] - 1];
-export { homeChord, degreePlaces, eventsLength as eventsLengthOf };
+export { homeChord, degreePlaces, cadence, scaleSteps, eventsLength as eventsLengthOf };
 export const ANSWERS_ALL_IV = ANSWERS.intervals;
 
 // --- ONE LESSON BEING PLAYED ---

@@ -42,6 +42,8 @@
     <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
     <symbol id="i-sliders" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2.6" fill="currentColor"/><circle cx="15" cy="17" r="2.6" fill="currentColor"/></g></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7 3.5h10v5.5a5 5 0 0 1-10 0zM7 5.5H4v1.8a3.6 3.6 0 0 0 3.4 3.6M17 5.5h3v1.8a3.6 3.6 0 0 1-3.4 3.6M12 14v3.5M8.5 20.5h7M9.5 17.5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-review" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4v4h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-cross" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
   </svg>
   <div id="theme-frame" aria-hidden="true"></div>
@@ -63,6 +65,19 @@
     </header>
 
     <main class="ear">
+      <!-- The course (Beta, on in Settings): Course and Practice tabs above the course path or the practice screen (#home) -->
+      <div id="mode-tabs" class="tabs mode-tabs" role="tablist" data-i18n-aria="modeAria" aria-label="Course or practice" hidden>
+        <button role="tab" class="tab" data-mode="course" id="mode-course" data-i18n="modeCourse">Course</button>
+        <button role="tab" class="tab" data-mode="practice" id="mode-practice" data-i18n="modePractice">Practice</button>
+      </div>
+      <section id="course" class="screen course" role="tabpanel" aria-labelledby="mode-course" hidden>
+        <div class="course-bar">
+          <span id="streak" class="streak" role="img"><svg class="flame" aria-hidden="true"><use href="#i-flame"/></svg><span id="streak-num" aria-hidden="true">0</span></span>
+          <span id="goal" class="goal" role="img"><span class="goal-ring" aria-hidden="true"></span><span id="goal-text" aria-hidden="true"></span></span>
+          <button id="review-btn" class="review-btn" hidden><svg aria-hidden="true"><use href="#i-review"/></svg><span id="review-text"></span></button>
+        </div>
+        <div id="course-path" class="course-path"></div>
+      </section>
       <!-- Lessons screen: the three tabs, the lesson path, the game and free practice -->
       <section id="home" class="screen home">
         <div class="tabs" role="tablist" data-i18n-aria="tabsAria" aria-label="Exercises">
@@ -125,6 +140,21 @@
         </div>
       </section>
 
+      <!-- A Learn card (course): before a unit's first lesson and a checkpoint -->
+      <section id="learn" class="screen learn" hidden>
+        <div class="quiz-top">
+          <button id="learn-back" class="icon-btn back-btn" data-i18n-aria="backAria" aria-label="Back to the lessons">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cross"/></svg>
+          </button>
+          <span id="learn-kicker" class="learn-kicker"></span>
+        </div>
+        <div class="panel learn-panel">
+          <h2 id="learn-title" class="learn-title"></h2>
+          <p id="learn-text" class="learn-text"></p>
+          <div id="learn-demos" class="learn-demos"></div>
+          <button id="learn-go" class="btn btn-primary learn-go" data-i18n="gotIt">Got it</button>
+        </div>
+      </section>
       <!-- End of a lesson or a game -->
       <section id="done" class="screen done" hidden>
         <div class="panel done-panel">
@@ -132,6 +162,10 @@
           <div id="done-score" class="done-score" hidden><svg class="flame" aria-hidden="true"><use href="#i-flame"/></svg><span id="done-score-num"></span></div>
           <h2 id="done-title" class="done-title"></h2>
           <p id="done-text" class="done-text"></p>
+          <div id="done-stats" class="done-stats" hidden>
+            <span id="done-streak" class="done-stat"></span>
+            <span id="done-goal" class="done-stat"></span>
+          </div>
           <div class="done-actions">
             <button id="done-main" class="btn btn-primary"></button>
             <button id="done-again" class="btn"></button>
@@ -169,6 +203,26 @@
       <div id="names-seg" class="seg" role="group" aria-labelledby="names-label">
         <button type="button" data-names="solfege" data-i18n="namesSolfege">Do Re Mi</button>
         <button type="button" data-names="letters" data-i18n="namesLetters">C D E</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <span id="beta-label" class="group-label" data-i18n="betaLabel">Try the new course (Beta)</span>
+      <div id="beta-seg" class="seg" role="group" aria-labelledby="beta-label">
+        <button type="button" data-on="1" data-i18n="on">On</button>
+        <button type="button" data-on="0" data-i18n="off">Off</button>
+      </div>
+    </div>
+    <div id="course-settings" class="course-settings" hidden>
+      <div class="control-group">
+        <span id="goal-label" class="group-label" data-i18n="goalLabel">Daily goal (lessons)</span>
+        <div id="goal-seg" class="seg" role="group" aria-labelledby="goal-label"></div>
+      </div>
+      <div class="control-group">
+        <span id="chime-label" class="group-label" data-i18n="chimeLabel">Sounds for right and wrong</span>
+        <div id="chime-seg" class="seg" role="group" aria-labelledby="chime-label">
+          <button type="button" data-on="1" data-i18n="on">On</button>
+          <button type="button" data-on="0" data-i18n="off">Off</button>
+        </div>
       </div>
     </div>
     <div class="control-group reset-group">

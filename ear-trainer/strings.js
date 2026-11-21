@@ -8,6 +8,8 @@
  * scale degree. ls*: lesson names that aren't simply their answers.
  */
 
+import { COURSE_STRINGS } from './course-strings.js';
+
 export const EAR_STRINGS = {
   en: {
     title: "Ear Trainer",
@@ -163,3 +165,5 @@ export const EAR_STRINGS = {
     loading: "Caricamento del suono del pianoforte…", loadFailed: "Il suono del pianoforte non si è caricato. Controlla la connessione, poi premi Riascolta.",
   },
 };
+// The course (Beta) has its strings in ./course-strings.js.
+for (const lang of Object.keys(COURSE_STRINGS)) Object.assign(EAR_STRINGS[lang], COURSE_STRINGS[lang]);

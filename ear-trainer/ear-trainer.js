@@ -17,6 +17,7 @@ import {
 } from './questions.js';
 import { prettyChord as pretty } from '../shared/ui/accidentals.js';
 import { EAR_STRINGS } from './strings.js';
+import * as C from './course.js';
 
 const $ = (id) => document.getElementById(id);
 const SETTINGS_KEY = 'ear-trainer.settings.v1';
@@ -51,12 +52,37 @@ function readSettings() {
       degrees: { answers: picked('degrees', [1, 3, 5]), range: choice('degrees', 'range', DEGREE_RANGES, 'octave') },
     },
     solfege: typeof s.solfege === 'boolean' ? s.solfege : null,   // null: follows the language
+    course: readCourse(obj(s.course), obj, int),
+  };
+}
+// The course (Beta). Stars are kept by lesson id, so the course can change while in Beta.
+function readCourse(c, obj, int) {
+  const day = (v) => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null);
+  const st = obj(c.stars), streak = obj(c.streak), goal = obj(c.goal);
+  const validMix = (m) => m && EXERCISES.includes(m.ex) && ANSWERS[m.ex].includes(m.a) && ANSWERS[m.ex].includes(m.b) && m.a !== m.b;
+  return {
+    on: c.on === true,
+    stars: c.stars && typeof c.stars === 'object' ? C.LESSONS.map((l) => int(st[l.id], 0, 3, 0)) : null,   // null: not moved over yet
+    streak: { last: day(streak.last), count: int(streak.count, 0, 99999, 0), rest: day(streak.rest) },
+    goal: { day: day(goal.day), done: int(goal.done, 0, 999, 0) },
+    goalSize: C.GOALS.includes(c.goalSize) ? c.goalSize : 2,
+    chime: c.chime !== false,
+    mistakes: (Array.isArray(c.mistakes) ? c.mistakes : []).filter(validMix).slice(0, 30)
+      .map((m) => ({ ex: m.ex, a: m.a, b: m.b, play: typeof m.play === 'string' ? m.play : null, range: typeof m.range === 'string' ? m.range : null,
+        mode: m.mode === 'minor' ? 'minor' : m.ex === 'degrees' ? 'major' : null, ok: int(m.ok, 0, 1, 0) })),
+    view: c.view === 'practice' ? 'practice' : 'course',
   };
 }
 const settings = readSettings();
 // Theme and language are one choice for the whole hub; what this tool saved before is passed on.
 Object.assign(settings, loadLook(loadSettings(SETTINGS_KEY)));
-const save = () => saveSettings(SETTINGS_KEY, settings);
+// The first time the course opens, the stars of the first version's lessons move over.
+if (!settings.course.stars) settings.course.stars = C.migrateStars(settings.stars);
+const save = () => saveSettings(SETTINGS_KEY, {
+  ...settings,
+  course: { ...settings.course, stars: Object.fromEntries(C.LESSONS.map((l, i) => [l.id, settings.course.stars[i]]).filter(([, v]) => v)) },
+});
+const courseOn = () => settings.course.on;
 const solfege = () => (settings.solfege === null ? settings.lang !== 'en' : settings.solfege);
 
 const i18n = createI18n({
@@ -93,7 +119,7 @@ function lessonTitle(ex, i) {
   return cap(joinOr(l.answers.map((a) => (ex === 'intervals' ? t('iv' + a) : ex === 'chords' ? t('c_' + a).toLowerCase() : String(a)))));
 }
 
-const homeEl = $('home'), quizEl = $('quiz'), doneEl = $('done');
+const homeEl = $('home'), quizEl = $('quiz'), doneEl = $('done'), courseEl = $('course'), learnEl = $('learn'), modeTabs = $('mode-tabs');
 const tabs = [...document.querySelectorAll('.tab')];
 const homePanel = $('home-panel'), pathEl = $('path');
 const lessonNum = $('lesson-num'), lessonTitleEl = $('lesson-title'), startBtn = $('start-btn');
@@ -160,7 +186,8 @@ function showSounding(tag) {
   hearBtn.classList.toggle('playing', tag !== null);
   const s = session;
   [...answersEl.children].forEach((b) => b.classList.toggle('sounding',
-    !!s && ((tag === 'yours' && b.answer === s.yours) || (tag === 'right' && b.answer === s.q.answer))));
+    !!s && ((tag === 'yours' && b.answer === s.yours) || (tag === 'right' && b.answer === s.q.answer)
+      || ((tag === 'first' || tag === 'second') && b.answer === tag))));
 }
 const isPlaying = () => Tone.now() < soundEnd;
 
@@ -219,24 +246,36 @@ $('home').querySelector('.tabs').addEventListener('keydown', (e) => {
 // --- SCREENS ---
 function showScreen(name) {
   const active = document.activeElement;
-  const hadFocus = active && active !== document.body && (homeEl.contains(active) || quizEl.contains(active) || doneEl.contains(active));
+  const screens = [homeEl, quizEl, doneEl, courseEl, learnEl, modeTabs];
+  const hadFocus = active && active !== document.body && screens.some((el) => el.contains(active));
   homeEl.hidden = name !== 'home';
   quizEl.hidden = name !== 'quiz';
   doneEl.hidden = name !== 'done';
+  courseEl.hidden = name !== 'course';
+  learnEl.hidden = name !== 'learn';
+  modeTabs.hidden = !courseOn() || (name !== 'home' && name !== 'course');
+  homePanel.hidden = courseOn();   // with the course on, the lesson lists give way to it
   document.body.dataset.screen = name;
+  document.body.dataset.course = courseOn() ? 'on' : 'off';
   // Keyboard and screen-reader users land on the new screen, not on a hidden button.
   if (hadFocus && !active.checkVisibility?.()) {
     if (name === 'quiz') hearBtn.focus();
-    else if (name === 'home') document.querySelector('.tab[aria-selected="true"]')?.focus();
+    else if (name === 'learn') $('learn-go').focus();
+    else if (name === 'home' || name === 'course') document.querySelector('.tab[aria-selected="true"]:not([hidden])')?.focus();
   }
+}
+// The lessons screen: the course or practice (course on), or the first version's tabs.
+function showHome() {
+  if (courseOn() && settings.course.view === 'course') { showScreen('course'); renderCourse(); }
+  else { showScreen('home'); renderHome(); }
+  renderModeTabs();
 }
 function goHome() {
   stopSound();
   const s = session;
   if (s && s.mode === 'game' && s.score > settings.best[s.ex]) { settings.best[s.ex] = s.score; save(); }
   session = null;
-  showScreen('home');
-  renderHome();
+  showHome();
 }
 
 // --- QUESTIONS ---
@@ -258,13 +297,28 @@ const startPractice = () => begin('practice');
 
 function currentOptions() {
   const s = session;
+  if (s.mode === 'course') return { answers: s.q.choices };
   if (s.mode === 'lesson') return LESSONS[s.ex][s.lesson];
   if (s.mode === 'game') return gameStage(s.ex, s.score);
   return settings.practice[s.ex];
 }
 
 function nextQuestion() {
-  const s = session, opts = currentOptions();
+  const s = session;
+  if (s.mode === 'course') {
+    const q = s.run.next(s.q);
+    if (!q) return finishCourse();
+    s.q = q;
+    s.ex = q.ex || null;
+    s.answered = false;
+    s.yours = null;
+    s.entered = [];
+    s.fresh = [];
+    renderQuiz();
+    playEvents(q.events);
+    return;
+  }
+  const opts = currentOptions();
   s.fresh = s.mode === 'game' ? opts.answers.filter((a) => !s.known.includes(a)) : [];
   if (s.mode === 'game') s.known = opts.answers;
   s.q = makeQuestion(s.ex, opts, { prev: s.q });
@@ -276,19 +330,21 @@ function nextQuestion() {
 
 function renderQuiz() {
   const s = session, opts = currentOptions();
-  promptEl.textContent = t(ASK_KEYS[s.ex]);
+  promptEl.textContent = s.mode === 'course' ? coursePrompt(s.q) : t(ASK_KEYS[s.ex]);
   const answers = s.answered ? [...answersEl.children].map((b) => b.answer) : opts.answers;
   const n = answers.length;
-  answersEl.dataset.ex = s.ex;
-  answersEl.style.setProperty('--cols', s.ex === 'degrees' ? n : n <= 3 ? n : n === 4 ? 2 : 3);
-  answersEl.style.setProperty('--cols-wide', s.ex === 'degrees' ? n : n <= 4 ? n : n <= 6 ? 3 : 4);
+  const look = s.mode === 'course' ? courseLook(s.q) : s.ex;
+  answersEl.dataset.ex = look;
+  const row = look === 'degrees' || look === 'numbers';
+  answersEl.style.setProperty('--cols', row ? n : n <= 3 ? n : n === 4 ? 2 : 3);
+  answersEl.style.setProperty('--cols-wide', row ? n : n <= 4 ? n : n <= 6 ? 3 : 4);
   answersEl.innerHTML = '';
   answers.forEach((a, i) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'answer' + (s.fresh.includes(a) ? ' fresh' : '');
     b.answer = a;
-    b.innerHTML = `<span class="answer-key computer-only" aria-hidden="true">${ANSWER_KEYS[i] || ''}</span><span class="answer-mark" aria-hidden="true"></span><span class="answer-name">${answerName(s.ex, a)}</span>`;
+    b.innerHTML = `<span class="answer-key computer-only" aria-hidden="true">${ANSWER_KEYS[i] || ''}</span><span class="answer-mark" aria-hidden="true"></span><span class="answer-name">${s.mode === 'course' ? choiceName(s.q, a) : answerName(s.ex, a)}</span>`;
     b.addEventListener('click', (e) => answer(a, e.detail === 0));
     answersEl.appendChild(b);
   });
@@ -298,10 +354,15 @@ function renderQuiz() {
 
 function renderTop() {
   const s = session;
-  progressEl.hidden = s.mode !== 'lesson';
+  progressEl.hidden = s.mode !== 'lesson' && s.mode !== 'course';
   livesEl.hidden = scoreEl.hidden = s.mode !== 'game';
   tallyEl.hidden = s.mode !== 'practice';
-  if (s.mode === 'lesson') {
+  if (s.mode === 'course') {
+    const r = s.run, n = r.total, at = Math.min(r.asked, n);
+    barFill.style.width = `${(100 * at) / n}%`;
+    barText.textContent = r.asked >= n && !C.isRight(s.q, s.yours) ? '↺' : `${at} / ${n}`;
+    progressEl.setAttribute('aria-label', tf('courseProgressAria', { r: at, g: n }));
+  } else if (s.mode === 'lesson') {
     barFill.style.width = `${(100 * Math.min(s.right, LESSON_GOAL)) / LESSON_GOAL}%`;
     barText.textContent = `${s.right} / ${LESSON_GOAL}`;
     progressEl.setAttribute('aria-label', tf('progressAria', { r: s.right, g: LESSON_GOAL }));
@@ -326,6 +387,7 @@ function notesText(q) {
 
 function renderFeedback() {
   const s = session, q = s.q;
+  if (s.mode === 'course') return renderCourseFeedback();
   [...answersEl.children].forEach((b) => {
     b.classList.toggle('good', s.answered && b.answer === q.answer);
     b.classList.toggle('bad', s.answered && b.answer === s.yours && s.yours !== q.answer);
@@ -351,12 +413,13 @@ function renderFeedback() {
 function answer(a, byKey) {
   const s = session;
   if (!s || s.answered) return;
+  if (s.mode === 'course') return courseAnswer(a, byKey);
   s.answered = true;
   s.yours = a;
   const ok = a === s.q.answer;
   if (s.mode === 'lesson') { if (ok) s.right++; else s.mistakes++; }
   else if (s.mode === 'game') { if (ok) s.score++; else s.lives--; }
-  else { s.asked++; if (ok) s.right++; }
+  else { s.asked++; if (ok) s.right++; if (s.asked % C.LESSON_LENGTH === 0) countForGoal(); }
   renderTop();
   renderFeedback();
   const btn = [...answersEl.children].find((b) => b.answer === a);
@@ -376,6 +439,7 @@ function pop(el, cls) {
 function next(byKey = false) {
   const s = session;
   if (!s || !s.answered || s.result) return;
+  if (s.mode === 'course') { nextQuestion(); if (byKey && session && !session.result) hearBtn.focus(); return; }
   if (s.mode === 'lesson' && s.right >= LESSON_GOAL) return finishLesson();
   if (s.mode === 'game' && s.lives <= 0) return finishGame();
   nextQuestion();
@@ -383,7 +447,12 @@ function next(byKey = false) {
 }
 
 hearBtn.addEventListener('click', () => { if (session) playEvents(session.q.events); });
-compareBtn.addEventListener('click', () => { if (session && session.answered) playEvents(compareEvents(session.q, session.yours)); });
+compareBtn.addEventListener('click', () => {
+  const s = session;
+  if (!s || !s.answered) return;
+  if (s.mode === 'course') playEvents(courseCompare(s.q, s.yours));
+  else playEvents(compareEvents(s.q, s.yours));
+});
 nextBtn.addEventListener('click', (e) => next(e.detail === 0));
 $('back-btn').addEventListener('click', goHome);
 
@@ -402,6 +471,7 @@ function finishGame() {
   const s = session, ex = s.ex;
   const newBest = s.score > settings.best[ex];
   if (newBest) { settings.best[ex] = s.score; save(); }
+  countForGoal();
   s.result = { kind: 'game', score: s.score, newBest };
   showDone();
 }
@@ -409,11 +479,14 @@ function showDone() {
   stopSound();
   showScreen('done');
   renderDone();
-  if (session.result.kind === 'lesson' || session.result.newBest) burst();
+  const r = session.result;
+  if (r.kind === 'lesson' || r.newBest || (r.kind === 'course' && r.saved)) burst(r.kind === 'course' && r.big ? 44 : 22);
   $('done-main').focus({ preventScroll: true });
 }
 function renderDone() {
   const s = session, r = s.result;
+  $('done-stats').hidden = r.kind !== 'course';
+  if (r.kind === 'course') return renderCourseDone();
   const starsEl = $('done-stars'), scoreBox = $('done-score');
   const main = $('done-main'), again = $('done-again');
   starsEl.hidden = r.kind !== 'lesson';
@@ -440,20 +513,21 @@ function renderDone() {
 }
 $('done-main').addEventListener('click', () => {
   const s = session;
+  if (s.result.kind === 'course') return s.review ? startReview() : openLesson(s.result.next);
   if (s.result.kind === 'lesson') startLesson(s.lesson + 1);
   else startGame();
 });
-$('done-again').addEventListener('click', () => startLesson(session.lesson));
+$('done-again').addEventListener('click', () => (session.mode === 'course' ? startCourseLesson(session.lesson) : startLesson(session.lesson)));
 $('done-back').addEventListener('click', goHome);
 
 // A short burst of sparkles in the theme's colors.
-function burst() {
+function burst(count = 22) {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const box = $('burst');
   box.innerHTML = '';
   const colors = ['var(--color-star)', 'var(--color-left)', 'var(--color-right)'];
-  for (let i = 0; i < 22; i++) {
-    const a = (i / 22) * Math.PI * 2 + Math.random() * 0.3, d = 70 + Math.random() * 90;
+  for (let i = 0; i < count; i++) {
+    const a = (i / count) * Math.PI * 2 + Math.random() * 0.3, d = 70 + Math.random() * (count > 22 ? 150 : 90);
     const sp = document.createElement('span');
     sp.style.setProperty('--dx', `${Math.cos(a) * d}px`);
     sp.style.setProperty('--dy', `${Math.sin(a) * d}px`);
@@ -518,6 +592,344 @@ practiceStart.addEventListener('click', () => {
   startPractice();
 });
 
+// --- THE COURSE (Beta; spec: specs/ear-trainer-course.md) ---
+const ROMAN = { 1: 'I', 4: 'IV', 5: 'V', 6: 'vi' };
+const today = () => C.dayKey(new Date());
+const sectionOf = (i) => C.SECTIONS[C.LESSONS[i].section];
+const unitOf = (i) => (C.LESSONS[i].unit >= 0 ? sectionOf(i).units[C.LESSONS[i].unit] : null);
+
+function renderModeTabs() {
+  [...modeTabs.children].forEach((b) => {
+    const on = b.dataset.mode === settings.course.view;
+    b.setAttribute('aria-selected', String(on));
+    b.tabIndex = on ? 0 : -1;
+  });
+}
+function selectView(view, focus = false) {
+  settings.course.view = view;
+  save();
+  showHome();
+  if (focus) modeTabs.querySelector(`[data-mode="${view}"]`).focus();
+}
+[...modeTabs.children].forEach((b) => b.addEventListener('click', () => selectView(b.dataset.mode)));
+modeTabs.addEventListener('keydown', (e) => {
+  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+  e.preventDefault();
+  selectView(settings.course.view === 'course' ? 'practice' : 'course', true);
+});
+
+// The day: one more lesson's worth for the streak and the goal.
+function countForGoal() {
+  if (!courseOn()) return;
+  const d = today();
+  settings.course.streak = C.recordDay(settings.course.streak, d);
+  settings.course.goal = C.addToGoal(settings.course.goal, d);
+  save();
+}
+
+// The course path: a band per section, three lessons per unit winding left and right, a trophy per checkpoint.
+const pathEl2 = $('course-path');
+let scrollToNext = true;
+function renderCourse() {
+  const c = settings.course, d = today();
+  const streak = C.streakNow(c.streak, d), done = C.goalToday(c.goal, d);
+  $('streak-num').textContent = streak;
+  $('streak').setAttribute('aria-label', tf('streakAria', { n: streak }));
+  $('streak').classList.toggle('cold', !c.streak.last || c.streak.last !== d);
+  $('goal-text').textContent = done >= c.goalSize ? t('goalDone') : `${done} / ${c.goalSize}`;
+  $('goal').style.setProperty('--p', `${Math.min(100, (100 * done) / c.goalSize)}%`);
+  $('goal').setAttribute('aria-label', tf('goalAria', { n: done, g: c.goalSize }));
+  const reviewBtn = $('review-btn');
+  reviewBtn.hidden = c.mistakes.length < C.REVIEW_MIN;
+  $('review-text').textContent = tf('reviewN', { n: c.mistakes.length });
+
+  const stars = c.stars, next = C.nextLessonIn(stars);
+  const html = [];
+  let zig = 0;
+  C.SECTIONS.forEach((sec, si) => {
+    html.push(`<div class="sec-band"><span class="sec-num">${tf('sectionN', { n: si + 1 })}</span><span class="sec-name">${t('s_' + sec.id)}</span></div>`);
+    C.LESSONS.forEach((l, i) => {
+      if (l.section !== si) return;
+      if (l.type === 'meet') html.push(`<p class="unit-name">${t('u_' + sec.units[l.unit].id)}</p>`);
+      const open = C.lessonOpenIn(stars, i), isNext = i === next && !stars[i];
+      const cls = ['node', stars[i] ? 'done' : '', open ? '' : 'locked', isNext ? 'next' : '', l.type === 'check' ? 'check' : ''].join(' ');
+      const offset = l.type === 'check' ? 0 : [0, 1, 0, -1][zig++ % 4];
+      const name = l.type === 'check' ? t('checkpoint') : t('type_' + l.type);
+      const full = l.type === 'check' ? `${name}: ${t('s_' + sec.id)}` : `${t('u_' + sec.units[l.unit].id)}: ${name}`;
+      const label = !open ? tf('nodeLocked', { name: full }) : stars[i] ? tf('nodeStars', { name: full, s: stars[i] }) : full;
+      const inside = l.type === 'check' ? icon('trophy') : stars[i] ? icon('check') : String(['meet', 'practise', 'mix'].indexOf(l.type) + 1);
+      html.push(`<div class="node-row" style="--x:${offset}"><button type="button" class="${cls}" data-i="${i}" aria-label="${label}"${open ? '' : ' aria-disabled="true"'}>`
+        + `<span class="node-circle">${inside}</span><span class="node-stars">${stars[i] ? starsHtml(stars[i]) : ''}</span></button>`
+        + (isNext ? `<span class="node-start" aria-hidden="true">${t('start')}: ${name}</span>` : '') + '</div>');
+    });
+  });
+  pathEl2.innerHTML = html.join('');
+  if (scrollToNext && !courseEl.hidden) {
+    scrollToNext = false;
+    const el = pathEl2.querySelector('.node.next') || pathEl2.querySelector(`[data-i="${next}"]`);
+    // After the browser has put back the old scroll position (on a reload).
+    requestAnimationFrame(() => requestAnimationFrame(() => el?.scrollIntoView({ block: 'center' })));
+  }
+}
+pathEl2.addEventListener('click', (e) => {
+  const b = e.target.closest('.node');
+  if (!b) return;
+  const i = Number(b.dataset.i);
+  if (!C.lessonOpenIn(settings.course.stars, i)) { pop(b, 'shake'); return; }
+  openLesson(i);
+});
+$('review-btn').addEventListener('click', startReview);
+
+// A unit's first lesson and a checkpoint start with their Learn card.
+function openLesson(i) {
+  if (i === null || i === undefined || i >= C.LESSONS.length) return goHome();
+  const l = C.LESSONS[i];
+  if (l.type === 'meet' || l.type === 'check') {
+    stopSound();
+    session = { mode: 'learn', lesson: i };
+    showScreen('learn');
+    renderLearn();
+    return;
+  }
+  startCourseLesson(i);
+}
+function demoName(label) {
+  if (label.key) return t(label.key);
+  const [kind, a] = label.ref;
+  return kind === 'iv' ? cap(t('iv' + a)) : kind === 'c' ? t('c_' + a) : tf('stepN', { n: a });
+}
+function renderLearn() {
+  const i = session.lesson, l = C.LESSONS[i], sec = sectionOf(i), u = unitOf(i);
+  $('learn-kicker').textContent = `${tf('sectionN', { n: l.section + 1 })} · ${t('s_' + sec.id)}`;
+  $('learn-title').textContent = u ? t('u_' + u.id) : t('checkpoint');
+  const skip = l.type === 'check' && !C.LESSONS.every((x) => x.section !== l.section || x === l || settings.course.stars[x.index] > 0);
+  $('learn-text').textContent = u ? t('u_' + u.id + '_t') : t(skip ? 'checkSkipText' : 'checkText');
+  const demos = $('learn-demos');
+  demos.innerHTML = '';
+  (u ? u.learn.demos : []).forEach((d) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn demo-btn';
+    b.innerHTML = `${icon('play')}<span>${demoName(d.label)}</span>`;
+    b.addEventListener('click', () => playEvents(d.events));
+    demos.appendChild(b);
+  });
+  $('learn-go').textContent = t(u ? 'gotIt' : 'start');
+}
+$('learn-go').addEventListener('click', () => startCourseLesson(session.lesson));
+$('learn-back').addEventListener('click', goHome);
+
+function startCourseLesson(i) {
+  stopSound();
+  session = { mode: 'course', lesson: i, run: C.createRun(C.LESSONS[i]), q: null, ex: null, answered: false, yours: null, entered: [], combo: 0, fresh: [] };
+  showScreen('quiz');
+  nextQuestion();
+}
+function startReview() {
+  const pools = C.reviewPools(settings.course.mistakes);
+  if (!pools) return goHome();
+  stopSound();
+  session = { mode: 'course', review: true, lesson: null, run: C.createRun(pools), q: null, ex: null, answered: false, yours: null, entered: [], combo: 0, fresh: [] };
+  showScreen('quiz');
+  nextQuestion();
+}
+
+const PROMPTS = { hl: 'askHL', sd: 'askSD', step: 'askStep', keymode: 'askKey', melody: 'askMelody', prog: 'askProg' };
+function coursePrompt(q) {
+  if (q.kind === 'which') return t(ASK_KEYS[q.ex]);
+  if (q.kind === 'pick') return tf('askPick', { name: answerName(q.ex, q.target).toLowerCase() });
+  return t(PROMPTS[q.kind]);
+}
+// How the answer buttons look: numbers in a row for steps and chord numbers.
+const courseLook = (q) => (q.kind === 'which' ? q.ex : q.kind === 'melody' ? 'degrees' : q.kind === 'prog' ? 'numbers' : 'words');
+function choiceName(q, a) {
+  if (q.kind === 'which') return answerName(q.ex, a);
+  if (q.kind === 'melody') return String(a);
+  if (q.kind === 'prog') return ROMAN[a];
+  return t('ch_' + a);
+}
+function courseDetail(q) {
+  if (q.kind === 'which') return `<strong>${answerName(q.ex, q.answer)}</strong>: ${answerDetail(q.ex, q.answer)}`;
+  if (q.kind === 'pick') return tf(q.answer === 'first' ? 'pickFirst' : 'pickSecond', { name: `<strong>${answerName(q.ex, q.target).toLowerCase()}</strong>`, other: answerName(q.ex, q.other).toLowerCase() });
+  if (q.kind === 'melody') return `<strong>${q.answer.join(' → ')}</strong>`;
+  if (q.kind === 'prog') return `<strong>${q.pattern.map((n) => ROMAN[n]).join(' → ')}</strong>: ${t('progWords')}`;
+  return `<strong>${t('ch_' + q.answer)}</strong>: ${t('x_' + q.answer)}`;
+}
+function courseNotes(q) {
+  if (q.kind === 'which') return notesText(q);
+  if (q.kind === 'hl' || q.kind === 'sd' || q.kind === 'step') {
+    return nameNotes(q.notes, solfege()).notes.map((n) => pretty(n.name) + n.octave).join(' → ');
+  }
+  return '';
+}
+function renderCourseFeedback() {
+  const s = session, q = s.q;
+  const ok = s.answered && C.isRight(q, q.kind === 'melody' ? s.entered : s.yours);
+  [...answersEl.children].forEach((b) => {
+    const isAnswer = q.kind === 'melody' ? false : b.answer === q.answer;
+    const good = s.answered && isAnswer, bad = s.answered && q.kind !== 'melody' && b.answer === s.yours && !isAnswer;
+    b.classList.toggle('good', good);
+    b.classList.toggle('bad', bad);
+    b.classList.toggle('after', s.answered);
+    b.setAttribute('aria-disabled', String(s.answered));
+    b.querySelector('.answer-mark').innerHTML = good ? icon('check') : bad ? icon('cross') : '';
+  });
+  fbMain.className = 'fb-main' + (s.answered ? (ok ? ' good' : ' bad') : '');
+  if (!s.answered) {
+    // A melody fills in as the steps are tapped.
+    fbMain.innerHTML = q.kind === 'melody' ? q.answer.map((_, i) => `<span class="slot">${s.entered[i] ?? '_'}</span>`).join('') : '';
+    fbDetail.innerHTML = q.kind === 'melody' && s.entered.length ? `<button type="button" class="undo-btn" id="undo-btn">${icon('review')}${t('undo')}</button>` : '';
+    fbNotes.textContent = '';
+  } else {
+    fbMain.innerHTML = icon(ok ? 'check' : 'cross', 'fb-icon') + t(ok ? 'right' : 'wrong')
+      + (ok && s.combo >= 3 && [3, 5, 8].includes(s.combo) ? ` <span class="combo">${tf('combo', { n: s.combo })}</span>` : '');
+    fbDetail.innerHTML = courseDetail(q) + (q.kind === 'melody' && !ok ? ` (${t('yours')}: ${s.entered.join(' → ')})` : '');
+    fbNotes.textContent = courseNotes(q);
+  }
+  compareBtn.hidden = !s.answered || ok || !(q.kind === 'which' || q.kind === 'melody' || q.kind === 'prog' || q.kind === 'keymode');
+  nextBtn.hidden = !s.answered;
+}
+// Melodies: take back the last step tapped (Backspace does the same).
+fbDetail.addEventListener('click', (e) => {
+  const s = session;
+  if (!e.target.closest('#undo-btn') || !s || s.mode !== 'course' || s.answered || !s.entered.length) return;
+  s.entered.pop();
+  renderCourseFeedback();
+  if (s.entered.length) $('undo-btn').focus(); else answersEl.children[0]?.focus();
+});
+function courseAnswer(a, byKey) {
+  const s = session, q = s.q;
+  if (q.kind === 'melody') {
+    s.entered.push(a);
+    const btn = [...answersEl.children].find((b) => b.answer === a);
+    pop(btn, 'pop');
+    if (s.entered.length < q.answer.length) { renderCourseFeedback(); return; }
+  }
+  s.answered = true;
+  s.yours = q.kind === 'melody' ? s.entered.slice() : a;
+  const ok = C.isRight(q, s.yours);
+  s.run.answer(q, ok);
+  s.combo = ok ? s.combo + 1 : 0;
+  if (!ok) settings.course.mistakes = C.noteMistake(settings.course.mistakes, q, s.yours);
+  else if (s.review) settings.course.mistakes = C.noteReviewRight(settings.course.mistakes, q);
+  save();
+  renderTop();
+  renderCourseFeedback();
+  if (q.kind !== 'melody') pop([...answersEl.children].find((b) => b.answer === a), ok ? 'pop' : 'shake');
+  if (ok) pop(progressEl, 'pop');
+  chime(ok);
+  if (byKey) nextBtn.focus();
+}
+// Compare: what you answered, then the right one.
+function courseCompare(q, yours) {
+  if (q.kind === 'which') return compareEvents(q, yours);
+  let mine;
+  if (q.kind === 'melody') {
+    const steps = C.scaleSteps(q.mode);
+    const notes = (n) => n.map((d, i) => ({ at: 1.0 + i * 0.7, notes: [q.root + steps[d - 1]], dur: 0.65 }));
+    const home = { at: 0, notes: C.homeChord(q.root, q.mode), dur: 0.8 };
+    mine = [home, ...notes(yours)];
+    const right = [home, ...notes(q.answer)];
+    const gap = eventsLength(mine) + 0.5;
+    return [...mine.map((e) => ({ ...e, tag: 'yours' })), ...right.map((e) => ({ ...e, at: e.at + gap, tag: 'right' }))];
+  }
+  if (q.kind === 'prog') {
+    const pat = [...q.pattern.slice(0, -1), yours];
+    mine = pat.map((n, i) => ({ at: i * 0.85, notes: C.progChord(q.root, n), dur: 0.8 }));
+  } else {   // keymode
+    mine = C.cadence(q.root, yours);
+  }
+  const gap = eventsLength(mine) + 0.5;
+  return [...mine.map((e) => ({ ...e, tag: 'yours' })), ...q.events.map((e) => ({ ...e, at: e.at + gap, tag: 'right' }))];
+}
+// A soft chime after a right answer, a low soft tap after a wrong one (Settings can turn them off).
+function chime(ok) {
+  if (!settings.course.chime || !rack) return;
+  const inst = rack.instruments.harp, now = Tone.now() + 0.05;
+  if (ok) {
+    inst.triggerAttackRelease(midiToFreq(88), 0.25, now, 0.25);
+    inst.triggerAttackRelease(midiToFreq(95), 0.4, now + 0.09, 0.22);
+  } else {
+    rack.instruments.epiano.triggerAttackRelease(midiToFreq(45), 0.25, now, 0.22);
+  }
+}
+
+function finishCourse() {
+  const s = session, d = today(), c = settings.course;
+  const firstRight = s.run.firstRight, got = C.starsForRun(firstRight, s.run.total);
+  let saved = true, big = false, skipped = false;
+  if (!s.review) {
+    const i = s.lesson, l = C.LESSONS[i];
+    const sectionDone = C.LESSONS.every((x) => x.section !== l.section || x === l || c.stars[x.index] > 0);
+    if (l.type === 'check' && !sectionDone) {
+      // Skipping ahead needs 7 of 8 at the first try.
+      if (firstRight >= C.CHECK_PASS) { c.stars = C.checkpointSkip(c.stars, i, got); skipped = true; }
+      else saved = false;
+    } else {
+      c.stars[i] = Math.max(c.stars[i], got);
+    }
+    big = l.type === 'mix' || l.type === 'check';
+  }
+  if (saved) countForGoal();
+  save();
+  scrollToNext = true;
+  s.result = { kind: 'course', stars: got, firstRight, total: s.run.total, saved, big, skipped, next: s.review ? null : C.nextLessonIn(c.stars),
+    streak: C.streakNow(c.streak, d), goal: C.goalToday(c.goal, d) };
+  showDone();
+}
+function renderCourseDone() {
+  const s = session, r = s.result, c = settings.course;
+  const starsEl = $('done-stars');
+  $('done-score').hidden = true;
+  starsEl.hidden = !r.saved;
+  starsEl.innerHTML = starsHtml(r.stars);
+  starsEl.setAttribute('aria-label', tf('starsAria', { s: r.stars }));
+  const l = s.review ? null : C.LESSONS[s.lesson];
+  $('done-title').textContent = s.review ? t('reviewDone') : !r.saved ? t('checkNotYet') : r.skipped ? t('skipDone')
+    : l.type === 'check' ? t('sectionDone') : l.type === 'mix' ? t('unitDone') : t('lessonDone');
+  $('done-text').textContent = !r.saved ? tf('checkNeed', { r: r.firstRight, n: r.total }) : tf('firstTry', { r: r.firstRight, n: r.total });
+  $('done-streak').innerHTML = `${icon('flame', 'flame')}<span>${tf('dayN', { n: r.streak })}</span>`;
+  $('done-goal').innerHTML = `<span class="goal-ring" style="--p:${Math.min(100, (100 * r.goal) / c.goalSize)}%" aria-hidden="true"></span><span>${r.goal >= c.goalSize ? t('goalReached') : tf('goalOf', { n: r.goal, g: c.goalSize })}</span>`;
+  const main = $('done-main'), again = $('done-again');
+  const more = s.review ? C.reviewPools(c.mistakes) : r.next !== null && r.next !== s.lesson;
+  main.hidden = !more;
+  main.textContent = t(s.review ? 'reviewMore' : 'continue');
+  again.hidden = !!s.review;
+  again.textContent = t('again');
+}
+
+// Settings: the Beta switch, the daily goal, the chime.
+function renderCourseSettings() {
+  [...$('beta-seg').children].forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.on === '1') === courseOn())));
+  $('course-settings').hidden = !courseOn();
+  const goalSeg = $('goal-seg');
+  if (!goalSeg.children.length) {
+    C.GOALS.forEach((g) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = g;
+      b.dataset.goal = g;
+      b.addEventListener('click', () => { settings.course.goalSize = g; save(); renderCourseSettings(); renderCourse(); });
+      goalSeg.appendChild(b);
+    });
+  }
+  [...goalSeg.children].forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.goal) === settings.course.goalSize)));
+  [...$('chime-seg').children].forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.on === '1') === settings.course.chime)));
+}
+[...$('beta-seg').children].forEach((b) => b.addEventListener('click', () => {
+  settings.course.on = b.dataset.on === '1';
+  if (settings.course.on) { settings.course.view = 'course'; scrollToNext = true; }
+  save();
+  renderCourseSettings();
+  if (!session) showHome();
+}));
+[...$('chime-seg').children].forEach((b) => b.addEventListener('click', () => {
+  settings.course.chime = b.dataset.on === '1';
+  save();
+  renderCourseSettings();
+  if (settings.course.chime) chime(true);
+}));
+
 // --- SETTINGS, ABOUT AND PATREON WINDOWS ---
 const modals = createModalManager({
   modals: [settingsModal, aboutModal, practiceModal, supportModal],
@@ -529,7 +941,7 @@ document.querySelectorAll('.modal-header .close-btn').forEach((b) => b.addEventL
 // After 30 s untouched, coming back opens the Patreon window (at most every 40 min).
 // A question playing counts as use.
 // In use while a question is on screen: the window may come when a lesson or game ends.
-const support = createSupportPrompt({ dialog: supportModal, modals, t, isBusy: () => isPlaying() || document.body.dataset.screen === 'quiz' });
+const support = createSupportPrompt({ dialog: supportModal, modals, t, isBusy: () => isPlaying() || document.body.dataset.screen === 'quiz' || document.body.dataset.screen === 'learn' });
 $('settings-btn').addEventListener('click', (e) => modals.open(settingsModal, e.currentTarget));
 $('about-btn').addEventListener('click', (e) => modals.open(aboutModal, e.currentTarget));
 
@@ -557,16 +969,21 @@ $('reset-btn').addEventListener('click', () => { $('reset-ask').hidden = false; 
 $('reset-no').addEventListener('click', () => { $('reset-ask').hidden = true; $('reset-btn').focus(); });
 $('reset-yes').addEventListener('click', () => {
   EXERCISES.forEach((ex) => { settings.stars[ex] = LESSONS[ex].map(() => 0); settings.best[ex] = 0; selected[ex] = 0; });
+  Object.assign(settings.course, { stars: C.LESSONS.map(() => 0), streak: { last: null, count: 0, rest: null }, goal: { day: null, done: 0 }, mistakes: [] });
   save();
   $('reset-ask').hidden = true;
   $('reset-done').hidden = false;
   $('reset-btn').focus();
-  if (!session) renderHome();
+  if (!session) showHome();
 });
 
 function applyLanguage() {
   i18n.apply();
   renderHome();
+  renderCourse();
+  renderModeTabs();
+  renderCourseSettings();
+  if (session && document.body.dataset.screen === 'learn') renderLearn();
   renderNames();
   if (session && document.body.dataset.screen === 'quiz') renderQuiz();
   if (session && document.body.dataset.screen === 'done') renderDone();
@@ -582,7 +999,10 @@ document.addEventListener('keydown', (e) => {
   const el = document.activeElement;
   if (el && el.closest && el.closest('.custom-select')) return;
   const screen = document.body.dataset.screen;
-  if (e.key === 'Escape' && screen !== 'home') { e.preventDefault(); goHome(); return; }
+  if (e.key === 'Escape' && screen !== 'home' && screen !== 'course') { e.preventDefault(); goHome(); return; }
+  if (e.key === 'Backspace' && screen === 'quiz' && session && session.mode === 'course' && !session.answered && session.entered.length) {
+    e.preventDefault(); session.entered.pop(); renderCourseFeedback(); return;
+  }
   if (screen !== 'quiz' || !session) return;
   if (e.key === ' ') {
     e.preventDefault();   // Space replays everywhere; Enter still presses a focused button
@@ -607,7 +1027,7 @@ document.addEventListener('keyup', (e) => {
 applyTheme(settings.theme);
 themeSelect.value = settings.theme;
 langSelect.value = settings.lang;
-showScreen('home');
 applyLanguage();
+showHome();
 loadRack();   // the piano samples start loading now, so the first question is ready
 registerHubWorker('../');
