@@ -9,6 +9,8 @@
  *   const { t, interp, apply } = createI18n({ strings, getLang, vars })
  *     t(key)         the string in getLang()'s language, else English, else the key
  *     interp(str)    replaces {name} with vars.name (e.g. {repo}, {patreon})
+ *     tf(key, values)  t(key) with each {name} replaced by values.name, e.g.
+ *                    tf('lessonN', { n: 3 }); a {name} not in values stays as it is
  *     apply()        sets <html lang>, fills every [data-i18n] element's
  *                    innerHTML with interp(t(key)) and every [data-i18n-aria]
  *                    element's aria-label with t(key), then the page's search
@@ -56,5 +58,6 @@ export function createI18n({ strings, getLang, vars = {} }) {
     });
     applySeo(getLang(), urlLang());
   };
-  return { t, interp, apply };
+  const tf = (key, values) => t(key).replace(/\{(\w+)\}/g, (m, k) => (k in values ? values[k] : m));
+  return { t, tf, interp, apply };
 }

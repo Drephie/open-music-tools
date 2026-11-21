@@ -15,6 +15,7 @@ import {
   EXERCISES, ANSWERS, LESSONS, PLAYS, DEGREE_RANGES, LESSON_GOAL, LIVES,
   starsFor, lessonOpen, gameStage, makeQuestion, compareEvents, eventsLength,
 } from './questions.js';
+import { prettyChord as pretty } from '../shared/ui/accidentals.js';
 import { EAR_STRINGS } from './strings.js';
 
 const $ = (id) => document.getElementById(id);
@@ -63,12 +64,8 @@ const i18n = createI18n({
   getLang: () => settings.lang,
   vars: { patreon: PATREON_URL, instagram: DESIGNER_URL, repo: REPO_URL },
 });
-const { t } = i18n;
-const fill = (str, vars) => str.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
-const tf = (key, vars) => fill(t(key), vars);
+const { t, tf } = i18n;
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-const ACC_RE = /(^|\/)(Do|Re|Mi|Fa|Sol|La|Si|[A-G])(#+|b+)?/g;
-const pretty = (name) => name.replace(ACC_RE, (_, pre, l, acc = '') => pre + l + acc.replace(/#/g, '♯').replace(/b/g, '♭'));
 const icon = (id, cls = '') => `<svg class="${cls}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
 const starsHtml = (n) => [0, 1, 2].map((i) => icon('star', i < n ? 'star on' : 'star')).join('');
 

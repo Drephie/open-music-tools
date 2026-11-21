@@ -56,8 +56,7 @@ const i18n = createI18n({
   getLang: () => settings.lang,
   vars: { patreon: PATREON_URL, instagram: DESIGNER_URL, repo: REPO_URL },
 });
-const { t } = i18n;
-const tf = (key, vars) => t(key).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
+const { t, tf } = i18n;
 
 // --- THE JAM (in memory only): a song of sections, each with its chords ---
 // newKey: the key and mode New chords uses (null = random).

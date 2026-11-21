@@ -7,7 +7,7 @@
  * the audio clock, everything else on the page's clock), the status line, the
  * two views, the settings, windows and keyboard.
  */
-import { startPitch } from '../shared/pitch.js';
+import { startPitch, freqToMidi as toMidi } from '../shared/pitch.js';
 import { midiToFreq } from '../shared/theory.js';
 import { startAudio, createRack } from '../shared/sound.js';
 import { createClicks } from '../shared/transport.js';
@@ -31,7 +31,6 @@ const VIEW_LOW = 33, VIEW_HIGH = 95;        // the notes the graph can show (La1
 const AHEAD = 0.12;                         // sounds are handed to the audio clock this far ahead (s)
 const LEAD = 0.5;                           // the first round starts this long after Start is ready
 const ERROR_KEYS = { insecure: 'errInsecure', unsupported: 'errUnsupported', denied: 'errDenied', 'no-mic': 'errNoMic', busy: 'errBusy', ended: 'errEnded' };
-const toMidi = (f) => 69 + 12 * Math.log2(f / 440);
 const nowS = () => performance.now() / 1000;
 const pcOf = (m) => ((Math.round(m) % 12) + 12) % 12;
 
@@ -64,8 +63,7 @@ const i18n = createI18n({
   getLang: () => settings.lang,
   vars: { patreon: PATREON_URL, instagram: DESIGNER_URL, repo: REPO_URL },
 });
-const { t } = i18n;
-const fill = (key, vars) => Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), t(key));
+const { t, tf } = i18n;
 
 const statusEl = document.querySelector('.status'), mainEl = $('status-main'), subEl = $('status-sub'), dotEl = $('beat-dot'), srEl = $('sr-status');
 const goBtn = $('go-btn'), goLabel = $('go-label');
@@ -224,7 +222,7 @@ function judge(r) {
   r.octave = r.result.octave;
   run.good += r.result.good;
   run.total += r.result.total;
-  announce(`${fill('inTune', { n: r.result.good, total: r.result.total })}. ${tipText(r)}`);
+  announce(`${tf('inTune', { n: r.result.good, total: r.result.total })}. ${tipText(r)}`);
 }
 
 // Every 25 ms while running: hand the next sounds to the audio clock, score
@@ -310,7 +308,7 @@ function stopRun(finished = false) {
   if (noMic) errorKey = micErr;   // now say why there was no microphone, and how to allow it
   showButtons();
   render(true);
-  if (lastRun && finished && !lastRun.noMic) announce(fill('done', { n: lastRun.good, total: lastRun.total }));
+  if (lastRun && finished && !lastRun.noMic) announce(tf('done', { n: lastRun.good, total: lastRun.total }));
   requestDraw();
 }
 
@@ -364,16 +362,16 @@ function tipText(r) {
   const p = r.plan.parts[tip.part];
   const note = p.m0 !== p.m1 ? t(p.m1 > p.m0 ? 'slideUp' : 'slideDown') : noteName(r, p.m0);
   const key = tip.dir === 'low' ? (tip.far ? 'tipOneLowFar' : 'tipOneLow') : (tip.far ? 'tipOneHighFar' : 'tipOneHigh');
-  return fill(key, { note });
+  return tf(key, { note });
 }
 
 function octaveText(k) {
   if (!k) return '';
   const n = Math.abs(k);
-  return n === 1 ? t(k < 0 ? 'octLower' : 'octHigher') : fill(k < 0 ? 'octsLower' : 'octsHigher', { n });
+  return n === 1 ? t(k < 0 ? 'octLower' : 'octHigher') : tf(k < 0 ? 'octsLower' : 'octsHigher', { n });
 }
 
-const roundsText = () => fill('idleSub', { n: 2 * settings.far + 1, far: settings.far });
+const roundsText = () => tf('idleSub', { n: 2 * settings.far + 1, far: settings.far });
 const startLabel = (midi) => { const n = startName(midi, solfege()); return { name: n.name, octave: n.octave, text: `${prettyName(n.name)}${n.octave}` }; };
 
 let last = { main: null, sub: null, dot: null, msg: null };
@@ -390,9 +388,9 @@ function render(force = false) {
   else if (wanted && !listener && !noMic) main = t('waiting');
   else if (pianoMsg === 'loading') main = t('loading');
   else if (ph) {
-    const { r, k, phase } = ph, total = run.rounds.length, round = fill('roundOf', { n: r.i + 1, total });
+    const { r, k, phase } = ph, total = run.rounds.length, round = tf('roundOf', { n: r.i + 1, total });
     const beat = r.plan.beat;
-    if (phase === 'listen') { main = t('listen'); sub = `${round} · ${fill('fromNote', { note: startLabel(r.start).text })}`; spoken = main; }
+    if (phase === 'listen') { main = t('listen'); sub = `${round} · ${tf('fromNote', { note: startLabel(r.start).text })}`; spoken = main; }
     else if (phase === 'count') {
       const n = Math.max(0, Math.min(3, Math.floor((k - r.plan.countIn) / beat)));
       main = t('yourTurn');
@@ -408,12 +406,12 @@ function render(force = false) {
       main = t('noMicRound');
       sub = round;
     } else {
-      main = fill('inTune', { n: r.result.good, total: r.result.total });
+      main = tf('inTune', { n: r.result.good, total: r.result.total });
       const oct = octaveText(r.result.octave);
       sub = tipText(r) + (oct ? ` · ${oct}` : '');
     }
-  } else if (lastRun && !lastRun.stopped) { main = fill('done', { n: lastRun.good, total: lastRun.total }); sub = t('doneSub'); }
-  else if (lastRun) { main = t('stopped'); sub = lastRun.total ? fill('inTune', { n: lastRun.good, total: lastRun.total }) : roundsText(); }
+  } else if (lastRun && !lastRun.stopped) { main = tf('done', { n: lastRun.good, total: lastRun.total }); sub = t('doneSub'); }
+  else if (lastRun) { main = t('stopped'); sub = lastRun.total ? tf('inTune', { n: lastRun.good, total: lastRun.total }) : roundsText(); }
   else { main = t('idle'); sub = roundsText(); }
 
   if (force || main !== last.main) { mainEl.textContent = main; last.main = main; }
@@ -616,7 +614,7 @@ function showStart() {
   const n = startLabel(settings.start), range = startRange(exerciseById(settings.ex), settings.far);
   startNameEl.innerHTML = accidentalHtml(n.name);
   startOctEl.textContent = String(n.octave);
-  startNote.setAttribute('aria-label', fill('startHear', { note: n.text }));
+  startNote.setAttribute('aria-label', tf('startHear', { note: n.text }));
   startDown.disabled = settings.start <= range.min;
   startUp.disabled = settings.start >= range.max;
 }

@@ -12,6 +12,7 @@ import { setupCustomSelects, setSelectRoom } from '../shared/ui/select.js';
 import { createModalManager } from '../shared/ui/modal.js';
 import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
+import { prettyChord as pretty, prettyChordHtml as prettyHtml } from '../shared/ui/accidentals.js';
 import { PIANO_STRINGS } from './strings.js';
 
 const $ = (id) => document.getElementById(id);
@@ -73,11 +74,7 @@ const settingsModal = $('settings-modal'), aboutModal = $('about-modal'), suppor
 
 // --- NOTE NAMES ---
 // Theory spells with '#' and 'b'; the screen shows ♯ and ♭.
-const ACC_RE = /(^|\/)(Do|Re|Mi|Fa|Sol|La|Si|[A-G])(#+|b+)?/g;
-const pretty = (name) => name.replace(ACC_RE, (_, pre, l, acc = '') => pre + l + acc.replace(/#/g, '♯').replace(/b/g, '♭'));
-// Same, with the sharps and flats raised and smaller (the big chord name).
-const prettyHtml = (name) => name.replace(ACC_RE, (_, pre, l, acc = '') =>
-  pre + l + (acc ? `<span class="acc">${acc.replace(/#/g, '♯').replace(/b/g, '♭')}</span>` : ''));
+// (pretty and prettyHtml: shared/ui/accidentals.js; prettyHtml raises the signs for the big chord name.)
 const octaveOf = (m) => Math.floor(m / 12) - 1;
 const sharpName = (m, solf = solfege()) => pretty((solf ? SHARP_SOLFEGE : SHARP_LETTERS)[m % 12]);
 

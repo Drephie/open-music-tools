@@ -45,8 +45,7 @@ const i18n = createI18n({
   getLang: () => settings.lang,
   vars: { patreon: PATREON_URL, instagram: DESIGNER_URL, repo: REPO_URL },
 });
-const { t } = i18n;
-const fill = (key, vars) => Object.entries(vars).reduce((s, [k, v]) => s.split(`{${k}}`).join(v), t(key));
+const { t, tf } = i18n;
 
 const views = { start: $('start-view'), busy: $('busy-view'), result: $('result-view') };
 const playBtn = $('play-btn'), playLabel = $('play-label'), tapBtn = $('tap-btn');
@@ -128,13 +127,13 @@ async function startListening(source) {
   $('start-error').hidden = true;
   show('busy');
   setBusy('listening', { progress: 0, tip: t(source === 'mic' ? 'micTip' : 'tabTip'), live: true });
-  $('busy-title').textContent = fill('listeningFor', { s: 0, total: LISTEN_SECONDS });
+  $('busy-title').textContent = tf('listeningFor', { s: 0, total: LISTEN_SECONDS });
   listener = listen(source, {
     seconds: LISTEN_SECONDS,
     onLevel: (v) => { $('level-bar').style.width = `${Math.round(v * 100)}%`; },
     onTime: (s) => {
       if (my !== job) return;
-      $('busy-title').textContent = fill('listeningFor', { s: Math.floor(s), total: LISTEN_SECONDS });
+      $('busy-title').textContent = tf('listeningFor', { s: Math.floor(s), total: LISTEN_SECONDS });
       $('busy-bar').style.width = `${Math.round(s / LISTEN_SECONDS * 100)}%`;
       $('stop-early-btn').disabled = s < EARLY_STOP;
     },
@@ -154,7 +153,7 @@ async function startListening(source) {
   listener = null;
   if (my !== job) return;
   $('level-row').hidden = true; $('stop-early-btn').hidden = true;
-  try { await useBuffer(buffer, fill('whatWasHeard', { source: t(source === 'mic' ? 'sourceMic' : 'sourceTab') }), my); } catch (e) { console.error(e); if (my === job) { busy = false; startError('failed'); } }
+  try { await useBuffer(buffer, tf('whatWasHeard', { source: t(source === 'mic' ? 'sourceMic' : 'sourceTab') }), my); } catch (e) { console.error(e); if (my === job) { busy = false; startError('failed'); } }
 }
 
 function cancelBusy() {
@@ -192,9 +191,9 @@ function showResult() {
     $('key-mode').textContent = k.mode;
     $('key-found').setAttribute('aria-label', keyPlain(r.key.key));
     $('key-alt').hidden = !r.key.alt;
-    if (r.key.alt) $('key-alt').innerHTML = fill('orKey', { key: keyHtml(r.key.alt) });
+    if (r.key.alt) $('key-alt').innerHTML = tf('orKey', { key: keyHtml(r.key.alt) });
     $('key-changes').hidden = !r.key.changes.length;
-    $('key-changes').innerHTML = r.key.changes.slice(0, 3).map((c) => fill('keyChange', { key: keyHtml(c.key), time: formatTime(c.time) })).join('<br>');
+    $('key-changes').innerHTML = r.key.changes.slice(0, 3).map((c) => tf('keyChange', { key: keyHtml(c.key), time: formatTime(c.time) })).join('<br>');
   }
   updatePosition();
 }
@@ -221,12 +220,12 @@ function showBpm() {
   doubleBtn.innerHTML = `×2 <span class="alt-num">${doubleOf}</span>`;
   halfBtn.setAttribute('aria-pressed', String(factor === 0.5));
   doubleBtn.setAttribute('aria-pressed', String(factor === 2));
-  halfBtn.setAttribute('aria-label', factor === 0.5 ? fill('backAria', { n: Math.round(base) }) : fill('halfAria', { n: halfOf }));
-  doubleBtn.setAttribute('aria-label', factor === 2 ? fill('backAria', { n: Math.round(base) }) : fill('doubleAria', { n: doubleOf }));
+  halfBtn.setAttribute('aria-label', factor === 0.5 ? tf('backAria', { n: Math.round(base) }) : tf('halfAria', { n: halfOf }));
+  doubleBtn.setAttribute('aria-label', factor === 2 ? tf('backAria', { n: Math.round(base) }) : tf('doubleAria', { n: doubleOf }));
   const range = r.beat && r.beat.range;
   const note = $('tempo-note');
   if (tapped) { note.hidden = false; note.textContent = t('tapped'); }
-  else if (range && range.changes) { note.hidden = false; note.textContent = fill('tempoChanges', { low: Math.round(range.low * factor), high: Math.round(range.high * factor) }); }
+  else if (range && range.changes) { note.hidden = false; note.textContent = tf('tempoChanges', { low: Math.round(range.low * factor), high: Math.round(range.high * factor) }); }
   else note.hidden = true;
   const link = $('metronome-link');
   link.hidden = false;

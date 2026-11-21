@@ -5,7 +5,7 @@
  * screen: the note at the top, fitting the view to the notes on screen, pause and looking back,
  * tapping a key to hear it, the settings, windows and keyboard.
  */
-import { startPitch, createPitchSmoother, nearestNote } from '../shared/pitch.js';
+import { startPitch, createPitchSmoother, nearestNote, freqToMidi as toMidi } from '../shared/pitch.js';
 import { commonNoteName, midiToFreq, parseKey, MAJOR_SCALE_STEPS, MINOR_SCALE_STEPS } from '../shared/theory.js';
 import { startAudio, createRack } from '../shared/sound.js';
 import { LANGUAGES, mergeStrings, createI18n } from '../shared/ui/i18n.js';
@@ -26,7 +26,6 @@ const LOWEST = 33, HIGHEST = 95;            // the notes the graph can show (La1
 const REF_SECONDS = 2;                      // a tapped key sounds this long
 const REF_QUIET = 0.35;                     // and the line waits this much longer (the room's echo)
 const ERROR_KEYS = { insecure: 'errInsecure', unsupported: 'errUnsupported', denied: 'errDenied', 'no-mic': 'errNoMic', busy: 'errBusy', ended: 'errEnded' };
-const toMidi = (f) => 69 + 12 * Math.log2(f / 440);
 const nowS = () => performance.now() / 1000;
 
 // --- SETTINGS (remembered in this browser only; nothing sung is kept) ---

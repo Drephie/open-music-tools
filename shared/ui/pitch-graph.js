@@ -42,8 +42,9 @@
  *   view.midiAt(y)        the pitch at a height in the canvas (CSS px)
  *   view.onKeys(x)        true when x is on the piano keys
  */
+import { prettyName as pretty } from './accidentals.js';
+
 const BLACK = [false, true, false, true, false, false, true, false, true, false, true, false];
-const pretty = (n) => n.replace(/#$/, '♯').replace(/b$/, '♭');
 
 function parseColor(c) {
   c = (c || '').trim();

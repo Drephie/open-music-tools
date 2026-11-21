@@ -12,6 +12,7 @@ import { createModalManager } from '../shared/ui/modal.js';
 import { THEMES, LANGUAGE_NAMES, PATREON_URL, DESIGNER_URL, REPO_URL, loadSettings, saveSettings, applyTheme, closeOnBackdrop, createSupportPrompt, loadLook, saveLook, watchLook } from '../shared/ui/page.js';
 import { registerHubWorker } from '../shared/offline.js';
 import { MODES, ANSWERS, TYPES, TRIES, dayNumber, dateOf, puzzle, parseAnswer, status } from './game.js';
+import { prettyName as pretty } from '../shared/ui/accidentals.js';
 import { INTERVLE_STRINGS } from './strings.js';
 
 const $ = (id) => document.getElementById(id);
@@ -50,10 +51,8 @@ const i18n = createI18n({
   getLang: () => settings.lang,
   vars: { patreon: PATREON_URL, instagram: DESIGNER_URL, repo: REPO_URL },
 });
-const { t } = i18n;
-const tf = (key, vars) => t(key).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
+const { t, tf } = i18n;
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-const pretty = (name) => name.replace(/#/g, '♯').replace(/([A-Za-z])b/g, '$1♭');
 const noteName = (midi) => pretty(commonNoteName(midi, solfege()).name);
 
 // --- THE DAY ---

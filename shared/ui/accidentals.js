@@ -8,6 +8,10 @@
  *                         page.css gives svg.acc its stroke and colour.
  *   prettyName(name)      'F#' -> 'F♯', 'Mib' -> 'Mi♭' (plain text: screen
  *                         readers, titles)
+ *   prettyChord(name)     every note in a chord name: 'C#m7/G#' -> 'C♯m7/G♯',
+ *                         'Solbmaj7' -> 'Sol♭maj7', double sharps and flats too
+ *   prettyChordHtml(name) the same, each sign in <span class="acc"> (raised
+ *                         and smaller with CSS: the Piano's big chord name)
  *
  * Names come from shared/theory.js (ASCII '#' and 'b' after the letter or
  * syllable; letters are capitals, so a final lowercase b is always a flat).
@@ -19,3 +23,10 @@ const ACC_SVG = {
 
 export const accidentalHtml = (name) => name.replace(/([#b])$/, (acc) => ACC_SVG[acc]);
 export const prettyName = (name) => name.replace(/#$/, '♯').replace(/b$/, '♭');
+
+// A note at the start or after a slash: its letter or syllable, then its signs.
+const NOTE_RE = /(^|\/)(Do|Re|Mi|Fa|Sol|La|Si|[A-G])(#+|b+)?/g;
+const signs = (acc) => acc.replace(/#/g, '♯').replace(/b/g, '♭');
+export const prettyChord = (name) => name.replace(NOTE_RE, (_, pre, l, acc = '') => pre + l + signs(acc));
+export const prettyChordHtml = (name) => name.replace(NOTE_RE, (_, pre, l, acc = '') =>
+  pre + l + (acc ? `<span class="acc">${signs(acc)}</span>` : ''));
