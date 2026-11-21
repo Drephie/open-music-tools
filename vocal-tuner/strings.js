@@ -58,7 +58,7 @@ export const TUNER_STRINGS = {
     aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità né tracker.<br><br>Canta una nota: vedi qual è e quanto sei calante o crescente, in cent (centesimi di semitono). Entro 10 cent sei intonato (5 in modalità difficile). La = 440 Hz.<br><br>Il suono del microfono viene analizzato sul tuo dispositivo e scartato: niente viene registrato o caricato online.',
     aboutKeys: "Al computer: Spazio avvia e ferma l'ascolto.",
     supportTitle: "Sostieni l'accordatore vocale",
-    supportBody: "Ti piace cantare intonato? Aiutaci a mantenere questi strumenti musicali gratuiti, senza pubblicità e in crescita!",
+    supportBody: "Ti piace cantare intonato? Aiutaci a tenere questi strumenti gratuiti e senza pubblicità, e a crearne di nuovi!",
     start: "Inizia ad ascoltare", stop: "Ferma",
     idle: "Tocca per iniziare e canta",
     waiting: "In attesa del microfono…",

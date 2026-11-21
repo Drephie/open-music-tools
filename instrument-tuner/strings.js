@@ -79,7 +79,7 @@ export const TUNER_STRINGS = {
     aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità né tracker.<br><br>Scegli lo strumento, suona una corda e gira la chiavetta fino a leggere Accordata: entro 5 cent (centesimi di semitono), 2 in modalità difficile. Corda sbagliata? Tocca quella giusta. La = 440 Hz.<br><br>Il suono del microfono è analizzato sul tuo dispositivo e scartato: niente viene registrato né caricato online.',
     aboutKeys: "Al computer: Spazio avvia e ferma l'ascolto.",
     supportTitle: "Sostieni l'accordatore per strumenti",
-    supportBody: "Ti piace suonare accordato? Aiutaci a mantenere questi strumenti musicali gratuiti, senza pubblicità e in crescita!",
+    supportBody: "Ti piace suonare accordato? Aiutaci a tenere questi strumenti gratuiti e senza pubblicità, e a crearne di nuovi!",
     tuningAria: "Strumento e accordatura",
     start: "Inizia ad ascoltare", stop: "Ferma",
     idle: "Tocca per iniziare e suona",

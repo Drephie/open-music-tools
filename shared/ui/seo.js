@@ -169,18 +169,18 @@ export const SEO = {
   "vocal-tuner": {
     "en": {
       "title": "Vocal Tuner – Check if You Sing in Tune, Free | Open Music Tools",
-      "desc": "A free online vocal tuner: sing a note into your microphone and see right away if it is too low, too high or in tune. Made by a vocal coach. Nothing is recorded or uploaded.",
-      "about": "A free online vocal tuner made by vocal coach Drephie: sing into your microphone and see the note you sing and whether you are flat, sharp or in tune. Your voice never leaves your device."
+      "desc": "A free online vocal tuner: sing a note into your microphone and see right away if it is too low, too high or in tune. Nothing is recorded or uploaded.",
+      "about": "A free online vocal tuner: sing into your microphone and see the note you sing and whether you are flat, sharp or in tune. Your voice never leaves your device."
     },
     "es": {
       "title": "Afinador de voz – Comprueba si cantas afinado, gratis | Open Music Tools",
-      "desc": "Un afinador de voz online y gratis: canta una nota al micrófono y mira al momento si está baja, alta o afinada. Hecho por una profesora de canto. Nada se graba ni se sube.",
-      "about": "Un afinador de voz online y gratis, hecho por la profesora de canto Drephie: canta al micrófono y mira la nota que cantas y si estás bajo, alto o afinado. Tu voz nunca sale de tu dispositivo."
+      "desc": "Un afinador de voz online y gratis: canta una nota al micrófono y mira al momento si está baja, alta o afinada. Nada se graba ni se sube.",
+      "about": "Un afinador de voz online y gratis: canta al micrófono y mira la nota que cantas y si estás bajo, alto o afinado. Tu voz nunca sale de tu dispositivo."
     },
     "it": {
       "title": "Accordatore per voce – Scopri se sei intonato, gratis | Open Music Tools",
-      "desc": "Un accordatore per voce online e gratuito: canta una nota nel microfono e vedi subito se è calante, crescente o intonata. Creato da una vocal coach. Niente viene registrato o caricato.",
-      "about": "Un accordatore per voce online e gratuito, creato dalla vocal coach Drephie: canta nel microfono e vedi la nota che canti e se sei calante, crescente o intonato. Tutto avviene sul tuo dispositivo."
+      "desc": "Un accordatore per voce online e gratuito: canta una nota nel microfono e vedi subito se è calante, crescente o intonata. Niente viene registrato o caricato.",
+      "about": "Un accordatore per voce online e gratuito: canta nel microfono e vedi la nota che canti e se sei calante, crescente o intonato. Tutto avviene sul tuo dispositivo."
     }
   },
   "instrument-tuner": {
@@ -229,7 +229,7 @@ export const SEO = {
       "about": "Calentamientos vocales y ejercicios de canto gratis: escucha el piano, canta cada ejercicio y mira nota a nota dónde estabas afinado, para entrenar la afinación y cantar mejor."
     },
     "it": {
-      "title": "Pitch Training – Esercizi per cantare intonati | Open Music Tools",
+      "title": "Vocalizzi – Esercizi per cantare intonati | Open Music Tools",
       "desc": "Esercizi di canto online e gratuiti: il pianoforte suona un vocalizzo su una base, tu lo ricanti e vedi quali note hai cantato intonate. Niente viene registrato.",
       "about": "Vocalizzi ed esercizi di canto gratuiti: ascolta il pianoforte, ricanta ogni esercizio e guarda nota per nota dove eri intonato, per allenare l’intonazione e cantare meglio."
     }

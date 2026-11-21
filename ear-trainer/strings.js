@@ -114,11 +114,11 @@ export const EAR_STRINGS = {
   it: {
     title: "Orecchio musicale",
     aboutTitle: "Informazioni su Orecchio musicale",
-    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, niente caricato online: tutto funziona nel tuo browser.<br><br><strong>Intervalli</strong>: la distanza tra due note, in semitoni (da un tasto del pianoforte a quello subito dopo). <strong>Accordi</strong>: maggiore, minore e altro. <strong>Gradi della scala</strong>: senti la tonalità, poi una nota: che grado è? L\'1 è casa.',
+    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, nulla viene caricato online: tutto funziona nel tuo browser.<br><br><strong>Intervalli</strong>: la distanza tra due note, in semitoni (da un tasto del pianoforte a quello subito dopo). <strong>Accordi</strong>: maggiore, minore e altro. <strong>Gradi della scala</strong>: senti la tonalità, poi una nota: che grado è? L\'1 è casa.',
     aboutCredits: 'Suono di pianoforte: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> di Alexander Holm, con licenza <a href="https://creativecommons.org/licenses/by/3.0/deed.it" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "Al computer: Spazio fa risentire la domanda, i tasti dei numeri rispondono (da 1 a 9, 0, - e =, come sui pulsanti), Invio passa alla domanda successiva ed Esc torna alle lezioni.",
     supportTitle: "Sostieni Orecchio musicale",
-    supportBody: "Ti piace allenare l'orecchio? Aiutaci a mantenere questi strumenti musicali gratuiti, senza pubblicità e in crescita!",
+    supportBody: "Ti piace allenare l'orecchio? Aiutaci a tenere questi strumenti gratuiti e senza pubblicità, e a crearne di nuovi!",
     tabsAria: "Esercizi", tabIntervals: "Intervalli", tabChords: "Accordi", tabDegrees: "Gradi della scala",
     lessons: "Lezioni", lessonN: "Lezione {n}", start: "Inizia", or: "o",
     lessonLocked: "Lezione {n}, bloccata", lessonStars: "Lezione {n}, {s} stelle su 3", lessonNext: "Lezione {n}, la prossima",

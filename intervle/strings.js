@@ -62,11 +62,11 @@ export const INTERVLE_STRINGS = {
   it: {
     title: "Intervle",
     aboutTitle: "Informazioni su Intervle",
-    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, niente viene caricato: tutto funziona nel tuo browser.<br><br>Tre giochi d\'orecchio al giorno, uguali per tutti, con 3 tentativi ciascuno. <strong>Facile</strong>: quanto sono distanti due note (l\'<strong>intervallo</strong>, contato in semitoni: da un tasto del pianoforte al successivo)? <strong>Medio</strong>: conosci la prima nota; di\' qual è la seconda. <strong>Difficile</strong>: conosci la prima nota; poi arriva un accordo intero: scegli la sua nota e il suo tipo (es. Fa♯m7). Non ci arrivi? <strong>Suggerimento</strong> suona l\'accordo una nota alla volta. Un gioco nuovo ogni mezzanotte.',
+    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, niente viene caricato: tutto funziona nel tuo browser.<br><br>Tre giochi d\'orecchio al giorno, uguali per tutti, con 3 tentativi ciascuno. <strong>Facile</strong>: quanto sono distanti due note (l\'<strong>intervallo</strong>, contato in semitoni: da un tasto del pianoforte al successivo)? <strong>Medio</strong>: conosci la prima nota; di\' qual è la seconda. <strong>Difficile</strong>: conosci la prima nota; poi arriva un accordo intero: scegli la sua nota e il suo tipo (es. Fa♯m7). Non ci arrivi? Il pulsante <strong>Suggerimento</strong> suona l\'accordo una nota alla volta. Un gioco nuovo ogni mezzanotte.',
     aboutCredits: ABOUT_CREDITS.it,
     aboutKeys: "Al computer: Spazio suona il gioco, i tasti numerici rispondono (come sui pulsanti), oppure scrivi la risposta (\"m3\", \"Mi\", \"E\", \"Fa#m7\") e premi Invio.",
     supportTitle: "Sostieni Intervle",
-    supportBody: "Ti piace il tuo gioco d'orecchio quotidiano? Aiutaci a mantenere questi strumenti musicali gratuiti, senza pubblicità e in crescita!",
+    supportBody: "Ti piace il tuo gioco d'orecchio quotidiano? Aiutaci a tenere questi strumenti gratuiti e senza pubblicità, e a crearne di nuovi!",
     modesAria: "Modalità", easy: "Facile", medium: "Medio", hard: "Difficile",
     backToday: "Torna a oggi",
     askEasy: "Quanto sono distanti le due note?", askMedium: "La prima nota suonata è {note}. Quale nota viene dopo?", askHard: "La prima nota suonata è {note}. Quale accordo viene dopo?", rootAria: "La nota dell'accordo", typeGroupAria: "Il tipo di accordo",

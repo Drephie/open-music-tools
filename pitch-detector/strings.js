@@ -72,7 +72,7 @@ export const DETECTOR_STRINGS = {
     aboutCredits: 'Suono di pianoforte: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> di Alexander Holm, con licenza <a href="https://creativecommons.org/licenses/by/3.0/deed.it" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "Al computer: Spazio avvia e ferma l'ascolto, P mette in pausa e le frecce guardano indietro in pausa.",
     supportTitle: "Sostieni il rilevatore di intonazione",
-    supportBody: "Ti piace vedere la tua voce? Aiutaci a mantenere questi strumenti musicali gratuiti, senza pubblicità e in crescita!",
+    supportBody: "Ti piace vedere la tua voce? Aiutaci a tenere questi strumenti gratuiti e senza pubblicità, e a crearne di nuovi!",
     start: "Inizia ad ascoltare", stop: "Ferma", pause: "Pausa", resume: "Riprendi",
     idle: "Tocca per iniziare e canta",
     waiting: "In attesa del microfono…",

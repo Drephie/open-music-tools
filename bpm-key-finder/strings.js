@@ -98,11 +98,11 @@ export const FINDER_STRINGS = {
   it: {
     title: "Trova BPM e tonalità",
     aboutTitle: "Informazioni su Trova BPM e tonalità",
-    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracciamento, niente caricato online: tutto funziona nel tuo browser.<br><br>Trova la velocità di una canzone in <strong>BPM</strong> (battiti al minuto: quanti battiti batteresti in un minuto) e la sua <strong>tonalità</strong> (la nota e la scala in cui la canzone si sente a casa). Le canzoni lente spesso vengono lette al doppio della velocità: tocca <strong>½</strong>. Premi Riproduci per sentire un clic su ogni battito trovato; se i clic non tornano, batti il tempo con Batti. La tua canzone non viene mai caricata né conservata.',
+    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracciamento, nulla viene caricato online: tutto funziona nel tuo browser.<br><br>Trova la velocità di una canzone in <strong>BPM</strong> (battiti al minuto: quanti battiti batteresti in un minuto) e la sua <strong>tonalità</strong> (la nota e la scala in cui la canzone si sente a casa). Le canzoni lente spesso vengono lette al doppio della velocità: tocca <strong>½</strong>. Premi Riproduci per sentire un clic su ogni battito trovato; se i clic non tornano, batti il tempo con Batti. La tua canzone non viene mai caricata né conservata.',
     aboutCredits: CREDITS.it,
     aboutKeys: "Sul computer: Spazio riproduce o mette in pausa, T batte il tempo, O sceglie un file.",
     supportTitle: "Sostieni Trova BPM e tonalità",
-    supportBody: "Hai trovato quello che cercavi? Aiuta questi strumenti musicali a restare gratuiti, senza pubblicità e a crescere!",
+    supportBody: "Hai trovato quello che cercavi? Aiutaci a tenere questi strumenti gratuiti e senza pubblicità, e a crearne di nuovi!",
     chooseSong: "Scegli una canzone", chooseHint: "Una canzone o un video dal tuo dispositivo",
     listenMic: "Ascolta con il microfono", listenTab: "Ascolta un'altra scheda",
     privacyLine: "Niente viene caricato: la canzone resta sul tuo dispositivo.",

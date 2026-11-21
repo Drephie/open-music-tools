@@ -74,11 +74,11 @@ export const PIANO_STRINGS = {
   it: {
     title: "Piano",
     aboutTitle: "Informazioni sul Piano",
-    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, niente caricato online: tutto funziona nel tuo browser.<br><br><strong>Tieni</strong>: il tasto suona finché lo tieni premuto. <strong>Risuona</strong>: suona e si spegne piano piano da solo. <strong>Bordone</strong>: tocca un tasto per farlo suonare, toccalo di nuovo per fermarlo.',
+    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, nulla viene caricato online: tutto funziona nel tuo browser.<br><br><strong>Tieni</strong>: il tasto suona finché lo tieni premuto. <strong>Risuona</strong>: suona e si spegne piano piano da solo. <strong>Bordone</strong>: tocca un tasto per farlo suonare, toccalo di nuovo per fermarlo.',
     aboutCredits: 'Suono di pianoforte: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> di Alexander Holm, con licenza <a href="https://creativecommons.org/licenses/by/3.0/deed.it" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>.',
     aboutKeys: "Al computer: A W S E D F T G Y H U J K suonano i tasti da Do (le letterine sui tasti), Z e X li spostano di un'ottava in giù o in su, e tenendo premuto Spazio le note continuano a suonare.",
     supportTitle: "Sostieni il Piano",
-    supportBody: "Ti piace suonarlo? Aiutaci a mantenere questi strumenti musicali gratuiti, senza pubblicità e in crescita!",
+    supportBody: "Ti piace suonarlo? Aiutaci a tenere questi strumenti gratuiti e senza pubblicità, e a crearne di nuovi!",
     sound: "Suono",
     sndPiano: "Pianoforte a coda", sndEpiano: "Piano elettrico", sndEsynth: "Synth", sndPad: "Pad", sndOrgan: "Organo", sndHarp: "Arpa", sndDreamy: "Synth sognante",
     keys: "Tasti sullo schermo", keysFewer: "Meno tasti, più grandi", keysMore: "Più tasti, più piccoli",

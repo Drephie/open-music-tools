@@ -54,9 +54,9 @@ export const METRONOME_STRINGS = {
   it: {
     title: "Metronomo",
     aboutTitle: "Informazioni sul Metronomo",
-    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, niente caricato online: tutto funziona nel tuo browser.',
+    aboutBody: 'Strumenti musicali gratuiti e <a href="{repo}" target="_blank" rel="noopener noreferrer">open source</a> di <a href="{instagram}" target="_blank" rel="noopener noreferrer">Drephie</a>. Niente pubblicità, niente tracker, nulla viene caricato online: tutto funziona nel tuo browser.',
     supportTitle: "Sostieni il Metronomo",
-    supportBody: "Ti piace esercitarti con il Metronomo? Aiutaci a mantenere questi strumenti musicali gratuiti, senza pubblicità e in crescita!",
+    supportBody: "Ti piace esercitarti con il Metronomo? Aiutaci a tenere questi strumenti gratuiti e senza pubblicità, e a crearne di nuovi!",
     aboutKeys: "Al computer: Spazio avvia e ferma, T batte il tempo, le frecce lo rendono più lento o più veloce (con Maiusc, di 10 in 10).",
     dotsHint: "Tocca un punto: forte, normale o muto",
     dotsGroup: "Battiti della battuta",

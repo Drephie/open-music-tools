@@ -7,7 +7,7 @@
 const ABOUT_CREDITS = {
   en: 'Piano sound: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> by Alexander Holm, licensed under <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>. Acoustic drums: <a href="https://github.com/sfzinstruments/virtuosity_drums" target="_blank" rel="noopener noreferrer">Virtuosity Drums</a> by Versilian Studios and Karoryfer Samples, in the public domain (CC0). Synth drums and bass are made in your browser.',
   es: 'Sonido de piano: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> de Alexander Holm, con licencia <a href="https://creativecommons.org/licenses/by/3.0/deed.es" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>. Batería acústica: <a href="https://github.com/sfzinstruments/virtuosity_drums" target="_blank" rel="noopener noreferrer">Virtuosity Drums</a> de Versilian Studios y Karoryfer Samples, de dominio público (CC0). La batería sintética y el bajo se crean en tu navegador.',
-  it: 'Suono del pianoforte: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> di Alexander Holm, con licenza <a href="https://creativecommons.org/licenses/by/3.0/deed.it" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>. Batteria acustica: <a href="https://github.com/sfzinstruments/virtuosity_drums" target="_blank" rel="noopener noreferrer">Virtuosity Drums</a> di Versilian Studios e Karoryfer Samples, di pubblico dominio (CC0). Batteria sintetica e basso nascono nel tuo browser.',
+  it: 'Suono del pianoforte: <a href="https://archive.org/details/SalamanderGrandPianoV3" target="_blank" rel="noopener noreferrer">Salamander Grand Piano</a> di Alexander Holm, con licenza <a href="https://creativecommons.org/licenses/by/3.0/deed.it" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>. Batteria acustica: <a href="https://github.com/sfzinstruments/virtuosity_drums" target="_blank" rel="noopener noreferrer">Virtuosity Drums</a> di Versilian Studios e Karoryfer Samples, di pubblico dominio (CC0). Batteria sintetica e basso sono generati nel tuo browser.',
 };
 const STYLE_NAMES = { style_pop: 'Pop', style_rock: 'Rock', style_blues: 'Blues', style_jazz: 'Jazz', style_bossa: 'Bossa nova', style_reggae: 'Reggae', style_lofi: 'Lo-fi' };
 
@@ -87,7 +87,7 @@ export const JAM_STRINGS = {
     aboutCredits: ABOUT_CREDITS.it,
     aboutKeys: "Su un computer: Spazio suona o ferma, N dà nuovi accordi. Trascina un accordo con il mouse per spostarlo; clic destro per bloccarlo.",
     supportTitle: "Sostieni Jam Machine",
-    supportBody: "Ti stai divertendo a suonare? Aiuta questi strumenti musicali a restare gratuiti, senza pubblicità e a crescere!",
+    supportBody: "Ti stai divertendo a suonare? Aiutaci a tenere questi strumenti gratuiti e senza pubblicità, e a crearne di nuovi!",
     styleAria: "Stile", ...STYLE_NAMES, style_ballad: "Ballad",
     keyTitle: "{key} {mode}", modeMaj: "maggiore", modeMin: "minore", keyMeta: "{bpm} BPM",
     advanced: "Avanzate", advancedAria: "Tonalità e velocità",
@@ -110,7 +110,7 @@ export const JAM_STRINGS = {
     sec_intro: "Intro", sec_verse: "Strofa", sec_prechorus: "Pre-ritornello", sec_chorus: "Ritornello", sec_bridge: "Bridge", sec_outro: "Finale", secPlaying: "in riproduzione",
     kit: "Batteria", kitAcoustic: "Batteria acustica", kitSynth: "Batteria sintetica",
     fileTitle: "Copia, salva o apri", fileHint: "Un file .omt salvato conserva tutta la jam: sezioni, accordi, tonalità, velocità e suoni. Resta sul tuo dispositivo; riaprilo qui quando vuoi.",
-    meter: "Metro", chordLen: "Durata", fewerBeats: "Un tempo in meno", moreBeats: "Un tempo in più", beat1: "1 tempo", beatsN: "{n} tempi",
+    meter: "Tempo (4/4, 3/4…)", chordLen: "Durata", fewerBeats: "Un tempo in meno", moreBeats: "Un tempo in più", beat1: "1 tempo", beatsN: "{n} tempi",
     shortBar: "Mancano {beats} per completare la battuta: il ritmo si sposterà a ogni ripetizione.", shortBar1: "Manca 1 tempo per completare la battuta: il ritmo si sposterà a ogni ripetizione.", fillBar: "Completa",
     loading: "Caricamento dei suoni…", loadFailed: "I suoni non si sono caricati. Controlla la connessione e premi di nuovo Suona.",
   },
