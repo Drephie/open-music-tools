@@ -43,7 +43,7 @@ export const SEO = {
     },
     "it": {
       "title": "Choordination – Suona accordi con i gesti delle mani | Open Music Tools",
-      "desc": "Choordination, di Drephie: suona accordi con le mani davanti alla webcam. Uno strumento gratuito nel browser per cantanti e cantautori. Niente lascia il tuo dispositivo.",
+      "desc": "Choordination, di Drephie: suona accordi con le mani davanti alla webcam. Uno strumento gratuito nel browser per cantanti e cantautori. Tutto avviene sul tuo dispositivo.",
       "about": "Choordination è uno strumento di accordi gratuito e online creato da Drephie: mostra le mani alla fotocamera e i tuoi gesti suonano accordi, così puoi accompagnarti mentre canti. Il riconoscimento delle mani funziona sul tuo dispositivo, su telefono o computer, e puoi registrarti mentre suoni."
     }
   },
@@ -180,7 +180,7 @@ export const SEO = {
     "it": {
       "title": "Accordatore per voce – Scopri se sei intonato, gratis | Open Music Tools",
       "desc": "Un accordatore per voce online e gratuito: canta una nota nel microfono e vedi subito se è calante, crescente o intonata. Creato da una vocal coach. Niente viene registrato o caricato.",
-      "about": "Un accordatore per voce online e gratuito, creato dalla vocal coach Drephie: canta nel microfono e vedi la nota che canti e se sei calante, crescente o intonato. La tua voce non lascia mai il dispositivo."
+      "about": "Un accordatore per voce online e gratuito, creato dalla vocal coach Drephie: canta nel microfono e vedi la nota che canti e se sei calante, crescente o intonato. Tutto avviene sul tuo dispositivo."
     }
   },
   "instrument-tuner": {
