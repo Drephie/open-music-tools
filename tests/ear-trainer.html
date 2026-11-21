@@ -16,7 +16,7 @@
   </style>
 </head>
 <body>
-  <h1>ear-trainer/questions.js tests</h1>
+  <h1>ear-trainer/questions.js and course.js tests</h1>
   <p id="summary">Running…</p>
   <table>
     <thead><tr><th>Check</th><th>Checked</th><th>Result</th></tr></thead>
@@ -27,13 +27,15 @@
 <script type="module">
   import * as theory from '../shared/theory.js';
   import * as questions from '../ear-trainer/questions.js';
+  import * as course from '../ear-trainer/course.js';
   import { checkQuestions } from './ear-trainer-cases.js';
+  import { checkCourse } from './ear-trainer-course-cases.js';
 
   const rows = document.getElementById('rows');
   const summary = document.getElementById('summary');
   let failed = 0, total = 0;
   try {
-    for (const row of checkQuestions(questions, theory)) {
+    for (const row of [...checkQuestions(questions, theory), ...checkCourse(course, theory)]) {
       total++;
       if (row.failed) failed++;
       const tr = document.createElement('tr');

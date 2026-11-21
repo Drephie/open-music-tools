@@ -21,7 +21,8 @@
  *                            `score` right answers: 2 answers, one more every
  *                            GAME_STEP (5); once all are in, intervals go up and
  *                            down, then also together, and degrees go wide
- *   makeQuestion(ex, { answers, play, range }, { prev, answer, random })
+ *   makeQuestion(ex, { answers, play, range, mode }, { prev, answer, random })
+ *     mode (degrees): 'major' (default) or 'minor' (i–iv–V–i, natural minor steps)
  *     -> { ex, answer, play, root, notes, events }
  *     answer: one of answers (or `answer`, to introduce a new one), picked
  *     again once when it equals prev.answer, so repeats are rarer; prev: the
@@ -34,8 +35,10 @@
  *     (same first note, root or key), then the right one; each event has a
  *     tag, 'yours' or 'right'
  *   eventsLength(events)     seconds until the last note ends
+ *   cadence(T, mode), homeChord(T, mode), scaleSteps(mode), degreePlaces(T, degree,
+ *     range, mode): the key's sound and where a step is played (used by course.js)
  */
-import { CHORD_FORMS, MAJOR_SCALE_STEPS } from '../shared/theory.js';
+import { CHORD_FORMS, MAJOR_SCALE_STEPS, MINOR_SCALE_STEPS } from '../shared/theory.js';
 
 export const EXERCISES = ['intervals', 'chords', 'degrees'];
 const span = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
@@ -125,18 +128,21 @@ function chordEvents(notes, play) {
 }
 // The key as four chords, I–IV–V–I, around home (T): C E G, C F A, B D G, C E G
 // over a bass note.
-const homeChord = (T) => [T - 12, T, T + 4, T + 7];
-function cadence(T) {
+// In a minor key (mode 'minor'): i–iv–V–i, C Eb G, C F Ab, B D G, C Eb G.
+export const homeChord = (T, mode = 'major') => [T - 12, T, T + (mode === 'minor' ? 3 : 4), T + 7];
+export function cadence(T, mode = 'major') {
+  const m = mode === 'minor' ? 1 : 0;
   return [
-    { at: 0, notes: homeChord(T), dur: 0.55 },
-    { at: 0.6, notes: [T - 7, T, T + 5, T + 9], dur: 0.55 },
+    { at: 0, notes: homeChord(T, mode), dur: 0.55 },
+    { at: 0.6, notes: [T - 7, T, T + 5, T + 9 - m], dur: 0.55 },
     { at: 1.2, notes: [T - 5, T - 1, T + 2, T + 7], dur: 0.55 },
-    { at: 1.8, notes: homeChord(T), dur: 1.1 },
+    { at: 1.8, notes: homeChord(T, mode), dur: 1.1 },
   ];
 }
+export const scaleSteps = (mode) => (mode === 'minor' ? MINOR_SCALE_STEPS : MAJOR_SCALE_STEPS);
 // Where a degree is played: 'octave' T..T+11, 'top' with 1 as T+12, 'wide' in [T-7, T+12].
-function degreePlaces(T, degree, range) {
-  const n = T + MAJOR_SCALE_STEPS[degree - 1];
+export function degreePlaces(T, degree, range, mode = 'major') {
+  const n = T + scaleSteps(mode)[degree - 1];
   if (range === 'top') return [degree === 1 ? T + 12 : n];
   if (range === 'wide') return [n - 12, n, n + 12].filter((m) => m >= T - 7 && m <= T + 12);
   return [n];
@@ -170,10 +176,11 @@ export function makeQuestion(ex, opts, { prev = null, answer = null, random = Ma
   }
   // Scale degrees: home somewhere from G3 to F#4, a new key each time.
   const T = pickNote(55, 66, lastRoot, random);
-  const note = pick(degreePlaces(T, a, opts.range || 'octave'), random);
+  const mode = opts.mode === 'minor' ? 'minor' : 'major';
+  const note = pick(degreePlaces(T, a, opts.range || 'octave', mode), random);
   return {
-    ex, answer: a, play: null, range: opts.range || 'octave', root: T, notes: [note],
-    events: [...cadence(T), { at: 3.0, notes: [note], dur: 1.5 }],
+    ex, answer: a, play: null, range: opts.range || 'octave', mode, root: T, notes: [note],
+    events: [...cadence(T, mode), { at: 3.0, notes: [note], dur: 1.5 }],
   };
 }
 
@@ -192,8 +199,8 @@ export function compareEvents(q, yours) {
   } else {
     // Home chord, then the note; your step in the question's range, nearest the right one.
     const target = q.notes[0];
-    const place = degreePlaces(q.root, yours, q.range).reduce((best, m) => (Math.abs(m - target) < Math.abs(best - target) ? m : best));
-    const withHome = (m) => [{ at: 0, notes: homeChord(q.root), dur: 0.8 }, { at: 1.0, notes: [m], dur: 1.3 }];
+    const place = degreePlaces(q.root, yours, q.range, q.mode).reduce((best, m) => (Math.abs(m - target) < Math.abs(best - target) ? m : best));
+    const withHome = (m) => [{ at: 0, notes: homeChord(q.root, q.mode), dur: 0.8 }, { at: 1.0, notes: [m], dur: 1.3 }];
     mine = withHome(place);
     right = withHome(target);
   }

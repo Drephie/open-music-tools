@@ -7,10 +7,12 @@
  */
 import * as theory from '../../shared/theory.js';
 import * as questions from '../../ear-trainer/questions.js';
+import * as course from '../../ear-trainer/course.js';
 import { checkQuestions } from '../ear-trainer-cases.js';
+import { checkCourse } from '../ear-trainer-course-cases.js';
 
 let failed = 0;
-for (const row of checkQuestions(questions, theory)) {
+for (const row of [...checkQuestions(questions, theory), ...checkCourse(course, theory)]) {
   print(`${row.failed ? 'FAIL' : 'pass'}  ${row.section}: ${row.checked} checked, ${row.failed} failed`);
   row.examples.forEach(e => print('      ' + e));
   if (row.failed) failed++;
