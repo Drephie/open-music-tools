@@ -52,6 +52,26 @@ context.load_cert_chain(str(cert), str(key))
 
 
 class NoCache(http.server.SimpleHTTPRequestHandler):
+    # A browser can open a connection and stay silent (Safari does). The
+    # handshake runs here, in the connection's own thread, with a time limit,
+    # so one silent connection can't hold up every other file.
+    timeout = 15
+
+    def setup(self):
+        self.request.settimeout(self.timeout)
+        try:
+            self.request.do_handshake()
+        except (ssl.SSLError, OSError):
+            self.request.close()
+            raise
+        super().setup()
+
+    def handle(self):
+        try:
+            super().handle()
+        except (ssl.SSLError, OSError):
+            pass
+
     # The phone always gets the newest files while we change them.
     def end_headers(self):
         self.send_header('Cache-Control', 'no-store')
@@ -60,6 +80,8 @@ class NoCache(http.server.SimpleHTTPRequestHandler):
 
 handler = functools.partial(NoCache, directory=str(root))
 server = http.server.ThreadingHTTPServer(('0.0.0.0', port), handler)
-server.socket = context.wrap_socket(server.socket, server_side=True)
+server.socket = context.wrap_socket(server.socket, server_side=True, do_handshake_on_connect=False)
+server.daemon_threads = True
+server.handle_error = lambda request, address: None   # a dropped or refused connection is normal here
 print(f'On the phone (same Wi-Fi): https://{ip}:{port}/', flush=True)
 server.serve_forever()
