@@ -73,10 +73,11 @@
       <section id="course" class="screen course" role="tabpanel" aria-labelledby="mode-course" hidden>
         <div class="course-bar">
           <span id="streak" class="streak" role="img"><svg class="flame" aria-hidden="true"><use href="#i-flame"/></svg><span id="streak-num" aria-hidden="true">0</span></span>
-          <span id="goal" class="goal" role="img"><span class="goal-ring" aria-hidden="true"></span><span id="goal-text" aria-hidden="true"></span></span>
+          <span id="goal" class="goal" role="img"><span id="goal-ticks" class="goal-ticks" aria-hidden="true"></span><span id="goal-text" aria-hidden="true"></span></span>
           <button id="review-btn" class="review-btn" hidden><svg aria-hidden="true"><use href="#i-review"/></svg><span id="review-text"></span></button>
         </div>
         <div id="course-path" class="course-path"></div>
+        <div class="course-next-bar"><button id="course-next" class="btn btn-primary course-next"></button></div>
       </section>
       <!-- Lessons screen: the three tabs, the lesson path, the game and free practice -->
       <section id="home" class="screen home">

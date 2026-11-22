@@ -200,64 +200,89 @@ body[data-theme="bw"] .answer.bad .answer-name { text-decoration: line-through; 
 /* --- The course (Beta): Course | Practice tabs, the streak and goal bar, the winding path --- */
 .mode-tabs[hidden] { display: none; }
 .course-bar {
-  position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 14px; padding: 8px 4px;
-  margin: 0 -8px; padding-left: 12px; padding-right: 8px; border-radius: 0 0 var(--radius-control) var(--radius-control);
-  background: color-mix(in srgb, var(--bg-page) 45%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 17px; color: var(--color-text);
+  display: flex; align-items: center; gap: 18px; min-height: 52px; padding: 6px 0;
+  border-bottom: 1px solid var(--staff-line);
+  font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; font-size: 16px; color: var(--color-text);
 }
-.streak, .goal { display: inline-flex; align-items: center; gap: 5px; }
-.streak .flame { width: 24px; height: 24px; }
+.course { --staff-line: color-mix(in srgb, var(--color-text) 30%, transparent); }
+.streak, .goal { display: inline-flex; align-items: center; gap: 6px; }
+.streak .flame { width: 20px; height: 20px; color: var(--color-star); }
 .streak.cold .flame { color: var(--color-text-inactive); }
-.goal-ring {
-  flex: none; width: 24px; height: 24px; border-radius: 50%;
-  background: conic-gradient(var(--color-good) var(--p, 0%), color-mix(in srgb, var(--color-text) 18%, transparent) 0);
-  -webkit-mask: radial-gradient(circle, transparent 6.5px, #000 7px); mask: radial-gradient(circle, transparent 6.5px, #000 7px);
-}
-.goal { --p: 0%; }
-.goal .goal-ring { background: conic-gradient(var(--color-good) var(--p), color-mix(in srgb, var(--color-text) 18%, transparent) 0); }
+.goal-ticks { display: inline-flex; gap: 3px; }
+.goal-ticks .tick { width: 12px; height: 6px; border-radius: 2px; background: color-mix(in srgb, var(--color-text) 22%, transparent); }
+.goal-ticks .tick.on { background: var(--color-good); }
 .review-btn {
-  margin-left: auto; min-height: 40px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 20px;
-  border: var(--border-width) solid var(--color-right); background: transparent; color: var(--color-right); font: 700 14px var(--font-main); cursor: pointer;
+  margin-left: auto; min-height: 40px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border-radius: var(--radius-control);
+  border: var(--border-width) solid var(--border-panel); background: transparent; color: var(--color-text); font: 700 14px var(--font-main); cursor: pointer;
 }
 .review-btn[hidden] { display: none; }
-.review-btn svg { width: 17px; height: 17px; }
-.course-path { display: flex; flex-direction: column; align-items: center; padding-bottom: 16px; }
-.sec-band {
-  align-self: stretch; margin: 14px 0 4px; padding: 10px 14px; border-radius: var(--radius-control);
-  background: var(--color-left); color: var(--color-text-pinched); display: flex; flex-direction: column; gap: 2px;
+.review-btn svg { width: 16px; height: 16px; }
+
+/* The path, drawn like a score: a rehearsal letter for each section, a staff
+   for each unit, its three lessons as three rising notes with their names
+   under them like lyrics, the checkpoint a whole note before the final bar line. */
+.course-path { padding: 0 2px 8px; }
+.sec { margin-top: 30px; }
+.sec-head { display: flex; align-items: center; gap: 12px; margin: 0 0 6px; color: var(--color-title); }
+.sec-mark {
+  flex: none; display: grid; place-items: center; width: 30px; height: 30px; border: 2px solid currentColor; border-radius: 3px;
+  font: 700 17px/1 var(--font-num);
 }
-.sec-num { font-size: 12px; font-weight: 600; opacity: 0.85; }
-.sec-name { font-family: var(--font-display); font-size: 19px; line-height: 1.15; font-weight: var(--title-weight); text-transform: var(--title-transform); letter-spacing: var(--title-spacing); }
-.unit-name { align-self: stretch; margin: 12px 0 0; text-align: center; font-size: 14px; font-weight: 700; color: var(--color-text-inactive); }
-.node-row { position: relative; width: 64px; transform: translateX(calc(var(--x, 0) * 62px)); display: flex; justify-content: center; }
-.node { position: relative; display: flex; flex-direction: column; align-items: center; padding: 6px 2px 10px; border: 0; background: none; cursor: pointer; touch-action: manipulation; color: var(--color-text); font-family: var(--font-main); }
-.node-circle {
-  box-sizing: border-box; width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center;
-  font: 700 20px/1 var(--font-num); border: 2px solid var(--border-panel); background: var(--color-panel); color: var(--color-btn-text);
-  transition: transform 0.15s;
+.sec-name { font-family: var(--font-display); font-size: 22px; line-height: 1.15; font-weight: var(--title-weight); text-transform: var(--title-transform); letter-spacing: var(--title-spacing); }
+.unit { padding-top: 14px; }
+.unit-name { margin: 0 0 12px; font-size: 15px; font-weight: 700; line-height: 1.25; color: var(--color-text); }
+.unit.check .unit-name { font-style: italic; color: var(--color-text-inactive); }
+.staff {
+  position: relative; height: 41px; margin-bottom: 44px;
+  background: repeating-linear-gradient(to bottom, var(--staff-line) 0 1px, transparent 1px 10px);
+  border-left: 1px solid var(--staff-line); border-right: 1px solid var(--staff-line);
 }
-.node-circle svg { width: 24px; height: 24px; }
-.node:active .node-circle { transform: scale(0.94); }
-.node.done .node-circle { background: var(--color-left); border-color: var(--color-left); color: var(--color-text-pinched); }
-.node.next .node-circle { border-color: var(--color-right); color: var(--color-right); border-width: 3px; animation: glow 1.8s ease-in-out infinite; }
-.node.locked { cursor: default; }
-.node.locked .node-circle { border-color: color-mix(in srgb, var(--border-panel) 45%, transparent); background: transparent; color: var(--color-text-inactive); }
-.node.check .node-circle { width: 66px; height: 66px; border-radius: 22px; }
-.node.check:not(.done) .node-circle { color: var(--color-star); border-color: color-mix(in srgb, var(--color-star) 60%, transparent); background: var(--color-panel); }
-.node:focus-visible { outline: none; }
-.node:focus-visible .node-circle { outline: 2px solid var(--color-right); outline-offset: 3px; }
-.node-stars { position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); display: flex; filter: drop-shadow(0 0 1.5px var(--bg-page)) drop-shadow(0 0 1px var(--bg-page)); }
-.node-stars .star { width: 14px; height: 14px; }
-.node-start {
-  position: absolute; left: calc(100% + 4px); top: 50%; transform: translateY(-60%); white-space: nowrap; pointer-events: none;
-  padding: 7px 12px; border-radius: var(--radius-control); background: var(--color-primary); color: var(--color-primary-text); font: 700 14px var(--font-main);
+.staff.end { border-right: 4px solid var(--staff-line); }
+.staff.end::after { content: ""; position: absolute; top: 0; bottom: 0; right: 4px; width: 1px; background: var(--staff-line); }
+.note {
+  position: absolute; top: -10px; left: calc(var(--h) * 33.333%); width: 33.333%; height: 96px; padding: 0; border: 0; background: none;
+  cursor: pointer; touch-action: manipulation; color: var(--color-text); font-family: var(--font-main);
 }
-.node-row[style*="--x:1"] .node-start { left: auto; right: calc(100% + 4px); }
+.note.whole { left: 30%; width: 40%; }
+.note::before {   /* the stem */
+  content: ""; position: absolute; left: calc(50% + 7px); top: calc(45px - var(--h) * 10px - 31px); width: 1.5px; height: 30px; background: var(--color-text);
+}
+.note.whole::before { display: none; }
+.note.next::before { left: calc(50% + 8px); background: var(--color-primary); }
+.note.locked::before { background: var(--staff-line); }
+.note[style*="--h:2"]::before { left: calc(50% - 8.5px); top: calc(45px - var(--h) * 10px + 1px); }   /* above the middle line: stem down */
+.note.next[style*="--h:2"]::before { left: calc(50% - 9.5px); }
+.note-head {
+  position: absolute; left: 50%; top: calc(45px - var(--h) * 10px); width: 17px; height: 12px; border-radius: 50%;
+  transform: translate(-50%, -50%) rotate(-22deg); background: var(--color-text); transition: transform 0.15s;
+}
+.note.whole .note-head { top: 30px; width: 20px; height: 13px; transform: translate(-50%, -50%); background: transparent; border: 3.5px solid var(--color-text); border-left-width: 2px; border-right-width: 2px; }
+.note.next .note-head { background: transparent; border: 2.5px solid var(--color-primary); width: 19px; height: 14px; }
+.note.next.whole .note-head { border-width: 3.5px 2px; }
+.note.locked { cursor: default; }
+.note.locked .note-head { background: transparent; border: 1.5px solid var(--staff-line); }
+.note:active:not(.locked) .note-head { transform: translate(-50%, -50%) rotate(-22deg) scale(0.88); }
+.lyric { position: absolute; left: 0; right: 0; top: 62px; font-size: 13px; line-height: 1.2; color: var(--color-text-inactive); text-align: center; }
+.note.done .lyric { color: var(--color-text); }
+.note.next .lyric { color: var(--color-primary); font-weight: 700; }
+.note-stars { position: absolute; left: 0; right: 0; top: 79px; display: flex; justify-content: center; gap: 1px; }
+.note-stars .star { width: 11px; height: 11px; }
+.note.whole .note-stars { top: 62px; }
+.note:focus-visible { outline: none; }
+.note:focus-visible .note-head { outline: 2px solid var(--color-primary); outline-offset: 4px; }
+.course-next-bar { position: sticky; bottom: 0; z-index: 5; padding: 10px 0 calc(10px + env(safe-area-inset-bottom, 0px)); }
+.course-next-bar:has(.course-next[hidden]) { display: none; }
+.course-next { width: 100%; min-height: 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 12px; }
+.next-go { display: inline-flex; align-items: center; gap: 7px; font-size: 17px; font-weight: 700; }
+.next-go svg { width: 14px; height: 14px; }
+.next-what { font-size: 13px; font-weight: 500; opacity: 0.85; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* The Learn card */
-.learn-kicker { flex: 1; font-size: 13px; font-weight: 700; color: var(--color-text-inactive); }
+.learn-kicker { flex: 1; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; color: var(--color-text); }
+.learn-kicker .sec-mark { width: 26px; height: 26px; font-size: 15px; color: var(--color-title); }
 .learn-panel { display: flex; flex-direction: column; gap: 14px; padding-top: 20px; padding-bottom: 20px; }
-.learn-title { margin: 0; text-align: center; font-family: var(--font-display); font-size: 26px; line-height: 1.15; font-weight: var(--title-weight); color: var(--color-title); text-transform: var(--title-transform); letter-spacing: var(--title-spacing); text-wrap: balance; }
-.learn-text { margin: 0; text-align: center; font-size: 17px; line-height: 1.45; text-wrap: pretty; }
+.learn-title { margin: 0; text-align: left; font-family: var(--font-display); font-size: 26px; line-height: 1.15; font-weight: var(--title-weight); color: var(--color-title); text-transform: var(--title-transform); letter-spacing: var(--title-spacing); text-wrap: balance; }
+.learn-text { margin: 0; text-align: left; font-size: 17px; line-height: 1.45; text-wrap: pretty; }
 .learn-demos { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
 .demo-btn { min-height: 56px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; }
 .demo-btn svg { width: 18px; height: 18px; flex: none; color: var(--color-right); }
@@ -273,16 +298,19 @@ body[data-theme="bw"] .answer.bad .answer-name { text-decoration: line-through; 
 .done-stats { display: flex; gap: 10px; width: 100%; max-width: 360px; }
 .done-stats[hidden] { display: none; }
 .done-stat {
-  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 6px 8px;
-  border-radius: var(--radius-control); border: var(--border-width) solid var(--border-panel); font-weight: 700; font-size: 15px; line-height: 1.2;
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 4px 6px;
+  font-weight: 700; font-size: 15px; line-height: 1.2;
 }
-.done-stat .flame { width: 24px; height: 24px; flex: none; }
+.done-stat + .done-stat { border-left: 1px solid color-mix(in srgb, var(--color-text) 25%, transparent); }
+.done-stat .flame { width: 20px; height: 20px; flex: none; color: var(--color-star); }
 .home-panel[hidden] { display: none; }
 
 @media (hover: hover) and (pointer: fine) {
   :is(.tab, .card-btn, .chip, .seg button):hover:not([aria-selected="true"]):not([aria-pressed="true"]) { background: var(--color-hover); color: var(--color-hover-text); }
   .answer:not(.after):hover { background: var(--color-hover); color: var(--color-hover-text); }
-  .step:not(.locked):hover .step-circle, .node:not(.locked):hover .node-circle { transform: scale(1.06); }
+  .step:not(.locked):hover .step-circle { transform: scale(1.06); }
+  .note:not(.locked):hover .note-head { transform: translate(-50%, -50%) rotate(-22deg) scale(1.15); }
+  .note.whole:not(.locked):hover .note-head { transform: translate(-50%, -50%) scale(1.15); }
   .review-btn:hover { background: var(--color-hover); color: var(--color-hover-text); }
 }
 @media (min-width: 700px) {
@@ -321,7 +349,7 @@ body[data-theme="bw"] :is(.flame, .heart:not(.lost)) { color: var(--color-text);
 
 /* Reduce motion: the next lesson keeps a still ring, stars and answers appear without moving. */
 @media (prefers-reduced-motion: reduce) {
-  .step.next .step-circle, .node.next .node-circle { animation: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-right) 30%, transparent); }
+  .step.next .step-circle { animation: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-right) 30%, transparent); }
   .done-stars .star, .pop, .shake, .burst span { animation: none; }
   .answer:active:not(.after), .card-btn:active, .step[aria-pressed="true"] .step-circle, .step:active .step-circle, :is(.tab, .seg button, .chip):active { transform: none; }
 }

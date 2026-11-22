@@ -480,7 +480,7 @@ function showDone() {
   showScreen('done');
   renderDone();
   const r = session.result;
-  if (r.kind === 'lesson' || r.newBest || (r.kind === 'course' && r.saved)) burst(r.kind === 'course' && r.big ? 44 : 22);
+  if (r.kind === 'lesson' || r.newBest) burst();   // the course celebrates with its stars alone
   $('done-main').focus({ preventScroll: true });
 }
 function renderDone() {
@@ -638,48 +638,68 @@ function renderCourse() {
   $('streak').setAttribute('aria-label', tf('streakAria', { n: streak }));
   $('streak').classList.toggle('cold', !c.streak.last || c.streak.last !== d);
   $('goal-text').textContent = done >= c.goalSize ? t('goalDone') : `${done} / ${c.goalSize}`;
-  $('goal').style.setProperty('--p', `${Math.min(100, (100 * done) / c.goalSize)}%`);
+  $('goal-ticks').innerHTML = goalTicks(done, c.goalSize);
   $('goal').setAttribute('aria-label', tf('goalAria', { n: done, g: c.goalSize }));
   const reviewBtn = $('review-btn');
   reviewBtn.hidden = c.mistakes.length < C.REVIEW_MIN;
   $('review-text').textContent = tf('reviewN', { n: c.mistakes.length });
 
   const stars = c.stars, next = C.nextLessonIn(stars);
+  // Drawn like a score: a rehearsal letter for each section, a short staff for
+  // each unit with its three lessons as three rising notes, the lesson names
+  // under them like lyrics; the checkpoint is a whole note before the final bar line.
+  const note = (l, i, h) => {
+    const sec = C.SECTIONS[l.section];
+    const open = C.lessonOpenIn(stars, i), isNext = i === next && !stars[i];
+    const cls = ['note', stars[i] ? 'done' : '', open ? '' : 'locked', isNext ? 'next' : '', l.type === 'check' ? 'whole' : ''].join(' ');
+    const name = l.type === 'check' ? t('checkpoint') : t('type_' + l.type);
+    const full = l.type === 'check' ? `${name}: ${t('s_' + sec.id)}` : `${t('u_' + sec.units[l.unit].id)}: ${name}`;
+    const label = !open ? tf('nodeLocked', { name: full }) : stars[i] ? tf('nodeStars', { name: full, s: stars[i] }) : full;
+    return `<button type="button" class="${cls}" data-i="${i}" style="--h:${h}" aria-label="${label}"${open ? '' : ' aria-disabled="true"'}>`
+      + `<span class="note-stars">${stars[i] ? starsHtml(stars[i]) : ''}</span><span class="note-head"></span>`
+      + `<span class="lyric">${l.type === 'check' ? '' : name}</span></button>`;
+  };
   const html = [];
-  let zig = 0;
   C.SECTIONS.forEach((sec, si) => {
-    html.push(`<div class="sec-band"><span class="sec-num">${tf('sectionN', { n: si + 1 })}</span><span class="sec-name">${t('s_' + sec.id)}</span></div>`);
-    C.LESSONS.forEach((l, i) => {
-      if (l.section !== si) return;
-      if (l.type === 'meet') html.push(`<p class="unit-name">${t('u_' + sec.units[l.unit].id)}</p>`);
-      const open = C.lessonOpenIn(stars, i), isNext = i === next && !stars[i];
-      const cls = ['node', stars[i] ? 'done' : '', open ? '' : 'locked', isNext ? 'next' : '', l.type === 'check' ? 'check' : ''].join(' ');
-      const offset = l.type === 'check' ? 0 : [0, 1, 0, -1][zig++ % 4];
-      const name = l.type === 'check' ? t('checkpoint') : t('type_' + l.type);
-      const full = l.type === 'check' ? `${name}: ${t('s_' + sec.id)}` : `${t('u_' + sec.units[l.unit].id)}: ${name}`;
-      const label = !open ? tf('nodeLocked', { name: full }) : stars[i] ? tf('nodeStars', { name: full, s: stars[i] }) : full;
-      const inside = l.type === 'check' ? icon('trophy') : stars[i] ? icon('check') : String(['meet', 'practise', 'mix'].indexOf(l.type) + 1);
-      html.push(`<div class="node-row" style="--x:${offset}"><button type="button" class="${cls}" data-i="${i}" aria-label="${label}"${open ? '' : ' aria-disabled="true"'}>`
-        + `<span class="node-circle">${inside}</span><span class="node-stars">${stars[i] ? starsHtml(stars[i]) : ''}</span></button>`
-        + (isNext ? `<span class="node-start" aria-hidden="true">${t('start')}</span>` : '') + '</div>');
+    html.push(`<section class="sec"><h2 class="sec-head"><span class="sec-mark" aria-hidden="true">${String.fromCharCode(65 + si)}</span>`
+      + `<span class="sec-name"><span class="visually-hidden">${tf('sectionN', { n: si + 1 })}: </span>${t('s_' + sec.id)}</span></h2>`);
+    sec.units.forEach((u, ui) => {
+      const ls = C.LESSONS.filter((l) => l.section === si && l.unit === ui && l.type !== 'check');
+      html.push(`<div class="unit"><p class="unit-name">${t('u_' + u.id)}</p><div class="staff">${ls.map((l, k) => note(l, l.index, k)).join('')}</div></div>`);
     });
+    const ck = C.LESSONS.find((l) => l.section === si && l.type === 'check');
+    if (ck) html.push(`<div class="unit check"><p class="unit-name">${t('checkpoint')}</p><div class="staff end">${note(ck, ck.index, 1)}</div></div>`);
+    html.push('</section>');
   });
   pathEl2.innerHTML = html.join('');
+  // The one main action: the next lesson, at the bottom of the screen.
+  const nextBtn2 = $('course-next');
+  nextBtn2.hidden = next === null || next === undefined || next >= C.LESSONS.length;
+  if (!nextBtn2.hidden) {
+    const l = C.LESSONS[next], sec = C.SECTIONS[l.section];
+    const what = l.type === 'check' ? `${t('checkpoint')} · ${t('s_' + sec.id)}` : `${t('u_' + sec.units[l.unit].id)} · ${t('type_' + l.type)}`;
+    nextBtn2.innerHTML = `<span class="next-go">${icon('play')}${t(stars.some((s) => s) ? 'continue' : 'start')}</span><span class="next-what">${what}</span>`;
+  }
   if (scrollToNext && !courseEl.hidden) {
     scrollToNext = false;
-    const el = pathEl2.querySelector('.node.next') || pathEl2.querySelector(`[data-i="${next}"]`);
+    const el = pathEl2.querySelector('.note.next') || pathEl2.querySelector(`[data-i="${next}"]`);
     // After the browser has put back the old scroll position (on a reload).
     requestAnimationFrame(() => requestAnimationFrame(() => el?.scrollIntoView({ block: 'center' })));
   }
 }
 pathEl2.addEventListener('click', (e) => {
-  const b = e.target.closest('.node');
+  const b = e.target.closest('.note');
   if (!b) return;
   const i = Number(b.dataset.i);
   if (!C.lessonOpenIn(settings.course.stars, i)) { pop(b, 'shake'); return; }
   openLesson(i);
 });
 $('review-btn').addEventListener('click', startReview);
+$('course-next').addEventListener('click', () => openLesson(C.nextLessonIn(settings.course.stars)));
+// The daily goal as small marks, one for each lesson of the goal.
+function goalTicks(done, size) {
+  return Array.from({ length: size }, (_, i) => `<span class="tick${i < done ? ' on' : ''}"></span>`).join('');
+}
 
 // A unit's first lesson and a checkpoint start with their Learn card.
 function openLesson(i) {
@@ -701,7 +721,8 @@ function demoName(label) {
 }
 function renderLearn() {
   const i = session.lesson, l = C.LESSONS[i], sec = sectionOf(i), u = unitOf(i);
-  $('learn-kicker').textContent = `${tf('sectionN', { n: l.section + 1 })} · ${t('s_' + sec.id)}`;
+  $('learn-kicker').innerHTML = `<span class="sec-mark" aria-hidden="true">${String.fromCharCode(65 + l.section)}</span>`
+    + `<span><span class="visually-hidden">${tf('sectionN', { n: l.section + 1 })}: </span>${t('s_' + sec.id)}</span>`;
   $('learn-title').textContent = u ? t('u_' + u.id) : t('checkpoint');
   const skip = l.type === 'check' && !C.LESSONS.every((x) => x.section !== l.section || x === l || settings.course.stars[x.index] > 0);
   $('learn-text').textContent = u ? t('u_' + u.id + '_t') : t(skip ? 'checkSkipText' : 'checkText');
@@ -890,7 +911,7 @@ function renderCourseDone() {
     : l.type === 'check' ? t('sectionDone') : l.type === 'mix' ? t('unitDone') : t('lessonDone');
   $('done-text').textContent = !r.saved ? tf('checkNeed', { r: r.firstRight, n: r.total }) : tf('firstTry', { r: r.firstRight, n: r.total });
   $('done-streak').innerHTML = `${icon('flame', 'flame')}<span>${tf('dayN', { n: r.streak })}</span>`;
-  $('done-goal').innerHTML = `<span class="goal-ring" style="--p:${Math.min(100, (100 * r.goal) / c.goalSize)}%" aria-hidden="true"></span><span>${r.goal >= c.goalSize ? t('goalReached') : tf('goalOf', { n: r.goal, g: c.goalSize })}</span>`;
+  $('done-goal').innerHTML = `<span class="goal-ticks" aria-hidden="true">${goalTicks(r.goal, c.goalSize)}</span><span>${r.goal >= c.goalSize ? t('goalReached') : tf('goalOf', { n: r.goal, g: c.goalSize })}</span>`;
   const main = $('done-main'), again = $('done-again');
   const more = s.review ? C.reviewPools(c.mistakes) : r.next !== null && r.next !== s.lesson;
   main.hidden = !more;
